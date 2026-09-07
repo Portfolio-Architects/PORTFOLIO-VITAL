@@ -40,7 +40,7 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
     let sum = 0;
     for (let i = 0; i < budgetEntries.length; i++) {
       const e = budgetEntries[i];
-      if (!e.isPlanned && e.actionType !== 'settle' && validCategoryIds.has(e.categoryId)) {
+      if (!e.isPlanned && e.actionType !== 'settle' && e.actionType !== 'daily_expense' && validCategoryIds.has(e.categoryId)) {
         sum += e.actionType === 'transfer' ? -e.amount : e.amount;
       }
     }
@@ -77,7 +77,7 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
     }
     for (let i = 0; i < budgetEntries.length; i++) {
       const e = budgetEntries[i];
-      if (!e.isPlanned && e.actionType !== 'settle' && executedByCatId[e.categoryId] !== undefined) {
+      if (!e.isPlanned && e.actionType !== 'settle' && e.actionType !== 'daily_expense' && executedByCatId[e.categoryId] !== undefined) {
         if (e.actionType === 'transfer') {
           executedByCatId[e.categoryId] -= e.amount;
         } else {
@@ -154,7 +154,7 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
       }
 
       if (!e.isPlanned && e.actionType !== 'settle') {
-        if (monthIdx >= 0 && monthIdx < 12) {
+        if (e.actionType !== 'daily_expense' && monthIdx >= 0 && monthIdx < 12) {
           const amount = e.actionType === 'transfer' ? -e.amount : e.amount;
           monthlyAmounts[monthIdx] += amount;
         }

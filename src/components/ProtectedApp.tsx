@@ -101,6 +101,16 @@ const YangjaeFestivalDashboard = dynamic(() => import('@/components/festival/Yan
   loading: () => null
 });
 
+const MindMap3D = dynamic(() => import('@/components/MindMap3D').then(mod => mod.MindMap3D), {
+  ssr: false,
+  loading: () => null
+});
+
+const ProjectManagementPage = dynamic(() => import('@/components/project/ProjectManagementPage'), {
+  ssr: false,
+  loading: () => null
+});
+
 const AppLogModal = dynamic(() => import('@/components/AppLogModal').then(mod => mod.AppLogModal), {
   ssr: false,
   loading: () => null
@@ -151,15 +161,17 @@ function scheduleStaggeredPreloads(): () => void {
     import('@/components/budget/BudgetDashboard');
   }, 3500);
 
-  // Stage 2 (+5.5s): Secondary modules (YangjaeFestivalDashboard, InventoryList)
+  // Stage 2 (+5.5s): Secondary modules (YangjaeFestivalDashboard, InventoryList, MindMap3D)
   scheduleIdle(() => {
     import('@/components/festival/YangjaeFestivalDashboard');
     import('@/components/inventory/InventoryList');
+    import('@/components/MindMap3D');
   }, 5500);
 
-  // Stage 3 (+7.5s): Simulator & Modals (BudgetSimulator, AppLogModal, AIAssistantModal, CommandPalette)
+  // Stage 3 (+7.5s): Simulator, Project & Modals (BudgetSimulator, ProjectManagementPage, AppLogModal, AIAssistantModal, CommandPalette)
   scheduleIdle(() => {
     import('@/components/budget/BudgetSimulator');
+    import('@/components/project/ProjectManagementPage');
     import('@/components/AppLogModal');
     import('@/components/ai/AIAssistantModal');
     import('@/components/modals/CommandPalette');
@@ -183,6 +195,8 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
   const [visitedModules, setVisitedModules] = useState<Record<ModuleType, boolean>>({
     dashboard: true,
     workspace: false,
+    mindmap: false,
+    project: false,
     festival: false,
     simulator: false,
   });
@@ -274,7 +288,7 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
     const distance = touchStartX.current - touchEndX.current;
     
     if (Math.abs(distance) > 60) {
-      const order: ModuleType[] = ['dashboard', 'workspace', 'festival', 'simulator'];
+      const order: ModuleType[] = ['dashboard', 'workspace', 'festival', 'simulator', 'mindmap', 'project'];
       const currentIndex = order.indexOf(activeModule);
       
       if (distance > 0 && currentIndex < order.length - 1) {
@@ -376,6 +390,20 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
                   getItemHistory={getItemHistory}
                   addSignal={() => {}}
                 />
+              </div>
+            )}
+
+            {/* MindMap3D */}
+            {visitedModules.mindmap && (
+              <div className={activeModule === 'mindmap' ? 'block' : 'hidden'}>
+                <MindMap3D isActive={activeModule === 'mindmap'} />
+              </div>
+            )}
+
+            {/* Project Management */}
+            {visitedModules.project && (
+              <div className={activeModule === 'project' ? 'block' : 'hidden'}>
+                <ProjectManagementPage />
               </div>
             )}
 

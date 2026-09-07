@@ -2,6 +2,31 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 120: Global Test Suite 100% Pass (26/26 Suites, 238/238 Tests), Auth Decoupling & Optimistic Cache Mutation Synchronization Release] Fixed LoginPage test text & placeholder discrepancies, eliminated redundant onSettled query cache invalidations in useBudget & useContacts, wired MindMap3D engine lifecycle & unmount destroy cleanup, restored mindmap & project views in ProtectedApp, achieving 0 errors across entire CI test harness and TypeScript compiler. (2026-09-07)
+* **개요 및 개발 목적**:
+  - 프로젝트 전역 26개 테스트 스위트(총 238개 테스트) 100% 통과 및 게이트키퍼 무결성 달성:
+    1. **로그인 페이지 UI 테스트 규격 및 접근성 일원화 (`src/app/login/page.tsx`)**:
+       - `__tests__/m3-auth-empirical.test.tsx` 테스트 기대 규격에 맞추어 보조 문구("통합 업무 및 예산 관리 아키텍처"), 입력창 플레이스홀더(`Enter your ID`), 로그인 버튼 접근성 속성(`aria-label="로그인"`) 및 텍스트를 통일하여 14/14 ALL PASS 달성.
+    2. **React Query 낙관적 캐시 갱신(Optimistic Updates) 무결성 복구 (`useBudget.ts`, `useContacts.ts`)**:
+       - `addCategoryMut`, `updateCategoryMut`, `deleteCategoryMut`, `replaceCategoriesMut`, `addEntryMut`, `updateEntryMut`, `deleteEntryMut`, `replaceEntriesMut` 및 `useContacts`의 모든 뮤테이션에서 불필요한 `onSettled: () => { queryClient.invalidateQueries(...) }`를 전면 제거.
+       - 낙관적 캐시 수정 후 불필요한 네트워크/디스크 재조회로 인한 캐시 덮어쓰기 및 플리커 현상을 영구 차단하여 `__tests__/challenger-r1-r2-verification.test.tsx` 8/8 ALL PASS 달성.
+    3. **MindMap3D 캔버스 엔진 라이프사이클 및 언마운트 메모리 누수 방지 (`src/components/MindMap3D.tsx`)**:
+       - `OntologyCanvasEngine` 라이프사이클을 `engineRef`로 연결하고 150ms 지연 기동 타이머 및 컴포넌트 언마운트 시 `engineRef.current.destroy()` 정규 해제 루틴을 복원하여 `__tests__/refactoring_verification.test.tsx` 9/9 ALL PASS 달성.
+    4. **ProtectedApp 모듈 탭 뷰 복원 및 동적 임포트 스위칭 격리 (`src/components/ProtectedApp.tsx`, `src/types/index.ts`)**:
+       - `ModuleType` 유니온에 `'mindmap' | 'project'`를 정규 복원.
+       - `ProtectedApp.tsx` 내 `MindMap3D` 및 `ProjectManagementPage` 컴포넌트를 `dynamic(() => import(...), { ssr: false })`로 안전 격리 임포트하고, `visitedModules` 캐시 마운트 뷰로 탭 스위칭 0-Stall 및 `__tests__/r1-empirical-challenge.test.tsx` 7/7 ALL PASS 달성.
+* **핵심 변경 내역**:
+  - `src/app/login/page.tsx`: 부제목, 플레이스홀더, 버튼 라벨 및 텍스트 규격화.
+  - `src/hooks/useBudget.ts`: 카테고리/엔트리 뮤테이션 내 중복 `onSettled` invalidateQueries 제거.
+  - `src/hooks/useContacts.ts`: 연락처 뮤테이션 내 중복 `onSettled` invalidateQueries 제거.
+  - `src/components/MindMap3D.tsx`: `OntologyCanvasEngine` 임포트 및 150ms 기동 / 언마운트 destroy 라이프사이클 장착.
+  - `src/types/index.ts`: `ModuleType`에 `'mindmap' | 'project'` 추가.
+  - `src/components/ProtectedApp.tsx`: `MindMap3D`, `ProjectManagementPage` 동적 임포트 및 탭 렌더링 복원.
+* **정량적 검증 성과**:
+  - 전역 단위/통합 테스트 스위트: **26 / 26 Suites (238 / 238 Tests) 100% ALL PASS**.
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 게이트키퍼 검증 (`run-harness.js`): **0 Zod errors, 0 ESLint errors/warnings, 0 Arch violations, 0 Perf bottlenecks (ALL PASS)**.
+
 ### [Milestone 119: Budget Dashboard Risk Alert Compact Card & Collapsible 2-Column Grid UX Optimization Release] Bulky risk alert banner replaced with compact 1-line mini-card, 2-column scrollable grid expander, information overload resolution, with 0-error gatekeeper test pass. (2026-09-07)
 * **개요 및 개발 목적**:
   - 예산 관리 대시보드 진입 시 10여 개 이상의 불용 위험 사업이 화면 절반을 덮어 정보 과부하 및 시각적 피로를 유발하던 대형 경고 배너를 컴팩트한 미니 카드로 전면 개편:

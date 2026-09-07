@@ -173,7 +173,7 @@ export interface DocumentEntry {
   status: 'draft' | 'ready' | 'done'; // 상태
 }
 
-export type ModuleType = 'dashboard' | 'workspace' | 'festival' | 'simulator';
+export type ModuleType = 'dashboard' | 'workspace' | 'mindmap' | 'project' | 'festival' | 'simulator';
 
 // ============ Budget Simulator Module ============
 export interface SimulationEntry {

@@ -648,5 +648,28 @@
     "actionType": "general",
     "isPlanned": false,
     "id": "mtcc4txdtlhhdkfx3"
+  },
+  {
+    "categoryId": "mnrcir0v5zjn4qxyg",
+    "amount": 580000,
+    "date": "2026-09-02",
+    "purpose": "서울체력장 운영인력 근무복(하절기) 구매비 지급",
+    "memo": "",
+    "docRegNum": "보건행정과-10891",
+    "linkedSubItemId": "id_d3100c0ecef3",
+    "actionType": "general",
+    "isPlanned": false,
+    "id": "mtqs71nadt5dx88sp"
+  },
+  {
+    "categoryId": "mnrcir0v0vx5ae1qd",
+    "amount": 1920000,
+    "date": "2026-08-31",
+    "purpose": "헬스체크업 운동 프로그램 강사료 지급(8월)",
+    "memo": "",
+    "docRegNum": "보건행정과-10671",
+    "actionType": "general",
+    "isPlanned": false,
+    "id": "mtqs8suged80c0qma"
   }
 ]

@@ -244,7 +244,8 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
                   {riskCategories.length}개 사업
                 </span>
                 <span className="text-xs text-rose-700/80 dark:text-rose-300">
-                  미집행 잔액: <strong className="text-rose-800 dark:text-rose-200 font-mono font-bold">{formatN(totalRiskRemaining)}원</strong>
+                  위험 사업 미집행 잔액: <strong className="text-rose-800 dark:text-rose-200 font-mono font-bold">{formatN(totalRiskRemaining)}원</strong>
+                  <span className="text-[11px] text-rose-500/80 dark:text-rose-400/80 ml-1 font-normal">(정상 집행 4개 사업 잔액 70,000원 제외)</span>
                 </span>
               </div>
             </div>
@@ -408,7 +409,7 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
         <div className="glass-panel rounded-[2rem] p-6 flex flex-col h-full justify-between shadow-2xs hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group">
           <div className="flex justify-between items-start mb-4">
             <span className="text-sm font-semibold text-blue-600 tracking-wide flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></span> 일반 계좌 (일상경비 제외)
+              <span className="w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></span> 일반 계좌 (e-호조 본청)
             </span>
             <div className="p-2 rounded-xl bg-blue-50 border border-blue-100 text-blue-500 group-hover:scale-110 transition-transform duration-300">
               <Wallet size={18} />
@@ -416,11 +417,11 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight mb-3 font-mono">
-              {formatN(filteredStats.remaining - filteredStats.dailyExpenseRemaining)}
+              {formatN(filteredStats.remaining)}
               <span className="text-sm font-bold text-gray-500 ml-1">원 잔여</span>
             </div>
             <div className="flex justify-between items-center text-xs bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 text-gray-500 font-medium">
-              <span>일반 지출</span>
+              <span>본청 직접 지출</span>
               <span className="font-semibold text-gray-700">{formatN(filteredStats.totalSpent - filteredStats.dailyExpenseIssued)}원</span>
             </div>
           </div>
@@ -464,7 +465,7 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
         <div className="bg-gradient-to-br from-teal-700 to-emerald-800 rounded-[2rem] p-6 flex flex-col h-full justify-between shadow-2xs hover:shadow-lg hover:shadow-teal-600/25 hover:-translate-y-1 transition-all duration-300 group border border-teal-600/50">
           <div className="flex justify-between items-start mb-4">
             <span className="text-sm font-semibold text-teal-100 tracking-wide flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-teal-300 shadow-sm shadow-teal-300/50"></span> 총 가용 잔액
+              <span className="w-2 h-2 rounded-full bg-teal-300 shadow-sm shadow-teal-300/50"></span> 보건소 실질 총 가용
             </span>
             <div className="flex gap-2 items-center">
               <button 
@@ -480,11 +481,12 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-sm mb-3 font-mono">
-              {formatN(filteredStats.remaining)}
+              {formatN(filteredStats.remaining + filteredStats.dailyExpenseRemaining)}
               <span className="text-sm font-semibold text-teal-200 ml-1">원</span>
             </div>
-            <div className="text-[11px] text-teal-100 font-medium bg-teal-900/40 p-2 rounded-xl border border-teal-600/30 border-dashed">
-              원장대조 버튼으로 영수증 누락을 확인하세요.
+            <div className="text-[11px] text-teal-100 font-medium bg-teal-900/40 p-2 rounded-xl border border-teal-600/30 flex justify-between items-center">
+              <span>본청 e-호조: {formatN(filteredStats.remaining)}원</span>
+              <span>일상 통장: {formatN(filteredStats.dailyExpenseRemaining)}원</span>
             </div>
           </div>
         </div>

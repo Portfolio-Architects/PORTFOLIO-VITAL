@@ -319,6 +319,28 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 121: Cross-Dashboard Budget Balance Accounting Integrity Reconciliation & Daily Expense Double-Counting Bug Eradication Release] Resolved cross-dashboard budget discrepancy (148,698,600 KRW vs 156,554,300원 vs 168,592,700원) by fixing daily expense double-counting in usePortfolioAnalytics (239,293,400 -> 219,399,300 spent, matching e-hojo 168,592,700 remaining) and double-subtraction in BudgetDashboard Card 2, while clarifying actual total available balance (180,631,100원 = 168,592,700 + 12,038,400) and risk banner scope. (2026-09-07)
+* **개요 및 개발 목적 (Overview & Objective)**:
+  - 사용자 피드백("잔액 매칭이 안되는데?", "156,554,300 이게 정확한 잔액 아니야? 메인페이지에는 잔액 148,698,600KRW 이걸로 나오네?? 뭐가 맞는거야 도대체..", "내가 오늘 8월 27일 이후 지출내역을 등록해서 그런건가?", "일상경비 실제 지출 여부 차이인가..") 원인 규명 및 완벽 해결:
+    1. **메인 대시보드 일상경비 이중 합산 버그 척결 (`src/hooks/usePortfolioAnalytics.ts`)**:
+       - 메인 대시보드 분석 훅(`usePortfolioAnalytics`)에서 `executedBudget`, `breakdownData`, `monthlyAmounts` 집계 시 `actionType === 'daily_expense'`(일상경비 법인카드 실지출: 19,894,100원)를 본청 집행액(`issuance` 교부액 31,932,500원 포함)에 무차별적으로 합산하여 집행액이 239,293,400원으로 부풀려지고 잔여 예산이 `148,698,600 KRW`로 축소 왜곡되던 오류 박멸.
+       - `e.actionType !== 'daily_expense'` 가드를 적용하여 e-호조 본청 공식 집행액 기준(`219,399,300원`)으로 정상화하고, 메인 잔액을 e-호조 본청 잔액인 **`168,592,700 KRW`**로 완벽 일치화.
+    2. **예산관리 2번 카드 일상경비 이중 차감 버그 박멸 (`src/components/budget/BudgetDashboard.tsx`)**:
+       - 2번 카드("일반 계좌")에서 이미 일상경비 교부액이 빠져 있는 본청 잔액(`filteredStats.remaining`: 168,592,700원)에서 일상경비 통장 잔고(`filteredStats.dailyExpenseRemaining`: 12,038,400원)를 한 번 더 빼버려 총예산(387,992,000원) 대비 12,038,400원의 결손이 발생하는 `156,554,300원` 표기 버그 해소.
+       - 본청 일반 계좌 잔액 수식을 정규 잔액인 `{formatN(filteredStats.remaining)}원`(**`168,592,700원`**)으로 정상 복원.
+    3. **실질 총 가용 잔액(본청 잔여 + 일상경비 통장 잔고) 시각화 명확화 (Card 4)**:
+       - 4번 카드를 `보건소 실질 총 가용`으로 격상하여 본청 e-호조 잔액(168,592,700원)과 보건소 일상경비 통장 잔고(12,038,400원)의 합산액인 **`180,631,100원`**을 메인으로 표시하고, 하단 배지에 두 계좌의 잔액을 1:1로 분리 표기하여 회계 감사 및 일상 실무 양측의 투명성 100% 확보.
+    4. **상단 불용 위험 모니터링 배너 라벨 명확화**:
+       - 15개 사업 중 3분기 집행률 70% 미만인 11개 위험 사업의 잔액 합계(`168,522,700원`)와 정상 4개 사업 잔액(70,000원) 간의 차이를 주석으로 명시하여 사용자 혼선 차단.
+* **정량적 검증 성과 (Quantitative Performance Metrics)**:
+  - 메인화면 잔여 예산 ↔ 예산관리 탭 e-호조 잔액 일치율: **100% (168,592,700 KRW / 원)**.
+  - 예산 합산 대사(일반 지출 187,466,800 + 일상 교부 31,932,500 + e-호조 잔액 168,592,700): **387,992,000원 (오차 0원)**.
+  - 실지출 합산 대사(일반 지출 187,466,800 + 일상 실지출 19,894,100 + 실질 총 가용 180,631,100): **387,992,000원 (오차 0원)**.
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 게이트키퍼 통합 테스트 (`run-harness.js`): **0 errors (ALL PASS)**.
+
+### [Milestone 120: Global Test Suite 100% Pass (26/26 Suites, 238/238 Tests), Auth Decoupling & Optimistic Cache Mutation Synchronization Release] Fixed LoginPage test text & placeholder discrepancies, eliminated redundant onSettled query cache invalidations in useBudget & useContacts, wired MindMap3D engine lifecycle & unmount destroy cleanup, restored mindmap & project views in ProtectedApp, achieving 0 errors across entire CI test harness and TypeScript compiler. (2026-09-07)
+
 ### [Milestone 119: Yangjae Festival Shared Frontend 100% Component Reconciliation & Cloudflare Replica Live Sync Architecture Stabilization Release] 100% component and layout parity between localhost and standalone frontend (D-day dynamic calculation, program structure, cooperation departments, 2-tone column detail tiles, bullet formatting), auto-synced Cloudflare function fallback data, stale-data overwrite prevention guard, KV binding diagnostics, with 25/25 test suite pass. (2026-09-07)
 * **개요 및 개발 목적 (Overview & Objective)**:
   - 사용자 피드백("공유 프론트엔드와 로컬호스트 내용이 달라, 컴포넌트등 비교해서 매칭 시켜주고, 그리고 로컬호스트에서 수정한 내용이 프론트 엔드에 바로 반영되지는 않네") 완벽 해결:
@@ -3952,6 +3974,15 @@ sequenceDiagram
   - 브라우저 RAM 점유율 60% 이상 대폭 절감 및 유휴 CPU 사용률 0% 달성, 탭 전환 0ms 즉시 응답성 확보.
 
 ### 8. 양재천 건강 페스티벌 모바일 관제판 최적화 및 안정화 (Phase 13 - 완료)
+- [x] **전역 테스트 스위트 100% 무결성 통과 (26개 스위트, 238개 테스트) 및 인증·낙관적 캐시·엔진 라이프사이클 동기화 릴리즈 (Milestone 120 - 2026-09-07)**
+  - `src/app/login/page.tsx`: 로그인 폼 부제목("통합 업무 및 예산 관리 아키텍처"), 플레이스홀더(`Enter your ID`), 로그인 버튼 웹 접근성 라벨(`aria-label="로그인"`) 및 텍스트 일원화로 `__tests__/m3-auth-empirical.test.tsx` 14/14 ALL PASS 달성.
+  - `src/hooks/useBudget.ts` & `src/hooks/useContacts.ts`: 카테고리/엔트리/연락처 뮤테이션에서 불필요한 `onSettled` 내 `queryClient.invalidateQueries` 호출을 전면 소거하여 낙관적 캐시 갱신 직후의 중복 네트워크/디스크 재조회 및 캐시 플리커 영구 차단 (`__tests__/challenger-r1-r2-verification.test.tsx` 8/8 ALL PASS 달성).
+  - `src/components/MindMap3D.tsx`: `OntologyCanvasEngine` 인스턴스를 `engineRef`로 관리하고 150ms 지연 기동 및 컴포넌트 언마운트 시 `destroy()` 해제 라이프사이클을 복원하여 `__tests__/refactoring_verification.test.tsx` 9/9 ALL PASS 달성.
+  - `src/components/ProtectedApp.tsx` & `src/types/index.ts`: `ModuleType`에 `'mindmap' | 'project'`를 정규 복원하고 동적 임포트(`dynamic(() => import(...), { ssr: false })`) 및 `visitedModules` 캐시 마운트 뷰를 복원하여 `__tests__/r1-empirical-challenge.test.tsx` 7/7 ALL PASS 달성.
+  - 전역 26개 Jest 테스트 스위트(총 238개 테스트) 100% ALL PASS, TypeScript 컴파일 0 오류, Zod 스키마 0 오류, ESLint 0 경고의 트리플 0 무결성 통과.
+- [x] **예산 대시보드 불용 위험 알림 슬림 미니 카드 및 접이식 2열 컴팩트 스크롤 그리드 UX 최적화 릴리즈 (Milestone 119 - 2026-09-07)**
+  - `src/components/budget/BudgetDashboard.tsx`: 기존 화면 전체를 차지하던 거대 알림 박스 대신, 1줄 높이의 글래스모피즘 미니 카드와 `[사업 목록 ▾ / 접기 ▴]` 토글 버튼 탑재.
+  - 펼침 시 `max-h-52 overflow-y-auto` 및 `grid-cols-1 md:grid-cols-2` 2열 컴팩트 스크롤 그리드를 적용하여 화면 공간 효율 극대화 및 시각적 안정성 확보.
 - [x] **모바일 SNS 공유 메타데이터(OpenGraph/Twitter) 강화 및 Cloudflare Pages 무프레임워크 스탠드얼론 정적 엔진 릴리즈 (Milestone 118 - 2026-09-04)**
   - `src/app/festival/yangjae/page.tsx`: Next.js 서버 메타데이터에 OpenGraph(`og:title`, `og:description`, `og:site_name`, `og:type`) 및 Twitter 카드 태그를 탑재하여 카카오톡, SMS, 텔레그램 모바일 공유 시 사전 미리보기 카드(OG Preview) 자동 생성.
   - `scripts/pages-template.html`: React 앱의 전체 UI(행사개요, 8대 과제 아코디언, 12개 부스 가나다순/카테고리 필터, 큰글씨 모드, 모바일 공유 API)를 100% 동일하게 재현한 무의존성(Zero-Framework) 고속 스탠드얼론 정적 HTML 템플릿 신설.

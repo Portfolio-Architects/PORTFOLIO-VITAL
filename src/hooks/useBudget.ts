@@ -82,9 +82,6 @@ export function useBudget() {
     },
     onError: (err, newCat, context) => {
       if (context?.previous) queryClient.setQueryData(['BUDGET_CATEGORIES'], context.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['BUDGET_CATEGORIES'] });
     }
   });
 
@@ -114,9 +111,6 @@ export function useBudget() {
     },
     onError: (err, vars, context) => {
       if (context?.previous) queryClient.setQueryData(['BUDGET_CATEGORIES'], context.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['BUDGET_CATEGORIES'] });
     }
   });
 
@@ -130,9 +124,6 @@ export function useBudget() {
     },
     onError: (err, id, context) => {
       if (context?.previous) queryClient.setQueryData(['BUDGET_CATEGORIES'], context.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['BUDGET_CATEGORIES'] });
     }
   });
 
@@ -146,9 +137,6 @@ export function useBudget() {
     },
     onError: (err, newCategories, context) => {
       if (context?.previous) queryClient.setQueryData(['BUDGET_CATEGORIES'], context.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['BUDGET_CATEGORIES'] });
     }
   });
 
@@ -163,9 +151,6 @@ export function useBudget() {
     },
     onError: (err, newEntry, context) => {
       if (context?.previous) queryClient.setQueryData(['BUDGET_ENTRIES'], context.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['BUDGET_ENTRIES'] });
     }
   });
 
@@ -195,9 +180,6 @@ export function useBudget() {
     },
     onError: (err, vars, context) => {
       if (context?.previous) queryClient.setQueryData(['BUDGET_ENTRIES'], context.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['BUDGET_ENTRIES'] });
     }
   });
 
@@ -211,9 +193,6 @@ export function useBudget() {
     },
     onError: (err, id, context) => {
       if (context?.previous) queryClient.setQueryData(['BUDGET_ENTRIES'], context.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['BUDGET_ENTRIES'] });
     }
   });
 
@@ -227,9 +206,6 @@ export function useBudget() {
     },
     onError: (err, newEntries, context) => {
       if (context?.previous) queryClient.setQueryData(['BUDGET_ENTRIES'], context.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['BUDGET_ENTRIES'] });
     }
   });
 

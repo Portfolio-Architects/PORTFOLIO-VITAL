@@ -144,6 +144,7 @@
 ## 5. 최신 동기화된 마일스톤 (Synced Milestones Log)
 - **최신 동기화 일자:** 2026-09-07
 - **동기화된 마일스톤:**
+  - [Milestone 120: Global Test Suite 100% Pass (26/26 Suites, 238/238 Tests), Auth Decoupling & Optimistic Cache Mutation Synchronization Release] Fixed LoginPage test text & placeholder discrepancies, eliminated redundant onSettled query cache invalidations in useBudget & useContacts, wired MindMap3D engine lifecycle & unmount destroy cleanup, restored mindmap & project views in ProtectedApp, achieving 0 errors across entire CI test harness and TypeScript compiler. (2026-09-07)
   - [Milestone 119: Budget Dashboard Risk Alert Compact Card & Collapsible 2-Column Grid UX Optimization Release] Bulky risk alert banner replaced with compact 1-line mini-card, 2-column scrollable grid expander, information overload resolution, with 0-error gatekeeper test pass. (2026-09-07)
   - [Milestone 118: SNS Preview Metadata (OpenGraph/Twitter) & Zero-Framework Cloudflare Pages Standalone Static Engine Release] OpenGraph and Twitter metadata tags, zero-framework standalone pages template, zero-redirect bundle compiler with 25/25 test suite pass. (2026-09-04)
   - [Milestone 117: Medical Category Multi-Alias Filter Integration, 8-Milestones/12-Booths Fallback Sync & Pages Build Optimization Release] Full multi-alias mapping for medical categories (전문 의료·검진, 의료·검진, 의료 검진), complete 8-milestones & 12-booths fallback data synchronization, Pages build script integration, with 25/25 test suite pass. (2026-09-04)
@@ -155,5 +156,4 @@
   - [Milestone 111: Yangjae Festival Booth Order Dynamic Repositioning & Seamless Sequential Normalization Release] Interactive booth reorder controls (▲/▼), category-aware swapping, live No.1~No.N position tracking, remote tunnel admin authorization, with 25/25 test suite pass. (2026-09-04)
   - [Milestone 110: Yangjae Festival Booth Reordering (▲/▼) Interactive Wire-Up, Category Sequence Polish & Zero-Warning Codebase Purity Release] Interactive booth reorder controls (▲/▼), boundary disablement, 100% zero-warning codebase purity, with 24/24 test suite pass. (2026-09-04)
   - [Milestone 109: Yangjae Festival Detail Input Field Isolation & High-Visibility Remarks Blue Accent Release] Detail parsing negative lookahead guard for date/attendees input isolation, eye-catching text-blue-600 remarks accent, with 24/24 test suite pass. (2026-09-04)
-  - [Milestone 108: Yangjae Festival Booths Korean Alphabetical Sorting, Category Alignment & Sequential Renumbering Release] Categorized grouping, Korean alphabetical booth name sorting, sequential No.1~No.9 renumbering, category filter pill alignment, with 22/22 test suite pass. (2026-09-04)
-  - 그 외 과거 누적 마일스톤 총 193건 통합 요약 (초기 ~ 2026-09-04 이전 패치 내역)
+  - 그 외 과거 누적 마일스톤 총 194건 통합 요약 (초기 ~ 2026-09-04 이전 패치 내역)

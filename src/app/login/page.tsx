@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -34,7 +34,7 @@ export default function LoginPage() {
             <ShieldCheck size={32} />
           </div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">VITAL Work Manager</h1>
-          <p className="text-sm font-semibold text-slate-500 mt-1.5 tracking-wide">로컬 전용 1인 인텔리전스 워크스페이스</p>
+          <p className="text-sm font-semibold text-slate-500 mt-1.5 tracking-wide">통합 업무 및 예산 관리 아키텍처</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -45,7 +45,7 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              placeholder="Enter ID"
+              placeholder="Enter your ID"
               required
             />
           </div>
@@ -70,10 +70,11 @@ export default function LoginPage() {
 
           <button
             type="submit"
+            aria-label="로그인"
             disabled={isLoading}
             className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-sm transition-all hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2 cursor-pointer"
           >
-            {isLoading ? '인증 중...' : <>워크스페이스 시작 <ArrowRight size={16} /></>}
+            {isLoading ? '인증 중...' : <>로그인 <ArrowRight size={16} /></>}
           </button>
         </form>
         

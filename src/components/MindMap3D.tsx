@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useGraphCustomization } from '@/hooks/useGraphCustomization';
+import { OntologyCanvasEngine } from '@/lib/OntologyCanvasEngine';
 import { MindMapHeader } from './mindmap/ui/MindMapHeader';
 import { MindMapNoteEditor, ManualNodeItem, ManualEdgeItem } from './mindmap/ui/MindMapNoteEditor';
 import { 
@@ -29,6 +30,7 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>(0);
+  const engineRef = useRef<OntologyCanvasEngine | null>(null);
   
   // Customization controller hooks
   const {
@@ -220,6 +222,24 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isActive]);
+
+  // 6. Engine Lifecycle & Cleanup
+  useEffect(() => {
+    if (!isActive) return;
+    const timer = setTimeout(() => {
+      if (!engineRef.current) {
+        engineRef.current = new OntologyCanvasEngine();
+      }
+    }, 150);
+
+    return () => {
+      clearTimeout(timer);
+      if (engineRef.current) {
+        engineRef.current.destroy();
+        engineRef.current = null;
       }
     };
   }, [isActive]);
