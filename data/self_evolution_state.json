@@ -1,5 +1,0 @@
-{
-  "consecutiveFailures": {
-    "src/components/dashboard/DummyPerfTest.tsx": 0
-  }
-}

@@ -57,6 +57,13 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Add Node Modal States
+  const [isAddingNode, setIsAddingNode] = useState(false);
+  const [newNodeName, setNewNodeName] = useState('');
+  const [selectedLayerId, setSelectedLayerId] = useState('2');
+  const [selectedGroup, setSelectedGroup] = useState('OTHER');
+  const [pendingNodeCoords, setPendingNodeCoords] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
   // Dragging and interaction refs & states
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -257,6 +264,30 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
     }
   }, []);
 
+  const handleExecuteAddNode = useCallback(() => {
+    if (!newNodeName.trim()) return;
+    const coords = (pendingNodeCoords.x !== 0 || pendingNodeCoords.y !== 0)
+      ? pendingNodeCoords
+      : { x: Math.round(-pan.x / zoom), y: Math.round(-pan.y / zoom) };
+    const newNode = addCustomNode(newNodeName.trim(), coords.x, coords.y, '#3b82f6');
+    setActiveNodeId(newNode.id);
+    setIsAddingNode(false);
+    setNewNodeName('');
+  }, [newNodeName, pendingNodeCoords, pan, zoom, addCustomNode]);
+
+  const handleCanvasDoubleClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+    const canvasX = (clickX - rect.width / 2 - pan.x) / zoom;
+    const canvasY = (clickY - rect.height / 2 - pan.y) / zoom;
+    setPendingNodeCoords({ x: Math.round(canvasX), y: Math.round(canvasY) });
+    setNewNodeName('');
+    setIsAddingNode(true);
+  }, [pan, zoom]);
+
   const handleMouseDownBackground = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     
@@ -269,8 +300,9 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
       const canvasX = (clickX - rect.width / 2 - pan.x) / zoom;
       const canvasY = (clickY - rect.height / 2 - pan.y) / zoom;
       
-      const newNode = addCustomNode('새 생각 노트', Math.round(canvasX), Math.round(canvasY), '#3b82f6');
-      setActiveNodeId(newNode.id);
+      setPendingNodeCoords({ x: Math.round(canvasX), y: Math.round(canvasY) });
+      setNewNodeName('');
+      setIsAddingNode(true);
       lastClickTimeRef.current = 0;
       return;
     }
@@ -279,7 +311,7 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
     setIsPanning(true);
     panStartRef.current = { ...pan };
     mouseStartRef.current = { x: e.clientX, y: e.clientY };
-  }, [pan, zoom, addCustomNode]);
+  }, [pan, zoom]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning && !draggingNodeId) return;
@@ -339,9 +371,10 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
     const offset = (manualNodes.length % 5) * 40;
     const x = -100 + offset;
     const y = -100 + offset;
-    const newNode = addCustomNode('새 노트', x, y, '#3b82f6');
-    setActiveNodeId(newNode.id);
-  }, [manualNodes.length, addCustomNode]);
+    setPendingNodeCoords({ x, y });
+    setNewNodeName('');
+    setIsAddingNode(true);
+  }, [manualNodes.length]);
 
   const handleAddChildNode = useCallback((parentId: string, title = '하위 생각') => {
     const parent = nodeMap.get(parentId);
@@ -507,12 +540,6 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      {/* Background Canvas element for non-passive zoom and zero-leak tests */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 pointer-events-none w-full h-full"
-      />
-
       {/* Top Header Toolbar */}
       <MindMapHeader
         stats={{ nodes: manualNodes.length, edges: manualEdges.length }}
@@ -533,12 +560,19 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
         className="relative flex-1 w-full h-full cursor-grab active:cursor-grabbing overflow-hidden"
         onWheel={handleWheel}
         onMouseDown={handleMouseDownBackground}
+        onDoubleClick={handleCanvasDoubleClick}
         style={{
           backgroundImage: `radial-gradient(circle, var(--dot-color, rgba(148, 163, 184, 0.25)) 1.5px, transparent 1.5px)`,
           backgroundSize: `${24 * zoom}px ${24 * zoom}px`,
           backgroundPosition: `${pan.x}px ${pan.y}px`,
         }}
       >
+        {/* Background Canvas element for non-passive zoom and zero-leak tests */}
+        <canvas
+          ref={canvasRef}
+          onDoubleClick={handleCanvasDoubleClick}
+          className="absolute inset-0 w-full h-full pointer-events-auto"
+        />
         {/* Transform Container */}
         <div
           className="absolute inset-0 origin-center pointer-events-none"
@@ -754,6 +788,104 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
           onSelectNode={node => setActiveNodeId(node.id)}
           onClose={() => setActiveNodeId(null)}
         />
+      )}
+
+      {/* Add Node Modal */}
+      {isAddingNode && (
+        <div 
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
+          onClick={() => {
+            setIsAddingNode(false);
+            setNewNodeName('');
+          }}
+        >
+          <div 
+            className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 flex flex-col gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">새 노드 추가</h3>
+            </div>
+
+            <div className="py-2 flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="modalNewNodeName" className="text-xs font-semibold text-slate-500 dark:text-slate-400">노드 이름</label>
+                <input
+                  id="modalNewNodeName"
+                  autoFocus
+                  type="text"
+                  placeholder="노드 이름을 입력하세요..."
+                  value={newNodeName}
+                  onChange={(e) => setNewNodeName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newNodeName.trim()) {
+                      e.preventDefault();
+                      handleExecuteAddNode();
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault();
+                      setIsAddingNode(false);
+                      setNewNodeName('');
+                    }
+                  }}
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 text-slate-800 dark:text-slate-200 placeholder-slate-400 font-medium transition-all"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="modalSelectedLayer" className="text-xs font-semibold text-slate-500 dark:text-slate-400">온톨로지 레이어</label>
+                <select
+                  id="modalSelectedLayer"
+                  value={selectedLayerId}
+                  onChange={(e) => setSelectedLayerId(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 text-slate-800 dark:text-slate-200 font-medium transition-all cursor-pointer"
+                >
+                  <option value="1">비전/전략</option>
+                  <option value="2">업무/회의</option>
+                  <option value="3">실행/과제</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="modalSelectedGroup" className="text-xs font-semibold text-slate-500 dark:text-slate-400">분류 (그룹)</label>
+                <select
+                  id="modalSelectedGroup"
+                  value={selectedGroup}
+                  onChange={(e) => setSelectedGroup(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 text-slate-800 dark:text-slate-200 font-medium transition-all cursor-pointer"
+                >
+                  <option value="OTHER">기타</option>
+                  <option value="BUSINESS">사업</option>
+                  <option value="MANAGEMENT">관리</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2.5 mt-2 justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAddingNode(false);
+                  setNewNodeName('');
+                }}
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleExecuteAddNode}
+                disabled={!newNodeName.trim()}
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg transition-all cursor-pointer ${
+                  newNodeName.trim()
+                    ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
+                    : 'bg-slate-300 dark:bg-slate-700 shadow-none cursor-not-allowed opacity-50'
+                }`}
+              >
+                생성하기
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

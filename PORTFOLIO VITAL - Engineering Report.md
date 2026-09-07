@@ -319,6 +319,30 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 122: Recursive Self-Improvement Loop & Autonomous Evolution Harness Decommission Release] Deleted self-evolution.js and diagnose-targets.js scripts, eliminated background 3-minute schedule tick (RSI_TICK) infinite loop instructions from AGENTS.md manifest, streamlined run-harness.js into pure Zod database integrity & ESLint verifier, completely stopping uncommanded commits and autonomous codebase mutations. (2026-09-07)
+* **개요 및 개발 목적**:
+  - 패치 후 자동으로 구동되던 재귀적 자기개선 무한 루프, 자율 진화 스크립트 및 AGENTS.md 규정을 완전 폐지하여 불필요한 백그라운드 틱 실행 및 무단 자율 커밋(`[auto] self-improvement: verify 0-0-0 codebase purity` 등)을 영구 차단:
+    1. **재귀적 자가 개선 스크립트 완전 삭제 (`scripts/self-evolution.js`, `scripts/diagnose-targets.js`)**:
+       - 무단 코드 수정 및 무단 git commit/push 루프를 구동하던 `self-evolution.js` 완전 삭제.
+       - 성능 병목 및 린트 스캔 전용 스크립트 `diagnose-targets.js` 완전 삭제 및 잔여 진단 파일(`data/diagnose_report.json`, `data/self_evolution_state.json`, `data/.diagnose_cache.json`) 정리.
+    2. **하네스 스크립트 경량화 및 게이트키퍼 단일화 (`scripts/run-harness.js`)**:
+       - `diagnose-targets.js` 서브프로세스 호출부(4단계) 및 관련 플래그(`--no-diag`)를 전면 제거.
+       - SSOT 로컬 DB의 Zod 스키마 무결성 검증과 소스코드 ESLint 정적 분석만을 수행하는 단일하고 안전한 CI 게이트키퍼로 복원.
+    3. **AGENTS.md 에이전트 행동 지침 개편**:
+       - `2.F. 재귀적 자가 개선 루틴 (Recursive Self-Improvement Routine)` 및 `4. 재귀적 자기 개선`, `4-2`, `4-3`, `4-4` 프로토콜을 시스템 규칙에서 영구 제거.
+       - 작업 종료 시 백그라운드 `schedule` 틱(`RSI_TICK`) 무한 연쇄 호출 및 무인 자율 승인/배포 규칙 전면 폐지.
+* **핵심 변경 내역**:
+  - `scripts/self-evolution.js`: 파일 삭제.
+  - `scripts/diagnose-targets.js`: 파일 삭제.
+  - `scripts/run-harness.js`: 4단계 `diagnose-targets.js` 실행부 및 `--no-diag` 플래그 제거.
+  - `AGENTS.md`: 재귀적 자기개선 및 무한 틱 연쇄 규칙 삭제, 섹션 인덱싱 정돈.
+  - `scripts/sync-rules.js`: 마일스톤 섹션 마커를 Section 4로 정렬.
+  - `data/diagnose_report.json`, `data/self_evolution_state.json`, `data/.diagnose_cache.json`: 잔여 임시 상태 파일 삭제.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 게이트키퍼 검증 (`run-harness.js`): **0 Zod errors, 0 ESLint errors (ALL PASS)**.
+  - 백그라운드 태스크: **0 background tasks (무한 틱 스케줄러 완전 정지)**.
+
 ### [Milestone 121: Cross-Dashboard Budget Balance Accounting Integrity Reconciliation & Daily Expense Double-Counting Bug Eradication Release] Resolved cross-dashboard budget discrepancy (148,698,600 KRW vs 156,554,300원 vs 168,592,700원) by fixing daily expense double-counting in usePortfolioAnalytics (239,293,400 -> 219,399,300 spent, matching e-hojo 168,592,700 remaining) and double-subtraction in BudgetDashboard Card 2, while clarifying actual total available balance (180,631,100원 = 168,592,700 + 12,038,400) and risk banner scope. (2026-09-07)
 * **개요 및 개발 목적 (Overview & Objective)**:
   - 사용자 피드백("잔액 매칭이 안되는데?", "156,554,300 이게 정확한 잔액 아니야? 메인페이지에는 잔액 148,698,600KRW 이걸로 나오네?? 뭐가 맞는거야 도대체..", "내가 오늘 8월 27일 이후 지출내역을 등록해서 그런건가?", "일상경비 실제 지출 여부 차이인가..") 원인 규명 및 완벽 해결:
@@ -3974,6 +3998,18 @@ sequenceDiagram
   - 브라우저 RAM 점유율 60% 이상 대폭 절감 및 유휴 CPU 사용률 0% 달성, 탭 전환 0ms 즉시 응답성 확보.
 
 ### 8. 양재천 건강 페스티벌 모바일 관제판 최적화 및 안정화 (Phase 13 - 완료)
+- [x] **Next.js 미들웨어 라우트 보호 일원화, 사이드바 네비게이션 탭 무결성 및 마인드맵 인터랙티브 노드 추가 복원 릴리즈 (Milestone 124 - 2026-09-07)**
+  - `src/middleware.ts`: Next.js 공식 표준 미들웨어를 신설하고 `src/proxy.ts`와 통합 정렬하여, 비인증 사용자의 루트 접속 시 `/login`으로의 정상 307 리다이렉트를 보장하고 `/festival`, `/api/festival`, `/api/calendar`, `/api/auth` 및 정적 자산의 비인증 공개 접근 보장.
+  - `src/components/Sidebar.tsx`: Playwright E2E 테스트에서 참조하는 `마인드맵`(`mindmap`, `Network` 아이콘) 및 `사업관리`(`project`, `FolderKanban` 아이콘) 탭을 `navItems`에 전격 복원하여 데스크톱 및 모바일 플로팅 독 전역 인터랙션 지원.
+  - `src/components/MindMap3D.tsx`: 캔버스 빈 영역 더블클릭(`onDoubleClick`) 시 노드 추가 모달(`isAddingNode`)이 즉시 팝업되도록 이벤트 파이프라인을 정비하고, E2E 규격에 부합하는 `input#modalNewNodeName`, `select#modalSelectedLayer`(업무/회의 `2`), `select#modalSelectedGroup`(기타 `OTHER`), `button:has-text("생성하기")` 엘리먼트 구현.
+  - `src/hooks/useBudgetSimulator.ts`: `addBudgetEntry`의 동기식 반환 타입에 맞추어 비동기 체이닝 오류를 해소하고 안전한 동기식 ID 매핑으로 TS2531/TS2339/TS7006 컴파일 에러 완전 교정.
+  - Jest 단위/통합 26/26 스위트 (238/238 테스트) ALL PASS, TypeScript 컴파일 0 오류, 게이트키퍼 0 오류 통과.
+- [x] **통합 불용 위험 번다운 모니터링 & 지출 품의/소진 계획 시뮬레이터 릴리즈 (Milestone 123 - 2026-09-07)**
+  - 고립되어 있던 11개 불용 위험 사업 모니터링과 예산 시뮬레이터를 유기적인 단일 지출 품의/소진 계획(Commitment Accounting) 허브로 전격 통합.
+  - `BUDGET_ENTRIES.json` SSOT에 `isPlanned: true`로 직접 저장하여 가용 잔액 실시간 차감 연동.
+  - 1-클릭 실제 지출 정산 전환 라이프사이클(`settleEntry`) 및 상태 배지 추적, 번다운 헤더 수치화 및 `QuickPlanModal` 탑재 완료.
+- [x] **재귀적 자기개선 루프 및 자율 진화 하네스 완전 폐지 (Milestone 122 - 2026-09-07)**
+  - `scripts/self-evolution.js`, `scripts/diagnose-targets.js` 삭제, `AGENTS.md` 내 3분 주기 백그라운드 틱(`RSI_TICK`) 무한 루프 규정 폐지, `run-harness.js` 순수 Zod & ESLint 단일 게이트키퍼 경량화로 무단 자율 커밋 원천 차단.
 - [x] **전역 테스트 스위트 100% 무결성 통과 (26개 스위트, 238개 테스트) 및 인증·낙관적 캐시·엔진 라이프사이클 동기화 릴리즈 (Milestone 120 - 2026-09-07)**
   - `src/app/login/page.tsx`: 로그인 폼 부제목("통합 업무 및 예산 관리 아키텍처"), 플레이스홀더(`Enter your ID`), 로그인 버튼 웹 접근성 라벨(`aria-label="로그인"`) 및 텍스트 일원화로 `__tests__/m3-auth-empirical.test.tsx` 14/14 ALL PASS 달성.
   - `src/hooks/useBudget.ts` & `src/hooks/useContacts.ts`: 카테고리/엔트리/연락처 뮤테이션에서 불필요한 `onSettled` 내 `queryClient.invalidateQueries` 호출을 전면 소거하여 낙관적 캐시 갱신 직후의 중복 네트워크/디스크 재조회 및 캐시 플리커 영구 차단 (`__tests__/challenger-r1-r2-verification.test.tsx` 8/8 ALL PASS 달성).

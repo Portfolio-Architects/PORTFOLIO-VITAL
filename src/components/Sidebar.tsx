@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ModuleType } from '@/types';
-import { Archive, LayoutDashboard, Sparkles } from 'lucide-react';
+import { Archive, LayoutDashboard, Sparkles, Network, FolderKanban } from 'lucide-react';
 
 import { LocalhostStatusHUD } from '@/components/layout/LocalhostStatusHUD';
 
@@ -19,6 +19,8 @@ interface TopNavProps {
 const navItems: { id: ModuleType; label: string; icon: React.ElementType }[] = [
   { id: 'dashboard', label: '대시보드', icon: LayoutDashboard },
   { id: 'workspace', label: '예산관리', icon: Archive },
+  { id: 'mindmap', label: '마인드맵', icon: Network },
+  { id: 'project', label: '사업관리', icon: FolderKanban },
   { id: 'festival', label: '양재천 페스티벌', icon: Sparkles },
 ];
 
@@ -79,7 +81,7 @@ function SidebarComponent({ activeModule, onModuleChange, appMode, onPreloadModu
       </header>
 
       {/* Mobile Floating Dock */}
-      <div className="sm:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[320px] transition-all duration-300 transform animate-slide-up-fade">
+      <div className="sm:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[380px] transition-all duration-300 transform animate-slide-up-fade">
         <nav className="flex items-center justify-around p-1.5 bg-white/75 dark:bg-slate-900/75 backdrop-blur-lg border border-white/20 shadow-2xl rounded-[2.5rem]">
           {navItems.map((item) => {
             const Icon = item.icon;

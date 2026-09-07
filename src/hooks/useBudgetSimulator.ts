@@ -110,6 +110,9 @@ export interface UseBudgetSimulatorReturn {
   loadTestPreset: () => void;
   loadFestivalPreset: () => void;
 
+  // Real Expenditure Lifecycle Action (정산 전환)
+  settleEntry: (simId: string, actualAmount?: number, actualDate?: string) => Promise<void>;
+
   // Aggregated Summaries
   projectSummaries: ProjectSimulationSummary[];
   statItemSummaries: StatItemSimulationSummary[];
@@ -154,7 +157,15 @@ const getSimSnapshot = (): SimulationEntry[] => {
 const getSimServerSnapshot = () => emptySimEntries;
 
 export function useBudgetSimulator(): UseBudgetSimulatorReturn {
-  const { categories, getCategoryStats, isLoading: budgetLoading } = useBudget();
+  const {
+    categories,
+    entries: budgetEntries,
+    addEntry: addBudgetEntry,
+    updateEntry: updateBudgetEntry,
+    deleteEntry: deleteBudgetEntry,
+    getCategoryStats,
+    isLoading: budgetLoading
+  } = useBudget();
 
   // Filter States
   const [selectedDetailedProject, setSelectedDetailedProject] = useState<string>('');
@@ -179,6 +190,39 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       return next;
     });
   }, []);
+
+  // Combine storedEntries with any SSOT budgetEntries that are planned (isPlanned: true)
+  const mergedEntries = useMemo<SimulationEntry[]>(() => {
+    const list = [...entries];
+    const existingBudgetEntryIds = new Set<string>();
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].budgetEntryId) existingBudgetEntryIds.add(list[i].budgetEntryId!);
+    }
+
+    if (budgetEntries) {
+      for (let i = 0; i < budgetEntries.length; i++) {
+        const be = budgetEntries[i];
+        if (be.isPlanned && !existingBudgetEntryIds.has(be.id)) {
+          const cat = categories?.find(c => c.id === be.categoryId);
+          list.push({
+            id: be.simulationEntryId || `sim-be-${be.id}`,
+            name: be.purpose,
+            detailedProject: cat?.detailedProject || '기타사업',
+            statItem: cat?.statItem || cat?.name || '일반운영비',
+            categoryId: be.categoryId,
+            unitPrice: be.amount,
+            quantity: 1,
+            amount: be.amount,
+            memo: be.memo,
+            createdAt: be.date || new Date().toISOString(),
+            status: be.isSettled ? 'SETTLED' : 'PLANNED',
+            budgetEntryId: be.id,
+          });
+        }
+      }
+    }
+    return list;
+  }, [entries, budgetEntries, categories]);
 
   // Pre-indexed O(1) lookup Map for category resolution by detailedProject + statItem
   const projectStatItemToCategoryMap = useMemo(() => {
@@ -244,20 +288,44 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       : unitPrice * quantity;
     
     const categoryId = rawInput.categoryId || resolveCategoryId(rawInput.detailedProject, rawInput.statItem);
+    const newSimId = generateId();
 
     const newEntry: SimulationEntry = {
       ...rawInput,
-      id: generateId(),
+      id: newSimId,
       unitPrice,
       quantity,
       amount: computedAmount,
       categoryId,
       createdAt: new Date().toISOString(),
+      status: 'PLANNED',
     };
+
+    // Auto-sync as BudgetEntry (isPlanned: true) to data/BUDGET_ENTRIES.json SSOT
+    if (categoryId) {
+      try {
+        const created = addBudgetEntry({
+          categoryId,
+          amount: computedAmount,
+          date: new Date().toISOString().split('T')[0],
+          purpose: rawInput.name,
+          memo: rawInput.memo ? `[시뮬레이션] ${rawInput.memo}` : `[시뮬레이션] 단가 ₩${unitPrice.toLocaleString('ko-KR')} × ${quantity}개`,
+          isPlanned: true,
+          isSettled: false,
+          actionType: 'general',
+          simulationEntryId: newSimId,
+        });
+        if (created && created.id) {
+          newEntry.budgetEntryId = created.id;
+        }
+      } catch (err) {
+        console.warn('[useBudgetSimulator] Failed to sync to BudgetEntry:', err);
+      }
+    }
 
     setEntries(prev => [newEntry, ...prev]);
     return newEntry;
-  }, [resolveCategoryId, setEntries]);
+  }, [resolveCategoryId, addBudgetEntry, setEntries]);
 
   const updateEntry = useCallback((id: string, partial: Partial<SimulationEntry>) => {
     setEntries(prev => prev.map(item => {
@@ -277,8 +345,45 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   }, [resolveCategoryId, setEntries]);
 
   const deleteEntry = useCallback((id: string) => {
+    const target = mergedEntries.find(item => item.id === id);
+    if (target?.budgetEntryId) {
+      deleteBudgetEntry(target.budgetEntryId);
+    }
     setEntries(prev => prev.filter(item => item.id !== id));
-  }, [setEntries]);
+  }, [mergedEntries, deleteBudgetEntry, setEntries]);
+
+  // Real Expenditure Lifecycle Action (정산 전환)
+  const settleEntry = useCallback(async (simId: string, actualAmount?: number, actualDate?: string) => {
+    const sim = mergedEntries.find(e => e.id === simId);
+    if (!sim) return;
+    const finalAmount = actualAmount !== undefined ? actualAmount : sim.amount;
+    const finalDate = actualDate || new Date().toISOString().split('T')[0];
+
+    // 1. Mark planned budget entry as settled if linked
+    if (sim.budgetEntryId) {
+      await updateBudgetEntry(sim.budgetEntryId, { isSettled: true });
+    }
+
+    // 2. Add real expenditure entry to SSOT (isPlanned: false)
+    const actualEntry = await addBudgetEntry({
+      categoryId: sim.categoryId || resolveCategoryId(sim.detailedProject, sim.statItem) || '',
+      amount: finalAmount,
+      date: finalDate,
+      purpose: `${sim.name} (실지출 집행)`,
+      memo: sim.memo ? `${sim.memo} [시뮬레이션 정산 완료]` : `[시뮬레이션 정산 완료: ${sim.name}]`,
+      isPlanned: false,
+      isSettled: false,
+      relatedPlanId: sim.budgetEntryId,
+      actionType: 'general',
+    });
+
+    // 3. Mark sim entry as SETTLED in local state
+    updateEntry(simId, {
+      status: 'SETTLED',
+      settledEntryId: actualEntry && 'id' in actualEntry ? (actualEntry.id as string) : undefined,
+      settledDate: finalDate,
+    });
+  }, [mergedEntries, updateBudgetEntry, addBudgetEntry, resolveCategoryId, updateEntry]);
 
   const resetEntries = useCallback(() => {
     setEntries([]);
@@ -341,9 +446,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       target.currentSpent += stats?.spent || 0;
     }
 
-    // Add simulation entries
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
+    // Add simulation entries (excluding settled ones)
+    for (let i = 0; i < mergedEntries.length; i++) {
+      const entry = mergedEntries[i];
+      if (entry.status === 'SETTLED') continue;
       const dp = entry.detailedProject || '기타';
       let target = map.get(dp);
       if (!target) {
@@ -375,7 +481,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     }
 
     return results.sort((a, b) => a.detailedProject.localeCompare(b.detailedProject));
-  }, [categories, getCategoryStats, entries]);
+  }, [categories, getCategoryStats, mergedEntries]);
 
   const statItemSummaries = useMemo<StatItemSimulationSummary[]>(() => {
     if (!categories) return [];
@@ -411,9 +517,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       target.currentSpent += stats?.spent || 0;
     }
 
-    // Add simulation entries
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
+    // Add simulation entries (excluding settled ones)
+    for (let i = 0; i < mergedEntries.length; i++) {
+      const entry = mergedEntries[i];
+      if (entry.status === 'SETTLED') continue;
       const dp = entry.detailedProject || '기타';
       const st = entry.statItem || '일반';
       const key = `${dp}::${st}`;
@@ -455,10 +562,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       if (dpComp !== 0) return dpComp;
       return a.statItem.localeCompare(b.statItem);
     });
-  }, [categories, getCategoryStats, entries]);
+  }, [categories, getCategoryStats, mergedEntries]);
 
   return {
-    entries,
+    entries: mergedEntries,
     isLoading: budgetLoading,
     selectedDetailedProject,
     selectedStatItem,
@@ -474,6 +581,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     resetEntries,
     loadTestPreset,
     loadFestivalPreset,
+    settleEntry,
     projectSummaries,
     statItemSummaries,
     resolveCategoryId,

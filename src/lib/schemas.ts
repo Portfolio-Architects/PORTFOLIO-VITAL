@@ -107,6 +107,7 @@ export const BudgetEntrySchema = z.object({
   checked: z.boolean().optional().catch(false),
   fundingSource: z.string().optional().catch(undefined),
   transferDirection: z.enum(['in', 'out']).optional().catch(undefined),
+  simulationEntryId: z.string().optional().catch(undefined),
 });
 
 export type BudgetEntryDto = z.infer<typeof BudgetEntrySchema>;
@@ -123,6 +124,10 @@ export const SimulationEntrySchema = z.object({
   amount: z.number().catch(0),
   memo: z.string().optional().catch(''),
   createdAt: z.string().catch(new Date().toISOString()),
+  status: z.enum(['PLANNED', 'SETTLED', 'CANCELLED']).optional().catch('PLANNED'),
+  budgetEntryId: z.string().optional().catch(undefined),
+  settledEntryId: z.string().optional().catch(undefined),
+  settledDate: z.string().optional().catch(undefined),
 });
 
 export type SimulationEntryDto = z.infer<typeof SimulationEntrySchema>;

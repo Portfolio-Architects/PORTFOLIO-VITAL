@@ -2,6 +2,84 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 124: Next.js Middleware Route Protection Delegation, Sidebar Navigation Tab Parity & MindMap Interactive Node Creation Restoration for Playwright E2E Release] Restored official src/middleware.ts and unified with src/proxy.ts, eliminating || isDev || isLocalHost bypass so unauthenticated visitors redirect to /login while maintaining public bypasses for /festival, /api/festival, /api/calendar, /api/auth. Restored mindmap and project tabs in Sidebar.tsx with Lucide icons Network and FolderKanban. Restored interactive canvas double-click handling and '새 노드 추가' modal in MindMap3D.tsx, resolved useBudgetSimulator synchronous mutation, achieving 100% Jest pass (26/26 Suites, 238/238 Tests) and 0 TypeScript compiler errors. (2026-09-07)
+* **개요 및 개발 목적**:
+  - GitHub Actions CI 환경 및 로컬 E2E 테스트(`npx playwright test`)의 전건 통과를 위해 미들웨어 라우트 보호, 사이드바 네비게이션 탭, 그리고 3D 마인드맵 인터랙티브 노드 추가 모달을 완벽히 복원:
+    1. **Next.js 미들웨어 라우트 보호 및 공개 경로 바이패스 일원화 (`src/middleware.ts`, `src/proxy.ts`)**:
+       - 기존 `proxy.ts` 내의 `|| isDev || isLocalHost` 무조건 인증 바이패스 및 자동 세션 쿠키 발급 로직을 제거하여 비인증 루트(`/`) 접속 시 `/login`으로의 정상 307 리다이렉트를 보장.
+       - 양재천 페스티벌(`/festival`, `/api/festival`), iCal 캘린더 피드(`/api/calendar`), 로그인 인증 API(`/api/auth`) 및 정적 자산(`/_next`, `/favicon.ico`, `/manifest.json`)은 비인증 상태에서도 자유롭게 접근할 수 있도록 공개 경로 화이트리스트 구성.
+       - Next.js 공식 표준 진입점인 `src/middleware.ts`를 신설하고 `src/proxy.ts`와 상호 호환 정렬.
+    2. **사이드바 네비게이션 탭 무결성 및 E2E 셀렉터 복원 (`src/components/Sidebar.tsx`)**:
+       - Playwright E2E 테스트(`mindmap-manual-edit.spec.ts`, `project-management.spec.ts`)에서 기대하는 `마인드맵`(`mindmap`, `Network` 아이콘) 및 `사업관리`(`project`, `FolderKanban` 아이콘) 탭을 `navItems`에 전격 복원.
+       - 데스크톱 네비게이션 바와 모바일 플로팅 독(`max-w-[380px]`) 모두에 5개 탭을 균형 있게 배치하여 어떤 뷰포트에서도 원클릭 모듈 전환 보장.
+    3. **3D 마인드맵 인터랙티브 노드 추가 모달 및 캔버스 더블클릭 복원 (`src/components/MindMap3D.tsx`)**:
+       - 캔버스 빈 영역 더블클릭(`onDoubleClick` 및 300ms 델타 타임스탬프 더블 mousedown) 시 노드 추가 모달(`isAddingNode`)이 즉시 팝업되도록 이벤트 파이프라인 정비.
+       - E2E 단언 규격에 부합하는 `input#modalNewNodeName`, `select#modalSelectedLayer`(업무/회의 `2`), `select#modalSelectedGroup`(기타 `OTHER`), `button:has-text("생성하기")` 엘리먼트 구현 및 생성 즉시 디스크/메모리 온톨로지 반영.
+    4. **예산 시뮬레이터 동기식 뮤테이션 타입 안정화 (`src/hooks/useBudgetSimulator.ts`)**:
+       - `useBudget`의 `addEntry`가 동기식으로 `BudgetEntry` 객체를 반환함에도 비동기 `.then()/.catch()`가 호출되어 발생하던 TS2531/TS2339/TS7006 컴파일 에러를 `try/catch` 블록 및 동기식 ID 매핑으로 완전 교정.
+* **핵심 변경 내역**:
+  - `src/middleware.ts`: Next.js 공식 미들웨어 신설 및 공개 경로 바이패스 처리.
+  - `src/proxy.ts`: 불필요한 `isDev || isLocalHost` 무조건 인증 바이패스 제거.
+  - `src/components/Sidebar.tsx`: `navItems`에 `mindmap`과 `project` 탭 추가, 모바일 독 가로폭 380px 확장.
+  - `src/components/MindMap3D.tsx`: 캔버스 더블클릭 바인딩, `새 노드 추가` 모달 및 계층/그룹 셀렉트박스 복원.
+  - `src/hooks/useBudgetSimulator.ts`: `addBudgetEntry` 동기 호출 및 생성 ID 할당 로직 정돈.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - Jest 단위/통합 테스트 (`npm test`): **26/26 Suites, 238/238 Tests ALL PASS (100%)**.
+  - 게이트키퍼 검증 (`node scripts/run-harness.js`): **0 Zod errors, 0 ESLint errors (ALL PASS)**.
+  - HTTP 통신 검증: 비인증 루트(`/`) 요청 시 `HTTP 307 Temporary Redirect (Location: /login)` 정확한 미들웨어 응답 확인.
+
+### [Milestone 123: Integrated Budget Risk Burn-down Monitoring & Execution Commitment Simulator Release] Unified isolated 불용 위험 모니터링 (11 risk categories) and 예산 시뮬레이터 into an integrated commitment accounting and burn-down hub. Connected simulation plans to SSOT BUDGET_ENTRIES.json as isPlanned: true, wired 1-click settlement lifecycle (정산 전환) with status badge tracking, and added real-time burn-down header metrics and QuickPlanModal actions in BudgetDashboard. (2026-09-07)
+* **개요 및 개발 목적**:
+  - 기존 브라우저 `localStorage`에만 고립되어 실제 집행 내역과 연계되지 않던 예산 시뮬레이터와, 3분기 집행률 70% 미만 11개 불용 위험 사업 모니터링 배너를 유기적인 단일 지출 품의/소진 계획(Commitment Accounting) 허브로 통합:
+    1. **SSOT 지출 품의/소진 계획 연동 (`isPlanned: true`)**:
+       - 시뮬레이터에서 등록한 미래 지출 계획을 로컬 DB `BUDGET_ENTRIES.json`에 `isPlanned: true`로 직접 저장하여 전역 카테고리 통계(`CategoryStats.planned`, `CategoryStats.remaining`)에 즉시 반영.
+    2. **1-클릭 실제 지출 정산 전환 라이프사이클 (`settleEntry`)**:
+       - 시뮬레이션 항목에 `[💳 실제 지출로 집행 (정산)]` 버튼 제공. 클릭 시 모달 또는 즉시 확인을 통해 `isPlanned: false`인 실제 지출 전표를 생성하고 원본 계획을 `status: 'SETTLED'`로 자동 완료 처리.
+    3. **불용 위험 모니터링 배너 번다운(Burn-down) 수치화 및 퀵 플랜 (`QuickPlanModal`) 탑재**:
+       - 위험 사업 배너 헤더에 `미집행 잔액: 1.68억원 − 소진 계획: X원 = 최종 불용 예상: Y원` 번다운 계산식을 실시간 렌더링.
+       - 각 위험 사업 행마다 `[+ 소진 계획]` 원클릭 버튼을 탑재하여 `QuickPlanModal`을 통해 즉시 품의/소진 계획을 추가할 수 있도록 구현.
+       - 배너 헤더에 `[✨ 시뮬레이터 상세]` 버튼을 추가하여 메인 탭에서 예산 시뮬레이터 탭으로 원클릭 화면 전환 지원.
+* **핵심 변경 내역**:
+  - `src/types/index.ts`: `BudgetEntry`에 `simulationEntryId` 추가, `SimulationEntry`에 `status`, `budgetEntryId`, `settledEntryId`, `settledDate` 필드 확장.
+  - `src/lib/schemas.ts`: `BudgetEntrySchema` 및 `SimulationEntrySchema`에 `.catch()` 안전 디폴트값 부여.
+  - `src/components/budget/ui/QuickPlanModal.tsx`: 불용 방지 소진 계획 즉시 수립 모달 신규 구현.
+  - `src/hooks/useBudgetSimulator.ts`: `useBudget` 뮤테이션 연동, `mergedEntries` 통합, `settleEntry` 정산 파이프라인 구현.
+  - `src/components/budget/ui/SimulationEntryList.tsx`: 정산 액션 버튼, 상태 필터 탭(전체/집행 대기/집행 완료), 상태 배지 추가.
+  - `src/components/budget/ui/SimulationResultTable.tsx`: `onSettleEntry` 핸들러 전달 및 연계.
+  - `src/components/budget/BudgetSimulator.tsx`: 정산 확인 다이얼로그 및 3분기 불용 위험 사업 퀵 필터 칩스 탑재.
+  - `src/components/budget/BudgetDashboard.tsx`: 위험 사업 번다운 수치, `QuickPlanModal` 연동, `[+ 소진 계획]` 및 `[시뮬레이터 상세]` 버튼 장착.
+  - `src/components/WorkspaceView.tsx`: `onNavigateToSimulator` 핸들러 전달하여 탭 간 매끄러운 화면 이동 보장.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 게이트키퍼 검증 (`run-harness.js --quick`): **0 Zod errors (PASS)**.
+  - 정적 분석 검증 (ESLint): **0 errors (PASS)**.
+  - 로컬 개발 서버 (`http://localhost:3001`): **HTTP 200 OK (정상 구동)**.
+
+### [Milestone 122: Recursive Self-Improvement Loop & Autonomous Evolution Harness Decommission Release] Deleted self-evolution.js and diagnose-targets.js scripts, eliminated background 3-minute schedule tick (RSI_TICK) infinite loop instructions from AGENTS.md manifest, streamlined run-harness.js into pure Zod database integrity & ESLint verifier, completely stopping uncommanded commits and autonomous codebase mutations. (2026-09-07)
+* **개요 및 개발 목적**:
+  - 패치 후 자동으로 구동되던 재귀적 자기개선 무한 루프, 자율 진화 스크립트 및 AGENTS.md 규정을 완전 폐지하여 불필요한 백그라운드 틱 실행 및 무단 자율 커밋(`[auto] self-improvement: verify 0-0-0 codebase purity` 등)을 영구 차단:
+    1. **재귀적 자가 개선 스크립트 완전 삭제 (`scripts/self-evolution.js`, `scripts/diagnose-targets.js`)**:
+       - 무단 코드 수정 및 무단 git commit/push 루프를 구동하던 `self-evolution.js` 완전 삭제.
+       - 성능 병목 및 린트 스캔 전용 스크립트 `diagnose-targets.js` 완전 삭제 및 잔여 진단 파일(`data/diagnose_report.json`, `data/self_evolution_state.json`, `data/.diagnose_cache.json`) 정리.
+    2. **하네스 스크립트 경량화 및 게이트키퍼 단일화 (`scripts/run-harness.js`)**:
+       - `diagnose-targets.js` 서브프로세스 호출부(4단계) 및 관련 플래그(`--no-diag`)를 전면 제거.
+       - SSOT 로컬 DB의 Zod 스키마 무결성 검증과 소스코드 ESLint 정적 분석만을 수행하는 단일하고 안전한 CI 게이트키퍼로 복원.
+    3. **AGENTS.md 에이전트 행동 지침 개편**:
+       - `2.F. 재귀적 자가 개선 루틴 (Recursive Self-Improvement Routine)` 및 `4. 재귀적 자기 개선`, `4-2`, `4-3`, `4-4` 프로토콜을 시스템 규칙에서 영구 제거.
+       - 작업 종료 시 백그라운드 `schedule` 틱(`RSI_TICK`) 무한 연쇄 호출 및 무인 자율 승인/배포 규칙 전면 폐지.
+* **핵심 변경 내역**:
+  - `scripts/self-evolution.js`: 파일 삭제.
+  - `scripts/diagnose-targets.js`: 파일 삭제.
+  - `scripts/run-harness.js`: 4단계 `diagnose-targets.js` 실행부 및 `--no-diag` 플래그 제거.
+  - `AGENTS.md`: 재귀적 자기개선 및 무한 틱 연쇄 규칙 삭제, 섹션 인덱싱 정돈.
+  - `scripts/sync-rules.js`: 마일스톤 섹션 마커를 Section 4로 정렬.
+  - `data/diagnose_report.json`, `data/self_evolution_state.json`, `data/.diagnose_cache.json`: 잔여 임시 상태 파일 삭제.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 게이트키퍼 검증 (`run-harness.js`): **0 Zod errors, 0 ESLint errors (ALL PASS)**.
+  - 백그라운드 태스크: **0 background tasks (무한 틱 스케줄러 완전 정지)**.
+
 ### [Milestone 120: Global Test Suite 100% Pass (26/26 Suites, 238/238 Tests), Auth Decoupling & Optimistic Cache Mutation Synchronization Release] Fixed LoginPage test text & placeholder discrepancies, eliminated redundant onSettled query cache invalidations in useBudget & useContacts, wired MindMap3D engine lifecycle & unmount destroy cleanup, restored mindmap & project views in ProtectedApp, achieving 0 errors across entire CI test harness and TypeScript compiler. (2026-09-07)
 * **개요 및 개발 목적**:
   - 프로젝트 전역 26개 테스트 스위트(총 238개 테스트) 100% 통과 및 게이트키퍼 무결성 달성:

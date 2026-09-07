@@ -223,6 +223,7 @@ function WorkspaceViewComponent(props: WorkspaceViewProps) {
           batchSettleEntries={props.batchSettleEntries}
           getCategoryStats={props.getCategoryStats}
           overallStats={props.overallStats}
+          onNavigateToSimulator={() => handleTabChange('simulator')}
         />
       ) : activeTab === 'inventory' ? (
         <InventoryList

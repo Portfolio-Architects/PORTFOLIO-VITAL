@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { BudgetCategory, BudgetEntry } from '@/types';
 import { useBudgetFilters } from '@/hooks/useBudgetFilters';
 import { Card } from '@/components/ui/card';
-import { ShieldAlert, RefreshCw, Search, FilePlus2, CircleDollarSign, Wallet, Receipt, ShieldCheck, ChevronDown } from 'lucide-react';
+import { ShieldAlert, RefreshCw, Search, FilePlus2, CircleDollarSign, Wallet, Receipt, ShieldCheck, ChevronDown, Sparkles, Plus } from 'lucide-react';
 import { MultiSelectDropdown } from './ui/MultiSelectDropdown';
 import { PolicyGroupCard } from './ui/PolicyGroupCard';
 import { useVirtualList } from '@/hooks/useVirtualList';
@@ -35,6 +35,11 @@ const DailyExpenseStatModal = dynamic(
   { ssr: false }
 );
 
+const QuickPlanModal = dynamic(
+  () => import('./ui/QuickPlanModal').then((mod) => mod.QuickPlanModal),
+  { ssr: false }
+);
+
 import { CategoryStats } from '@/hooks/useBudget';
 
 interface BudgetDashboardProps {
@@ -50,11 +55,12 @@ interface BudgetDashboardProps {
   batchUpdateEntries?: (ids: string[] | Array<{ id: string; [key: string]: any }>, updates?: Partial<BudgetEntry>) => void;
   batchDeleteEntries?: (ids: string[]) => void;
   batchSettleEntries?: (ids: string[], status: 'SETTLED' | 'PENDING' | 'REJECTED') => void;
-  getCategoryStats: (id: string) => CategoryStats | null;
+  getCategoryStats: (id: string, excludePlanned?: boolean) => CategoryStats | null;
   overallStats: { 
     totalBudget: number; totalSpent: number; totalPlanned: number; remaining: number;
     dailyExpenseIssued: number; dailyExpenseSpent: number; dailyExpenseRemaining: number;
   };
+  onNavigateToSimulator?: () => void;
 }
 
 function formatN(n: number) { return n.toLocaleString('ko-KR'); }
@@ -88,6 +94,7 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
   const [showLedgerModal, setShowLedgerModal] = useState(false);
   const [showDailyStatModal, setShowDailyStatModal] = useState(false);
   const [isRiskExpanded, setIsRiskExpanded] = useState(false);
+  const [quickPlanCategory, setQuickPlanCategory] = useState<BudgetCategory | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -130,6 +137,30 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
       setReturnToEntryModal(false);
     }
   }, [updateEntry, addEntry, returnToEntryModal]);
+
+  const handleSaveQuickPlan = useCallback((plan: {
+    categoryId: string;
+    detailedProject: string;
+    statItem: string;
+    name: string;
+    unitPrice: number;
+    quantity: number;
+    amount: number;
+    memo?: string;
+    date: string;
+  }) => {
+    addEntry({
+      categoryId: plan.categoryId,
+      amount: plan.amount,
+      date: plan.date,
+      purpose: plan.name,
+      memo: plan.memo,
+      isPlanned: true,
+      isSettled: false,
+      actionType: 'general'
+    });
+    setQuickPlanCategory(null);
+  }, [addEntry]);
 
   const handleSettleEntry = useCallback((plannedEntryId: string, actualAmount: number) => {
     const plannedEntry = entries.find(e => e.id === plannedEntryId);
@@ -202,16 +233,25 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
   const riskCategories = useMemo(() => {
     return categories.map(cat => {
       const st = getCategoryStats(cat.id);
-      if (!st) return null;
-      if (currentMonth >= 9 && st.usageRate < 70) return { cat, st, reason: '3분기 집행률 70% 미만' };
-      if (isEndOfYearApproaching && (st.remaining / st.totalBudget) >= 0.1) return { cat, st, reason: '회계연도 마감 임박 (가용 잔액 10% 초과)' };
+      const stExcludePlanned = getCategoryStats(cat.id, true) || st;
+      if (!st || !stExcludePlanned) return null;
+      if (currentMonth >= 9 && stExcludePlanned.usageRate < 70) return { cat, st, stExcludePlanned, reason: '3분기 집행률 70% 미만' };
+      if (isEndOfYearApproaching && (stExcludePlanned.remaining / st.totalBudget) >= 0.1) return { cat, st, stExcludePlanned, reason: '회계연도 마감 임박 (가용 잔액 10% 초과)' };
       return null;
-    }).filter(Boolean);
+    }).filter((item): item is NonNullable<typeof item> => Boolean(item));
   }, [categories, getCategoryStats, currentMonth, isEndOfYearApproaching]);
 
-  const totalRiskRemaining = useMemo(() => {
-    return riskCategories.reduce((acc, curr) => acc + (curr?.st.remaining ?? 0), 0);
+  const totalRiskUnspent = useMemo(() => {
+    return riskCategories.reduce((acc, curr) => acc + (curr.stExcludePlanned.remaining ?? 0), 0);
   }, [riskCategories]);
+
+  const totalRiskPlanned = useMemo(() => {
+    return riskCategories.reduce((acc, curr) => acc + (curr.st.planned ?? 0), 0);
+  }, [riskCategories]);
+
+  const totalRiskProjected = useMemo(() => {
+    return Math.max(0, totalRiskUnspent - totalRiskPlanned);
+  }, [totalRiskUnspent, totalRiskPlanned]);
 
   // Policy groups virtualization
   const isPolicyVirtualActive = groupedByPolicy.length > 4;
@@ -230,11 +270,11 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
   return (
     <div className="space-y-6">
       
-      {/* Risk Alert Compact Card */}
+      {/* Risk Alert Compact Card & Integrated Simulator Burn-down Hub */}
       {riskCategories.length > 0 && (
         <div className="bg-rose-50/70 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/30 rounded-2xl p-3 shadow-2xs transition-all">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <div className="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
                 <ShieldAlert size={17} />
               </div>
@@ -243,46 +283,118 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
                 <span className="px-2 py-0.5 text-[11px] font-bold bg-rose-200/80 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 rounded-full">
                   {riskCategories.length}개 사업
                 </span>
-                <span className="text-xs text-rose-700/80 dark:text-rose-300">
-                  위험 사업 미집행 잔액: <strong className="text-rose-800 dark:text-rose-200 font-mono font-bold">{formatN(totalRiskRemaining)}원</strong>
-                  <span className="text-[11px] text-rose-500/80 dark:text-rose-400/80 ml-1 font-normal">(정상 집행 4개 사업 잔액 70,000원 제외)</span>
-                </span>
+                <div className="flex items-center gap-2 text-xs text-rose-700/80 dark:text-rose-300 flex-wrap">
+                  <span>미집행 잔액: <strong className="text-rose-800 dark:text-rose-200 font-mono font-bold">{formatN(totalRiskUnspent)}원</strong></span>
+                  {totalRiskPlanned > 0 ? (
+                    <>
+                      <span className="text-rose-300 dark:text-rose-700 font-mono">−</span>
+                      <span className="text-indigo-700 dark:text-indigo-300 font-medium">
+                        소진 계획: <strong className="font-mono font-bold">{formatN(totalRiskPlanned)}원</strong>
+                      </span>
+                      <span className="text-rose-300 dark:text-rose-700 font-mono">=</span>
+                      <span className="bg-white/80 dark:bg-slate-900/60 px-2 py-0.5 rounded-md border border-rose-200/60 dark:border-rose-800/40 text-rose-900 dark:text-rose-100">
+                        최종 불용 예상: <strong className="font-mono font-bold">{formatN(totalRiskProjected)}원</strong>
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-[11px] text-rose-500/80 dark:text-rose-400/80 font-normal">
+                      (소진 계획 미수립)
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsRiskExpanded(!isRiskExpanded)}
-              className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white/90 dark:bg-slate-800 hover:bg-white text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
-            >
-              <span>{isRiskExpanded ? '접기' : '사업 목록'}</span>
-              <ChevronDown size={14} className={`transform transition-transform duration-200 ${isRiskExpanded ? 'rotate-180' : ''}`} />
-            </button>
+            <div className="flex items-center gap-2">
+              {props.onNavigateToSimulator && (
+                <button
+                  type="button"
+                  onClick={props.onNavigateToSimulator}
+                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                  title="예산 시뮬레이터로 이동하여 종합 시뮬레이션 및 정산 관리"
+                >
+                  <Sparkles size={13} className="text-indigo-600 dark:text-indigo-400" />
+                  <span>시뮬레이터 상세</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsRiskExpanded(!isRiskExpanded)}
+                className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white/90 dark:bg-slate-800 hover:bg-white text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+              >
+                <span>{isRiskExpanded ? '접기' : '사업 목록'}</span>
+                <ChevronDown size={14} className={`transform transition-transform duration-200 ${isRiskExpanded ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
           </div>
 
           {/* Collapsible details: 2-column compact scroll grid */}
           {isRiskExpanded && (
             <div className="mt-2.5 pt-2.5 border-t border-rose-200/60 dark:border-rose-900/40">
               <div className="flex items-center justify-between text-[11px] text-rose-600 dark:text-rose-400 mb-2 px-1">
-                <span>조기 집행 및 연말 잔액 소진 조치(추경 등) 권고 사업 목록</span>
+                <span>조기 집행 및 연말 잔액 소진 조치(시뮬레이션 계획 수립 및 품의) 권고 사업 목록</span>
                 <span>총 {riskCategories.length}건</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 max-h-52 overflow-y-auto pr-1">
-                {riskCategories.map((item, id) => (
-                  <div key={id} className="flex items-center justify-between text-xs bg-white/80 dark:bg-slate-900/60 px-2.5 py-2 rounded-xl border border-rose-100 dark:border-rose-900/30 gap-2">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate" title={item?.cat.name}>
-                      {item?.cat.name}
-                    </span>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] text-rose-600 dark:text-rose-400 bg-rose-100/70 dark:bg-rose-950/60 px-1.5 py-0.5 rounded">
-                        {item?.reason}
-                      </span>
-                      <span className="text-xs font-bold text-rose-700 dark:text-rose-300 font-mono">
-                        {formatN(item?.st.remaining ?? 0)}원
-                      </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
+                {riskCategories.map((item) => {
+                  const unspent = item.stExcludePlanned.remaining;
+                  const planned = item.st.planned;
+                  const finalRemaining = item.st.remaining;
+                  const isFullyPlanned = planned > 0 && finalRemaining <= 0;
+                  const isPartiallyPlanned = planned > 0 && finalRemaining > 0;
+
+                  return (
+                    <div key={item.cat.id} className="flex items-center justify-between text-xs bg-white/85 dark:bg-slate-900/70 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/30 gap-2 shadow-3xs">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate" title={item.cat.name}>
+                            {item.cat.name}
+                          </span>
+                          {isFullyPlanned ? (
+                            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded shrink-0">
+                              계획 100%
+                            </span>
+                          ) : isPartiallyPlanned ? (
+                            <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-100/80 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded shrink-0">
+                              수립중
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-rose-600 dark:text-rose-400 bg-rose-100/70 dark:bg-rose-950/60 px-1.5 py-0.5 rounded shrink-0">
+                              {item.reason}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400 flex-wrap">
+                          <span>미집행: <strong className="font-mono text-slate-700 dark:text-slate-300">{formatN(unspent)}원</strong></span>
+                          {planned > 0 && (
+                            <>
+                              <span className="text-slate-300 dark:text-slate-600">/</span>
+                              <span className="text-indigo-600 dark:text-indigo-400">
+                                계획: <strong className="font-mono">{formatN(planned)}원</strong>
+                              </span>
+                              <span className="text-slate-300 dark:text-slate-600">/</span>
+                              <span className={finalRemaining <= 0 ? 'text-emerald-600 font-bold' : 'text-amber-600'}>
+                                최종잔여: <strong className="font-mono">{formatN(finalRemaining)}원</strong>
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setQuickPlanCategory(item.cat)}
+                          className="px-2 py-1 text-[11px] font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-1 cursor-pointer shadow-3xs hover:shadow-xs active:scale-95"
+                          title="이 사업에 대한 소진 계획(품의) 즉시 수립"
+                        >
+                          <Plus size={12} />
+                          <span>소진 계획</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -596,6 +708,18 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
           onClose={() => setShowDailyStatModal(false)}
           categories={filteredCategoriesTree}
           getCategoryStats={getCategoryStats}
+        />
+      )}
+
+      {/* Quick Plan Modal */}
+      {quickPlanCategory && (
+        <QuickPlanModal
+          key={quickPlanCategory.id}
+          isOpen={!!quickPlanCategory}
+          onClose={() => setQuickPlanCategory(null)}
+          category={quickPlanCategory}
+          currentRemaining={getCategoryStats(quickPlanCategory.id, true)?.remaining ?? 0}
+          onSavePlan={handleSaveQuickPlan}
         />
       )}
     </div>

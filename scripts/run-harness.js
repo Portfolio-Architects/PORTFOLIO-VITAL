@@ -4,7 +4,6 @@ const { z } = require('zod');
 
 const args = process.argv.slice(2);
 const isQuick = args.includes('--quick') || args.includes('--db-only');
-const noDiag = args.includes('--no-diag');
 
 console.log('====================================================');
 console.log('🚀 Zod Gatekeeper: Starting Database Integrity Test...');
@@ -251,19 +250,7 @@ try {
 
 console.log('====================================================');
 
-// 4. Run codebase diagnostics
-try {
-  const diagPath = path.join(process.cwd(), 'scripts', 'diagnose-targets.js');
-  if (fs.existsSync(diagPath) && !noDiag) {
-    execSync('node scripts/diagnose-targets.js --skip-eslint', { stdio: 'inherit' });
-  } else if (noDiag) {
-    console.log('  ↳ ℹ️  [SKIP] Diagnostics skipped via --no-diag flag.');
-  }
-} catch (diagErr) {
-  console.error('  ↳ ❌ [FAIL] Codebase diagnostics failed:', diagErr.message);
-}
 
-console.log('====================================================');
 if (failedCount === 0) {
   console.log('🎉 [PASS] All Gatekeeper tests complete. 0 errors found.');
   console.log('====================================================');

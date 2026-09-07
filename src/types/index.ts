@@ -98,6 +98,7 @@ export interface BudgetEntry {
   checked?: boolean;
   fundingSource?: string;
   transferDirection?: 'in' | 'out';
+  simulationEntryId?: string;
 }
 
 // ============ Inventory Module ============
@@ -187,6 +188,10 @@ export interface SimulationEntry {
   amount: number;           // 총액 (unitPrice * quantity)
   memo?: string;            // 비고/메모
   createdAt: string;        // 생성일시 (ISO string)
+  status?: 'PLANNED' | 'SETTLED' | 'CANCELLED'; // 기본값 PLANNED, 실제 지출 완료 시 SETTLED
+  budgetEntryId?: string;   // 매핑된 SSOT 품의(BudgetEntry) ID
+  settledEntryId?: string;  // 실제 지출로 정산 완료된 BudgetEntry ID
+  settledDate?: string;     // 정산 집행 일자
 }
 
 export interface ProjectSimulationSummary {

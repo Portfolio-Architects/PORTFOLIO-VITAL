@@ -1,11 +1,15 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function proxy(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const sessionCookie = req.cookies.get('hchps_session');
   const isAuthenticated = sessionCookie?.value === 'authenticated-secure-session-token';
   const isLoginPage = req.nextUrl.pathname === '/login';
-  const isPublicFestival = req.nextUrl.pathname.startsWith('/festival') || req.nextUrl.pathname.startsWith('/api/festival') || req.nextUrl.pathname.startsWith('/api/calendar') || req.nextUrl.pathname.startsWith('/api/auth');
+  const isPublicFestival =
+    req.nextUrl.pathname.startsWith('/festival') ||
+    req.nextUrl.pathname.startsWith('/api/festival') ||
+    req.nextUrl.pathname.startsWith('/api/calendar') ||
+    req.nextUrl.pathname.startsWith('/api/auth');
   const isTunnelDomain = req.nextUrl.hostname.includes('trycloudflare.com') || req.nextUrl.hostname.includes('loca.lt');
 
   // 외부 터널 도메인으로 루트(/) 접속 시 양재천 페스티벌 관제판으로 자동 이동
@@ -30,15 +34,10 @@ export function proxy(req: NextRequest) {
   return NextResponse.next();
 }
 
-
-export default proxy;
-
-
+export default middleware;
 
 export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };
-
-

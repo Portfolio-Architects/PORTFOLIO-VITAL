@@ -23,6 +23,7 @@ export interface SimulationResultTableProps {
   entries: SimulationEntry[];
   onEditEntry?: (entry: SimulationEntry) => void;
   onDeleteEntry: (id: string) => void;
+  onSettleEntry?: (simId: string) => void;
   onResetAll?: () => void;
   onLoadTestPreset?: () => void;
 }
@@ -36,6 +37,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
   entries,
   onEditEntry,
   onDeleteEntry,
+  onSettleEntry,
   onResetAll,
   onLoadTestPreset,
 }) => {
@@ -282,6 +284,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
           entries={entries}
           onEditEntry={onEditEntry}
           onDeleteEntry={onDeleteEntry}
+          onSettleEntry={onSettleEntry}
           onResetAll={onResetAll}
           onLoadTestPreset={onLoadTestPreset}
         />

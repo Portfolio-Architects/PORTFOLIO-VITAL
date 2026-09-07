@@ -18,6 +18,7 @@ export const BudgetSimulator: React.FC = React.memo(() => {
     deleteEntry,
     resetEntries,
     loadTestPreset,
+    settleEntry,
     projectSummaries,
     statItemSummaries,
   } = useBudgetSimulator();
@@ -25,9 +26,13 @@ export const BudgetSimulator: React.FC = React.memo(() => {
   // Currently Editing Entry State
   const [editingEntry, setEditingEntry] = useState<SimulationEntry | null>(null);
 
+  // Settlement Dialog State
+  const [settlingItem, setSettlingItem] = useState<SimulationEntry | null>(null);
+  const [actualAmountInput, setActualAmountInput] = useState<string>('');
+  const [actualDateInput, setActualDateInput] = useState<string>('');
+
   const handleEditEntry = useCallback((entry: SimulationEntry) => {
     setEditingEntry(entry);
-    // Smooth scroll to top form if needed
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -40,6 +45,21 @@ export const BudgetSimulator: React.FC = React.memo(() => {
     setEditingEntry(null);
   }, [updateEntry]);
 
+  const handleOpenSettle = useCallback((id: string) => {
+    const item = entries.find(e => e.id === id);
+    if (!item) return;
+    setSettlingItem(item);
+    setActualAmountInput(item.amount.toLocaleString('ko-KR'));
+    setActualDateInput(new Date().toISOString().split('T')[0]);
+  }, [entries]);
+
+  const handleConfirmSettle = useCallback(async () => {
+    if (!settlingItem) return;
+    const cleanAmount = parseInt(actualAmountInput.replace(/[^0-9]/g, ''), 10) || settlingItem.amount;
+    await settleEntry(settlingItem.id, cleanAmount, actualDateInput);
+    setSettlingItem(null);
+  }, [settlingItem, actualAmountInput, actualDateInput, settleEntry]);
+
   // Count Deficit Projects (Single-pass memoized count)
   const deficitProjectsCount = useMemo(() => {
     let count = 0;
@@ -47,6 +67,11 @@ export const BudgetSimulator: React.FC = React.memo(() => {
       if (projectSummaries[i].isDeficit) count++;
     }
     return count;
+  }, [projectSummaries]);
+
+  // Extract Risk Projects (< 70% execution rate)
+  const riskProjects = useMemo(() => {
+    return projectSummaries.filter(p => p.executionRate < 70 && p.currentRemaining > 0);
   }, [projectSummaries]);
 
   return (
@@ -105,6 +130,48 @@ export const BudgetSimulator: React.FC = React.memo(() => {
         </div>
       </div>
 
+      {/* 1-1. Risk Monitoring Quick Filter Chips */}
+      {riskProjects.length > 0 && (
+        <div className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 shadow-2xs flex flex-col gap-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-600" />
+              <span className="text-xs font-bold text-rose-900">
+                3분기 불용 위험 사업 ({riskProjects.length}개) — 집중 소진 계획 수립 권고
+              </span>
+            </div>
+            <span className="text-[11px] text-rose-600 font-medium">
+              클릭 시 해당 사업으로 폼 자동 매핑
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {riskProjects.map(p => (
+              <button
+                key={p.detailedProject}
+                type="button"
+                onClick={() => {
+                  setEditingEntry({
+                    id: '',
+                    name: `${p.detailedProject} 하반기 물품/용역 소진`,
+                    detailedProject: p.detailedProject,
+                    statItem: getStatItemsForProject(p.detailedProject)[0] || '',
+                    unitPrice: Math.min(p.currentRemaining, 1000000),
+                    quantity: 1,
+                    amount: Math.min(p.currentRemaining, 1000000),
+                    createdAt: new Date().toISOString(),
+                  });
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-rose-700 hover:text-rose-900 border border-rose-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-3xs cursor-pointer active:scale-95"
+              >
+                <span>{p.detailedProject}</span>
+                <span className="text-[11px] text-rose-500 font-mono">({p.executionRate.toFixed(1)}% | 잔액 {p.currentRemaining.toLocaleString('ko-KR')}원)</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 2. Top Metric Cards (Summary Cards) */}
       <SimulationSummaryCards
         projectSummaries={projectSummaries}
@@ -130,9 +197,86 @@ export const BudgetSimulator: React.FC = React.memo(() => {
         entries={entries}
         onEditEntry={handleEditEntry}
         onDeleteEntry={deleteEntry}
+        onSettleEntry={handleOpenSettle}
         onResetAll={resetEntries}
         onLoadTestPreset={loadTestPreset}
       />
+
+      {/* 5. Settlement Confirmation Dialog */}
+      {settlingItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">실제 지출 집행 (정산) 전환</h3>
+                <p className="text-xs text-slate-500">지출 계획을 실제 e-호조 집행 내역으로 영속 등록합니다.</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5 text-xs">
+              <div className="flex justify-between text-slate-500">
+                <span>계획 항목명</span>
+                <span className="font-bold text-slate-800">{settlingItem.name}</span>
+              </div>
+              <div className="flex justify-between text-slate-500">
+                <span>세부사업 / 통계목</span>
+                <span className="font-mono text-indigo-600 font-semibold">{settlingItem.detailedProject} · {settlingItem.statItem}</span>
+              </div>
+              <div className="flex justify-between text-slate-500 pt-1.5 border-t border-slate-200">
+                <span>기존 계획 예정액</span>
+                <span className="font-mono font-bold text-slate-700">₩{settlingItem.amount.toLocaleString('ko-KR')}</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">최종 실제 집행액 (원)</label>
+                <input
+                  type="text"
+                  value={actualAmountInput}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                    const n = parseInt(raw, 10);
+                    setActualAmountInput(n ? n.toLocaleString('ko-KR') : '');
+                  }}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-mono text-right focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">실제 집행 일자</label>
+                <input
+                  type="date"
+                  value={actualDateInput}
+                  onChange={(e) => setActualDateInput(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setSettlingItem(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmSettle}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                실지출 집행 완료
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

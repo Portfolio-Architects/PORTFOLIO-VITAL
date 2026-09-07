@@ -50,7 +50,7 @@ function updateAgentsManifest(milestones) {
   let agentsContent = fs.readFileSync(AGENTS_PATH, 'utf8');
   const today = new Date().toISOString().split('T')[0];
   
-  const marker = '## 5. 최신 동기화된 마일스톤 (Synced Milestones Log)';
+  const marker = '## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)';
   
   // Format milestones as a markdown list (Keep only recent 12, group the rest)
   const LIMIT = 12;
