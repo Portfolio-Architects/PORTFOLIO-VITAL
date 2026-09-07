@@ -142,7 +142,7 @@
    - 무인 자율 구동 시 위 3개 검증 스위트를 통과한 변경 건만 자율 배포(Auto-Merge)되며, 패치 완료 시 `node scripts/sync-rules.js`를 구동하여 `AGENTS.md` 하단 마일스톤 로그를 100% 최신 상태로 유지합니다.
 
 ## 5. 최신 동기화된 마일스톤 (Synced Milestones Log)
-- **최신 동기화 일자:** 2026-09-04
+- **최신 동기화 일자:** 2026-09-07
 - **동기화된 마일스톤:**
   - [Milestone 118: SNS Preview Metadata (OpenGraph/Twitter) & Zero-Framework Cloudflare Pages Standalone Static Engine Release] OpenGraph and Twitter metadata tags, zero-framework standalone pages template, zero-redirect bundle compiler with 25/25 test suite pass. (2026-09-04)
   - [Milestone 117: Medical Category Multi-Alias Filter Integration, 8-Milestones/12-Booths Fallback Sync & Pages Build Optimization Release] Full multi-alias mapping for medical categories (전문 의료·검진, 의료·검진, 의료 검진), complete 8-milestones & 12-booths fallback data synchronization, Pages build script integration, with 25/25 test suite pass. (2026-09-04)

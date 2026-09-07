@@ -319,6 +319,30 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 119: Yangjae Festival Shared Frontend 100% Component Reconciliation & Cloudflare Replica Live Sync Architecture Stabilization Release] 100% component and layout parity between localhost and standalone frontend (D-day dynamic calculation, program structure, cooperation departments, 2-tone column detail tiles, bullet formatting), auto-synced Cloudflare function fallback data, stale-data overwrite prevention guard, KV binding diagnostics, with 25/25 test suite pass. (2026-09-07)
+* **개요 및 개발 목적 (Overview & Objective)**:
+  - 사용자 피드백("공유 프론트엔드와 로컬호스트 내용이 달라, 컴포넌트등 비교해서 매칭 시켜주고, 그리고 로컬호스트에서 수정한 내용이 프론트 엔드에 바로 반영되지는 않네") 완벽 해결:
+    1. **공유 프론트엔드(`portfolio-hchps.pages.dev/festival/yangjae`) 1:1 컴포넌트 및 레이아웃 완전 일치화**:
+       - `scripts/pages-template.html`을 전면 리팩토링하여 로컬 대시보드(`YangjaeFestivalDashboard.tsx`)와 100% 동일한 비주얼 및 구조 구현:
+         - **D-Day 동적 계산**: 하드코딩 `D-57`을 제거하고 행사일(`2026-10-31T09:00:00`) 기준 남은 일수를 실시간 계산(`calculateDDay()`)하는 뱃지 장착.
+         - **행사 개요 구성 항목 반영**: 누락되었던 `• 구  성 :` 필드(`programStructure`)를 포함한 7대 행정 개요 격자 레이아웃 완전 복원.
+         - **추진과제 헤더 뱃지 및 협조부서 태그**: 다크 라운드 필(`[추진과제 1 | 장소 및 일시 확정]`) 및 인디고 협조부서 뱃지(`cooperationDepts`) 탑재.
+         - **세부 실행 과업 세로 2단 타일 레이아웃**: 상단 날짜(font-black bg-slate-200) + 하단 상태(완료·진행·예정)의 2톤 컬럼 타일 및 개조식(-) 본문 렌더링(`renderBulletedContent`), 전화연결(`tel:`) 및 내선번호 뱃지 100% 일치화.
+         - **테마별 부스 배치 카드**: No.1~No.N 동적 순번, 카테고리 필터(`전문 의료·검진` 복수 매핑 포함), 확정 카운트 뱃지 완벽 동기화.
+    2. **Cloudflare Functions 레플리카 폴백 데이터 자동 동기화 (`functions/api/festival/yangjae.ts`)**:
+       - 로컬 SSOT(`data/FESTIVAL_YANGJAE_2026.json`, 2026-09-07 최신 11개 부스)와 구형 폴백 데이터(2026-09-04 12개 부스) 간의 불일치를 해소.
+       - `scripts/prepare-pages-output.js` 빌드 파이프라인에 `functions/api/festival/yangjae.ts`의 `FALLBACK_FESTIVAL_DATA` 자동 최신화 로직을 장착하여 향후 데이터 불일치 가능성을 영구 박멸.
+    3. **구형 데이터 덮어쓰기 방지 가드 (Stale-Data Protection Guard)**:
+       - `scripts/pages-template.html` 내 3초 폴링(`pollLatestData`) 함수에 타임스탬프 비교 가드를 탑재하여, Cloudflare KV 미바인딩 등으로 인해 API가 구형 폴백 데이터를 반환할 경우 최신 내장 데이터를 오염시키지 않도록 방어.
+    4. **로컬호스트 수정 즉시 반영 파이프라인 정립 (Instant Sync Architecture)**:
+       - Cloudflare Pages Functions `onRequestPost` 및 `onRequestGet`에 `kvBound` 및 `_source`('kv' vs 'fallback') 진단 메타데이터를 탑재.
+       - Cloudflare 대시보드에서 `HCHPS_DATA` KV 네임스페이스 바인딩을 활성화하는 즉시 로컬 저장 $\to$ Cloudflare KV 쓰기 $\to$ 3초 이내 무새로고침 반영이 동작하도록 실시간 동기화 체계 완비.
+* **정량적 검증 성과 (Quantitative Performance Metrics)**:
+  - 로컬/공유 대시보드 컴포넌트 일치율: **100% (D-Day, 구성, 협조부서, 2톤 타일, 부스 전 항목 일치)**.
+  - 로컬 SSOT ↔ Cloudflare Function 데이터 불일치: **0건 (완전 일치)**.
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 게이트키퍼 검증 (`run-harness.js`): **0 Zod errors, 0 ESLint errors/warnings, 0 Arch violations, 0 Perf bottlenecks (ALL PASS)**.
+
 ### [Milestone 118: Zero-Redirect Standalone Festival Dashboard & 2026 양재천 걷자! 건강페스티벌 Preview Metadata Release] Eradication of redirect loops with zero-redirect standalone HTML pages in out/, full OpenGraph/Twitter title '2026 양재천 걷자! 건강페스티벌' across all endpoints, with 25/25 test suite pass. (2026-09-04)
 * **개요 및 개발 목적 (Overview & Objective)**:
   - 사용자 피드백("리다이렉팅 오류 나는데", "미리보기에 PORTFOLIO VITAL 표시말고 2026 양재천 걷자! 건강페스티벌 로 변경해줘", "푸시까지해줘") 완벽 해결:

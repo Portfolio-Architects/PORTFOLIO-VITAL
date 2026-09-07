@@ -53,17 +53,21 @@ export const onRequestOptions: PagesFunction<Env> = async (context) => {
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     if (context.env && context.env.HCHPS_DATA) {
-      const raw = await context.env.HCHPS_DATA.get(KV_KEY, { cacheTtl: 0 });
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        return jsonResponse(context.request, parsed, 200);
+      try {
+        const raw = await context.env.HCHPS_DATA.get(KV_KEY, { cacheTtl: 0 });
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return jsonResponse(context.request, { ...parsed, _source: 'kv' }, 200);
+        }
+      } catch (kvErr) {
+        console.warn('[Cloudflare Pages] KV get error:', kvErr);
       }
     }
-    // Fallback if KV not yet populated
-    return jsonResponse(context.request, FALLBACK_FESTIVAL_DATA, 200);
+    // Fallback if KV not yet populated or binding missing
+    return jsonResponse(context.request, { ...FALLBACK_FESTIVAL_DATA, _source: 'fallback' }, 200);
   } catch (err) {
     console.error('[Cloudflare Pages /api/festival/yangjae] GET error:', err);
-    return jsonResponse(context.request, FALLBACK_FESTIVAL_DATA, 200);
+    return jsonResponse(context.request, { ...FALLBACK_FESTIVAL_DATA, _source: 'fallback' }, 200);
   }
 };
 
@@ -86,14 +90,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return jsonResponse(context.request, { success: false, error: 'Invalid payload structure' }, 400);
     }
 
-    if (context.env && context.env.HCHPS_DATA) {
+    const kvBound = !!(context.env && context.env.HCHPS_DATA);
+    if (kvBound) {
       await context.env.HCHPS_DATA.put(KV_KEY, JSON.stringify(payload));
     }
 
     return jsonResponse(context.request, {
       success: true,
+      kvBound,
       publishedAt: new Date().toISOString(),
       source: 'local-ssot',
+      note: kvBound ? 'Successfully saved to Cloudflare KV' : 'WARNING: HCHPS_DATA KV binding is not connected in Cloudflare Pages Dashboard',
     }, 200);
   } catch (err) {
     console.error('[Cloudflare Pages /api/festival/yangjae] POST error:', err);
@@ -117,7 +124,7 @@ const FALLBACK_FESTIVAL_DATA = {
     "staffNote": "행사 참여 직원 대체휴무 시행 예정",
     "organizer": "강남구보건소 보건행정과 건강증진팀",
     "overallProgress": 65,
-    "lastUpdated": "2026-09-04"
+    "lastUpdated": "2026-09-07"
   },
   "budget": {
     "total": 49900000,
@@ -203,7 +210,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "details": [
         "[완료][9.1.][참여:오창선, 고려대학교척추측만증연구소] 고려대학교척추측만증 연구소 부스 운영 확정 : 신청서 회신",
         "[완료][9.2.][참여:지영팀장님, 오창선] 부스 위치 답사 : 유디치과 검진버스 정차 위치 검토",
-        "[완료][9.2.][참여:오창선] 의료관광팀 부스 운영 불가 : 의료관광 부스 운영 불가 통보(더 큰 행사 있음)",
+        "[완료][9.2.][참여:오창선] 의료관광팀 부스 운영 불가 : 강남 메디컬 투어 부스 운영 불가 통보(더 큰 행사 있음)",
         "[완료][9.2.][참여:오창선, 김형종, 한국신체정보(주)] 운동처방 테마 부스 운영 확정 : 내 신체나이 알아보기 체력 측정, 자세 분석 및 운동 처방 ",
         "[진행][9.3.][참여:과장님, 오창선] 강남구의사회·한의사회 부스 운영 협조: 운영 확정 및 세부 사항 조율중",
         "[완료][9.4.][참여:오창선, 강남차병원] 강남차병원 부스 운영 확정 : 신청서 회신",
@@ -322,21 +329,13 @@ const FALLBACK_FESTIVAL_DATA = {
     {
       "id": 6,
       "category": "의료·검진",
-      "name": "서울시 간호조무사회",
-      "scale": "2동",
-      "program": "혈당 및 혈압 측정, 만성질환 1:1 상담",
-      "status": "협의중"
-    },
-    {
-      "id": 7,
-      "category": "의료·검진",
       "name": "유디치과",
       "scale": "1동 + 검진버스",
       "program": "구강 검진 및 구강건강 관리법 안내",
       "status": "확정"
     },
     {
-      "id": 8,
+      "id": 7,
       "category": "의료·검진",
       "name": "자생한방병원",
       "scale": "2동",
@@ -344,7 +343,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "status": "확정"
     },
     {
-      "id": 9,
+      "id": 8,
       "category": "민간 헬스케어",
       "name": "케이스튜디오 (디아르스)",
       "scale": "1동",
@@ -352,7 +351,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "status": "신청완료"
     },
     {
-      "id": 10,
+      "id": 9,
       "category": "민간 헬스케어",
       "name": "한국신체정보(주)",
       "scale": "2동",
@@ -360,7 +359,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "status": "신청완료"
     },
     {
-      "id": 11,
+      "id": 10,
       "category": "보건소 사업",
       "name": "금연·절주 영양 보건 사업 홍보",
       "scale": "1동",
@@ -368,7 +367,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "status": "확정"
     },
     {
-      "id": 12,
+      "id": 11,
       "category": "보건소 사업",
       "name": "서울체력장 강남센터",
       "scale": "2동",
