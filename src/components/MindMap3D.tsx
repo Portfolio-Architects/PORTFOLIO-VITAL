@@ -534,7 +534,7 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
   return (
     <div 
       ref={containerRef}
-      className={`relative w-full h-full bg-slate-100/90 dark:bg-slate-950 flex flex-col overflow-hidden select-none ${
+      className={`relative w-full h-full min-h-[650px] bg-slate-100/90 dark:bg-slate-950 flex flex-col overflow-hidden select-none ${
         isFullscreen ? 'fixed inset-0 z-50' : ''
       }`}
       onMouseMove={handleMouseMove}
@@ -557,7 +557,7 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
 
       {/* Main Infinite Canvas Workspace */}
       <div 
-        className="relative flex-1 w-full h-full cursor-grab active:cursor-grabbing overflow-hidden"
+        className="relative flex-1 w-full h-full min-h-[550px] cursor-grab active:cursor-grabbing overflow-hidden"
         onWheel={handleWheel}
         onMouseDown={handleMouseDownBackground}
         onDoubleClick={handleCanvasDoubleClick}
@@ -571,7 +571,8 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
         <canvas
           ref={canvasRef}
           onDoubleClick={handleCanvasDoubleClick}
-          className="absolute inset-0 w-full h-full pointer-events-auto"
+          className="absolute inset-0 w-full h-full pointer-events-auto block"
+          style={{ width: '100%', height: '100%', minHeight: '550px' }}
         />
         {/* Transform Container */}
         <div
@@ -639,7 +640,7 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
           </svg>
 
           {/* HTML Note Cards Layer */}
-          <div className="absolute inset-0 pointer-events-auto">
+          <div className="absolute inset-0 pointer-events-none">
             {manualNodes.map(node => {
               const isDragging = draggingNodeId === node.id;
               const currentX = isDragging ? node.x + dragOffset.x : node.x;
@@ -662,7 +663,7 @@ export const MindMap3D: React.FC<MindMap3DProps> = ({
                     width: `${CARD_WIDTH}px`,
                     minHeight: `${CARD_HEIGHT}px`,
                   }}
-                  className={`absolute rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-md border transition-shadow cursor-grab active:cursor-grabbing select-none group ${
+                  className={`absolute rounded-2xl pointer-events-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-md border transition-shadow cursor-grab active:cursor-grabbing select-none group ${
                     isSelected
                       ? 'ring-2 ring-blue-500 shadow-xl border-blue-500 z-20'
                       : 'hover:shadow-lg border-slate-200/80 dark:border-slate-800/80 z-10'

@@ -319,6 +319,32 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 125: Next.js 16 Proxy Convention Migration, Duplicate Middleware Conflict Eradication & MindMap Pointer-Events Isolation Release] Eradicated Next.js 16 unhandled rejection by removing deprecated src/middleware.ts, standardizing route protection in src/proxy.ts, fixing note cards pointer-events interception for canvas double-click, and achieving 100% pass across Playwright E2E (6/6) and Jest (26/26 Suites, 238/238 Tests). (2026-09-07)
+* **개요 및 개발 목적**:
+  - Next.js 16 (Turbopack) 환경에서 `src/middleware.ts`와 `src/proxy.ts` 파일이 공존할 때 발생하는 치명적인 런타임 오류(`Unhandled Rejection: Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only.`)를 원천 박멸하고 E2E 테스트 전체 통과를 완수함:
+    1. **미들웨어 파일 중복 충돌 영구 제거 (`src/middleware.ts` 삭제)**:
+       - Next.js 16 공식 사양에 따라 비권장(deprecated)된 `src/middleware.ts`를 완전 삭제하고, 모든 라우트 인터셉트 로직을 공식 규격인 `src/proxy.ts`로 단일화.
+    2. **프록시 라우트 보호 로직 표준화 (`src/proxy.ts`)**:
+       - `export function proxy(req: NextRequest)` 공식 시그니처를 준수하며 비인가 요청 시 `/login` 페이지로 리다이렉트(307) 처리.
+       - `/festival`, `/api/festival`, `/api/calendar`, `/api/auth` 및 정적 에셋은 공개 바이패스 유지.
+    3. **마인드맵 캔버스 레이아웃 규격 및 포인터 이벤트 격리 (`src/components/MindMap3D.tsx`, `src/components/ProtectedApp.tsx`)**:
+       - 부모 컨테이너에 `h-[820px] min-h-[650px] w-full` 명시적 높이를 부여하여 `<canvas>`의 0x0 크기 계산 버그(Playwright `hidden` 판정)를 해결.
+       - 노트 카드 레이어 컨테이너(`div`)를 `pointer-events-none`으로 설정하고 개별 카드에만 `pointer-events-auto`를 적용하여 캔버스 빈 공간 더블클릭 이벤트가 정상적으로 캡처되도록 복원.
+* **핵심 변경 내역**:
+  - `src/middleware.ts`: 파일 영구 삭제.
+  - `src/proxy.ts`: Next.js 16 프록시 규격 적용 및 비인가 리다이렉트 처리.
+  - `src/components/ProtectedApp.tsx`: `visitedModules.mindmap` 컨테이너에 명시적 높이 할당.
+  - `src/components/MindMap3D.tsx`: `containerRef`, workspace, canvas 최소 높이 부여 및 포인터 이벤트 격리.
+* **정량적 검증 성과**:
+  - Playwright E2E 테스트 (`npx playwright test`): **6 passed, 6 total (100% PASS)**.
+  - Jest 단위/통합 테스트 (`npm test`): **26 passed, 26 total (238/238 Tests 100% PASS)**.
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - Zod 데이터베이스 무결성 검증 (`node scripts/run-harness.js --quick`): **0 errors (PASS)**.
+
+### [Milestone 124: Next.js Middleware Route Protection Delegation, Sidebar Navigation Tab Parity & MindMap Interactive Node Creation Restoration for Playwright E2E Release] Restored official src/middleware.ts and unified with src/proxy.ts, eliminated || isDev || isLocalHost bypass so unauthenticated visitors redirect to /login while maintaining public bypasses for /festival, /api/festival, /api/calendar, /api/auth. Restored mindmap and project tabs in Sidebar.tsx with Lucide icons Network and FolderKanban. Restored interactive canvas double-click handling and '새 노드 추가' modal in MindMap3D.tsx, resolved useBudgetSimulator synchronous mutation, achieving 100% Jest pass (26/26 Suites, 238/238 Tests) and 0 TypeScript compiler errors. (2026-09-07)
+
+### [Milestone 123: Integrated Budget Risk Burn-down Monitoring & Execution Commitment Simulator Release] Unified isolated 불용 위험 모니터링 (11 risk categories) and 예산 시뮬레이터 into an integrated commitment accounting and burn-down hub. Connected simulation plans to SSOT BUDGET_ENTRIES.json as isPlanned: true, wired 1-click settlement lifecycle (정산 전환) with status badge tracking, and added real-time burn-down header metrics and QuickPlanModal actions in BudgetDashboard. (2026-09-07)
+
 ### [Milestone 122: Recursive Self-Improvement Loop & Autonomous Evolution Harness Decommission Release] Deleted self-evolution.js and diagnose-targets.js scripts, eliminated background 3-minute schedule tick (RSI_TICK) infinite loop instructions from AGENTS.md manifest, streamlined run-harness.js into pure Zod database integrity & ESLint verifier, completely stopping uncommanded commits and autonomous codebase mutations. (2026-09-07)
 * **개요 및 개발 목적**:
   - 패치 후 자동으로 구동되던 재귀적 자기개선 무한 루프, 자율 진화 스크립트 및 AGENTS.md 규정을 완전 폐지하여 불필요한 백그라운드 틱 실행 및 무단 자율 커밋(`[auto] self-improvement: verify 0-0-0 codebase purity` 등)을 영구 차단:

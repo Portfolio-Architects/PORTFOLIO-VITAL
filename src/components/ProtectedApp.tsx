@@ -395,7 +395,7 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
 
             {/* MindMap3D */}
             {visitedModules.mindmap && (
-              <div className={activeModule === 'mindmap' ? 'block' : 'hidden'}>
+              <div className={activeModule === 'mindmap' ? 'block h-[820px] min-h-[650px] w-full' : 'hidden'}>
                 <MindMap3D isActive={activeModule === 'mindmap'} />
               </div>
             )}
