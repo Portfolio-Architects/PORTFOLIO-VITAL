@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { BudgetCategory, BudgetEntry } from '@/types';
 import { useBudgetFilters } from '@/hooks/useBudgetFilters';
 import { Card } from '@/components/ui/card';
-import { ShieldAlert, RefreshCw, Search, FilePlus2, CircleDollarSign, Wallet, Receipt, ShieldCheck } from 'lucide-react';
+import { ShieldAlert, RefreshCw, Search, FilePlus2, CircleDollarSign, Wallet, Receipt, ShieldCheck, ChevronDown } from 'lucide-react';
 import { MultiSelectDropdown } from './ui/MultiSelectDropdown';
 import { PolicyGroupCard } from './ui/PolicyGroupCard';
 import { useVirtualList } from '@/hooks/useVirtualList';
@@ -87,6 +87,7 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
   const [returnToEntryModal, setReturnToEntryModal] = useState(false);
   const [showLedgerModal, setShowLedgerModal] = useState(false);
   const [showDailyStatModal, setShowDailyStatModal] = useState(false);
+  const [isRiskExpanded, setIsRiskExpanded] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -208,6 +209,10 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
     }).filter(Boolean);
   }, [categories, getCategoryStats, currentMonth, isEndOfYearApproaching]);
 
+  const totalRiskRemaining = useMemo(() => {
+    return riskCategories.reduce((acc, curr) => acc + (curr?.st.remaining ?? 0), 0);
+  }, [riskCategories]);
+
   // Policy groups virtualization
   const isPolicyVirtualActive = groupedByPolicy.length > 4;
   const { startIndex, endIndex, topPadding, bottomPadding } = useVirtualList({
@@ -225,23 +230,61 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
   return (
     <div className="space-y-6">
       
-      {/* Risk Alert Widget */}
+      {/* Risk Alert Compact Card */}
       {riskCategories.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-red-700 font-bold">
-            <ShieldAlert size={20} />
-            <h2>불용액 발생 위험 - 긴급 모니터링 알림</h2>
-          </div>
-          <p className="text-xs text-red-600 mb-2">다음 사업들은 조기 집행 및 연말 잔액 소진 조치(추경 등)가 강력 권고됩니다.</p>
-          <div className="flex flex-col gap-2">
-            {riskCategories.map((item, id) => (
-              <div key={id} className="flex flex-wrap items-center justify-between text-xs bg-white/50 px-3 py-2 rounded-lg">
-                <span className="font-semibold text-gray-800">[{item?.cat.name}]</span>
-                <span className="text-red-600 font-medium">{item?.reason}</span>
-                <span className="text-gray-600">현재 잔액: <strong className="text-red-700">{formatN(item?.st.remaining ?? 0)}원</strong></span>
+        <div className="bg-rose-50/70 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/30 rounded-2xl p-3 shadow-2xs transition-all">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+                <ShieldAlert size={17} />
               </div>
-            ))}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-rose-900 dark:text-rose-200">불용 위험 모니터링</span>
+                <span className="px-2 py-0.5 text-[11px] font-bold bg-rose-200/80 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 rounded-full">
+                  {riskCategories.length}개 사업
+                </span>
+                <span className="text-xs text-rose-700/80 dark:text-rose-300">
+                  미집행 잔액: <strong className="text-rose-800 dark:text-rose-200 font-mono font-bold">{formatN(totalRiskRemaining)}원</strong>
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsRiskExpanded(!isRiskExpanded)}
+              className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white/90 dark:bg-slate-800 hover:bg-white text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+            >
+              <span>{isRiskExpanded ? '접기' : '사업 목록'}</span>
+              <ChevronDown size={14} className={`transform transition-transform duration-200 ${isRiskExpanded ? 'rotate-180' : ''}`} />
+            </button>
           </div>
+
+          {/* Collapsible details: 2-column compact scroll grid */}
+          {isRiskExpanded && (
+            <div className="mt-2.5 pt-2.5 border-t border-rose-200/60 dark:border-rose-900/40">
+              <div className="flex items-center justify-between text-[11px] text-rose-600 dark:text-rose-400 mb-2 px-1">
+                <span>조기 집행 및 연말 잔액 소진 조치(추경 등) 권고 사업 목록</span>
+                <span>총 {riskCategories.length}건</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 max-h-52 overflow-y-auto pr-1">
+                {riskCategories.map((item, id) => (
+                  <div key={id} className="flex items-center justify-between text-xs bg-white/80 dark:bg-slate-900/60 px-2.5 py-2 rounded-xl border border-rose-100 dark:border-rose-900/30 gap-2">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate" title={item?.cat.name}>
+                      {item?.cat.name}
+                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] text-rose-600 dark:text-rose-400 bg-rose-100/70 dark:bg-rose-950/60 px-1.5 py-0.5 rounded">
+                        {item?.reason}
+                      </span>
+                      <span className="text-xs font-bold text-rose-700 dark:text-rose-300 font-mono">
+                        {formatN(item?.st.remaining ?? 0)}원
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

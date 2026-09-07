@@ -2,6 +2,23 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 119: Budget Dashboard Risk Alert Compact Card & Collapsible 2-Column Grid UX Optimization Release] Bulky risk alert banner replaced with compact 1-line mini-card, 2-column scrollable grid expander, information overload resolution, with 0-error gatekeeper test pass. (2026-09-07)
+* **개요 및 개발 목적**:
+  - 예산 관리 대시보드 진입 시 10여 개 이상의 불용 위험 사업이 화면 절반을 덮어 정보 과부하 및 시각적 피로를 유발하던 대형 경고 배너를 컴팩트한 미니 카드로 전면 개편:
+    1. **슬림 미니 카드(Compact Card) 기본 뷰 구현 (`src/components/budget/BudgetDashboard.tsx`)**:
+       - 기존 화면 전체를 차지하던 거대 알림 박스 대신, 1줄 높이의 세련된 글래스모피즘 미니 카드로 경량화.
+       - 아이콘 + "불용 위험 모니터링" + [N개 사업] 알약 배지 + "미집행 잔액 합계" 핵심 수치를 한눈에 직관적으로 요약.
+    2. **접이식 2열 컴팩트 스크롤 그리드(Collapsible Expander)**:
+       - 우측의 `[사업 목록 ▾ / 접기 ▴]` 토글 버튼을 통해 필요할 때만 상세 내역을 열람할 수 있도록 설계.
+       - 펼침 시에도 1열로 길게 늘어지지 않도록 `max-h-52 overflow-y-auto` 및 `grid-cols-1 md:grid-cols-2` 2열 컴팩트 그리드를 적용하여 화면 공간 효율 극대화 및 시각적 안정성 확보.
+* **핵심 변경 내역**:
+  - `src/components/budget/BudgetDashboard.tsx`:
+    - `isRiskExpanded` 상태 및 `totalRiskRemaining` 메모이제이션 집계 추가.
+    - `ChevronDown` 아이콘 임포트 및 슬림 미니 카드 + 접이식 2열 컴팩트 그리드 UI 리팩토링.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 게이트키퍼 검증 (`run-harness.js`): **0 Zod errors, 0 ESLint errors/warnings, 0 Arch violations, 0 Perf bottlenecks (ALL PASS)**.
+
 ### [Milestone 118: SNS Preview Metadata (OpenGraph/Twitter) & Zero-Framework Cloudflare Pages Standalone Static Engine Release] OpenGraph and Twitter metadata tags, zero-framework standalone pages template, zero-redirect bundle compiler with 25/25 test suite pass. (2026-09-04)
 * **개요 및 개발 목적**:
   - 모바일 메신저(카카오톡, 문자, 텔레그램 등) 링크 공유 시 시각적 미리보기 카드 제공 및 Cloudflare Pages 글로벌 CDN 엣지 무프레임워크 즉각 렌더링 체제 완성:
