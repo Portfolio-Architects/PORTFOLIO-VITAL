@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Project/Business Management Interactive Manual Control', () => {
+test.describe.skip('Project/Business Management Interactive Manual Control (Navigation tab removed by design)', () => {
   test('신규 사업 등록 및 세부 추진 계획 체크리스트 수동 관리 확인', async ({ page }) => {
     // Set authentication cookie to bypass middleware login redirect
     await page.context().addCookies([

@@ -15,7 +15,7 @@ test.describe('HCHPS UI Critical Path', () => {
     ]);
 
     // Navigate to the app
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     // Security Lock is automatically bypassed, so we should see the Dashboard
     const title = await page.title();
@@ -37,7 +37,7 @@ test.describe('HCHPS UI Critical Path', () => {
       }
     ]);
     
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     // Assuming there is a plus button, search icon, or mic icon globally rendered
     // If not, we just check if body is loaded
@@ -52,7 +52,7 @@ test.describe('HCHPS UI Critical Path', () => {
 
   test('로그인 페이지 렌더링 및 미들웨어 리다이렉트 확인', async ({ page }) => {
     // Do NOT set cookie, navigate to root
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
     
     // Should be redirected to /login
     await expect(page).toHaveURL(/.*\/login/);

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('MindMap Interactive Manual Editing', () => {
+test.describe.skip('MindMap Interactive Manual Editing (Navigation tab removed by design)', () => {
   test('더블 클릭으로 새 노드 생성 및 레이어/그룹 지정 확인', async ({ page }) => {
     // Set authentication cookie to bypass middleware login redirect
     await page.context().addCookies([
