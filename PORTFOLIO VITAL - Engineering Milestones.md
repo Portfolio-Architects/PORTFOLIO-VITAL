@@ -2,6 +2,25 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 127: Section Chief Phone Official Extension 7010 (02-3423-7010) Reaffirmation & Precision Sync Release] Reaffirmed and updated Section Chief (과장님/보건행정과장) official direct line to 02-3423-7010 (ext: 7010) across STAFF_PHONE_MAP, attendee badge linkers, DetailEditRow placeholder, pages-template.html Cloudflare replica, and CONTACTS.json SSOT with 100% test pass (25/25 Festival Tests, 238/238 All Tests). (2026-09-07)
+* **개요 및 개발 목적**:
+  - 사용자 명시적 지정에 따라 보건행정과장님의 공식 직통 내선 번호를 `02-3423-7010` (내선 `7010`)으로 최종 확정 및 일괄 반영:
+    1. **보건행정과장님 공식 직통번호 교정 (`02-3423-7010`, 내선 `7010`)**:
+       - `src/components/festival/YangjaeFestivalDashboard.tsx`: `STAFF_PHONE_MAP`의 `'과장님'`, `'과장'`, `'보건행정과장'` 내선 번호를 `7010` (`02-3423-7010`)으로 동기화.
+       - 세부 일정 편집 모달의 참석자 입력 플레이스홀더를 `과장님 7010, 오창선 7116, 제이민(김다희) 0544...`로 최신화.
+    2. **Cloudflare Pages 독립 정적 템플릿 동기화 (`scripts/pages-template.html` & `out/`)**:
+       - `pages-template.html`의 `STAFF_PHONE_MAP` 내 과장님 직통번호를 `7010` (`02-3423-7010`)으로 교정 후 `prepare-pages-output.js` 재빌드 실행.
+    3. **연락처 SSOT 정합성 보장 (`data/CONTACTS.json`)**:
+       - 주소록 내 과장님 레코드(`mtml-chief-section-7010`) 전화번호를 `02-3423-7010`으로 일치시킴.
+* **핵심 변경 내역**:
+  - `src/components/festival/YangjaeFestivalDashboard.tsx`: 과장님 `ext: '7010'`, `full: '02-3423-7010'` 매핑 및 플레이스홀더 교정.
+  - `scripts/pages-template.html`: 과장님 `7010` 갱신 및 `out/` 정적 파일 재컴파일.
+  - `data/CONTACTS.json`: 과장님 연락처 `02-3423-7010` 업데이트.
+  - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: 과장님 7010 매핑 단언 검증.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 양재천 페스티벌 테스트 (`npx jest yangjae-festival-realtime-collapsed-sync.test.tsx`): **25/25 Tests ALL PASS (100%)**.
+
 ### [Milestone 126: Section Chief Phone 02-3423-7116 Update & Agency J-Min (Kim Da-hee) 010-8494-0544 Contact Integration Release] Updated Section Chief (과장님/보건행정과장) official phone number to 02-3423-7116 (ext: 7116) and integrated Agency J-Min (제이민 커뮤니케이션 / 김다희 팀장님) 010-8494-0544 (ext: 0544) across festival dashboard STAFF_PHONE_MAP, attendee badge linkers, peoplePattern regex, pages-template.html Cloudflare replica, and CONTACTS.json SSOT with 100% test pass (26/26 Suites, 238/238 Tests). (2026-09-07)
 * **개요 및 개발 목적**:
   - 사용자 지시에 따라 양재천 건강페스티벌 대시보드 및 연락망 내 보건행정과장님 직통 내선 번호와 행사 총괄 대행사(제이민) 담당자 연락처를 최신 정보로 즉각 동기화:

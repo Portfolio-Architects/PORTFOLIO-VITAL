@@ -571,14 +571,14 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(STAFF_PHONE_MAP['희선팀장님']).toEqual({ ext: '7011', full: '02-3423-7011', role: '팀장' });
       expect(STAFF_PHONE_MAP['김희선팀장님']).toEqual({ ext: '7011', full: '02-3423-7011', role: '팀장' });
 
-      expect(STAFF_PHONE_MAP['과장님']).toEqual({ ext: '7116', full: '02-3423-7116', role: '과장' });
+      expect(STAFF_PHONE_MAP['과장님']).toEqual({ ext: '7010', full: '02-3423-7010', role: '과장' });
       expect(STAFF_PHONE_MAP['제이민']).toEqual({ ext: '0544', full: '010-8494-0544', role: '대행사(김다희 팀장)' });
       expect(STAFF_PHONE_MAP['김다희팀장님']).toEqual({ ext: '0544', full: '010-8494-0544', role: '대행사 팀장' });
 
       const infoChief = getStaffInfo('과장님');
       expect(infoChief).not.toBeNull();
-      expect(infoChief?.ext).toBe('7116');
-      expect(infoChief?.full).toBe('02-3423-7116');
+      expect(infoChief?.ext).toBe('7010');
+      expect(infoChief?.full).toBe('02-3423-7010');
 
       const infoJmin = getStaffInfo('제이민(대행사)');
       expect(infoJmin).not.toBeNull();

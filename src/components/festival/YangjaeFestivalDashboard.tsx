@@ -244,10 +244,10 @@ export const STAFF_PHONE_MAP: Record<string, { ext: string; full: string; role: 
   '지영': { ext: '7031', full: '02-3423-7031', role: '팀장' },
   '건강증진팀장(김지영)': { ext: '7031', full: '02-3423-7031', role: '팀장' },
   '팀장(김지영)': { ext: '7031', full: '02-3423-7031', role: '팀장' },
-  // 과장님 (02-3423-7116)
-  '과장님': { ext: '7116', full: '02-3423-7116', role: '과장' },
-  '과장': { ext: '7116', full: '02-3423-7116', role: '과장' },
-  '보건행정과장': { ext: '7116', full: '02-3423-7116', role: '과장' },
+  // 과장님 (02-3423-7010)
+  '과장님': { ext: '7010', full: '02-3423-7010', role: '과장' },
+  '과장': { ext: '7010', full: '02-3423-7010', role: '과장' },
+  '보건행정과장': { ext: '7010', full: '02-3423-7010', role: '과장' },
   // 제이민 커뮤니케이션 김다희 팀장님 (010-8494-0544)
   '제이민': { ext: '0544', full: '010-8494-0544', role: '대행사(김다희 팀장)' },
   '제이민(대행사)': { ext: '0544', full: '010-8494-0544', role: '대행사(김다희 팀장)' },
@@ -448,7 +448,7 @@ const DetailEditRow = React.memo(function DetailEditRow({
             setAttendees(e.target.value);
             emitChange(date, status, e.target.value, text);
           }}
-          placeholder="참석자 (예: 과장님 7116, 오창선 7116, 제이민(김다희) 0544, 지영팀장님 7031, 희선팀장님 7011, 서승오 7034, 임석훤 7012, 남상희 7025)"
+          placeholder="참석자 (예: 과장님 7010, 오창선 7116, 제이민(김다희) 0544, 지영팀장님 7031, 희선팀장님 7011, 서승오 7034, 임석훤 7012, 남상희 7025)"
           className="flex-1 min-w-0 px-2 py-0.5 border border-slate-300 rounded text-xs font-medium text-slate-800 bg-white"
         />
         {/* 위치(순서) 이동 및 삭제 버튼 그룹 */}
