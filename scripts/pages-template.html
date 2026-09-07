@@ -141,7 +141,18 @@
       '김희선': { ext: '7011', tel: '02-3423-7011' },
       '서승오': { ext: '7034', tel: '02-3423-7034' },
       '임석훤': { ext: '7012', tel: '02-3423-7012' },
-      '남상희': { ext: '7025', tel: '02-3423-7025' }
+      '남상희': { ext: '7025', tel: '02-3423-7025' },
+      '과장님': { ext: '7116', tel: '02-3423-7116' },
+      '과장': { ext: '7116', tel: '02-3423-7116' },
+      '보건행정과장': { ext: '7116', tel: '02-3423-7116' },
+      '제이민': { ext: '0544', tel: '010-8494-0544' },
+      '제이민(대행사)': { ext: '0544', tel: '010-8494-0544' },
+      '제이민 커뮤니케이션': { ext: '0544', tel: '010-8494-0544' },
+      '김다희': { ext: '0544', tel: '010-8494-0544' },
+      '김다희팀장': { ext: '0544', tel: '010-8494-0544' },
+      '김다희 팀장': { ext: '0544', tel: '010-8494-0544' },
+      '김다희팀장님': { ext: '0544', tel: '010-8494-0544' },
+      '김다희 팀장님': { ext: '0544', tel: '010-8494-0544' }
     };
 
     function parseDetail(raw) {
@@ -296,6 +307,8 @@
                       if (!staff) {
                         if (clean.includes('희선')) staff = STAFF_PHONE_MAP['희선팀장님'];
                         else if (clean.includes('지영')) staff = STAFF_PHONE_MAP['지영팀장님'];
+                        else if (clean.includes('제이민') || clean.includes('김다희') || clean.includes('다희')) staff = STAFF_PHONE_MAP['제이민'];
+                        else if (clean.includes('과장')) staff = STAFF_PHONE_MAP['과장님'];
                       }
                       if (staff) {
                         return '<a href="tel:' + staff.tel + '" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 shadow-3xs transition-colors cursor-pointer" title="전화 연결: ' + staff.tel + '">' +

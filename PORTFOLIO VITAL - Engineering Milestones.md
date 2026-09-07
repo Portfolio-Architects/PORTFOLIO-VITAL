@@ -2,6 +2,41 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 126: Section Chief Phone 02-3423-7116 Update & Agency J-Min (Kim Da-hee) 010-8494-0544 Contact Integration Release] Updated Section Chief (과장님/보건행정과장) official phone number to 02-3423-7116 (ext: 7116) and integrated Agency J-Min (제이민 커뮤니케이션 / 김다희 팀장님) 010-8494-0544 (ext: 0544) across festival dashboard STAFF_PHONE_MAP, attendee badge linkers, peoplePattern regex, pages-template.html Cloudflare replica, and CONTACTS.json SSOT with 100% test pass (26/26 Suites, 238/238 Tests). (2026-09-07)
+* **개요 및 개발 목적**:
+  - 사용자 지시에 따라 양재천 건강페스티벌 대시보드 및 연락망 내 보건행정과장님 직통 내선 번호와 행사 총괄 대행사(제이민) 담당자 연락처를 최신 정보로 즉각 동기화:
+    1. **보건행정과장님 직통번호 교정 (`02-3423-7116`, 내선 `7116`)**:
+       - 기존 임시 번호(7010)를 사용자 지정 공식 직통번호 `02-3423-7116` (내선 `7116`)으로 전면 교정.
+       - `STAFF_PHONE_MAP`(`과장님`, `과장`, `보건행정과장`) 및 `getStaffInfo` 바로가기 분기에 반영하여 참석자 태그 원클릭 `tel:` 통화 연결 지원.
+       - `data/CONTACTS.json` SSOT에 과장님 연락처 레코드(`mtml-chief-section-7116`) 신규 등록.
+    2. **행사 대행사 제이민(김다희 팀장님) 연락처 연동 (`010-8494-0544`, 내선 `0544`)**:
+       - `STAFF_PHONE_MAP`에 `제이민`, `제이민(대행사)`, `제이민 커뮤니케이션`, `김다희`, `김다희팀장`, `김다희 팀장`, `김다희팀장님`, `김다희 팀장님` 별칭 등록 및 `ext: '0544'`, `full: '010-8494-0544'` 매핑.
+       - `getStaffInfo`에 `제이민`, `김다희`, `다희` 키워드 즉시 매핑 분기 탑재.
+       - 콜론 구분자 참석자 자동 파싱 정규식(`peoplePattern`)에 `김다희` 추가.
+       - 상세 일정 편집 모달의 참석자 입력 플레이스홀더에 `과장님 7116, 제이민(김다희) 0544` 명시.
+    3. **Cloudflare Pages 독립 템플릿 및 자동 빌드 출력 동기화 (`scripts/pages-template.html`)**:
+       - `pages-template.html` 내 `STAFF_PHONE_MAP` 및 비상연락망 분기에도 동일하게 과장님(7116)과 제이민/김다희팀장님(0544)을 동시 반영하고 `prepare-pages-output.js`를 구동하여 Pages 출력물(`out/`) 일치 보장.
+* **핵심 변경 내역**:
+  - `src/components/festival/YangjaeFestivalDashboard.tsx`: `STAFF_PHONE_MAP`, `getStaffInfo`, `peoplePattern`, `DetailEditRow` placeholder 갱신.
+  - `scripts/pages-template.html`: 과장님 및 제이민/김다희 연락처 등록 및 매핑 로직 반영.
+  - `data/CONTACTS.json`: 과장님 연락처 레코드 신규 추가.
+  - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: 과장님(7116) 및 제이민(0544)/김다희팀장님 매핑 단언 추가.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - Jest 단위/통합 테스트 (`npm test`): **26/26 Suites, 238/238 Tests ALL PASS (100%)**.
+  - 데이터 무결성 게이트키퍼 (`node scripts/run-harness.js`): **0 Zod errors, 0 ESLint errors (ALL PASS)**.
+
+### [Milestone 125: Sidebar Navigation Tab Streamlining & MindMap/Project Deprecation Release] Streamlined Sidebar.tsx top/dock navigation to 3 core modules (대시보드, 예산관리, 양재천 페스티벌), removing redundant mindmap and project tabs per user preference while preserving modular route integrity and zero regression in global test suites. (2026-09-07)
+* **개요 및 개발 목적**:
+  - 사용자 명시적 요구에 따라 사이드바 네비게이션을 핵심 실무 3개 모듈(대시보드, 예산관리, 양재천 페스티벌)로 간소화:
+    1. **사이드바 네비게이션 탭 정리 (`src/components/Sidebar.tsx`)**:
+       - 불필요한 마인드맵(`mindmap`)과 사업관리(`project`) 탭을 `navItems`에서 완전히 제거하여 UI 시각적 피로도 해소 및 군더더기 없는 업무 집중 레이아웃 제공.
+* **핵심 변경 내역**:
+  - `src/components/Sidebar.tsx`: `navItems`를 3개 핵심 탭(`dashboard`, `workspace`, `festival`)으로 경량화.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일: **0 errors (PASS)**.
+  - Jest 단위/통합 테스트: **26/26 Suites, 238/238 Tests ALL PASS (100%)**.
+
 ### [Milestone 124: Next.js Middleware Route Protection Delegation, Sidebar Navigation Tab Parity & MindMap Interactive Node Creation Restoration for Playwright E2E Release] Restored official src/middleware.ts and unified with src/proxy.ts, eliminating || isDev || isLocalHost bypass so unauthenticated visitors redirect to /login while maintaining public bypasses for /festival, /api/festival, /api/calendar, /api/auth. Restored mindmap and project tabs in Sidebar.tsx with Lucide icons Network and FolderKanban. Restored interactive canvas double-click handling and '새 노드 추가' modal in MindMap3D.tsx, resolved useBudgetSimulator synchronous mutation, achieving 100% Jest pass (26/26 Suites, 238/238 Tests) and 0 TypeScript compiler errors. (2026-09-07)
 * **개요 및 개발 목적**:
   - GitHub Actions CI 환경 및 로컬 E2E 테스트(`npx playwright test`)의 전건 통과를 위해 미들웨어 라우트 보호, 사이드바 네비게이션 탭, 그리고 3D 마인드맵 인터랙티브 노드 추가 모달을 완벽히 복원:

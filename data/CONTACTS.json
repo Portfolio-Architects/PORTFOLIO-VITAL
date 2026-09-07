@@ -1438,5 +1438,14 @@
     "id": "mtml-nam-sang-hee-7025",
     "createdAt": "2026-09-04T07:20:00.000Z",
     "updatedAt": "2026-09-04T07:20:00.000Z"
+  },
+  {
+    "name": "과장님",
+    "phone": "02-3423-7116",
+    "email": "",
+    "notes": "강남구보건소 보건행정과장",
+    "id": "mtml-chief-section-7116",
+    "createdAt": "2026-09-07T08:15:00.000Z",
+    "updatedAt": "2026-09-07T08:15:00.000Z"
   }
 ]

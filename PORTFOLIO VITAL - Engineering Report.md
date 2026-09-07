@@ -4133,6 +4133,12 @@ sequenceDiagram
 - [x] **양재천 건강 페스티벌 대시보드 미사용 useEffect 제거 및 코드베이스 순도 100% 자가 치유 패치 (Milestone 104 - 2026-09-04)**
   - `src/components/festival/YangjaeFestivalDashboard.tsx`: React 19 render-time prop sync 리팩토링 후 잔존하던 미사용 `useEffect` 임포트 제거.
   - `diagnose-targets.js` 정적 분석 린트 경고 0건, 아키텍처 위반 0건, 성능 병목 0건 달성.
-  - Milestone 103의 세부과업 포커스 안정성, 예산 안전 계산 및 320px 반응형 헤더 기능 100% 보존.
-  - 18개 단위/통합 테스트 전건 PASS 및 게이트키퍼 0 오류 통과.
+- [x] **양재천 건강 페스티벌 보건행정과장님 번호 교정(02-3423-7116) 및 행사 대행사 제이민(김다희 팀장님, 010-8494-0544) 연락망 동기화 (Milestone 126 - 2026-09-07)**
+  - 사용자 지시에 따라 양재천 대시보드 및 연락망 시스템의 보건행정과장님 직통 내선 번호를 `02-3423-7116`(내선 `7116`)으로 즉각 교정하고 `data/CONTACTS.json` SSOT에 등록.
+  - 행사 대행사 제이민 커뮤니케이션(김다희 팀장님, `010-8494-0544`, 내선 `0544`)을 `STAFF_PHONE_MAP`, `getStaffInfo`, `peoplePattern` 정규식 및 Cloudflare Pages 독립 템플릿(`scripts/pages-template.html`)에 전격 등록.
+  - 상세 일정 편집 모달의 참석자 입력 플레이스홀더에 `과장님 7116, 제이민(김다희) 0544` 명시.
+  - 단위/통합 테스트(`yangjae-festival-realtime-collapsed-sync.test.tsx`) 25/25 전건 통과 및 전체 테스트 스위트 26/26 Suites (238 Tests) 100% 통과.
+- [x] **사이드바 네비게이션 간소화 및 마인드맵/사업관리 탭 정리 (Milestone 125 - 2026-09-07)**
+  - 사용자 명시적 요구에 따라 사이드바 네비게이션을 핵심 실무 3개 모듈(대시보드, 예산관리, 양재천 페스티벌)로 간소화.
+  - 불필요한 마인드맵(`mindmap`)과 사업관리(`project`) 탭을 `navItems`에서 완전히 제거하여 UI 시각적 피로도 해소 및 군더더기 없는 업무 집중 레이아웃 제공.
 
