@@ -4133,6 +4133,10 @@ sequenceDiagram
 - [x] **양재천 건강 페스티벌 대시보드 미사용 useEffect 제거 및 코드베이스 순도 100% 자가 치유 패치 (Milestone 104 - 2026-09-04)**
   - `src/components/festival/YangjaeFestivalDashboard.tsx`: React 19 render-time prop sync 리팩토링 후 잔존하던 미사용 `useEffect` 임포트 제거.
   - `diagnose-targets.js` 정적 분석 린트 경고 0건, 아키텍처 위반 0건, 성능 병목 0건 달성.
+- [x] **테마별 부스 상태 '확정' 일괄 통일 및 실시간 집계 연동 (Milestone 128 - 2026-09-07)**
+  - 민간 헬스케어 부스(케이스튜디오, 한국신체정보)의 자발적 공모 접수 단계 잔존 상태값이었던 `신청완료`를 최종 확정된 실무 조율 결과에 맞추어 `확정`으로 전면 일괄 통일.
+  - 상단 부스 집계(`확정 N개 / 총 N개`) 및 Cloudflare Pages 배포용 복제본(`functions/api/festival/yangjae.ts`, `out/`)에 100% 동기화.
+  - 단위/통합 테스트 25/25 ALL PASS 및 Zod 데이터 무결성 검증 0 오류 통과.
 - [x] **보건행정과장님 공식 직통 번호(02-3423-7010, 내선 7010) 최종 확정 및 일괄 반영 패치 (Milestone 127 - 2026-09-07)**
   - 사용자 명시적 지정에 따라 보건행정과장님의 공식 직통 내선 번호를 `02-3423-7010`(내선 `7010`)으로 최종 확정 및 일괄 반영.
   - `STAFF_PHONE_MAP` 및 `getStaffInfo` 바로가기 분기, `DetailEditRow` 참석자 안내 플레이스홀더, Cloudflare Pages 독립 정적 템플릿(`scripts/pages-template.html` 및 `out/`), `data/CONTACTS.json` SSOT까지 일치 완료.

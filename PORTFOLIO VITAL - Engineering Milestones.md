@@ -2,6 +2,23 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 128: Festival Booth Status Unification (신청완료 to 확정) & Real-time Aggregation Alignment Release] Unified private healthcare booth statuses (케이스튜디오, 한국신체정보) from 신청완료 to 확정 across FESTIVAL_YANGJAE_2026.json SSOT, useYangjaeFestival fallback, functions API replica, and Cloudflare Pages bundle, aligning confirmed booth metric tracking (확정 N개 / 총 N개) with 100% test pass. (2026-09-07)
+* **개요 및 개발 목적**:
+  - 사용자 피드백("확정과 신청완료 뱃지가 나뉜 이유는 뭐지? 확정으로 통일하면 안되나?")에 따라 부스 상태 표기를 명확하고 일관되게 단일화:
+    1. **기존 상태 분리 원인 규명 및 설명**:
+       - 당초 민간 헬스케어 기업(케이스튜디오, 한국신체정보)은 자발적 공모 신청서 접수 단계의 구분값인 `신청완료`로 초기 기록되었으며, 보건소 직영 및 협약 대형 병원은 `확정`으로 등록되어 있었음.
+    2. **'확정' 상태로 전면 단일화 반영**:
+       - 9월 2일 실무 답사 및 협의를 거쳐 두 민간 기업 모두 부스 규모(1동, 2동) 및 프로그램 내용이 최종 확정 완료된 상태이므로, 불필요한 시각적 혼선을 없애고 행정 신뢰도를 높이기 위해 `신청완료`를 `확정`(`bg-emerald-50 text-emerald-800 border-emerald-300`)으로 일괄 통일.
+       - 상단 부스 현황 요약 배지(`확정 {confirmedBoothCount} / 총 {activeBooths.length}개`)에서도 확정 부스 숫자가 정확히 실시간 합산 반영되도록 정합성 확보.
+* **핵심 변경 내역**:
+  - `data/FESTIVAL_YANGJAE_2026.json`: 부스 8(케이스튜디오), 부스 9(한국신체정보)의 `status`를 `"확정"`으로 일괄 변경.
+  - `src/hooks/useYangjaeFestival.ts`: 오프라인 폴백 부스 데이터 내 상태값을 `"확정"`으로 동기화.
+  - `functions/api/festival/yangjae.ts` & `out/`: Cloudflare Pages 복제본 및 정적 산출물 재빌드 완료.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 양재천 페스티벌 테스트 (`npx jest yangjae-festival-realtime-collapsed-sync.test.tsx`): **25/25 Tests ALL PASS (100%)**.
+  - Zod 데이터 무결성 검증 (`node scripts/run-harness.js --quick`): **0 errors (PASS)**.
+
 ### [Milestone 127: Section Chief Phone Official Extension 7010 (02-3423-7010) Reaffirmation & Precision Sync Release] Reaffirmed and updated Section Chief (과장님/보건행정과장) official direct line to 02-3423-7010 (ext: 7010) across STAFF_PHONE_MAP, attendee badge linkers, DetailEditRow placeholder, pages-template.html Cloudflare replica, and CONTACTS.json SSOT with 100% test pass (25/25 Festival Tests, 238/238 All Tests). (2026-09-07)
 * **개요 및 개발 목적**:
   - 사용자 명시적 지정에 따라 보건행정과장님의 공식 직통 내선 번호를 `02-3423-7010` (내선 `7010`)으로 최종 확정 및 일괄 반영:
