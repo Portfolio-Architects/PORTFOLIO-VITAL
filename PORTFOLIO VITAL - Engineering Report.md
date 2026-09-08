@@ -4172,6 +4172,15 @@ sequenceDiagram
   - 양재천 페스티벌 등 야외 기념·체육행사에서 국민의례를 약식 절차로 진행 시, 사회자가 *"애국가 제창 등 이하 생략하겠습니다"* 등의 부적절한 생략 멘트를 발언하는 것을 엄격히 금지.
   - 약식 절차 시 '국기에 대한 경례'(경례곡/맹세문) 후 생략 멘트 일체 없이 곧바로 다음 식순(내빈소개)으로 자연스럽게 전환하는 표준 시나리오 확립.
   - `AGENTS.md` 섹션 2 수칙(L항목) 신설, `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts`의 추진과제 2(행사 식순) 국민의례 세부 항목에 의전 주의사항 반영 완료.
+- [x] **양재천 페스티벌 구민 홍보 확대(동장 협조·보건소 전 부서 모객) 및 전 직원(금연단속원 포함) 안전관리 현장 배치 지침 반영 (Milestone 133 - 2026-09-08)**
+  - 행사 목적의 명확화 및 구민 참여 확대를 위한 다각도 홍보 체계 구축:
+    * 보건행정팀 및 민원서비스팀 참여자 모객 협업 체계 가동 및 관내 직능/유관 단체 초청 검토 (추진과제 4 홍보 세부사항).
+    * 과장님 주관 인근 동 주민센터(개포·일원·대치·도곡 등) 동장님 협조 요청 추진 (관내 주민 참여 적극 독려).
+  - 안전관리 및 인력 동원 계획 수립 (추진과제 7):
+    * 올해 행사에 보건소 전 직원(금연단속원 포함) 행사 현장 안전관리 및 구민 안내 전원 배치 계획 수립 및 대체휴무 시행 (`staffNote` 최신화).
+    * 1,000명 이상 대규모 인파 대비 안전관리계획 심의 및 응급의료 지원 동선 구축.
+  - `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts`, `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx` 동기화 및 Cloudflare Pages 24/7 레플리카 발행 완료.
+  - Jest 단위/통합 테스트 25/25 ALL PASS.
 
 
 

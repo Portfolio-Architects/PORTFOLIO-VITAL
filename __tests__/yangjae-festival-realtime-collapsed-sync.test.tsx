@@ -167,7 +167,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(copiedText).toContain('2026 양재천 걷자! 건강 페스티벌');
       expect(copiedText).toContain('주간 추진실적 보고');
       expect(copiedText).toContain('9. 7. ~ 9. 11.');
-      expect(copiedText).toContain('**행사 참여 직원 대체휴무 시행 예정**');
+      expect(copiedText).toContain('**행사 참여 직원 대체휴무 시행 예정 (전 직원 참여, 금연단속원 포함)**');
       expect(copiedText).toContain('■ 추진내역');
       expect(copiedText).toContain('https://portfolio-hchps.pages.dev/festival/yangjae');
       expect(copiedText).toContain('1. [체육회/공동개최] 9. 7. 강남구체육회(걷기협회) 구청장배 걷기대회 공동 개최 협의');
@@ -538,7 +538,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(screen.queryByText(/대행용역 3,695만/)).not.toBeInTheDocument();
 
       // Staff compensatory leave note should be rendered at the bottom of overview
-      expect(screen.getByText('행사 참여 직원 대체휴무 시행 예정')).toBeInTheDocument();
+      expect(screen.getByText('행사 참여 직원 대체휴무 시행 예정 (전 직원 참여, 금연단속원 포함)')).toBeInTheDocument();
     });
   });
 
@@ -707,7 +707,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('applies eye-catching blue font color to the staff substitute holiday row in Section 1 overview', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const noteText = await screen.findByText('행사 참여 직원 대체휴무 시행 예정');
+      const noteText = await screen.findByText('행사 참여 직원 대체휴무 시행 예정 (전 직원 참여, 금연단속원 포함)');
       expect(noteText).toBeInTheDocument();
       expect(noteText).toHaveClass('text-blue-600');
       expect(noteText).toHaveClass('font-bold');
