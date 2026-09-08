@@ -4167,7 +4167,12 @@ sequenceDiagram
     * 행사 개요 그리드를 고정 `58px` 대신 `minmax(62px, max-content) 10px 1fr` (큰글씨 시 `minmax(76px, max-content) 12px 1fr`) 유연 그리드로 전면 개편.
     * 라벨 span에 `whitespace-nowrap shrink-0` 및 콜론에 `shrink-0 text-center`를 부여하여 큰글씨 모드에서도 라벨이 절대 줄바꿈되지 않고 콜론이 완벽한 수직 일직선으로 정렬되도록 보장.
     * `scripts/pages-template.html`, `src/components/festival/YangjaeFestivalDashboard.tsx`, `out/` 정적 번들 및 Cloudflare 24/7 레플리카 전면 동기화 발행 완료.
-  - 단위/통합 테스트(`yangjae-festival-realtime-collapsed-sync.test.tsx`) 25/25 ALL PASS.
+- [x] **공공 행사 의전 및 국민의례 진행 규정(대통령훈령 국민의례 규정) 수립 및 약식 절차 '이하 생략' 금지 멘트 수칙 반영 (Milestone 132 - 2026-09-08)**
+  - 사용자 지침 및 대통령훈령 제438호 국민의례 규정에 따른 공공 행사 의전 표준 준거 확립.
+  - 양재천 페스티벌 등 야외 기념·체육행사에서 국민의례를 약식 절차로 진행 시, 사회자가 *"애국가 제창 등 이하 생략하겠습니다"* 등의 부적절한 생략 멘트를 발언하는 것을 엄격히 금지.
+  - 약식 절차 시 '국기에 대한 경례'(경례곡/맹세문) 후 생략 멘트 일체 없이 곧바로 다음 식순(내빈소개)으로 자연스럽게 전환하는 표준 시나리오 확립.
+  - `AGENTS.md` 섹션 2 수칙(L항목) 신설, `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts`의 추진과제 2(행사 식순) 국민의례 세부 항목에 의전 주의사항 반영 완료.
+
 
 
 
