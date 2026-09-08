@@ -4201,6 +4201,19 @@ sequenceDiagram
   - `AGENTS.md` 섹션 L 매니페스트 개정, `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts` 추진과제 2(행사 식순) 국민의례 세부 항목에 공식 의전 절차 완벽 반영.
   - Cloudflare Pages 24/7 레플리카 및 정적 번들 배포 완료.
   - Jest 단위/통합 테스트 25/25 ALL PASS.
+- [x] **양재천 페스티벌 추진과제 날짜 타일 너비 확장 및 날짜 폰트 크기 대폭 확대 가독성 패치 (Milestone 136 - 2026-09-08)**
+  - 사용자 피드백 반영: 세부 과업의 날짜(`26.7.29` 등)가 좁은 박스(`58px`)에 `11px`로 작게 표시되어 가독성이 떨어지고 식별이 불편했던 현상 해결.
+  - 개선 내역:
+    * **타일 너비 및 여백 확장**: `min-w-[58px]`에서 `min-w-[70px] sm:min-w-[76px]`로 가로폭을 대폭 확장하여 날짜가 찌그러지지 않고 넉넉한 여백 확보.
+    * **날짜 폰트 크기 및 시인성 극대화**:
+      - 단기 일자(`7.29`, `9.1`, `9.2` 등): `text-[14.5px] sm:text-[15px] font-black text-slate-950` 적용 (+36% 확대, 딥 잉크 블랙).
+      - 연도 포함 일자(`26.7.29`, `9.8.(화)` 등): `text-[13px] sm:text-[13.5px] font-black text-slate-950` 적용 (+23% 확대, 볼드 시인성).
+      - 시간대(`09:00~09:02` 등): `text-[10.5px] sm:text-[11px] font-extrabold text-slate-900`.
+      - 완료/진행 상태 텍스트: `text-[11px] sm:text-[11.5px] font-black py-1`로 함께 스케일업.
+    * **큰글씨 모드(`is-large-font`) 연동**: 큰글씨 활성화 시 `.date-tile`을 `86px`로 확장하고 `.date-text`를 `16.5px` 슈퍼 볼드로 자동 스케일링.
+    * `src/components/festival/YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`, `out/` 정적 번들 및 Cloudflare 24/7 레플리카 전면 동기화.
+    * Jest 단위/통합 테스트 25/25 ALL PASS.
+
 
 
 

@@ -79,6 +79,16 @@ const LARGE_FONT_STYLES = `
     font-size: 21px !important;
     line-height: 1.45 !important;
   }
+  .is-large-font .date-tile {
+    min-width: 86px !important;
+  }
+  .is-large-font .date-text {
+    font-size: 16.5px !important;
+    line-height: 1.3 !important;
+  }
+  .is-large-font .status-text {
+    font-size: 13px !important;
+  }
   .is-large-font input, .is-large-font textarea, .is-large-font select {
     font-size: 16px !important;
   }
@@ -1575,6 +1585,7 @@ ${targetUrl}`;
                                   const isCoopTask = parsed.text.includes('[협조') || detail.includes('[협조');
                                   const displayDate = parsed.date ? parsed.date.replace(/\.$/, '') : '상시';
                                   const isTimeRange = displayDate.includes('~');
+                                  const isShortDate = displayDate.length <= 5 && !isTimeRange;
 
                                   return (
                                     <div 
@@ -1585,25 +1596,25 @@ ${targetUrl}`;
                                           : 'hover:bg-white bg-white/70'
                                       }`}
                                     >
-                                      {/* 1. 세로 한 열(Column) 캘린더형 상태 타일 */}
-                                      <div className={`shrink-0 flex flex-col items-center justify-center rounded-lg border overflow-hidden shadow-2xs font-mono min-w-[58px] sm:min-w-[62px] text-center mt-0.5 bg-white transition-all ${
+                                      {/* 1. 세로 한 열(Column) 캘린더형 상태 타일: 날짜 크기 대폭 확대 및 시각성 극대화 */}
+                                      <div className={`date-tile shrink-0 flex flex-col items-center justify-center rounded-xl border-2 overflow-hidden shadow-xs font-mono min-w-[70px] sm:min-w-[76px] text-center mt-0.5 bg-white transition-all ${
                                         parsed.status === 'done'
-                                          ? 'border-emerald-400 ring-1 ring-emerald-200/60'
+                                          ? 'border-emerald-500'
                                           : parsed.status === 'in-progress'
-                                          ? 'border-amber-400 ring-1 ring-amber-200/60'
-                                          : 'border-slate-300'
+                                          ? 'border-amber-500'
+                                          : 'border-slate-400'
                                       }`}>
-                                        <span className={`w-full bg-slate-50 text-slate-800 font-extrabold px-1 py-1 tracking-tight border-b border-slate-200 break-all leading-tight ${
-                                          isTimeRange ? 'text-[9.5px]' : 'text-[11px]'
+                                        <span className={`date-text w-full bg-slate-50 text-slate-950 font-black px-1 py-1.5 tracking-tight border-b border-slate-200 break-all leading-snug ${
+                                          isTimeRange ? 'text-[10.5px] sm:text-[11px]' : isShortDate ? 'text-[14.5px] sm:text-[15px]' : 'text-[13px] sm:text-[13.5px]'
                                         }`}>
                                           {displayDate}
                                         </span>
-                                        <span className={`w-full px-1 py-0.5 text-[10px] font-black tracking-tight ${
+                                        <span className={`status-text w-full px-1 py-1 text-[11px] sm:text-[11.5px] font-black tracking-normal ${
                                           parsed.status === 'done'
                                             ? 'bg-emerald-600 text-white'
                                             : parsed.status === 'in-progress'
                                             ? 'bg-amber-500 text-white'
-                                            : 'bg-slate-500 text-white'
+                                            : 'bg-slate-600 text-white'
                                         }`}>
                                           {parsed.status === 'done' ? '✓ 완료' : parsed.status === 'in-progress' ? '▶ 진행' : '○ 예정'}
                                         </span>

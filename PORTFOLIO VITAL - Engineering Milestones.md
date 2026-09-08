@@ -2,6 +2,24 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 136: Festival Task Date Tile Expansion & Typography Legibility Overhaul Release] Expanded date tile width (min-w-70px/76px, 86px large font) and enlarged date font sizes (14.5px/15px short, 13.5px full, font-black slate-950) across YangjaeFestivalDashboard, pages-template.html and Cloudflare replica, resolving visual legibility issues with 100% test pass. (2026-09-08)
+* **개요 및 개발 목적**:
+  - 사용자 피드백("날짜가 너무 작게 나와서 불편해") 반영: 추진과제 세부 항목의 날짜(`26.7.29` 등)가 좁은 박스(`58px`)에 `11px`로 작게 표시되어 가독성이 떨어지던 문제를 해결하기 위해 날짜 타일 및 폰트 타이포그래피 전면 개편:
+    1. **타일 너비 및 여백 대폭 확장**: `min-w-[58px]`에서 `min-w-[70px] sm:min-w-[76px]`로 확장하여 날짜 왜곡 차단 및 시원한 공간감 부여.
+    2. **지능형 날짜 폰트 스케일링 & 잉크 블랙 컬러**:
+       - 5자 이하 단기 일자(`7.29`, `9.1` 등): `text-[14.5px] sm:text-[15px] font-black text-slate-950` (+36% 확대).
+       - 연도 포함 일자(`26.7.29` 등): `text-[13px] sm:text-[13.5px] font-black text-slate-950` (+23% 확대).
+       - 시간대 표기(`09:00~09:02` 등): `text-[10.5px] sm:text-[11px] font-extrabold text-slate-900`.
+       - 상태 뱃지: `text-[11px] sm:text-[11.5px] font-black py-1`.
+    3. **큰글씨 모드(`is-large-font`) 연동**: 타일 `min-w: 86px`, 폰트 `16.5px` 슈퍼 볼드로 자동 확장되어 시니어 및 저시력자 접근성 극대화.
+* **핵심 변경 내역**:
+  - `src/components/festival/YangjaeFestivalDashboard.tsx`: 날짜 타일 너비 확장, 지능형 폰트 크기 계산 및 `LARGE_FONT_STYLES` 스타일 클래스 추가.
+  - `scripts/pages-template.html`: Pages 독립 템플릿 내 동일 날짜 타일 및 폰트 확장, 큰글씨 CSS 클래스 연동.
+  - `functions/api/festival/yangjae.ts` & `out/`: Cloudflare Pages 정적 번들 동기화 빌드.
+* **정량적 검증 성과**:
+  - 양재천 페스티벌 테스트 (`npx jest yangjae-festival-realtime-collapsed-sync.test.tsx`): **25/25 Tests ALL PASS (100%)**.
+  - Cloudflare 24/7 레플리카 배포: **HTTP 200 OK (성공)**.
+
 ### [Milestone 128: Festival Booth Status Unification (신청완료 to 확정) & Real-time Aggregation Alignment Release] Unified private healthcare booth statuses (케이스튜디오, 한국신체정보) from 신청완료 to 확정 across FESTIVAL_YANGJAE_2026.json SSOT, useYangjaeFestival fallback, functions API replica, and Cloudflare Pages bundle, aligning confirmed booth metric tracking (확정 N개 / 총 N개) with 100% test pass. (2026-09-07)
 * **개요 및 개발 목적**:
   - 사용자 피드백("확정과 신청완료 뱃지가 나뉜 이유는 뭐지? 확정으로 통일하면 안되나?")에 따라 부스 상태 표기를 명확하고 일관되게 단일화:
