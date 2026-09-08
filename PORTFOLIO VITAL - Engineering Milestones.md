@@ -2,6 +2,18 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 137: Festival Timetable, Booth Roster & Outreach Organization Real-time Sync Release] Synchronized updated festival timeline (booth operation extended to 13:30, walk incentive cutoff at 12:30, cleanup 13:30-14:30), confirmed Gangnam Korean Medicine Association booth (26.9.8), and added Yangjaecheon Keepers outreach across SSOT and Cloudflare replica with 100% test pass. (2026-09-08)
+* **개요 및 개발 목적**:
+  - 사용자 실무 입력에 따라 축제 추진 일정, 운영 부스 및 참여 홍보 과업 최신화:
+    1. **행사 식순 및 세부 타임테이블 조정**: 부스 운영 종료를 13:30으로 연장, 걷기 출발 및 인센티브 지급 마감을 12:30으로 명시, 행사 정리 시간을 13:30~14:30으로 순연.
+    2. **운영 부스 일자 정규화 및 한의사회 확정 등록**: `26.` 연도 접두사 일괄 표준화 및 `[완료][26.9.8.] 강남구 한의사회 부스 운영 확정` 신규 반영.
+    3. **대구민 홍보 거버넌스 확대**: 인근 동 주민센터 협조 범위를 관내 단체 전체로 확장하고, '양재천 지킴이' 단체 홍보·참여 요청 과업 추가.
+* **핵심 변경 내역**:
+  - `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts`, `out/`: 실무 최신 과업 전면 동기화.
+* **정량적 검증 성과**:
+  - 양재천 페스티벌 테스트 (`npx jest yangjae-festival-realtime-collapsed-sync.test.tsx`): **25/25 Tests ALL PASS (100%)**.
+  - Cloudflare 24/7 레플리카 배포: **HTTP 200 OK (성공)**.
+
 ### [Milestone 136: Festival Task Date Tile Expansion & Typography Legibility Overhaul Release] Expanded date tile width (min-w-70px/76px, 86px large font) and enlarged date font sizes (14.5px/15px short, 13.5px full, font-black slate-950) across YangjaeFestivalDashboard, pages-template.html and Cloudflare replica, resolving visual legibility issues with 100% test pass. (2026-09-08)
 * **개요 및 개발 목적**:
   - 사용자 피드백("날짜가 너무 작게 나와서 불편해") 반영: 추진과제 세부 항목의 날짜(`26.7.29` 등)가 좁은 박스(`58px`)에 `11px`로 작게 표시되어 가독성이 떨어지던 문제를 해결하기 위해 날짜 타일 및 폰트 타이포그래피 전면 개편:
