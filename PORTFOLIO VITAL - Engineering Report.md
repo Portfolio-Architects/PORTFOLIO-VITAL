@@ -4149,4 +4149,25 @@ sequenceDiagram
 - [x] **사이드바 네비게이션 간소화 및 마인드맵/사업관리 탭 정리 (Milestone 125 - 2026-09-07)**
   - 사용자 명시적 요구에 따라 사이드바 네비게이션을 핵심 실무 3개 모듈(대시보드, 예산관리, 양재천 페스티벌)로 간소화.
   - 불필요한 마인드맵(`mindmap`)과 사업관리(`project`) 탭을 `navItems`에서 완전히 제거하여 UI 시각적 피로도 해소 및 군더더기 없는 업무 집중 레이아웃 제공.
+- [x] **양재천 건강 페스티벌 강남구체육회(걷기협회) 구청장배 걷기대회(200~250명) 공동개최 협의 반영 및 주간 추진실적 보고 문자(9.7.~9.11.) 최신화 (Milestone 129 - 2026-09-08)**
+  - 강남구체육회(걷기협회) 구청장배 걷기대회(200~250명) 분산 추진 건(체육회 당초 10.31. 영동3교 -> 11.21. 연기 조율안)을 과장님 제안 및 실무 협의를 통해 10. 31.(토) 우리 행사와 전격 통합·공동 개최하기로 결정.
+  - 대구민 참여 인원 기존 800명 선착순 접수에 체육회 걷기대회 200~250명을 결합하여 1,000명 이상 규모의 대형 축제로 외연 확장 및 양재천 코스·안전관리·부스 공동 활용 시너지 구축.
+  - SSOT(`data/FESTIVAL_YANGJAE_2026.json`), 클라이언트 훅(`useYangjaeFestival.ts`), Cloudflare Pages 함수 API(`functions/api/festival/yangjae.ts`), 정적 템플릿(`scripts/pages-template.html`), 대시보드 컴포넌트(`YangjaeFestivalDashboard.tsx`)의 `weeklyReport` 기간을 `9. 7. ~ 9. 11.`로 갱신하고 이번 주 5대 실적 항목 동기화.
+  - 마일스톤(추진과제 1, 추진과제 5) 및 업무 스케줄러(`SCHEDULE.md`, `data/SCHEDULES.json`)에 체육회 공동개최 협의 회의 및 행사 일정 동시 등록과 구글 캘린더 원클릭 연동 완료.
+  - 단위/통합 테스트(`yangjae-festival-realtime-collapsed-sync.test.tsx`) 25/25 ALL PASS 및 전체 테스트 26/26 Suites (238/238 Tests) 100% 무결점 통과.
+- [x] **공식 공유 링크 만료 임시 터널 도메인 영구 Cloudflare Pages 실서비스 URL(`https://portfolio-hchps.pages.dev/festival/yangjae`) 전면 교체 패치 (Milestone 130 - 2026-09-08)**
+  - 과거 일회성 trycloudflare 임시 터널 도메인(`codes-investing-findings-lucas.trycloudflare.com`) 만료로 인한 외부 열람 오류(Could not resolve host) 영구 해결.
+  - 상시 24/7 가동 중인 Cloudflare Pages 정식 실서비스 도메인(`https://portfolio-hchps.pages.dev/festival/yangjae`)으로 `PUBLIC_SHARE_URL` 및 Jest 단위/통합 테스트 전면 교체.
+  - `scripts/sync-festival-to-cloud.js`를 통해 로컬 SSOT 최신 변경 내역(체육회 공동 개최 및 9.7.~9.11. 추진실적)을 Cloudflare 24/7 레플리카에 실시간 발행 완료 (발행 성공 확인: HTTP 200 OK).
+  - 단위/통합 테스트(`yangjae-festival-realtime-collapsed-sync.test.tsx`) 25/25 ALL PASS.
+- [x] **양재천 건강 페스티벌 '큰글씨' 모드 폰트 중첩 폭발 버그 퇴치 및 행사 개요 그리드 세로 줄맞춤 안정화 패치 (Milestone 131 - 2026-09-08)**
+  - 원인 분석: `pages-template.html` 내 `.is-large-font [class*="text-"]` 와일드카드 선택자가 `text-slate-*`, `text-center` 등 색상/정렬 클래스까지 전부 매칭하여 `1.25em`을 자식 요소마다 중첩 곱연산(폰트 크기 비정상 폭발)을 유발하고, `58px` 고정 라벨 컬럼 폭으로 인해 '• 행사\n명', '• \n일 시' 등의 기형적인 줄바꿈 및 콜론 정렬 붕괴 발생.
+  - 개선 내역:
+    * CSS 선택자를 font-size 전용 유틸리티(`.is-large-font .text-xs`, `.text-sm` 등)로 한정하여 색상 클래스 중첩 곱연산 원천 차단.
+    * 행사 개요 그리드를 고정 `58px` 대신 `minmax(62px, max-content) 10px 1fr` (큰글씨 시 `minmax(76px, max-content) 12px 1fr`) 유연 그리드로 전면 개편.
+    * 라벨 span에 `whitespace-nowrap shrink-0` 및 콜론에 `shrink-0 text-center`를 부여하여 큰글씨 모드에서도 라벨이 절대 줄바꿈되지 않고 콜론이 완벽한 수직 일직선으로 정렬되도록 보장.
+    * `scripts/pages-template.html`, `src/components/festival/YangjaeFestivalDashboard.tsx`, `out/` 정적 번들 및 Cloudflare 24/7 레플리카 전면 동기화 발행 완료.
+  - 단위/통합 테스트(`yangjae-festival-realtime-collapsed-sync.test.tsx`) 25/25 ALL PASS.
+
+
 

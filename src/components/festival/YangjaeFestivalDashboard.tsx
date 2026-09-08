@@ -658,7 +658,7 @@ function YangjaeFestivalDashboardComponent() {
     setSelectedCategory(cat);
   }, []);
 
-  const PUBLIC_SHARE_URL = 'https://codes-investing-findings-lucas.trycloudflare.com/festival/yangjae';
+  const PUBLIC_SHARE_URL = 'https://portfolio-hchps.pages.dev/festival/yangjae';
 
   // 1. 행사 개요 독립 편집 핸들러
   const handleStartEditOverview = () => {
@@ -890,16 +890,16 @@ function YangjaeFestivalDashboardComponent() {
       : PUBLIC_SHARE_URL;
 
     const title = data?.meta?.title || '2026 양재천 걷자! 건강 페스티벌';
-    const period = data?.weeklyReport?.period || '8. 31. ~ 9. 4.';
+    const period = data?.weeklyReport?.period || '9. 7. ~ 9. 11.';
     const weekTitle = data?.weeklyReport?.weekTitle || '주간 추진실적 보고';
     const staffNote = data?.meta?.staffNote || '행사 참여 직원 대체휴무 시행 예정';
 
     const fallbackWeeklyItems = [
-      '1. [홍보] 행사 포스터 시안 제작 및 대구민 홍보 채널 구축 진행중 (지영팀장님, 오창선)\n   - 내용: 메인 포스터 디자인 감수 및 구청·보건소 홈페이지 배너·통합예약 연계 준비',
-      '2. [기획/회의] 9. 1. 행사 추진 총괄 및 현안 실무회의 완료\n   - 참석: 과장님, 희선팀장님, 지영팀장님, 임석훤, 남상희, 오창선\n   - 안건: 행사 추진 관련 전반, VIP 초청, 참가자 모집 방법(800명), 보도자료 배포 등',
-      '3. [장소/현장] 9. 2. 양재천 현장답사 및 유관기관 합동점검 실시\n   - 참석: 지영팀장님, 오창선, 유디치과 관계자\n   - 내용: 유디치과 이동 검진버스 진입 동선 및 건강체험 추가 부스 설치 구역 현장 실측',
-      '4. [의전] 구청장님 행사 참석 관련 구청 비서실 사전 협의 완료\n   - 내용: 행사 개회식 및 걷기대회 구청장님 참석 확정 조율 (지영팀장님)',
-      '5. [부스] 9. 3. 유관 의료단체(강남구의사회·한의사회) 부스 운영 협조 회의\n   - 참석: 과장님, 오창선\n   - 내용: 전문 의료진 건강상담 부스 운영 확정 및 세부 프로그램 운영안 협의 조율중',
+      '1. [체육회/공동개최] 9. 7. 강남구체육회(걷기협회) 구청장배 걷기대회 공동 개최 협의 (과장님, 지영팀장님, 오창선)\n   - 내용: 당초 영동3교 분산 추진 건(체육회 11.21. 연기안)을 10. 31.(토) 우리 행사와 전격 통합·공동 개최 협의\n   - 효과: 체육회 참가 인원(200~250명) 합류로 총 1,000명 이상 대규모 축제 외연 확장 및 행사 시너지 극대화',
+      '2. [기획/방침] 공동 개최 연계에 따른 행사 기본계획 방침서 수정 및 식순 보완\n   - 내용: 체육회 공동 주관 명기, 개회식 식순 연계(내빈 의전 및 준비운동), 걷기 코스 및 참가자 통합 운영안 조율',
+      '3. [부스/의료] 12개 전문 건강체험 부스 최종 확정 및 협력 기관 세부 조율 완료\n   - 내용: 대학병원·의사회·민간 헬스케어 등 12개 부스(검진버스 2대 포함) 배치도 확정 및 기관별 체험 프로그램 조율',
+      '4. [홍보/접수] 행사 메인 포스터 최종 감수 및 대구민 사전접수 시스템 연계 준비\n   - 내용: 공동개최 기관 표기 포스터 최종 감수, 10. 1. 보건소 통합예약시스템(800명 선착순) 접수 페이지 등록 사전 점검',
+      '5. [현장/안전] 행사장 시설 사용 협조 및 1,000명 인파 대비 안전관리 대책 수립\n   - 내용: 수변문화센터 외부(치수과)·내부(문화도시과) 시설 사용 조율, 남부혈액원 주차 협조(5대) 및 응급 안전 동선 구축',
     ];
 
     const weeklyLines = data?.weeklyReport?.items && data.weeklyReport.items.length > 0
@@ -1085,9 +1085,9 @@ ${targetUrl}`;
             {/* Key-Value Details Grid */}
             <div className="space-y-2">
               {/* 행사명 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[68px_10px_1fr] text-sm' : 'grid-cols-[58px_8px_1fr] text-xs'} items-baseline gap-1`}>
-                <span className="font-bold text-slate-600 tracking-wider">• 행사명</span>
-                <span className="font-bold text-slate-400 text-center">:</span>
+              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
+                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 행사명</span>
+                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <input
                     type="text"
@@ -1099,14 +1099,14 @@ ${targetUrl}`;
                     className="w-full px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-bold text-slate-900"
                   />
                 ) : (
-                  <span className="font-extrabold text-slate-900 leading-snug break-keep">{data?.meta?.title || '2026 양재천 건강 페스티벌'}</span>
+                  <span className="font-extrabold text-slate-900 leading-snug break-keep min-w-0">{data?.meta?.title || '2026 양재천 건강 페스티벌'}</span>
                 )}
               </div>
 
               {/* 일시 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[68px_10px_1fr] text-sm' : 'grid-cols-[58px_8px_1fr] text-xs'} items-baseline gap-1`}>
-                <span className="font-bold text-slate-600 tracking-wider">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>
-                <span className="font-bold text-slate-400 text-center">:</span>
+              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
+                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>
+                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <div className="flex gap-1">
                     <input
@@ -1131,14 +1131,14 @@ ${targetUrl}`;
                     />
                   </div>
                 ) : (
-                  <span className="font-semibold text-slate-800">{data?.meta?.eventDate || ''} ({data?.meta?.eventTime || ''})</span>
+                  <span className="font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.eventDate || ''} ({data?.meta?.eventTime || ''})</span>
                 )}
               </div>
 
               {/* 장소 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[68px_10px_1fr] text-sm' : 'grid-cols-[58px_8px_1fr] text-xs'} items-baseline gap-1`}>
-                <span className="font-bold text-slate-600 tracking-wider">• 장&nbsp;&nbsp;&nbsp;&nbsp;소</span>
-                <span className="font-bold text-slate-400 text-center">:</span>
+              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
+                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 장&nbsp;&nbsp;&nbsp;&nbsp;소</span>
+                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <input
                     type="text"
@@ -1150,14 +1150,14 @@ ${targetUrl}`;
                     className="w-full px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-semibold text-slate-900"
                   />
                 ) : (
-                  <span className="font-semibold text-slate-800 leading-snug break-keep">{data?.meta?.location || ''}</span>
+                  <span className="font-semibold text-slate-800 leading-snug break-keep min-w-0">{data?.meta?.location || ''}</span>
                 )}
               </div>
 
               {/* 코스 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[68px_10px_1fr] text-sm' : 'grid-cols-[58px_8px_1fr] text-xs'} items-baseline gap-1`}>
-                <span className="font-bold text-slate-600 tracking-wider">• 코&nbsp;&nbsp;&nbsp;&nbsp;스</span>
-                <span className="font-bold text-slate-400 text-center">:</span>
+              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
+                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 코&nbsp;&nbsp;&nbsp;&nbsp;스</span>
+                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <input
                     type="text"
@@ -1169,14 +1169,14 @@ ${targetUrl}`;
                     className="w-full px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-semibold text-slate-900"
                   />
                 ) : (
-                  <span className="font-semibold text-slate-800">{data?.meta?.course || ''}</span>
+                  <span className="font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.course || ''}</span>
                 )}
               </div>
 
               {/* 참여 대상 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[68px_10px_1fr] text-sm' : 'grid-cols-[58px_8px_1fr] text-xs'} items-baseline gap-1`}>
-                <span className="font-bold text-slate-600 tracking-wider">• 참&nbsp;&nbsp;&nbsp;&nbsp;여</span>
-                <span className="font-bold text-slate-400 text-center">:</span>
+              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
+                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 참&nbsp;&nbsp;&nbsp;&nbsp;여</span>
+                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <input
                     type="text"
@@ -1188,15 +1188,15 @@ ${targetUrl}`;
                     className="w-full px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-semibold text-slate-900"
                   />
                 ) : (
-                  <span className="font-semibold text-slate-800">{data?.meta?.targetAudience || ''}</span>
+                  <span className="font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.targetAudience || ''}</span>
                 )}
               </div>
 
-              {/* 구   성 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[68px_10px_1fr] text-sm' : 'grid-cols-[58px_8px_1fr] text-xs'} items-baseline gap-1`}>
-                <span className="font-bold text-slate-600 tracking-wider">• 구&nbsp;&nbsp;&nbsp;&nbsp;성</span>
-                <span className="font-bold text-slate-400 text-center">:</span>
-                <div className="space-y-1">
+              {/* 프로그램 구성 */}
+              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
+                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 구&nbsp;&nbsp;&nbsp;&nbsp;성</span>
+                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
+                <div className="space-y-1 min-w-0">
                   {(editingOverview ? (editOverviewData?.programStructure || []) : (data?.meta?.programStructure || [])).map((item: string, pIdx: number) => (
                     <div key={`prog-${pIdx}-${item.slice(0, 15)}`} className="flex items-start">
                       {editingOverview ? (
@@ -1256,9 +1256,9 @@ ${targetUrl}`;
               </div>
 
               {/* 비고 (직원 복무) - 눈에 띄는 선명한 블루 강조 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[68px_10px_1fr] text-sm' : 'grid-cols-[58px_8px_1fr] text-xs'} items-baseline gap-1 pt-0.5`}>
-                <span className="font-extrabold text-blue-600 tracking-wider">• 비&nbsp;&nbsp;&nbsp;&nbsp;고</span>
-                <span className="font-bold text-blue-400 text-center">:</span>
+              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline pt-0.5`}>
+                <span className="font-extrabold text-blue-600 tracking-wide whitespace-nowrap shrink-0">• 비&nbsp;&nbsp;&nbsp;&nbsp;고</span>
+                <span className="font-bold text-blue-400 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <input
                     type="text"

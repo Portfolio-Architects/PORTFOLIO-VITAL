@@ -166,11 +166,11 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       // Must contain festival title, period, staff note, weekly report items, and active Cloudflare URL
       expect(copiedText).toContain('2026 양재천 걷자! 건강 페스티벌');
       expect(copiedText).toContain('주간 추진실적 보고');
-      expect(copiedText).toContain('8. 31. ~ 9. 4.');
+      expect(copiedText).toContain('9. 7. ~ 9. 11.');
       expect(copiedText).toContain('**행사 참여 직원 대체휴무 시행 예정**');
       expect(copiedText).toContain('■ 추진내역');
-      expect(copiedText).toContain('https://codes-investing-findings-lucas.trycloudflare.com/festival/yangjae');
-      expect(copiedText).toContain('1. [홍보] 행사 포스터 시안 제작 및 대구민 홍보 채널 구축 진행중');
+      expect(copiedText).toContain('https://portfolio-hchps.pages.dev/festival/yangjae');
+      expect(copiedText).toContain('1. [체육회/공동개최] 9. 7. 강남구체육회(걷기협회) 구청장배 걷기대회 공동 개최 협의');
       expect(copiedText).toContain('※ 아래 링크 클릭하시면 전체 추진내역 열람이 가능합니다.');
     });
 
@@ -201,8 +201,8 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       });
 
       const copiedText = writeTextMock.mock.calls[0][0];
-      expect(copiedText).toContain('https://codes-investing-findings-lucas.trycloudflare.com/festival/yangjae');
-      expect(copiedText).toContain('8. 31. ~ 9. 4.');
+      expect(copiedText).toContain('https://portfolio-hchps.pages.dev/festival/yangjae');
+      expect(copiedText).toContain('9. 7. ~ 9. 11.');
     });
 
     it('falls back to document.execCommand in insecure HTTP or webview contexts without throwing', async () => {
@@ -289,7 +289,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(sharePayload.title).toContain('2026 양재천 걷자! 건강 페스티벌');
       expect(sharePayload.title).toContain('주간 추진실적 보고');
       // text already contains the target URL; url field should not be redundantly passed to avoid duplication
-      expect(sharePayload.text).toContain('https://codes-investing-findings-lucas.trycloudflare.com/festival/yangjae');
+      expect(sharePayload.text).toContain('https://portfolio-hchps.pages.dev/festival/yangjae');
       expect(sharePayload.url).toBeUndefined();
     });
   });

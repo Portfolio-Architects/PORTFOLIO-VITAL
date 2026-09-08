@@ -22,34 +22,41 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    .is-large-font [class*="text-"] {
-      font-size: 1.25em !important;
-      line-height: 1.6 !important;
-    }
-    .is-large-font [class*="text-\\[9"] {
-      font-size: 12.5px !important;
-    }
-    .is-large-font [class*="text-\\[10"] {
-      font-size: 13.5px !important;
-    }
-    .is-large-font [class*="text-\\[11"] {
+    /* 오직 글자 크기 유틸리티만 타겟팅 (text-slate-*, text-center 등 색상/정렬 클래스 중첩 폭발 방지) */
+    .is-large-font .text-\[9px\] { font-size: 11.5px !important; }
+    .is-large-font .text-\[10px\] { font-size: 12.5px !important; }
+    .is-large-font .text-\[11px\] { font-size: 13.5px !important; }
+    .is-large-font .text-xs {
       font-size: 14.5px !important;
+      line-height: 1.55 !important;
     }
-    .is-large-font [class*="text-xs"] {
-      font-size: 15.5px !important;
-      line-height: 1.6 !important;
+    .is-large-font .text-sm {
+      font-size: 16.5px !important;
+      line-height: 1.55 !important;
     }
-    .is-large-font [class*="text-sm"] {
-      font-size: 18px !important;
-      line-height: 1.6 !important;
-    }
-    .is-large-font [class*="text-base"] {
-      font-size: 20px !important;
+    .is-large-font .text-base {
+      font-size: 18.5px !important;
       line-height: 1.5 !important;
     }
-    .is-large-font [class*="text-lg"] {
-      font-size: 23px !important;
+    .is-large-font .text-lg {
+      font-size: 21px !important;
       line-height: 1.45 !important;
+    }
+
+    /* 행사 개요 라벨 정렬 보호 */
+    .overview-row {
+      display: grid;
+      grid-template-columns: minmax(62px, max-content) 10px 1fr;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .is-large-font .overview-row {
+      grid-template-columns: minmax(76px, max-content) 12px 1fr;
+      gap: 6px;
+    }
+    .overview-label {
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
     }
   </style>
 </head>
@@ -223,42 +230,42 @@
           '</div>' +
           '<span class="font-black text-xs px-2.5 py-0.5 bg-slate-900 text-amber-300 rounded-full border border-slate-700 shadow-xs tracking-wide shrink-0">D-' + daysLeft + '</span>' +
         '</div>' +
-        '<div class="space-y-2 text-xs">' +
-          '<div class="grid grid-cols-[58px_8px_1fr] items-baseline gap-1">' +
-            '<span class="font-bold text-slate-600 tracking-wider">• 행사명</span>' +
-            '<span class="font-bold text-slate-400 text-center">:</span>' +
-            '<span class="font-extrabold text-slate-900 leading-snug break-keep">' + (meta.title || '2026 양재천 건강 페스티벌') + '</span>' +
+        '<div class="space-y-2 text-xs overview-details">' +
+          '<div class="overview-row">' +
+            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 행사명</span>' +
+            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+            '<span class="font-extrabold text-slate-900 leading-snug break-keep min-w-0">' + (meta.title || '2026 양재천 건강 페스티벌') + '</span>' +
           '</div>' +
-          '<div class="grid grid-cols-[58px_8px_1fr] items-baseline gap-1">' +
-            '<span class="font-bold text-slate-600 tracking-wider">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>' +
-            '<span class="font-bold text-slate-400 text-center">:</span>' +
-            '<span class="font-semibold text-slate-800">' + (meta.eventDate || '') + ' (' + (meta.eventTime || '') + ')</span>' +
+          '<div class="overview-row">' +
+            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>' +
+            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+            '<span class="font-semibold text-slate-800 break-keep min-w-0">' + (meta.eventDate || '') + ' (' + (meta.eventTime || '') + ')</span>' +
           '</div>' +
-          '<div class="grid grid-cols-[58px_8px_1fr] items-baseline gap-1">' +
-            '<span class="font-bold text-slate-600 tracking-wider">• 장&nbsp;&nbsp;&nbsp;&nbsp;소</span>' +
-            '<span class="font-bold text-slate-400 text-center">:</span>' +
-            '<span class="font-semibold text-slate-800 leading-snug break-keep">' + (meta.location || '') + '</span>' +
+          '<div class="overview-row">' +
+            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 장&nbsp;&nbsp;&nbsp;&nbsp;소</span>' +
+            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+            '<span class="font-semibold text-slate-800 leading-snug break-keep min-w-0">' + (meta.location || '') + '</span>' +
           '</div>' +
-          '<div class="grid grid-cols-[58px_8px_1fr] items-baseline gap-1">' +
-            '<span class="font-bold text-slate-600 tracking-wider">• 코&nbsp;&nbsp;&nbsp;&nbsp;스</span>' +
-            '<span class="font-bold text-slate-400 text-center">:</span>' +
-            '<span class="font-semibold text-slate-800">' + (meta.course || '') + '</span>' +
+          '<div class="overview-row">' +
+            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 코&nbsp;&nbsp;&nbsp;&nbsp;스</span>' +
+            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+            '<span class="font-semibold text-slate-800 break-keep min-w-0">' + (meta.course || '') + '</span>' +
           '</div>' +
-          '<div class="grid grid-cols-[58px_8px_1fr] items-baseline gap-1">' +
-            '<span class="font-bold text-slate-600 tracking-wider">• 참&nbsp;&nbsp;&nbsp;&nbsp;여</span>' +
-            '<span class="font-bold text-slate-400 text-center">:</span>' +
-            '<span class="font-semibold text-slate-800">' + (meta.targetAudience || '') + '</span>' +
+          '<div class="overview-row">' +
+            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 참&nbsp;&nbsp;&nbsp;&nbsp;여</span>' +
+            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+            '<span class="font-semibold text-slate-800 break-keep min-w-0">' + (meta.targetAudience || '') + '</span>' +
           '</div>' +
           (progHtml ? 
-            '<div class="grid grid-cols-[58px_8px_1fr] items-baseline gap-1">' +
-              '<span class="font-bold text-slate-600 tracking-wider">• 구&nbsp;&nbsp;&nbsp;&nbsp;성</span>' +
-              '<span class="font-bold text-slate-400 text-center">:</span>' +
-              '<div class="space-y-1">' + progHtml + '</div>' +
+            '<div class="overview-row">' +
+              '<span class="overview-label font-bold text-slate-600 tracking-wide">• 구&nbsp;&nbsp;&nbsp;&nbsp;성</span>' +
+              '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+              '<div class="space-y-1 min-w-0">' + progHtml + '</div>' +
             '</div>' : '') +
-          '<div class="grid grid-cols-[58px_8px_1fr] items-baseline gap-1 pt-0.5">' +
-            '<span class="font-extrabold text-blue-600 tracking-wider">• 비&nbsp;&nbsp;&nbsp;&nbsp;고</span>' +
-            '<span class="font-bold text-blue-400 text-center">:</span>' +
-            '<span class="font-bold text-blue-600 leading-snug break-keep">' + (meta.staffNote || '행사 참여 직원 대체휴무 시행 예정') + '</span>' +
+          '<div class="overview-row pt-0.5">' +
+            '<span class="overview-label font-extrabold text-blue-600 tracking-wide">• 비&nbsp;&nbsp;&nbsp;&nbsp;고</span>' +
+            '<span class="font-bold text-blue-400 text-center shrink-0">:</span>' +
+            '<span class="font-bold text-blue-600 leading-snug break-keep min-w-0">' + (meta.staffNote || '행사 참여 직원 대체휴무 시행 예정') + '</span>' +
           '</div>' +
         '</div>';
     }
@@ -470,7 +477,7 @@
 
     document.getElementById('btn-share').onclick = function() {
       const title = appData.meta?.title || '2026 양재천 걷자! 건강 페스티벌';
-      const period = appData.weeklyReport?.period || '8. 31. ~ 9. 4.';
+      const period = appData.weeklyReport?.period || '9. 7. ~ 9. 11.';
       const weekTitle = appData.weeklyReport?.weekTitle || '주간 추진실적 보고';
       const staffNote = appData.meta?.staffNote || '행사 참여 직원 대체휴무 시행 예정';
       const report = (appData.weeklyReport?.items || []).join('\n');
