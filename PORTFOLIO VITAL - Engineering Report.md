@@ -4181,6 +4181,16 @@ sequenceDiagram
     * 1,000명 이상 대규모 인파 대비 안전관리계획 심의 및 응급의료 지원 동선 구축.
   - `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts`, `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx` 동기화 및 Cloudflare Pages 24/7 레플리카 발행 완료.
   - Jest 단위/통합 테스트 25/25 ALL PASS.
+- [x] **양재천 페스티벌 추진과제 세부 항목(Detail Row) 디자인 가독성 및 UI/UX 프리미엄 고도화 (Milestone 134 - 2026-09-08)**
+  - 문제점 개선: 날짜/완료 상태 타일이 회색/민트색 2단 박스로 비좁게 압축되어 가독성이 떨어지고, 개조식 내용이 단순 하이픈(`-`)과 얇은 폰트로 분리되어 시각적 위계가 불명확하며, 담당자 연락처 뱃지가 빈 공간에 부유하던 현상 개선.
+  - 개선 내역:
+    * **캘린더형 상태 타일 고도화**: 상태별(완료: 에메랄드 테두리/링 + 솔리드 에메랄드 `✓ 완료` 화이트 뱃지, 진행: 앰버 테두리/링 + `▶ 진행` 뱃지, 예정: 슬레이트 테두리 + `○ 예정` 뱃지) 시각적 피드백 직관화 및 날짜 말미 마침표 정리(`26.7.29` 등)와 패딩/너비 확장(`min-w-[58px] sm:min-w-[62px]`).
+    * **개조식 위계 및 본문 가독성 강화**: 제목(`사전답사 1` 등)을 `text-[13.5px] font-extrabold text-slate-900` 볼드 헤딩으로 격상하고, 하위 세부 내용은 조잡한 하이픈 대신 세련된 레일 보더(`border-l-2 border-slate-300 pl-2.5`) 기반 개조식 브리프로 시각적 위계를 정립.
+    * **담당자 행정 연락처 칩 바 신설**: 하단에 마이크로 헤어라인(`border-t border-slate-200/70 pt-1.5 mt-1.5`)으로 구분된 전용 메타데이터 풋터를 배치하고, `Phone`/`User` 아이콘이 포함된 둥근 알약 캡슐(`rounded-full`)로 전화 걸기 원클릭 액션을 제공하여 시각적 안정감 극대화.
+    * 큰글씨 모드(`is-large-font`)에서도 폰트 색상 클래스 곱연산 방지 및 세부 글자 크기(`13.5px`, `9.5px` 등) 정밀 스케일링 보장.
+    * `src/components/festival/YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`, `out/` 정적 번들 및 Cloudflare 24/7 레플리카 전면 동기화.
+    * Jest 단위/통합 테스트 25/25 ALL PASS.
+
 
 
 

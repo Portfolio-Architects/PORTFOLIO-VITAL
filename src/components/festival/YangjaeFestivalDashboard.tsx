@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useSyncExternalStore, useCallback } from 'react';
-import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
+import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, User } from 'lucide-react';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem } from '@/hooks/useYangjaeFestival';
 
 export interface DetailDraft {
@@ -56,33 +56,27 @@ const FESTIVAL_CATEGORIES = ['전체', '전문 의료·검진', '민간 헬스�
 const FESTIVAL_TARGET_TIMESTAMP = new Date("2026-10-31T09:00:00").getTime();
 
 const LARGE_FONT_STYLES = `
-  .is-large-font [class*="text-"] {
-    font-size: 1.25em !important;
-    line-height: 1.6 !important;
-  }
-  .is-large-font [class*="text-\\[9"] {
-    font-size: 12.5px !important;
-  }
-  .is-large-font [class*="text-\\[10"] {
-    font-size: 13.5px !important;
-  }
-  .is-large-font [class*="text-\\[11"] {
+  .is-large-font .text-\\[9px\\] { font-size: 11.5px !important; }
+  .is-large-font .text-\\[9\\.5px\\] { font-size: 12px !important; }
+  .is-large-font .text-\\[10px\\] { font-size: 12.5px !important; }
+  .is-large-font .text-\\[10\\.5px\\] { font-size: 13px !important; }
+  .is-large-font .text-\\[11px\\] { font-size: 13.5px !important; }
+  .is-large-font .text-\\[13px\\] { font-size: 15.5px !important; }
+  .is-large-font .text-\\[13\\.5px\\] { font-size: 16px !important; }
+  .is-large-font .text-xs {
     font-size: 14.5px !important;
+    line-height: 1.55 !important;
   }
-  .is-large-font [class*="text-xs"] {
-    font-size: 15.5px !important;
-    line-height: 1.6 !important;
+  .is-large-font .text-sm {
+    font-size: 16.5px !important;
+    line-height: 1.55 !important;
   }
-  .is-large-font [class*="text-sm"] {
-    font-size: 18px !important;
-    line-height: 1.6 !important;
-  }
-  .is-large-font [class*="text-base"] {
-    font-size: 20px !important;
+  .is-large-font .text-base {
+    font-size: 18.5px !important;
     line-height: 1.5 !important;
   }
-  .is-large-font [class*="text-lg"] {
-    font-size: 23px !important;
+  .is-large-font .text-lg {
+    font-size: 21px !important;
     line-height: 1.45 !important;
   }
   .is-large-font input, .is-large-font textarea, .is-large-font select {
@@ -321,7 +315,7 @@ export function renderBulletedContent(text: string, isLargeFont: boolean) {
     );
   }
 
-  // 2. 콜론(:)이 포함된 경우: "제목"과 "개조식 내용(-)"으로 2줄 분리
+  // 2. 콜론(:)이 포함된 경우: "제목"과 "개조식 내용"으로 2줄 분리
   // 예: "1차 사전답사: 현장 실사 및 행사장소 '수변문화쉼터' 검토 완료"
   if (text.includes(':')) {
     const colonIdx = text.indexOf(':');
@@ -331,13 +325,12 @@ export function renderBulletedContent(text: string, isLargeFont: boolean) {
     return (
       <div className="space-y-1">
         {titlePart && (
-          <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} font-bold text-slate-900 flex items-center gap-1`}>
+          <div className={`${isLargeFont ? 'text-sm' : 'text-[13px] sm:text-[13.5px]'} font-extrabold text-slate-900 tracking-tight leading-snug break-keep flex items-center gap-1.5`}>
             <span>{titlePart}</span>
           </div>
         )}
         {bodyPart && (
-          <div className="flex items-start gap-1.5 pl-1">
-            <span className="text-slate-400 font-bold shrink-0 text-xs select-none mt-0.5">-</span>
+          <div className="mt-1 pl-2.5 border-l-2 border-slate-300/90 py-0.5">
             <span className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-700 font-medium leading-relaxed break-keep`}>
               {bodyPart}
             </span>
@@ -350,8 +343,7 @@ export function renderBulletedContent(text: string, isLargeFont: boolean) {
   // 3. 일반 단일 라인
   return (
     <div className="flex items-start gap-1.5">
-      <span className="text-slate-400 font-bold shrink-0 text-xs select-none mt-0.5">-</span>
-      <span className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-800 font-medium leading-relaxed break-keep`}>
+      <span className={`${isLargeFont ? 'text-sm' : 'text-[13px] sm:text-[13.5px]'} text-slate-900 font-bold leading-relaxed break-keep`}>
         {text}
       </span>
     </div>
@@ -1577,76 +1569,89 @@ ${targetUrl}`;
                               })()}
                             </div>
                           ) : (
-                            <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-200/90 shadow-2xs">
-                              {item.details.map((detail: string, dIdx: number) => {
-                                const parsed = parseDetail(detail);
-                                const isCoopTask = parsed.text.includes('[협조') || detail.includes('[협조');
-                                return (
-                                  <div 
-                                    key={`${item.id}-detail-row-${dIdx}-${detail.slice(0, 20)}`} 
-                                    className={`p-2.5 flex items-start gap-2.5 transition-colors ${
-                                      isCoopTask 
-                                        ? 'bg-indigo-50/50 hover:bg-indigo-50/80' 
-                                        : 'hover:bg-white'
-                                    }`}
-                                  >
-                                    {/* 1. 세로 한 열(Column) 타일: 위는 날짜, 아래는 상태로 배치 */}
-                                    <div className="shrink-0 flex flex-col items-center justify-center rounded-lg border border-slate-300 overflow-hidden shadow-2xs font-mono min-w-[56px] text-center mt-0.5 bg-white">
-                                      <span className="w-full bg-slate-200 text-slate-900 font-black text-[10.5px] px-1 py-0.5 tracking-tight border-b border-slate-300">
-                                        {parsed.date || '상시'}
-                                      </span>
-                                      <span className={`w-full px-1 py-0.5 text-[9.5px] font-black tracking-tight ${
-                                        parsed.status === 'done'
-                                          ? 'bg-emerald-100 text-emerald-900'
-                                          : parsed.status === 'in-progress'
-                                          ? 'bg-amber-100 text-amber-900'
-                                          : 'bg-sky-100 text-sky-900'
-                                      }`}>
-                                        {parsed.status === 'done' ? '✓ 완료' : parsed.status === 'in-progress' ? '▶ 진행' : '○ 예정'}
-                                      </span>
-                                    </div>
+                              <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-200/90 shadow-2xs">
+                                {item.details.map((detail: string, dIdx: number) => {
+                                  const parsed = parseDetail(detail);
+                                  const isCoopTask = parsed.text.includes('[협조') || detail.includes('[협조');
+                                  const displayDate = parsed.date ? parsed.date.replace(/\.$/, '') : '상시';
+                                  const isTimeRange = displayDate.includes('~');
 
-                                    {/* 3. 본문 텍스트 (개조식 렌더링) 및 참석자 태그 */}
-                                    <div className="flex-1 min-w-0 pt-0.5 space-y-1.5">
-                                      <div className={parsed.status === 'done' ? 'text-slate-700' : 'text-slate-950 font-medium'}>
-                                        {renderBulletedContent(parsed.text, isLargeFont)}
+                                  return (
+                                    <div 
+                                      key={`${item.id}-detail-row-${dIdx}-${detail.slice(0, 20)}`} 
+                                      className={`p-3 flex items-start gap-3 transition-colors ${
+                                        isCoopTask 
+                                          ? 'bg-indigo-50/40 hover:bg-indigo-50/70' 
+                                          : 'hover:bg-white bg-white/70'
+                                      }`}
+                                    >
+                                      {/* 1. 세로 한 열(Column) 캘린더형 상태 타일 */}
+                                      <div className={`shrink-0 flex flex-col items-center justify-center rounded-lg border overflow-hidden shadow-2xs font-mono min-w-[58px] sm:min-w-[62px] text-center mt-0.5 bg-white transition-all ${
+                                        parsed.status === 'done'
+                                          ? 'border-emerald-400 ring-1 ring-emerald-200/60'
+                                          : parsed.status === 'in-progress'
+                                          ? 'border-amber-400 ring-1 ring-amber-200/60'
+                                          : 'border-slate-300'
+                                      }`}>
+                                        <span className={`w-full bg-slate-50 text-slate-800 font-extrabold px-1 py-1 tracking-tight border-b border-slate-200 break-all leading-tight ${
+                                          isTimeRange ? 'text-[9.5px]' : 'text-[11px]'
+                                        }`}>
+                                          {displayDate}
+                                        </span>
+                                        <span className={`w-full px-1 py-0.5 text-[10px] font-black tracking-tight ${
+                                          parsed.status === 'done'
+                                            ? 'bg-emerald-600 text-white'
+                                            : parsed.status === 'in-progress'
+                                            ? 'bg-amber-500 text-white'
+                                            : 'bg-slate-500 text-white'
+                                        }`}>
+                                          {parsed.status === 'done' ? '✓ 완료' : parsed.status === 'in-progress' ? '▶ 진행' : '○ 예정'}
+                                        </span>
                                       </div>
 
-                                      {/* 4. 분리된 참석자 태그 & 행정번호 연동 (라벨 없이 순수 뱃지만 노출) */}
-                                      {parsed.attendees && (
-                                        <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                                          {parsed.attendees.split(',').map((person, pIdx) => {
-                                            const trimmed = person.trim();
-                                            if (!trimmed) return null;
-                                            const staff = getStaffInfo(trimmed);
-                                            return staff ? (
-                                              <a
-                                                key={`attendee-${trimmed}-${pIdx}`}
-                                                href={`tel:${staff.full}`}
-                                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 shadow-3xs transition-colors cursor-pointer"
-                                                title={`전화 연결: ${staff.full}`}
-                                              >
-                                                <span>{trimmed}</span>
-                                                <span className="text-amber-900 font-mono text-[9.5px] bg-amber-200/90 px-1 py-0.2 rounded font-black">
-                                                  {staff.ext}
-                                                </span>
-                                              </a>
-                                            ) : (
-                                              <span
-                                                key={`attendee-${trimmed}-${pIdx}`}
-                                                className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-3xs"
-                                              >
-                                                {trimmed}
-                                              </span>
-                                            );
-                                          })}
+                                      {/* 3. 본문 텍스트 (개조식 렌더링) 및 참석자 태그 */}
+                                      <div className="flex-1 min-w-0 pt-0.5 space-y-1.5">
+                                        <div className={parsed.status === 'done' ? 'text-slate-800' : 'text-slate-950 font-medium'}>
+                                          {renderBulletedContent(parsed.text, isLargeFont)}
                                         </div>
-                                      )}
+
+                                        {/* 4. 분리된 참석자 태그 & 행정번호 연동 */}
+                                        {parsed.attendees && (
+                                          <div className="flex items-center gap-1.5 flex-wrap pt-1.5 border-t border-slate-200/70 mt-1.5">
+                                            {parsed.attendees.split(',').map((person, pIdx) => {
+                                              const trimmed = person.trim();
+                                              if (!trimmed) return null;
+                                              const staff = getStaffInfo(trimmed);
+                                              return staff ? (
+                                                <a
+                                                  key={`attendee-${trimmed}-${pIdx}`}
+                                                  href={`tel:${staff.full}`}
+                                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300/80 shadow-3xs transition-all cursor-pointer active:scale-95"
+                                                  title={`전화 연결: ${staff.full}`}
+                                                >
+                                                  <Phone className="w-2.5 h-2.5 text-amber-700 shrink-0" />
+                                                  <span>{trimmed}</span>
+                                                  <span className="text-amber-900 font-mono text-[9px] bg-amber-200/90 px-1.5 py-0.2 rounded-full font-black">
+                                                    {staff.ext}
+                                                  </span>
+                                                </a>
+                                              ) : (
+                                                <span
+                                                  key={`attendee-${trimmed}-${pIdx}`}
+                                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-100 text-slate-700 border border-slate-200/80 shadow-3xs"
+                                                >
+                                                  <User className="w-2.5 h-2.5 text-slate-500 shrink-0" />
+                                                  <span>{trimmed}</span>
+                                                </span>
+                                              );
+                                            })}
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                                  );
+                                })}
+                              </div>
                           )}
                         </div>
                       </div>
