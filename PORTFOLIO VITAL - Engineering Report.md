@@ -4190,6 +4190,18 @@ sequenceDiagram
     * 큰글씨 모드(`is-large-font`)에서도 폰트 색상 클래스 곱연산 방지 및 세부 글자 크기(`13.5px`, `9.5px` 등) 정밀 스케일링 보장.
     * `src/components/festival/YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`, `out/` 정적 번들 및 Cloudflare 24/7 레플리카 전면 동기화.
     * Jest 단위/통합 테스트 25/25 ALL PASS.
+- [x] **2026 양재천 건강 페스티벌 국민의례 약식절차 1 공식 채택 및 대통령훈령 제438호 표준 식순 동기화 (Milestone 135 - 2026-09-08)**
+  - 대통령훈령 제438호(국민의례 규정) 제4조에 의거한 의례 절차 체계화:
+    * **약식절차 1 공식 채택**:
+      ① 국기에 대한 경례: 전주가 없는 애국가 반주 1절에 맞춰 실시 (국기에 대한 맹세문은 낭송하지 않음).
+      ② 순국선열과 호국영령에 대한 묵념: 묵념곡을 연주하되 묵념곡이 없으면 구령으로 10~15초 정도 실시 (행사 성격에 따라 생략 가능).
+  - 사회자 표준 진행 대본 및 금지 멘트 수칙 강화:
+    * 개식 안내 $\to$ 국기에 대한 경례(전주 없는 애국가 1절 반주) $\to$ 묵념(묵념곡 10~15초) $\to$ 착석 및 내빈 소개 직결.
+    * 사회자가 *"애국가 제창 등 이하 생략하겠습니다"* 등의 부적절한 생략 표현을 발언하는 것을 규정상 절대 금지.
+  - `AGENTS.md` 섹션 L 매니페스트 개정, `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts` 추진과제 2(행사 식순) 국민의례 세부 항목에 공식 의전 절차 완벽 반영.
+  - Cloudflare Pages 24/7 레플리카 및 정적 번들 배포 완료.
+  - Jest 단위/통합 테스트 25/25 ALL PASS.
+
 
 
 
