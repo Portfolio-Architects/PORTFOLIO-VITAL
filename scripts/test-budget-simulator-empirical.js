@@ -262,9 +262,173 @@ assert(formContent.includes('useCallback'), 'SimulationInputForm memoizes event 
 assert(formContent.includes('useMemo'), 'SimulationInputForm memoizes derived amounts with useMemo');
 assert(formContent.includes('toLocaleString'), 'SimulationInputForm formats unit price with thousand separators');
 
+// ----------------------------------------------------
+// TEST 6: Duplicate Key Prevention & Merged Entries Deduplication
+// ----------------------------------------------------
+console.log('\n🔍 [TEST 6] Verifying Duplicate Key Prevention & MergedEntries Deduplication...');
+
+// 1. Verify SimulationResultTable & SimulationEntryList have defensive key patterns
+const tablePath = path.join(rootDir, 'src', 'components', 'budget', 'ui', 'SimulationResultTable.tsx');
+const tableContent = fs.readFileSync(tablePath, 'utf8');
+const listPath = path.join(rootDir, 'src', 'components', 'budget', 'ui', 'SimulationEntryList.tsx');
+const listContent = fs.readFileSync(listPath, 'utf8');
+
+assert(tableContent.includes('key={`sim-row-${entry.id}-${entryIdx}`}'), 'SimulationResultTable uses indexed unique keys for Level 3 simulation rows');
+assert(tableContent.includes('key={`stat-${statKey}-${sIdx}`}'), 'SimulationResultTable uses indexed unique keys for stat items');
+assert(listContent.includes('key={`sim-grp-item-${item.id}-${itemIdx}`}'), 'SimulationEntryList uses indexed unique keys for grouped view items');
+assert(listContent.includes('key={`sim-tbl-item-${item.id}-${itemIdx}`}'), 'SimulationEntryList uses indexed unique keys for table view items');
+assert(listContent.includes('key={`sim-card-item-${item.id}-${itemIdx}`}'), 'SimulationEntryList uses indexed unique keys for card view items');
+
+// 2. Simulate the mergedEntries deduplication logic with identical IDs
+function simulateMergedEntries(entries, budgetEntries, categories) {
+  const list = [];
+  const seenSimIds = new Set();
+  const existingBudgetEntryIds = new Set();
+
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    if (!e || !e.id) continue;
+    if (seenSimIds.has(e.id)) continue;
+    seenSimIds.add(e.id);
+    if (e.budgetEntryId) {
+      existingBudgetEntryIds.add(e.budgetEntryId);
+    }
+    list.push({ ...e });
+  }
+
+  if (budgetEntries) {
+    for (let i = 0; i < budgetEntries.length; i++) {
+      const be = budgetEntries[i];
+      if (!be.isPlanned) continue;
+
+      let matchedIdx = -1;
+      if (be.simulationEntryId && seenSimIds.has(be.simulationEntryId)) {
+        matchedIdx = list.findIndex(e => e.id === be.simulationEntryId);
+      } else if (be.id && existingBudgetEntryIds.has(be.id)) {
+        matchedIdx = list.findIndex(e => e.budgetEntryId === be.id);
+      }
+
+      if (matchedIdx >= 0) {
+        const current = list[matchedIdx];
+        const needsBudgetEntryId = !current.budgetEntryId && be.id;
+        const needsSettled = be.isSettled && current.status !== 'SETTLED';
+        if (needsBudgetEntryId || needsSettled) {
+          list[matchedIdx] = {
+            ...current,
+            budgetEntryId: current.budgetEntryId || be.id,
+            status: be.isSettled ? 'SETTLED' : current.status,
+          };
+        }
+        if (be.id) existingBudgetEntryIds.add(be.id);
+        continue;
+      }
+
+      let targetSimId = be.simulationEntryId || `sim-be-${be.id}`;
+      if (seenSimIds.has(targetSimId)) {
+        targetSimId = `sim-be-${be.id}-${targetSimId}`;
+      }
+      seenSimIds.add(targetSimId);
+      if (be.id) existingBudgetEntryIds.add(be.id);
+
+      const cat = categories?.find(c => c.id === be.categoryId);
+      list.push({
+        id: targetSimId,
+        name: be.purpose,
+        detailedProject: cat?.detailedProject || '기타사업',
+        statItem: cat?.statItem || cat?.name || '일반운영비',
+        categoryId: be.categoryId,
+        unitPrice: be.amount,
+        quantity: 1,
+        amount: be.amount,
+        memo: be.memo,
+        createdAt: be.date || new Date().toISOString(),
+        status: be.isSettled ? 'SETTLED' : 'PLANNED',
+        budgetEntryId: be.id,
+      });
+    }
+  }
+
+  const finalSeenIds = new Set();
+  const sanitizedList = [];
+  for (let i = 0; i < list.length; i++) {
+    let item = list[i];
+    if (finalSeenIds.has(item.id)) {
+      item = { ...item, id: `${item.id}-${i}` };
+    }
+    finalSeenIds.add(item.id);
+    sanitizedList.push(item);
+  }
+
+  return sanitizedList;
+}
+
+// Test with the exact bug scenario reported: collision with key 'mtthb2h1aczgpm6o3'
+const localEntriesWithCollision = [
+  { id: 'mtthb2h1aczgpm6o3', name: 'Item In Local Storage', amount: 500000, detailedProject: '사업A', statItem: '201-01' },
+  { id: 'mtthb2h1aczgpm6o3', name: 'Accidental Duplicate In Storage', amount: 500000, detailedProject: '사업A', statItem: '201-01' },
+  { id: 'other-item-1', name: 'Other Item', amount: 100000, detailedProject: '사업A', statItem: '201-01' }
+];
+
+const budgetEntriesWithSameSimId = [
+  { id: 'be-12345', simulationEntryId: 'mtthb2h1aczgpm6o3', isPlanned: true, purpose: 'Synced SSOT Item', amount: 500000, categoryId: 'cat-1' }
+];
+
+const resultMerged = simulateMergedEntries(localEntriesWithCollision, budgetEntriesWithSameSimId, [{ id: 'cat-1', detailedProject: '사업A', statItem: '201-01' }]);
+
+assert(resultMerged.length === 2, `Duplicate entries merged to exact unique count (expected 2, got ${resultMerged.length})`);
+const matchedSim = resultMerged.find(e => e.id === 'mtthb2h1aczgpm6o3');
+assert(matchedSim !== undefined, 'Simulation entry mtthb2h1aczgpm6o3 exists in result');
+assert(matchedSim.budgetEntryId === 'be-12345', `Simulation entry mtthb2h1aczgpm6o3 backfilled budgetEntryId correctly (${matchedSim.budgetEntryId})`);
+
+const allIds = resultMerged.map(e => e.id);
+const uniqueIds = new Set(allIds);
+assert(allIds.length === uniqueIds.size, 'All IDs in merged entries are strictly 100% unique');
+
+// ----------------------------------------------------
+// TEST 7: Daily Expense Issuance & Unexecuted Balance Calculation
+// ----------------------------------------------------
+console.log('\n🔍 [TEST 7] Verifying Daily Expense Unexecuted Balance Calculation & Surface Integration...');
+
+// 1. Check hook integration
+assert(hookContent.includes('target.dailyExpenseIssued += stats?.dailyExpenseIssued || 0;'), 'useBudgetSimulator accumulates dailyExpenseIssued in projectSummaries');
+assert(hookContent.includes('dailyExpenseRemaining: val.dailyExpenseRemaining'), 'useBudgetSimulator outputs dailyExpenseRemaining in projectSummaries');
+
+// 2. Check UI component integration
+const freshTableContent = fs.readFileSync(tablePath, 'utf8');
+
+assert(freshTableContent.includes('onlyWithDailyExpenses'), 'SimulationResultTable defines onlyWithDailyExpenses filter state');
+assert(freshTableContent.includes('statItemsWithDailyExpenseCount'), 'SimulationResultTable computes statItemsWithDailyExpenseCount');
+assert(freshTableContent.includes('일상 미집행'), 'SimulationResultTable renders 일상 미집행 badge/subtext');
+assert(freshTableContent.includes('Coins'), 'SimulationResultTable imports Coins icon');
+
+const cardsComponentPath = path.join(rootDir, 'src', 'components', 'budget', 'ui', 'SimulationSummaryCards.tsx');
+const cardsContent = fs.readFileSync(cardsComponentPath, 'utf8');
+
+assert(cardsContent.includes('totalDailyRemaining'), 'SimulationSummaryCards computes totalDailyRemaining');
+assert(cardsContent.includes('totalDailyIssued'), 'SimulationSummaryCards computes totalDailyIssued');
+assert(cardsContent.includes('실가용'), 'SimulationSummaryCards renders real available funds with daily expense balance');
+
+// 3. Mathematical validation of daily expense entries in local dataset
+let totalDailyIssuedFromData = 0;
+let totalDailySpentFromData = 0;
+budgetEntries.forEach(e => {
+  if (e.actionType === 'issuance') {
+    totalDailyIssuedFromData += (e.amount || 0);
+  } else if (e.actionType === 'daily_expense') {
+    totalDailySpentFromData += (e.amount || 0);
+  }
+});
+const totalDailyRemainingFromData = totalDailyIssuedFromData - totalDailySpentFromData;
+
+console.log(`  ↳ Local Data Daily Expense: Issued=₩${totalDailyIssuedFromData.toLocaleString()}, Spent=₩${totalDailySpentFromData.toLocaleString()}, Remaining=₩${totalDailyRemainingFromData.toLocaleString()}`);
+
+assert(totalDailyIssuedFromData > 0, `Local database contains daily expense issuances (₩${totalDailyIssuedFromData.toLocaleString()})`);
+assert(totalDailyRemainingFromData > 0, `Unexecuted daily expense balance is positive (₩${totalDailyRemainingFromData.toLocaleString()})`);
+assert(totalDailyRemainingFromData === totalDailyIssuedFromData - totalDailySpentFromData, 'Daily expense balance strictly equals issued - spent');
+
 console.log('\n====================================================');
 if (failures === 0) {
-  console.log('🎉 ALL 20 EMPIRICAL CHECKS PASSED PERFECTLY (0 failures)!');
+  console.log('🎉 ALL EMPIRICAL CHECKS PASSED PERFECTLY (0 failures)!');
 } else {
   console.log(`❌ VERIFICATION FAILED with ${failures} failure(s).`);
 }

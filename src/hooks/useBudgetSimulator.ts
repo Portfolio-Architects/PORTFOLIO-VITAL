@@ -193,35 +193,91 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
 
   // Combine storedEntries with any SSOT budgetEntries that are planned (isPlanned: true)
   const mergedEntries = useMemo<SimulationEntry[]>(() => {
-    const list = [...entries];
+    const list: SimulationEntry[] = [];
+    const seenSimIds = new Set<string>();
     const existingBudgetEntryIds = new Set<string>();
-    for (let i = 0; i < list.length; i++) {
-      if (list[i].budgetEntryId) existingBudgetEntryIds.add(list[i].budgetEntryId!);
+
+    // 1. Ingest local entries, deduplicating any accidental duplicates in storage
+    for (let i = 0; i < entries.length; i++) {
+      const e = entries[i];
+      if (!e || !e.id) continue;
+      if (seenSimIds.has(e.id)) continue;
+      seenSimIds.add(e.id);
+      if (e.budgetEntryId) {
+        existingBudgetEntryIds.add(e.budgetEntryId);
+      }
+      list.push({ ...e });
     }
 
+    // 2. Ingest or sync with SSOT planned budget entries
     if (budgetEntries) {
       for (let i = 0; i < budgetEntries.length; i++) {
         const be = budgetEntries[i];
-        if (be.isPlanned && !existingBudgetEntryIds.has(be.id)) {
-          const cat = categories?.find(c => c.id === be.categoryId);
-          list.push({
-            id: be.simulationEntryId || `sim-be-${be.id}`,
-            name: be.purpose,
-            detailedProject: cat?.detailedProject || '기타사업',
-            statItem: cat?.statItem || cat?.name || '일반운영비',
-            categoryId: be.categoryId,
-            unitPrice: be.amount,
-            quantity: 1,
-            amount: be.amount,
-            memo: be.memo,
-            createdAt: be.date || new Date().toISOString(),
-            status: be.isSettled ? 'SETTLED' : 'PLANNED',
-            budgetEntryId: be.id,
-          });
+        if (!be.isPlanned) continue;
+
+        // Check if this budget entry already matches an entry in list
+        let matchedIdx = -1;
+        if (be.simulationEntryId && seenSimIds.has(be.simulationEntryId)) {
+          matchedIdx = list.findIndex(e => e.id === be.simulationEntryId);
+        } else if (be.id && existingBudgetEntryIds.has(be.id)) {
+          matchedIdx = list.findIndex(e => e.budgetEntryId === be.id);
         }
+
+        if (matchedIdx >= 0) {
+          // Already present in list: ensure budgetEntryId and status are aligned
+          const current = list[matchedIdx];
+          const needsBudgetEntryId = !current.budgetEntryId && be.id;
+          const needsSettled = be.isSettled && current.status !== 'SETTLED';
+          if (needsBudgetEntryId || needsSettled) {
+            list[matchedIdx] = {
+              ...current,
+              budgetEntryId: current.budgetEntryId || be.id,
+              status: be.isSettled ? 'SETTLED' : current.status,
+            };
+          }
+          if (be.id) existingBudgetEntryIds.add(be.id);
+          continue;
+        }
+
+        // Not present in list: create a new simulation entry representing this SSOT planned budget entry
+        let targetSimId = be.simulationEntryId || `sim-be-${be.id}`;
+        if (seenSimIds.has(targetSimId)) {
+          targetSimId = `sim-be-${be.id}-${targetSimId}`;
+        }
+        seenSimIds.add(targetSimId);
+        if (be.id) existingBudgetEntryIds.add(be.id);
+
+        const cat = categories?.find(c => c.id === be.categoryId);
+        list.push({
+          id: targetSimId,
+          name: be.purpose,
+          detailedProject: cat?.detailedProject || '기타사업',
+          statItem: cat?.statItem || cat?.name || '일반운영비',
+          categoryId: be.categoryId,
+          unitPrice: be.amount,
+          quantity: 1,
+          amount: be.amount,
+          memo: be.memo,
+          createdAt: be.date || new Date().toISOString(),
+          status: be.isSettled ? 'SETTLED' : 'PLANNED',
+          budgetEntryId: be.id,
+        });
       }
     }
-    return list;
+
+    // 3. Final safety pass: guarantee 100% unique IDs across all items
+    const finalSeenIds = new Set<string>();
+    const sanitizedList: SimulationEntry[] = [];
+    for (let i = 0; i < list.length; i++) {
+      let item = list[i];
+      if (finalSeenIds.has(item.id)) {
+        item = { ...item, id: `${item.id}-${i}` };
+      }
+      finalSeenIds.add(item.id);
+      sanitizedList.push(item);
+    }
+
+    return sanitizedList;
   }, [entries, budgetEntries, categories]);
 
   // Pre-indexed O(1) lookup Map for category resolution by detailedProject + statItem
@@ -430,6 +486,9 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       totalBudget: number;
       currentSpent: number;
       simulatedExpenditure: number;
+      dailyExpenseIssued: number;
+      dailyExpenseSpent: number;
+      dailyExpenseRemaining: number;
     }>();
 
     // Initialize with existing categories
@@ -438,12 +497,22 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       const dp = cat.detailedProject || '기타';
       let target = map.get(dp);
       if (!target) {
-        target = { totalBudget: 0, currentSpent: 0, simulatedExpenditure: 0 };
+        target = {
+          totalBudget: 0,
+          currentSpent: 0,
+          simulatedExpenditure: 0,
+          dailyExpenseIssued: 0,
+          dailyExpenseSpent: 0,
+          dailyExpenseRemaining: 0,
+        };
         map.set(dp, target);
       }
       const stats = getCategoryStats(cat.id);
       target.totalBudget += cat.totalBudget || 0;
       target.currentSpent += stats?.spent || 0;
+      target.dailyExpenseIssued += stats?.dailyExpenseIssued || 0;
+      target.dailyExpenseSpent += stats?.dailyExpenseSpent || 0;
+      target.dailyExpenseRemaining += stats?.dailyExpenseRemaining || 0;
     }
 
     // Add simulation entries (excluding settled ones)
@@ -453,7 +522,14 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       const dp = entry.detailedProject || '기타';
       let target = map.get(dp);
       if (!target) {
-        target = { totalBudget: 0, currentSpent: 0, simulatedExpenditure: 0 };
+        target = {
+          totalBudget: 0,
+          currentSpent: 0,
+          simulatedExpenditure: 0,
+          dailyExpenseIssued: 0,
+          dailyExpenseSpent: 0,
+          dailyExpenseRemaining: 0,
+        };
         map.set(dp, target);
       }
       target.simulatedExpenditure += entry.amount || 0;
@@ -477,6 +553,9 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
         finalExpectedBalance,
         executionRate,
         isDeficit: finalExpectedBalance < 0,
+        dailyExpenseIssued: val.dailyExpenseIssued,
+        dailyExpenseSpent: val.dailyExpenseSpent,
+        dailyExpenseRemaining: val.dailyExpenseRemaining,
       });
     }
 
@@ -492,6 +571,9 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       totalBudget: number;
       currentSpent: number;
       simulatedExpenditure: number;
+      dailyExpenseIssued: number;
+      dailyExpenseSpent: number;
+      dailyExpenseRemaining: number;
     }>();
 
     // Key format: `${dp}::${st}`
@@ -509,12 +591,18 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           totalBudget: 0,
           currentSpent: 0,
           simulatedExpenditure: 0,
+          dailyExpenseIssued: 0,
+          dailyExpenseSpent: 0,
+          dailyExpenseRemaining: 0,
         };
         map.set(key, target);
       }
       const stats = getCategoryStats(cat.id);
       target.totalBudget += cat.totalBudget || 0;
       target.currentSpent += stats?.spent || 0;
+      target.dailyExpenseIssued += stats?.dailyExpenseIssued || 0;
+      target.dailyExpenseSpent += stats?.dailyExpenseSpent || 0;
+      target.dailyExpenseRemaining += stats?.dailyExpenseRemaining || 0;
     }
 
     // Add simulation entries (excluding settled ones)
@@ -533,6 +621,9 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           totalBudget: 0,
           currentSpent: 0,
           simulatedExpenditure: 0,
+          dailyExpenseIssued: 0,
+          dailyExpenseSpent: 0,
+          dailyExpenseRemaining: 0,
         };
         map.set(key, target);
       }
@@ -554,6 +645,9 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
         simulatedExpenditure: val.simulatedExpenditure,
         finalExpectedBalance,
         isDeficit: finalExpectedBalance < 0,
+        dailyExpenseIssued: val.dailyExpenseIssued,
+        dailyExpenseSpent: val.dailyExpenseSpent,
+        dailyExpenseRemaining: val.dailyExpenseRemaining,
       });
     }
 

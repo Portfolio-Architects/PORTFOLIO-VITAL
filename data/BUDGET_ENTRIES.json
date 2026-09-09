@@ -358,86 +358,6 @@
     "checked": true
   },
   {
-    "id": "mpnip9gm2xajhpsz6",
-    "categoryId": "mnrcir0v5zjn4qxyg",
-    "amount": 7500000,
-    "date": "2026-06-15",
-    "purpose": "강남체력인증 - 기간제보수 11월 소진 가계획",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general"
-  },
-  {
-    "id": "mpniparq513du9l05",
-    "categoryId": "mnrcir0v5zjn4qxyg",
-    "amount": 8080000,
-    "date": "2026-07-15",
-    "purpose": "강남체력인증 - 기간제보수 11월 소진 가계획",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general"
-  },
-  {
-    "id": "mpnipbnq00yk60bgx",
-    "categoryId": "mnrcir0v5zjn4qxyg",
-    "amount": 8140000,
-    "date": "2026-08-15",
-    "purpose": "강남체력인증 - 기간제보수 11월 소진 가계획",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general"
-  },
-  {
-    "id": "mpnipcdy7aecacnfd",
-    "categoryId": "mnrcir0v5zjn4qxyg",
-    "amount": 10542000,
-    "date": "2026-09-15",
-    "purpose": "강남체력인증 - 기간제보수 11월 소진 가계획",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general"
-  },
-  {
-    "id": "mpnipcytoq622xjzp",
-    "categoryId": "mnrcir0v5zjn4qxyg",
-    "amount": 7500000,
-    "date": "2026-10-15",
-    "purpose": "강남체력인증 - 기간제보수 11월 소진 가계획",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general"
-  },
-  {
-    "id": "mpnipey63vuky35as",
-    "categoryId": "mnrcir0v5zjn4qxyg",
-    "amount": 7500000,
-    "date": "2026-11-15",
-    "purpose": "강남체력인증 - 기간제보수 11월 소진 가계획",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general"
-  },
-  {
-    "id": "mpnj28ghq3ei8srak",
-    "categoryId": "mnrcir0v5zjn4qxyg",
-    "amount": 7413500,
-    "date": "2026-05-15",
-    "purpose": "강남체력인증 - 기간제보수 5월 가계획",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general"
-  },
-  {
-    "id": "mpnj2b691uc8729cj",
-    "categoryId": "mnrcir0v5zjn4qxyg",
-    "amount": 7500000,
-    "date": "2026-12-15",
-    "purpose": "강남체력인증 - 기간제보수 12월 가계획",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general"
-  },
-  {
     "id": "mpw3meq4tjszoqbj8",
     "categoryId": "mnrcir0v5zjn4qxyg",
     "amount": 7413500,
@@ -671,5 +591,53 @@
     "actionType": "general",
     "isPlanned": false,
     "id": "mtqs8suged80c0qma"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 49900000,
+    "date": "2026-09-09",
+    "purpose": "양재천 걷자! 건강 페스티벌 용역 계약",
+    "memo": "[시뮬레이션] 단가 ₩49,900,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mtth4xibhnjspzqqi",
+    "id": "mtth4xibmmeynyj29"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 2880000,
+    "date": "2026-09-09",
+    "purpose": "중년여성 비만예방 프로그램 강사비",
+    "memo": "[시뮬레이션] 단가 ₩2,880,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mttkuxbe2uice4jqq",
+    "id": "mttkuxbe6wu5fmujq"
+  },
+  {
+    "categoryId": "mnrcir0vkiq1dafm3",
+    "amount": 3000000,
+    "date": "2026-09-09",
+    "purpose": "행사 실비",
+    "memo": "[시뮬레이션] 단가 ₩3,000,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mttkw5n0vacjtddhv",
+    "id": "mttkw5n05zaabyvuz"
+  },
+  {
+    "categoryId": "mnrcir0voap2bpm8z",
+    "amount": 1980000,
+    "date": "2026-09-09",
+    "purpose": "노르딕 워킹 폴",
+    "memo": "[시뮬레이션] 단가 ₩1,980,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mttvqus6h4y3ixkij",
+    "id": "mttvqus7jbzq6e8qy"
   }
 ]

@@ -203,6 +203,9 @@ export interface ProjectSimulationSummary {
   finalExpectedBalance: number;// 최종 예상 잔액 (currentRemaining - simulatedExpenditure)
   executionRate: number;       // 집행률 (%)
   isDeficit: boolean;          // finalExpectedBalance < 0
+  dailyExpenseIssued?: number;   // 세부사업 일상경비 총 교부액
+  dailyExpenseSpent?: number;    // 세부사업 일상경비 실집행액
+  dailyExpenseRemaining?: number;// 세부사업 일상경비 교부액 중 미집행비용 (교부액 - 실집행액)
 }
 
 export interface StatItemSimulationSummary {
@@ -214,6 +217,9 @@ export interface StatItemSimulationSummary {
   simulatedExpenditure: number;
   finalExpectedBalance: number;
   isDeficit: boolean;
+  dailyExpenseIssued?: number;   // 통계목 일상경비 교부액
+  dailyExpenseSpent?: number;    // 통계목 일상경비 실집행액
+  dailyExpenseRemaining?: number;// 통계목 일상경비 교부액 중 미집행비용 (교부액 - 실집행액)
 }
 
 // ============ Weekly Scheduler Module ============

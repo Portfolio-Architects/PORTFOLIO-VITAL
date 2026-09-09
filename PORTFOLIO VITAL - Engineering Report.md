@@ -4227,6 +4227,61 @@ sequenceDiagram
     * 신규 유관 협력 단체 등록: `[예정][참여:과장님] 양재천 지킴이 : 행사 홍보 및 참여 요청`.
   - `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts`, `out/` 정적 번들 및 Cloudflare 24/7 레플리카 전면 동기화 완료.
   - Jest 단위/통합 테스트 25/25 ALL PASS.
+- [x] **예산시뮬레이터 통계목별 잔액 세부 드릴다운 및 등록 항목 리스트 통계목별 그룹화 고도화 (Milestone 138 - 2026-09-09)**
+  - 사용자 요구사항 반영: "예산시뮬레이터에 항목 등록했을 때, 통계목별 잔액 더 세부적으로 볼수있게 고도화 해줘, 등록항목 리스트별로 보고싶어"
+  - 개선 내역:
+    * **통계목별 잔액 테이블 내 Level 3 인라인 계층 전개 (드릴다운)**:
+      - 기존에 세부사업(Level 1) > 통계목(Level 2)으로 단순 합산액(₩49,900,000 등)만 노출되던 화면에서, 등록된 시뮬레이션 지출 항목(Level 3)을 인라인으로 펼쳐 볼 수 있도록 계층형 구조 전면 개편.
+      - 등록 항목이 존재하는 통계목에 `📌 N건 등록` 인터랙티브 뱃지 및 전개 아이콘 제공.
+      - 전개된 하위 행에서 항목명, 비고(메모), 생성일자, 단가 × 수량 산출식, 예정 금액(보라색 강조), 최종 잔액 기여도(-금액), 그리고 원클릭 인라인 액션([정산], [수정], [삭제]) 즉시 실행 지원.
+    * **신속 필터 및 일괄 전개 제어**:
+      - `📌 등록 통계목만 ({count}개)` 토글 칩: 전체 15개 이상의 통계목 중 실제 시뮬레이션 항목이 등록된 통계목만 1초 만에 압축 조회.
+      - `등록 세부항목 펼침/접기` 버튼: 모든 등록 항목을 원클릭으로 일괄 전개 또는 축약.
+    * **등록 항목 리스트 탭 다각화 (SimulationEntryList)**:
+      - 기존 단순 카드 뷰 외에 **'통계목별 그룹 뷰 (Grouped by Stat Item)'** 및 **'테이블 뷰 (Compact Table)'** 모드 스위처 제공.
+      - 통계목별 그룹 뷰에서 `세부사업 ❯ 통계목` 단위로 묶인 섹션 헤더(건수 및 소계 금액)와 항목별 정밀 상세 리스트 제공.
+    * `src/components/budget/ui/SimulationResultTable.tsx`, `src/components/budget/ui/SimulationEntryList.tsx` 고도화 완료.
+    * TypeScript 컴파일 (`npx tsc --noEmit`): 0 errors PASS.
+    * 예산 시뮬레이터 검증 (`node scripts/test-budget-simulator-empirical.js`): 20/20 Checks ALL PASS (100%).
+    * Zod 데이터 무결성 검증 (`node scripts/run-harness.js --quick`): 0 errors PASS.
+- [x] **예산시뮬레이터 React 콘솔 키 중복 에러 근절 및 양방향 디듀플리케이션 강화 (Milestone 139 - 2026-09-09)**
+  - 문제 현상: React 개발 모드 콘솔 에러 발생 (`Encountered two children with the same key, mtthb2h1aczgpm6o3`).
+  - 근본 원인 분석:
+    * `src/hooks/useBudgetSimulator.ts`의 `mergedEntries` 로직에서 로컬 스토리지에 저장된 항목과 `BUDGET_ENTRIES.json`의 planned 항목 간의 매칭 시, `existingBudgetEntryIds`만 검사하고 `simulationEntryId` 역색인을 수행하지 않아 동일 ID 항목이 이중 push되고 시뮬레이션 지출액이 중복 합산되는 결함 발생.
+    * 컴포넌트 렌더링 시 고유 인덱스가 누락된 순수 객체 ID 키 매핑으로 인한 React DOM Reconciler 충돌.
+  - 개선 내역:
+    * **3단계 양방향 역색인 디듀플리케이션 엔진**:
+      1. 로컬 스토리지 배열 읽기 시 `seenSimIds` Set 기반 1차 중복 방어.
+      2. SSOT planned `budgetEntries` 순회 시 `simulationEntryId` 및 `budgetEntryId` 양방향 매칭으로 기존 항목의 `budgetEntryId`와 `isSettled` 상태 인플레이스 동기화(중복 push 차단).
+      3. 최종 리스트 반환 시 `finalSeenIds` 기반 100% 고유 ID 보장 세이프가드 적용.
+    * **방어적 인덱스 키(Defensive Indexed Keys) 전면 적용**:
+      - `SimulationResultTable.tsx`: Level 3 등록 지출 항목 행(`key={`sim-row-${entry.id}-${entryIdx}`}`), 통계목 행(`key={`stat-${statKey}-${sIdx}`}`), 사업 그룹(`key={`group-${group.detailedProject}-${groupIdx}`}`), 프로젝트 요약 행(`key={`proj-${p.detailedProject}-${pIdx}`}`).
+      - `SimulationEntryList.tsx`: 그룹 뷰 항목(`key={`sim-grp-item-${item.id}-${itemIdx}`}`), 테이블 뷰 행(`key={`sim-tbl-item-${item.id}-${itemIdx}`}`), 카드 뷰 타일(`key={`sim-card-item-${item.id}-${itemIdx}`}`).
+- [x] **예산시뮬레이터 일상경비 교부액 중 미집행비용 추적 및 실가용액 표출 고도화 (Milestone 140 - 2026-09-09)**
+  - 사용자 요구사항: "아.. 그.. 일상경비 교부액중에서도 미집행비용을 함께 표시해줘야하겠어"
+  - 회계 분석 및 배경:
+    * 공공 회계(e-호조) 상 일상경비 교부 시 통계목 집행액으로 일괄 계상(`actionType === 'issuance'`)되어 장부상 집행 잔액에서 즉시 차감됨.
+    * 그러나 부서 일상경비 계좌에 남아 있는 미집행 잔액(`dailyExpenseRemaining = dailyExpenseIssued - dailyExpenseSpent`)은 실제 사용할 수 있는 예산이므로, 장부 잔액에 미집행 일상경비를 더한 금액이 실질 가용 예산임.
+  - 개선 내역:
+    * **데이터 인터페이스 및 산출 엔진 고도화**:
+      - `src/types/index.ts`: `ProjectSimulationSummary` 및 `StatItemSimulationSummary`에 `dailyExpenseIssued`, `dailyExpenseSpent`, `dailyExpenseRemaining` 추가.
+      - `src/hooks/useBudgetSimulator.ts`: `getCategoryStats(cat.id)`로부터 교부액, 실집행액, 미집행 잔여액을 실시간 집계하여 프로젝트 및 통계목 요약에 누적 반환.
+    * **정밀 UI 표출 (`SimulationResultTable.tsx`)**:
+      - **Level 2 통계목 행**: 통계목명 옆 앰버 뱃지(`[🪙 일상 미집행 ₩X,XXX (교부 ₩Y,YYY)]`), 현재 집행액 셀 하단 `교부 ₩...`, 현재 집행 잔액 셀 하단 `+ 일상 미집행 ₩... (실가용 ₩...)`, 최종 예상 잔액 셀 하단 `(일상 포함 ₩...)` 표출.
+      - **Level 1 사업 그룹 헤더 행**: 세부사업별 일상 미집행 총액 뱃지 및 실가용액 표기.
+      - **세부사업별 요약 뷰 (`viewMode === 'project'`)**: 동일하게 교부액, 일상 미집행액, 실질 가용액 표출.
+      - **테이블 하단 합계 (`<tfoot>`)**: 전체 합계 행에서도 일상경비 교부 총액 및 실가용 총액 표시.
+      - **신속 필터 툴바**: `[⚡ 일상경비 교부목만 ({count}개)]` 원클릭 압축 필터 칩 추가.
+    * **상단 핵심 지표 카드 연동 (`SimulationSummaryCards.tsx`)**:
+      - Card 2 (`현재 집행액`): 전체 일상경비 교부액 서브텍스트 표출.
+      - Card 3 (`현재 집행 잔액`): 전체 일상 미집행액 및 `(실가용 ₩...)` 실질 가용 총액 표출.
+      - Card 5 (`최종 예상 잔액`): 일상 미집행분을 포함한 최종 잔액 서브텍스트 표출.
+    * **정량적 검증 완료**:
+      - `scripts/test-budget-simulator-empirical.js`: [TEST 7] 일상경비 산출 및 표출 정합성 검증 테스트 추가 및 100% 통과.
+      - TypeScript 컴파일 (`npx tsc --noEmit`): 0 errors PASS.
+      - Jest 전체 회귀 테스트 (`npm test`): 26/26 Suites, 238/238 Tests ALL PASS (100%).
+      - Zod 데이터 무결성 검증 (`node scripts/run-harness.js --quick`): 0 errors PASS.
+
 
 
 

@@ -51,4 +51,6 @@ next-env.d.ts
 # agents and scratch
 /.agents/
 /scratch/
+scratch_*.txt
+temp_plan_text.txt
 

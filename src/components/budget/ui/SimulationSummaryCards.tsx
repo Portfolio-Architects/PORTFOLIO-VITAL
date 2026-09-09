@@ -29,6 +29,9 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
     let finalExpectedBalance = 0;
     let deficitCount = 0;
     let requiredBalance = 0;
+    let totalDailyIssued = 0;
+    let totalDailySpent = 0;
+    let totalDailyRemaining = 0;
 
     for (let i = 0; i < projectSummaries.length; i++) {
       const p = projectSummaries[i];
@@ -37,6 +40,9 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
       totalRemaining += p.currentRemaining;
       simulatedExpenditure += p.simulatedExpenditure;
       finalExpectedBalance += p.finalExpectedBalance;
+      totalDailyIssued += (p.dailyExpenseIssued || 0);
+      totalDailySpent += (p.dailyExpenseSpent || 0);
+      totalDailyRemaining += (p.dailyExpenseRemaining || 0);
 
       if (p.finalExpectedBalance < 0) {
         deficitCount += 1;
@@ -58,6 +64,9 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
       projectedExecutionRate,
       deficitCount,
       requiredBalance,
+      totalDailyIssued,
+      totalDailySpent,
+      totalDailyRemaining,
     };
   }, [projectSummaries]);
 
@@ -93,6 +102,11 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
               ₩{metrics.totalSpent.toLocaleString('ko-KR')}
             </span>
           </div>
+          {metrics.totalDailyIssued > 0 && (
+            <div className="text-[10px] text-amber-700 font-normal font-sans tracking-tight mt-0.5">
+              (교부 ₩{metrics.totalDailyIssued.toLocaleString('ko-KR')})
+            </div>
+          )}
           <div className="flex items-center justify-between mt-1">
             <span className="text-[11px] text-slate-400 font-medium">현재 집행률</span>
             <span
@@ -120,7 +134,16 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           <div className="text-xl sm:text-2xl font-extrabold text-emerald-600 font-mono tracking-tight">
             ₩{metrics.totalRemaining.toLocaleString('ko-KR')}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 font-medium">지출 예정액 차감 전 순잔액</p>
+          {metrics.totalDailyRemaining > 0 ? (
+            <div className="mt-1 text-[11px] font-sans font-medium text-amber-700 flex items-center justify-between flex-wrap gap-1">
+              <span>+ 일상 미집행 ₩{metrics.totalDailyRemaining.toLocaleString('ko-KR')}</span>
+              <span className="text-emerald-700 font-bold" title="교부 잔액 포함 실질 가용 총액">
+                (실가용 ₩{(metrics.totalRemaining + metrics.totalDailyRemaining).toLocaleString('ko-KR')})
+              </span>
+            </div>
+          ) : (
+            <p className="text-[11px] text-slate-400 mt-1 font-medium">지출 예정액 차감 전 순잔액</p>
+          )}
         </div>
       </div>
 
@@ -172,6 +195,11 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           >
             ₩{metrics.finalExpectedBalance.toLocaleString('ko-KR')}
           </div>
+          {metrics.totalDailyRemaining > 0 && (
+            <div className="text-[10px] text-slate-500 font-normal font-sans tracking-tight mt-0.5">
+              (일상 포함 ₩{(metrics.finalExpectedBalance + metrics.totalDailyRemaining).toLocaleString('ko-KR')})
+            </div>
+          )}
           <div className="flex items-center justify-between mt-1">
             <span className="text-[11px] text-slate-400 font-medium">예상 최종 집행률</span>
             <span

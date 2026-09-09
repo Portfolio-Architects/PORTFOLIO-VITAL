@@ -2,6 +2,83 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 140: Budget Simulator Daily Expense Unexecuted Balance (교부액 중 미집행비용) Tracking & Effective Available Funds Surface Integration Release] Added dailyExpenseIssued, dailyExpenseSpent, and dailyExpenseRemaining tracking across useBudgetSimulator project and stat item summaries, surfaced unexecuted daily expense badges and real effective available funds in SimulationResultTable (Level 2 stat rows, Level 1 group headers, project view, and table footer), added dedicated '⚡ 일상경비 교부목만' toolbar quick filter chip, and updated SimulationSummaryCards with 100% test pass (26/26 Suites, 238/238 Tests). (2026-09-09)
+* **개요 및 개발 목적**:
+  - 사용자 요구사항("아.. 그.. 일상경비 교부액중에서도 미집행비용을 함께 표시해줘야하겠어") 적극 반영:
+    1. **공공 회계(e-호조) 일상경비 특수성 해결**:
+       - e-호조 시스템에서는 일상경비 교부 시 통계목 집행액으로 일괄 처리(`actionType === 'issuance'`)되어 장부상 '현재 집행 잔액'에서 차감됨.
+       - 그러나 실제로는 부서 일상경비 계좌에 교부된 금액 중 아직 실지출되지 않은 미집행 잔액(`dailyExpenseRemaining = dailyExpenseIssued - dailyExpenseSpent`)이 존재하여, 실무 담당자 입장에서는 순잔액 + 미집행 일상경비 잔액이 진정한 '실질 가용 예산'임.
+       - 이를 장부상 잔액과 분리하여 명확하게 파악할 수 있도록 전체 시뮬레이터에 실시간 집계 및 다각도 시각화 파이프라인 구축.
+    2. **데이터 파이프라인 및 집계 엔진 고도화**:
+       - `src/types/index.ts`: `ProjectSimulationSummary` 및 `StatItemSimulationSummary`에 `dailyExpenseIssued`, `dailyExpenseSpent`, `dailyExpenseRemaining` 타입 필드 추가.
+       - `src/hooks/useBudgetSimulator.ts`: `getCategoryStats(cat.id)`로부터 일상경비 교부액, 실집행액, 잔여액을 추출하여 `projectSummaries` 및 `statItemSummaries`에 실시간 누적 산출.
+    3. **테이블 및 요약 뷰 정밀 표출 (`SimulationResultTable.tsx`)**:
+       - **Level 2 통계목 행**: 통계목명 옆에 앰버 뱃지(`[🪙 일상 미집행 ₩X,XXX (교부 ₩Y,YYY)]`) 제공, 현재 집행액 하단에 `교부 ₩...`, 현재 집행 잔액 하단에 `+ 일상 미집행 ₩... (실가용 ₩...)`, 최종 예상 잔액 하단에 `(일상 포함 ₩...)` 서브텍스트 표출.
+       - **Level 1 사업 그룹 헤더 행**: 세부사업 그룹 요약 단위에서도 일상 미집행 총액 뱃지 및 실가용액 표기.
+       - **세부사업별 요약 뷰 (`viewMode === 'project'`)**: 프로젝트 레벨에서도 동일하게 교부액, 일상 미집행액, 실질 가용액 표출.
+       - **테이블 하단 합계 (`<tfoot>`)**: 전체 합계 행에서도 일상경비 교부 총액 및 실가용 총액 표시.
+       - **신속 필터 툴바**: `[⚡ 일상경비 교부목만 ({count}개)]` 칩 버튼을 추가하여 일상경비가 교부된 통계목만 1초 만에 압축 필터링 지원.
+    4. **상단 핵심 지표 카드 연동 (`SimulationSummaryCards.tsx`)**:
+       - Card 2 (`현재 집행액`): 전체 일상경비 교부액 서브텍스트 표출.
+       - Card 3 (`현재 집행 잔액`): 전체 일상 미집행액 및 `(실가용 ₩...)` 실질 가용 총액 표출.
+       - Card 5 (`최종 예상 잔액`): 일상 미집행분을 포함한 최종 잔액 서브텍스트 표출.
+* **핵심 변경 내역**:
+  - `src/types/index.ts`: 일상경비 3대 필드 인터페이스 선언.
+  - `src/hooks/useBudgetSimulator.ts`: 프로젝트/통계목별 일상경비 집계 로직 반영.
+  - `src/components/budget/ui/SimulationResultTable.tsx`: 신속 필터, 뱃지, 실가용액 서브텍스트, 테이블 푸터 집계 전면 적용.
+  - `src/components/budget/ui/SimulationSummaryCards.tsx`: 카드 2/3/5 일상경비 지표 연동.
+  - `scripts/test-budget-simulator-empirical.js`: [TEST 7] 일상경비 산출 및 표출 정합성 검증 테스트 추가.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - Jest 전체 회귀 테스트 (`npm test`): **26/26 Suites, 238/238 Tests ALL PASS (100%)**.
+  - 예산 시뮬레이터 검증 (`node scripts/test-budget-simulator-empirical.js`): **All Empirical Checks ALL PASS (100%)**.
+  - Zod 데이터 무결성 검증 (`node scripts/run-harness.js --quick`): **0 errors (PASS)**.
+
+### [Milestone 139: Budget Simulator Key Duplication & SSOT MergedEntries Deduplication Hardening Release] Resolved React duplicate key console warning (Encountered two children with the same key), hardened useBudgetSimulator mergedEntries bidirectional deduplication between local storage and BUDGET_ENTRIES.json, and added defensive indexed keys across SimulationResultTable and SimulationEntryList with 100% test pass (26/26 Suites, 238/238 Tests). (2026-09-09)
+* **개요 및 개발 목적**:
+  - React 콘솔 경고(`Encountered two children with the same key, 'mtthb2h1aczgpm6o3'`) 해결 및 예산 시뮬레이터 데이터 정합성 강화:
+    1. **근본 원인 분석 (Root Cause)**:
+       - `src/hooks/useBudgetSimulator.ts`의 `mergedEntries`에서 `localStorage`에 저장된 항목의 `id`와 `BUDGET_ENTRIES.json`의 `simulationEntryId`가 일치하는 경우, 기존에 `budgetEntryId`가 미기입되어 있으면 `!existingBudgetEntryIds.has(be.id)` 조건으로 인해 동일 항목이 `list`에 중복 `push`되면서 동일한 `id`를 가진 객체가 2개 생성됨.
+       - 또한 브라우저 스토리지 상의 우발적 중복이나 컴포넌트 렌더링 시 고유 인덱스가 결여된 키 사용으로 인한 React DOM Reconciler 충돌 발생.
+    2. **양방향 역색인 디듀플리케이션 (Bidirectional Deduplication Engine)**:
+       - 1단계: 로컬 스토리지 엔트리 수집 시 `seenSimIds` Set으로 1차 중복 방어.
+       - 2단계: SSOT planned `budgetEntries` 순회 시 `simulationEntryId` 또는 `budgetEntryId`가 이미 `list`에 존재하면 신규 생성하지 않고 기존 엔트리에 `budgetEntryId` 및 집행 상태(`isSettled`)를 업데이트하는 인플레이스 병합 적용.
+       - 3단계: 최종 리스트 산출 시 `finalSeenIds` 기반 무조건 고유 ID 보장 패스 적용.
+    3. **UI 컴포넌트 방어적 인덱스 키 적용 (Defensive Indexed Keys)**:
+       - `SimulationResultTable.tsx`: Level 3 등록 지출 항목 행(`key={`sim-row-${entry.id}-${entryIdx}`}`), 통계목 행(`key={`stat-${statKey}-${sIdx}`}`), 사업 그룹(`key={`group-${group.detailedProject}-${groupIdx}`}`), 프로젝트 요약 행(`key={`proj-${p.detailedProject}-${pIdx}`}`).
+       - `SimulationEntryList.tsx`: 그룹 뷰 항목(`key={`sim-grp-item-${item.id}-${itemIdx}`}`), 테이블 뷰 행(`key={`sim-tbl-item-${item.id}-${itemIdx}`}`), 카드 뷰 타일(`key={`sim-card-item-${item.id}-${itemIdx}`}`).
+* **핵심 변경 내역**:
+  - `src/hooks/useBudgetSimulator.ts`: `mergedEntries` 양방향 중복 제거 및 SSOT 상태 동기화 구현.
+  - `src/components/budget/ui/SimulationResultTable.tsx`: 4대 렌더링 루프 방어적 인덱스 키 전면 적용.
+  - `src/components/budget/ui/SimulationEntryList.tsx`: 그룹/테이블/카드 뷰 전체 방어적 인덱스 키 전면 적용.
+  - `scripts/test-budget-simulator-empirical.js`: [TEST 6] 중복 키 방지 및 머지 엔진 정합성 검증 테스트 추가.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - Jest 전체 회귀 테스트 (`npm test`): **26/26 Suites, 238/238 Tests ALL PASS (100%)**.
+  - 예산 시뮬레이터 검증 (`node scripts/test-budget-simulator-empirical.js`): **All Empirical Checks ALL PASS (100%)**.
+  - Zod 데이터 무결성 검증 (`node scripts/run-harness.js --quick`): **0 errors (PASS)**.
+
+### [Milestone 138: Budget Simulator Hierarchical Level 3 Drilldown & Grouped Entry List Release] Implemented Level 3 nested simulation entry drilldown with inline settlement/edit/delete actions in Stat Item Balance view, added dedicated 'Registered Stat Items Only' quick filter chip and bulk toggle, and introduced 'Grouped by Stat Item' view mode in SimulationEntryList with 100% test pass. (2026-09-09)
+* **개요 및 개발 목적**:
+  - 사용자 피드백("예산시뮬레이터에 항목 등록했을 때, 통계목별 잔액 더 세부적으로 볼수있게 고도화 해줘, 등록항목 리스트별로 보고싶어") 반영:
+    1. **통계목별 잔액 테이블 내 Level 3 인라인 계층 전개 (드릴다운)**:
+       - 세부사업(Level 1) > 통계목(Level 2) 하위에 실제 등록된 시뮬레이션 지출 항목(Level 3)을 인라인으로 펼쳐 볼 수 있는 계층형 렌더링 지원.
+       - 등록 항목이 존재하는 통계목에 `📌 N건 등록됨` 인터랙티브 뱃지 및 전개 아이콘 제공.
+       - 전개된 하위 행에서 항목명, 비고(메모), 일자, 단가 × 수량 산출식, 예정 금액(보라색 강조), 잔액 기여도(-금액), 그리고 원클릭 인라인 액션([정산], [수정], [삭제]) 즉시 실행 가능.
+    2. **신속 필터 및 일괄 전개 제어**:
+       - `📌 등록 통계목만 ({count}개)` 토글 칩: 전체 15개 이상의 통계목 중 실제 시뮬레이션 항목이 등록된 통계목만 1초 만에 압축 조회.
+       - `등록 세부항목 펼침/접기` 버튼: 모든 등록 항목을 원클릭으로 일괄 전개 또는 축약.
+    3. **등록 항목 리스트 탭 다각화 (SimulationEntryList)**:
+       - 기존 단순 카드 뷰 외에 **'통계목별 그룹 뷰 (Grouped by Stat Item)'** 및 **'테이블 뷰 (Compact Table)'** 모드 스위처 제공.
+       - 통계목별 그룹 뷰에서 `세부사업 ❯ 통계목` 단위로 묶인 섹션 헤더(건수 및 소계 금액)와 항목별 정밀 상세 리스트 제공.
+* **핵심 변경 내역**:
+  - `src/components/budget/ui/SimulationResultTable.tsx`: $O(1)$ 항목 사전 인덱싱, Level 3 인라인 행 렌더링, 신속 필터 토글, 일괄 전개 핸들러 탑재.
+  - `src/components/budget/ui/SimulationEntryList.tsx`: 3대 뷰 모드(통계목별 그룹, 테이블, 카드) 스위처 및 그룹화 소계 집계 파이프라인 구현.
+* **정량적 검증 성과**:
+  - TypeScript 컴파일 (`npx tsc --noEmit`): **0 errors (PASS)**.
+  - 예산 시뮬레이터 검증 (`node scripts/test-budget-simulator-empirical.js`): **20/20 Checks ALL PASS (100%)**.
+  - Zod 데이터 무결성 검증 (`node scripts/run-harness.js --quick`): **0 errors (PASS)**.
+
 ### [Milestone 137: Festival Timetable, Booth Roster & Outreach Organization Real-time Sync Release] Synchronized updated festival timeline (booth operation extended to 13:30, walk incentive cutoff at 12:30, cleanup 13:30-14:30), confirmed Gangnam Korean Medicine Association booth (26.9.8), and added Yangjaecheon Keepers outreach across SSOT and Cloudflare replica with 100% test pass. (2026-09-08)
 * **개요 및 개발 목적**:
   - 사용자 실무 입력에 따라 축제 추진 일정, 운영 부스 및 참여 홍보 과업 최신화:
