@@ -13,6 +13,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Sidebar } from '@/components/Sidebar';
 import { syncTombstones } from '@/lib/sheets-api';
 import BudgetSimulatorSkeleton from '@/components/budget/ui/BudgetSimulatorSkeleton';
+import MindMap3DSkeleton from '@/components/skeletons/MindMap3DSkeleton';
+import YangjaeFestivalSkeleton from '@/components/skeletons/YangjaeFestivalSkeleton';
 
 function PortfolioDashboardViewSkeleton() {
   return (
@@ -98,12 +100,12 @@ const BudgetSimulator = dynamic(() => import('@/components/budget/BudgetSimulato
 
 const YangjaeFestivalDashboard = dynamic(() => import('@/components/festival/YangjaeFestivalDashboard'), {
   ssr: false,
-  loading: () => null
+  loading: () => <YangjaeFestivalSkeleton />
 });
 
 const MindMap3D = dynamic(() => import('@/components/MindMap3D').then(mod => mod.MindMap3D), {
   ssr: false,
-  loading: () => null
+  loading: () => <MindMap3DSkeleton />
 });
 
 const ProjectManagementPage = dynamic(() => import('@/components/project/ProjectManagementPage'), {
@@ -250,6 +252,8 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
     });
   }, []);
 
+  const handleAddSignalNoop = useCallback((_t: string) => {}, []);
+
   useEffect(() => {
     syncTombstones().catch(() => {});
   }, []);
@@ -388,7 +392,7 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
                   deleteItem={deleteItem}
                   adjustStock={adjustStock}
                   getItemHistory={getItemHistory}
-                  addSignal={() => {}}
+                  addSignal={handleAddSignalNoop}
                 />
               </div>
             )}
@@ -410,7 +414,7 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
             {/* 2026 Yangjae Festival Dashboard */}
             {visitedModules.festival && (
               <div className={activeModule === 'festival' ? 'block' : 'hidden'}>
-                <YangjaeFestivalDashboard />
+                <YangjaeFestivalDashboard isActive={activeModule === 'festival'} />
               </div>
             )}
 

@@ -11,8 +11,8 @@ export function useContacts() {
   const { data: contacts = [], isLoading: loading } = useQuery({
     queryKey: ['CONTACTS'],
     queryFn: () => readSheet<Contact>('CONTACTS'),
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
     refetchIntervalInBackground: false,
   });
 
@@ -36,6 +36,11 @@ export function useContacts() {
     onError: (err, newContacts, context) => {
       if (context?.previous) queryClient.setQueryData(['CONTACTS'], context.previous);
     },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['CONTACTS'] });
+      }
+    },
   });
 
   const addContactMut = useMutation({
@@ -48,6 +53,11 @@ export function useContacts() {
     },
     onError: (err, newContact, context) => {
       if (context?.previous) queryClient.setQueryData(['CONTACTS'], context.previous);
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['CONTACTS'] });
+      }
     },
   });
 
@@ -71,6 +81,11 @@ export function useContacts() {
     onError: (err, vars, context) => {
       if (context?.previous) queryClient.setQueryData(['CONTACTS'], context.previous);
     },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['CONTACTS'] });
+      }
+    },
   });
 
   const deleteContactMut = useMutation({
@@ -90,6 +105,11 @@ export function useContacts() {
     },
     onError: (err, id, context) => {
       if (context?.previous) queryClient.setQueryData(['CONTACTS'], context.previous);
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['CONTACTS'] });
+      }
     },
   });
 

@@ -83,15 +83,33 @@ export function useWikiStorage(
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadedNodeId, setLoadedNodeId] = useState<string | null>(null);
   const syncTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const pendingBlocksRef = useRef<Record<string, { nodeId: string; canonicalId: string; blocks: PartialBlock[] }>>({});
   const isFetchedRef = useRef(false);
 
-  // Clean up any pending debounce sync timers on unmount
+  // Auto-flush any pending debounce sync saves on unmount
   useEffect(() => {
-    const timers = syncTimersRef.current;
     return () => {
+      const timers = syncTimersRef.current;
       for (const k in timers) {
         if (Object.prototype.hasOwnProperty.call(timers, k)) {
           clearTimeout(timers[k]);
+        }
+      }
+
+      // Flush pending blocks to disk immediately so navigating away never loses edits
+      const pending = pendingBlocksRef.current;
+      for (const canonicalId in pending) {
+        if (Object.prototype.hasOwnProperty.call(pending, canonicalId)) {
+          const item = pending[canonicalId];
+          if (item && item.blocks) {
+            replaceAll(`WIKI_DOC_${canonicalId}`, [{ id: 'singleton', blocks: item.blocks }])
+              .then(() => {
+                console.log(`[Auto-Flush on Unmount] Wiki ${canonicalId} saved to disk SSOT.`);
+              })
+              .catch((err) => {
+                console.error(`[Auto-Flush on Unmount] Failed to flush wiki ${canonicalId}:`, err);
+              });
+          }
         }
       }
     };
@@ -273,10 +291,13 @@ export function useWikiStorage(
     }
 
     // 디바운스 클라우드 백업 (2초 유지 후 업로드) - 노드 단위로 독립 타이머
+    pendingBlocksRef.current[canonicalId] = { nodeId: nodeIdToSave, canonicalId, blocks: newBlocks };
+
     if (syncTimersRef.current[canonicalId]) {
       clearTimeout(syncTimersRef.current[canonicalId]);
     }
     syncTimersRef.current[canonicalId] = setTimeout(async () => {
+      delete pendingBlocksRef.current[canonicalId];
       try {
         await replaceAll(`WIKI_DOC_${canonicalId}`, [{ id: 'singleton', blocks: newBlocks }]);
         console.log(`[Auto-Save] Wiki ${canonicalId} uploaded to cloud.`);

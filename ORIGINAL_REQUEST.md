@@ -383,3 +383,39 @@ Integrity mode: development
 - [ ] `node scripts/run-harness.js` 검증 통과 (0 Zod errors, 0 ESLint errors, 0 warnings).
 - [ ] `npx tsc --noEmit` TypeScript 컴파일 0 오류 달성.
 - [ ] 패치 완료 후 `PORTFOLIO VITAL - Engineering Report.md`에 마일스톤 기록 및 `node scripts/sync-rules.js` 실행 완료.
+
+## Follow-up — 2026-09-10T01:54:06Z
+
+Re-architect and harden the end-to-end data persistence and state synchronization pipeline across the PORTFOLIO VITAL system to permanently eliminate data loss and stale UI states (ensuring text and operational edits in Festival Dashboard, Workspace Wiki, and Budget Simulator are 100% reliably committed to local disk SSOT and immediately reflected in the frontend), while optimizing application architecture to achieve instantaneous, zero-lag tab transitions and overall UX responsiveness.
+
+Working directory: d:/Desktop/PORTFOLIO/PORTFOLIO - VITAL
+Integrity mode: development
+
+## Requirements
+
+### R1. Universal Zero-Loss Text & State Synchronization Pipeline
+- Ensure that all text input, note edits, and sub-task modifications across all modules (Festival Dashboard, Workspace Wiki/BlockNote, Budget Simulator, and Tasks) are deterministically captured, protected against race conditions, and persisted to the local disk SSOT (`data/*.json`).
+- Eliminate any desynchronization between disk persistence and frontend state: UI components must immediately and reliably re-render the updated state without requiring manual browser reloads or falling back to stale cache.
+- Implement robust optimistic updates, error boundaries, and auto-recovery mechanisms to prevent in-flight text or data from being discarded during navigation or tab switching.
+
+### R2. Instantaneous Tab Switching & Zero-Lag UX Architecture
+- Optimize rendering lifecycle, state management, and chunk isolation so that switching between top-level and sub-level tabs (Festival, Workspace, MindMap, Budget, Overview) feels instantaneous (<100ms visual transition).
+- Prevent expensive re-renders, unneeded layout thrashing, and main-thread freezing when switching views or mounting complex components.
+- Ensure smooth typing experience with zero keystroke lag or stuttering across all text areas and rich text editors.
+
+## Verification Resources
+- Existing comprehensive test suites: 26 Jest suites covering 242+ tests (`npm test`).
+- Playwright E2E and visual verification scripts in `scratch/`.
+- Local development server running on `http://localhost:3001` with local JSON SSOT in `data/`.
+
+## Acceptance Criteria
+
+### Data Reliability & Integrity
+- [ ] 100% of text and operational edits in the Festival Dashboard, Workspace Wiki, and Budget Simulator are persisted to local disk SSOT and immediately visible in the UI without page reload.
+- [ ] No edited data is lost, overwritten, or reverted when switching tabs, navigating away, or typing rapidly.
+- [ ] Concurrency and debounced write pipelines handle rapid successive inputs with zero data corruption or uncommitted pending states.
+
+### UX & Tab Switching Performance
+- [ ] Tab switching transitions complete with near-instantaneous visual responsiveness (<100ms) with zero visible freeze.
+- [ ] Typing in high-frequency input fields maintains continuous 60fps fluidity without dropped frames.
+- [ ] All 26 existing Jest test suites (242+ tests) pass cleanly without any regression.

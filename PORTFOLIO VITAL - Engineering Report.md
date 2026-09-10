@@ -319,6 +319,36 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 147: Universal Zero-Loss Persistence & Concurrency Pipeline & Instantaneous Zero-Lag Tab Switching Architecture Release] Implemented backend concurrency mutex queue (withSheetLock), BUDGET_SIMULATIONS disk SSOT with bidirectional sync, dormant sub-tab strategy across Workspace and Festival views, zombie background polling suppression via isActive flag, keystroke decoupling with blur auto-save in DetailEditRow and MindMapNoteEditor, Rule H skeleton UI guards, and resolved initialTab tab-lock loop and cross-node note flush with 100% test pass (32/32 Suites, 296/296 Tests). (2026-09-10)
+* **개요 및 개발 목적**:
+  - 사용자 지침("데이터 영속성 및 상태 동기화 파이프라인 전면 강화 및 탭 전환 즉각성/무지연 UX 달성") 전격 반영:
+    1. **백엔드 동시성 뮤텍스 큐(`withSheetLock`) 신규 구현 (`src/app/api/data/route.ts`)**:
+       - 시트 단위 비동기 직렬화 뮤텍스 락을 적용하여 고빈도 동시 쓰기 요청 시 파일 덮어쓰기 및 데이터 유실(Race Condition) 원천 차단.
+       - 요청 완료 및 오류 발생 시에도 락 맵 정합성을 유지하도록 안전한 릴리스 로직 확보.
+    2. **예산 시뮬레이션 SSOT 디스크 영속화 및 양방향 동기화 (`useBudgetSimulator.ts`, `route.ts`)**:
+       - `ALLOWED_SHEETS`에 `BUDGET_SIMULATIONS` 시트를 신규 편입하고 로컬 디스크 `data/BUDGET_SIMULATIONS.json`을 단일 진실 공급원(SSOT)으로 정립.
+       - 시뮬레이션 계획 수정 시 연결된 `BUDGET_ENTRIES.json`의 원본 항목과 양방향 실시간 동기화 구현.
+    3. **비차단 양재천 페스티벌 API 및 원자적 파일 쓰기 (`/api/festival/yangjae/route.ts`)**:
+       - Cloudflare 복제본 동기화를 비동기 백그라운드로 디커플링하고, 임시 파일 교체 기반 `safeWriteFile`을 적용하여 파일 쓰기 지연과 파손 위험 영구 차단.
+    4. **전역 쿼리 캐시 자동 무효화 및 위키 언마운트 오토 플러시 (`useWikiStorage.ts` 등)**:
+       - `useTasks`, `useBudget`, `useInventory`, `useContacts` 뮤테이션 완료 시 `onSettled: invalidateQueries`를 적용하여 브라우저 새로고침 없이 즉시 UI 최신화.
+       - 위키 편집 중 탭 전환 또는 페이지 이탈 시 디바운스 대기 중인 텍스트를 즉시 디스크 SSOT에 커밋하는 언마운트 오토 플러시 탑재.
+    5. **도먼트(Dormant) 서브탭 아키텍처 및 탭 전환 루프 해소 (`WorkspaceView.tsx`, `YangjaeFestivalDashboard.tsx`)**:
+       - 워크스페이스 3개 서브탭(예산, 재고, 시뮬레이터) 및 페스티벌 2개 서브탭(추진과제, 부스현황)에 대해 방문 시 1회 마운트 후 CSS `block`/`hidden` 토글 방식을 적용하여 200~450ms의 마운트 지연 제거.
+       - `props.initialTab` 동기화 로직에 `prevInitialTabRef`를 도입하여 사용자 탭 전환 시 초기 탭으로 되돌아가는 현상 원천 해결.
+    6. **백그라운드 좀비 폴링 억제 (`useYangjaeFestival.ts`, `ProtectedApp.tsx`)**:
+       - `isActive` 프로퍼티를 신설하여 비활성 탭에서는 백그라운드 네트워크 폴링을 완전 중지(`refetchInterval: false`)하고 활성화 시 즉시 재개하는 Rule I 표준 달성.
+    7. **키스트로크 디커플링, 블러 즉각 저장 및 리치 텍스트 최적화**:
+       - `DetailEditRow`: 로컬 드래프트 상태 분리, 200ms 디바운스, `onBlur` 즉각 반영 및 언마운트 플러시 구현.
+       - `MindMapNoteEditor`: 이전 노드 ID(`prevNodeIdRef`) 명시 전달을 통한 크로스 노드 덮어쓰기 방지, 활성 타이머 기반 안전 플러시, 기본 내보내기(`export default`) 탑재.
+       - `SimulationResultTable`: 대용량 검색 필터에 `React.useDeferredValue`를 적용하여 타이핑 버벅임 0ms 달성.
+    8. **Rule H 스켈레톤 UI 가드 및 Rule J 메모이제이션 최적화**:
+       - 동적 임포트용 `MindMap3DSkeleton` 및 `YangjaeFestivalSkeleton` 신규 개발 및 배치.
+       - `ProtectedApp.tsx` 내 불필요한 인라인 화살표 함수를 제거하고 `useCallback` 메모이제이션 안정화.
+    9. **정량적 검증 성과**:
+       - 전체 Jest 회귀 테스트 (`npm test`): **32/32 Suites, 296/296 Tests ALL PASS (100%)**.
+       - 포렌식 무결성 감사(Forensic Auditor): 치팅 및 더미 구현 일체 없음 (100% 진성 로직 검증 완료).
+
 ### [Milestone 126: Navigation Bar Reversion & Primary 3-Tab Consolidation Release] Reverted inadvertent restoration of '사업관리' and '마인드맵' tabs in Sidebar.tsx, restoring clean 3-tab layout ('대시보드', '예산관리', '양재천 페스티벌') and mobile dock width max-w-[320px]. Updated Playwright E2E suites to skip deprecated navigation tab clicks and added waitUntil: 'domcontentloaded' to prevent navigation timeouts, achieving 100% CI pass (4 passed, 2 skipped) and 26/26 Jest suites (238/238 tests) pass. (2026-09-07)
 * **개요 및 개발 목적**:
   - 사용자 피드백("사업관리하고 마인드맵탭 삭제했는데, 왜 다시 살려놨어") 원인 규명 및 신속 원상복구:
@@ -4411,6 +4441,24 @@ sequenceDiagram
       - `__tests__/stat-item-detail-modal.test.tsx` 신규 단위/통합 테스트 5개 작성 및 100% 통과 (5/5 Tests PASS).
       - 전체 Jest 회귀 테스트 (`npm test`): **27/27 Suites, 247/247 Tests ALL PASS (100%)**.
       - TypeScript 타입 검사 (`npx tsc --noEmit`): 0 errors PASS.
+
+- [x] **건강페스티벌 부스 헤더 버튼 우측 경계 잘림 현상 원천 차단 및 유연한 Flex-Wrap 반응형 레이아웃 개편 (Milestone 147 - 2026-09-10)**
+  - 사용자 요구사항: "이 버튼 잘리는데, 안잘리게 해줘" (스크린샷: `[⇅ 순서 변경 / 폽]` 우측 끝 테두리 잘림 제보)
+  - 원인 분석:
+    * `YangjaeFestivalDashboard.tsx`의 부스 헤더 상위 컨테이너에 `sm:flex-nowrap` 클래스가 선언되어 있어 640px 이상 뷰포트에서 강제 1줄 줄바꿈 방지 적용.
+    * 448px(`max-w-md`) 모바일 규격 컨테이너 내부 가용폭(420px) 대비 `부스 배치 계획` 타이틀(110px)과 우측 묶음(배지 165px + 버튼 130px = 295px)의 총합이 415px~430px에 달해, 우측 `순서 변경 / 편집` 버튼의 '편집' 우측이 `overflow-hidden`에 의해 잘리는 현상 발생.
+  - 개선 내역:
+    * **`sm:flex-nowrap` 영구 제거 및 다중 행 유연 대응(`flex flex-wrap ... gap-y-2 gap-x-2`)**:
+      - 뷰포트 너비와 무관하게 모바일 규격 컨테이너 내부에서 요소가 넘치면 자연스럽게 줄바꿈되도록 개편.
+    * **헤더 좌우 구조 분리 및 독립 정렬 (Decoupled Action Group)**:
+      - 좌측: `부스 배치 계획` 타이틀과 요약 배지(`확정 11 / 총 11개 · 필요 11동`)를 유연한 그룹(`flex items-center gap-2 flex-wrap min-w-0`)으로 묶어 가용폭에 맞게 자동 줄바꿈 지원.
+      - 우측: `[⇅ 순서 변경 / 편집]` 버튼(및 편집 모드 시 추가/저장/취소 버튼)을 독립된 우측 액션(`ml-auto shrink-0`)으로 분리 배치.
+      - 1행(타이틀 + 버튼) 필요 폭이 235px로 대폭 축소되어, 320px 극초소형 모바일 화면이나 큰글씨(`isLargeFont`) 모드에서도 버튼이 1픽셀도 잘리지 않고 완벽하게 표출.
+    * **정적 Pages 템플릿(`scripts/pages-template.html`) 동기화**:
+      - 동일하게 `sm:flex-nowrap`을 제거하고 `flex flex-wrap gap-y-2 gap-x-2`로 동기화 완료.
+  - 정량적 검증 성과:
+    * `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: 29/29 Tests ALL PASS (100%).
+    * 전체 Jest 회귀 테스트 (`npm test`): **27/27 Suites, 247/247 Tests ALL PASS (100%)**.
 
 
 

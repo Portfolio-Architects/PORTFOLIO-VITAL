@@ -124,15 +124,43 @@ interface WorkspaceViewProps {
 }
 
 function WorkspaceViewComponent(props: WorkspaceViewProps) {
-  const [activeTab, setActiveTab] = useState<'budget' | 'inventory' | 'simulator'>(props.initialTab || 'budget');
+  const [activeTab, setActiveTab] = useState<'budget' | 'inventory' | 'simulator'>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('hchps-workspace-active-tab');
+        if (saved === 'budget' || saved === 'inventory' || saved === 'simulator') {
+          return saved;
+        }
+      } catch {}
+    }
+    return props.initialTab || 'budget';
+  });
+  const [visitedTabs, setVisitedTabs] = useState<Record<string, boolean>>(() => ({
+    budget: activeTab === 'budget',
+    inventory: activeTab === 'inventory',
+    simulator: activeTab === 'simulator',
+  }));
   const [, startTransition] = useTransition();
   const [zodError, setZodError] = useState<{ sheetName: string; rowId: string; errors: any } | null>(null);
 
-  const handleTabChange = (tab: 'budget' | 'inventory' | 'simulator') => {
+  const handleTabChange = useCallback((tab: 'budget' | 'inventory' | 'simulator') => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('hchps-workspace-active-tab', tab);
+      } catch {}
+    }
+    setVisitedTabs((prev) => (prev[tab] ? prev : { ...prev, [tab]: true }));
     startTransition(() => {
       setActiveTab(tab);
     });
-  };
+  }, []);
+
+  const [prevInitialTab, setPrevInitialTab] = useState(props.initialTab);
+  if (props.initialTab && props.initialTab !== prevInitialTab) {
+    setPrevInitialTab(props.initialTab);
+    setVisitedTabs((prev) => (prev[props.initialTab!] ? prev : { ...prev, [props.initialTab!]: true }));
+    setActiveTab(props.initialTab);
+  }
 
   const handleZodError = useCallback((e: Event) => {
     const customEvent = e as CustomEvent;
@@ -207,36 +235,46 @@ function WorkspaceViewComponent(props: WorkspaceViewProps) {
         </div>
       )}
 
-      {activeTab === 'budget' ? (
-        <BudgetDashboard
-          categories={props.budgetCategories}
-          entries={props.budgetEntries}
-          addCategory={props.addCategory}
-          updateCategory={props.updateCategory}
-          deleteCategory={props.deleteCategory}
-          replaceCategories={props.replaceCategories}
-          addEntry={props.addEntry}
-          updateEntry={props.updateEntry}
-          deleteEntry={props.deleteEntry}
-          batchUpdateEntries={props.batchUpdateEntries}
-          batchDeleteEntries={props.batchDeleteEntries}
-          batchSettleEntries={props.batchSettleEntries}
-          getCategoryStats={props.getCategoryStats}
-          overallStats={props.overallStats}
-          onNavigateToSimulator={() => handleTabChange('simulator')}
-        />
-      ) : activeTab === 'inventory' ? (
-        <InventoryList
-          items={props.inventoryItems}
-          addItem={props.addItem}
-          updateItem={props.updateItem}
-          deleteItem={props.deleteItem}
-          adjustStock={props.adjustStock}
-          getItemHistory={props.getItemHistory}
-        />
-      ) : (
-        <BudgetSimulator />
-      )}
+      <div className="w-full">
+        {visitedTabs.budget && (
+          <div className={activeTab === 'budget' ? 'block' : 'hidden'}>
+            <BudgetDashboard
+              categories={props.budgetCategories}
+              entries={props.budgetEntries}
+              addCategory={props.addCategory}
+              updateCategory={props.updateCategory}
+              deleteCategory={props.deleteCategory}
+              replaceCategories={props.replaceCategories}
+              addEntry={props.addEntry}
+              updateEntry={props.updateEntry}
+              deleteEntry={props.deleteEntry}
+              batchUpdateEntries={props.batchUpdateEntries}
+              batchDeleteEntries={props.batchDeleteEntries}
+              batchSettleEntries={props.batchSettleEntries}
+              getCategoryStats={props.getCategoryStats}
+              overallStats={props.overallStats}
+              onNavigateToSimulator={() => handleTabChange('simulator')}
+            />
+          </div>
+        )}
+        {visitedTabs.inventory && (
+          <div className={activeTab === 'inventory' ? 'block' : 'hidden'}>
+            <InventoryList
+              items={props.inventoryItems}
+              addItem={props.addItem}
+              updateItem={props.updateItem}
+              deleteItem={props.deleteItem}
+              adjustStock={props.adjustStock}
+              getItemHistory={props.getItemHistory}
+            />
+          </div>
+        )}
+        {visitedTabs.simulator && (
+          <div className={activeTab === 'simulator' ? 'block' : 'hidden'}>
+            <BudgetSimulator />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { 
   X, Plus, Trash2, Link2, Unlink, Palette, 
   FileText, CornerDownRight, CheckCircle2, ChevronRight 
@@ -74,6 +74,76 @@ const MindMapNoteEditorComponent: React.FC<MindMapNoteEditorProps> = ({
   const [selectedTargetToConnect, setSelectedTargetToConnect] = useState('');
   const [isAddingConnect, setIsAddingConnect] = useState(false);
 
+  const prevNodeIdRef = useRef(node?.id);
+  const titleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const memoTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const latestTitleRef = useRef(title);
+  const latestMemoRef = useRef(memo);
+  const latestNodeIdRef = useRef(node?.id);
+  useEffect(() => {
+    latestTitleRef.current = title;
+    latestMemoRef.current = memo;
+    latestNodeIdRef.current = node?.id;
+  }, [title, memo, node?.id]);
+
+  // Flush helpers for zero-loss guarantee
+  const flushTitle = useCallback(() => {
+    if (titleTimerRef.current) {
+      clearTimeout(titleTimerRef.current);
+      titleTimerRef.current = null;
+      if (latestNodeIdRef.current) {
+        onUpdateTitle(latestNodeIdRef.current, latestTitleRef.current);
+      }
+    }
+  }, [onUpdateTitle]);
+
+  const flushMemo = useCallback(() => {
+    if (memoTimerRef.current) {
+      clearTimeout(memoTimerRef.current);
+      memoTimerRef.current = null;
+      if (latestNodeIdRef.current) {
+        onUpdateMemo(latestNodeIdRef.current, latestMemoRef.current);
+      }
+    }
+  }, [onUpdateMemo]);
+
+  const [, startTransition] = React.useTransition();
+
+  // Sync state and flush uncommitted edits when selected node changes
+  useEffect(() => {
+    if (node?.id !== prevNodeIdRef.current) {
+      if (prevNodeIdRef.current) {
+        if (titleTimerRef.current) {
+          clearTimeout(titleTimerRef.current);
+          titleTimerRef.current = null;
+          onUpdateTitle(prevNodeIdRef.current, latestTitleRef.current);
+        }
+        if (memoTimerRef.current) {
+          clearTimeout(memoTimerRef.current);
+          memoTimerRef.current = null;
+          onUpdateMemo(prevNodeIdRef.current, latestMemoRef.current);
+        }
+      }
+      prevNodeIdRef.current = node?.id;
+      const nextTitle = override?.customLabel || node?.label || '';
+      const nextMemo = override?.customContextText || node?.memo || '';
+      startTransition(() => {
+        setTitle(nextTitle);
+        setMemo(nextMemo);
+      });
+      latestTitleRef.current = nextTitle;
+      latestMemoRef.current = nextMemo;
+    }
+  }, [node?.id, override?.customLabel, override?.customContextText, node?.label, node?.memo, onUpdateTitle, onUpdateMemo]);
+
+  // Flush pending updates on unmount
+  useEffect(() => {
+    return () => {
+      flushTitle();
+      flushMemo();
+    };
+  }, [flushTitle, flushMemo]);
+
   // Single-pass extraction of childNodes, connectedNodes, and connectableNodes
   const { childNodes, connectedNodes, connectableNodes } = useMemo(() => {
     if (!node) {
@@ -116,13 +186,31 @@ const MindMapNoteEditorComponent: React.FC<MindMapNoteEditorProps> = ({
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setTitle(val);
-    onUpdateTitle(node.id, val);
+    latestTitleRef.current = val;
+    if (titleTimerRef.current) {
+      clearTimeout(titleTimerRef.current);
+    }
+    if (node) {
+      titleTimerRef.current = setTimeout(() => {
+        titleTimerRef.current = null;
+        onUpdateTitle(node.id, val);
+      }, 250);
+    }
   };
 
   const handleMemoChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setMemo(val);
-    onUpdateMemo(node.id, val);
+    latestMemoRef.current = val;
+    if (memoTimerRef.current) {
+      clearTimeout(memoTimerRef.current);
+    }
+    if (node) {
+      memoTimerRef.current = setTimeout(() => {
+        memoTimerRef.current = null;
+        onUpdateMemo(node.id, val);
+      }, 250);
+    }
   };
 
   const handleAddChild = (e?: React.FormEvent) => {
@@ -187,6 +275,7 @@ const MindMapNoteEditorComponent: React.FC<MindMapNoteEditorProps> = ({
             type="text"
             value={title}
             onChange={handleTitleChange}
+            onBlur={flushTitle}
             placeholder="노트 제목을 입력하세요..."
             className="w-full px-3.5 py-2.5 text-base font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all placeholder:text-slate-400 font-sans"
           />
@@ -222,6 +311,7 @@ const MindMapNoteEditorComponent: React.FC<MindMapNoteEditorProps> = ({
           <textarea
             value={memo}
             onChange={handleMemoChange}
+            onBlur={flushMemo}
             rows={7}
             placeholder="이 생각에 대한 상세 내용, 메모, 체크포인트 등을 자유롭게 적어보세요..."
             className="w-full px-3.5 py-3 text-sm text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all resize-y placeholder:text-slate-400/80 leading-relaxed font-sans"
@@ -405,3 +495,4 @@ const MindMapNoteEditorComponent: React.FC<MindMapNoteEditorProps> = ({
 
 MindMapNoteEditorComponent.displayName = 'MindMapNoteEditor';
 export const MindMapNoteEditor = React.memo(MindMapNoteEditorComponent);
+export default MindMapNoteEditor;

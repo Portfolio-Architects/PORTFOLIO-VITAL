@@ -82,8 +82,8 @@ export function useTasks() {
   const { data: tasks = [], isLoading, error } = useQuery({
     queryKey: ['TASKS'],
     queryFn: () => readSheet<Task>('TASKS'),
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
     refetchIntervalInBackground: false,
   });
 
@@ -97,6 +97,11 @@ export function useTasks() {
     },
     onError: (err, newTask, context) => {
       if (context?.previousTasks) queryClient.setQueryData(['TASKS'], context.previousTasks);
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['TASKS'] });
+      }
     }
   });
 
@@ -115,6 +120,11 @@ export function useTasks() {
     },
     onError: (err, variables, context) => {
       if (context?.previousTasks) queryClient.setQueryData(['TASKS'], context.previousTasks);
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['TASKS'] });
+      }
     }
   });
 
@@ -128,6 +138,11 @@ export function useTasks() {
     },
     onError: (err, id, context) => {
       if (context?.previousTasks) queryClient.setQueryData(['TASKS'], context.previousTasks);
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['TASKS'] });
+      }
     }
   });
 

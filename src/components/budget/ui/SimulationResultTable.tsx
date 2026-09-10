@@ -56,6 +56,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
   // Set 'stat' (통계목별 잔액) as default main view mode
   const [viewMode, setViewMode] = useState<ViewMode>('stat');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const deferredSearchKeyword = React.useDeferredValue(searchKeyword);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [onlyWithEntries, setOnlyWithEntries] = useState<boolean>(false);
   const [onlyWithDailyExpenses, setOnlyWithDailyExpenses] = useState<boolean>(false);
@@ -125,7 +126,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
 
   // Filtered Project Summaries (Single-pass index loop)
   const filteredProjects = useMemo(() => {
-    const trimmedKw = searchKeyword.trim().toLowerCase();
+    const trimmedKw = deferredSearchKeyword.trim().toLowerCase();
     const list: ProjectSimulationSummary[] = [];
     for (let i = 0; i < projectSummaries.length; i++) {
       const p = projectSummaries[i];
@@ -137,11 +138,11 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
       list.push(p);
     }
     return list;
-  }, [projectSummaries, searchKeyword, statusFilter]);
+  }, [projectSummaries, deferredSearchKeyword, statusFilter]);
 
   // Filtered Stat Item Summaries with Registered Entry Keyword Matching & Entry Presence Filter
   const filteredStatItems = useMemo(() => {
-    const trimmedKw = searchKeyword.trim().toLowerCase();
+    const trimmedKw = deferredSearchKeyword.trim().toLowerCase();
     const list: StatItemSimulationSummary[] = [];
     for (let i = 0; i < statItemSummaries.length; i++) {
       const s = statItemSummaries[i];
@@ -178,7 +179,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
       list.push(s);
     }
     return list;
-  }, [statItemSummaries, searchKeyword, statusFilter, onlyWithEntries, onlyWithDailyExpenses, entriesByProjectAndStat]);
+  }, [statItemSummaries, deferredSearchKeyword, statusFilter, onlyWithEntries, onlyWithDailyExpenses, entriesByProjectAndStat]);
 
   // Check whether all registered stat items are currently expanded
   const areAllStatEntriesExpanded = useMemo(() => {

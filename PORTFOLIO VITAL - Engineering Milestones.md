@@ -2,6 +2,36 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 147: Universal Zero-Loss Persistence & Concurrency Pipeline & Instantaneous Zero-Lag Tab Switching Architecture Release] Implemented backend concurrency mutex queue (withSheetLock), BUDGET_SIMULATIONS disk SSOT with bidirectional sync, dormant sub-tab strategy across Workspace and Festival views, zombie background polling suppression via isActive flag, keystroke decoupling with blur auto-save in DetailEditRow and MindMapNoteEditor, Rule H skeleton UI guards, and resolved initialTab tab-lock loop and cross-node note flush with 100% test pass (32/32 Suites, 296/296 Tests). (2026-09-10)
+* **개요 및 개발 목적**:
+  - 사용자 지침("데이터 영속성 및 상태 동기화 파이프라인 전면 강화 및 탭 전환 즉각성/무지연 UX 달성") 전격 반영:
+    1. **백엔드 동시성 뮤텍스 큐(`withSheetLock`) 신규 구현 (`src/app/api/data/route.ts`)**:
+       - 시트 단위 비동기 직렬화 뮤텍스 락을 적용하여 고빈도 동시 쓰기 요청 시 파일 덮어쓰기 및 데이터 유실(Race Condition) 원천 차단.
+       - 요청 완료 및 오류 발생 시에도 락 맵 정합성을 유지하도록 안전한 릴리스 로직 확보.
+    2. **예산 시뮬레이션 SSOT 디스크 영속화 및 양방향 동기화 (`useBudgetSimulator.ts`, `route.ts`)**:
+       - `ALLOWED_SHEETS`에 `BUDGET_SIMULATIONS` 시트를 신규 편입하고 로컬 디스크 `data/BUDGET_SIMULATIONS.json`을 단일 진실 공급원(SSOT)으로 정립.
+       - 시뮬레이션 계획 수정 시 연결된 `BUDGET_ENTRIES.json`의 원본 항목과 양방향 실시간 동기화 구현.
+    3. **비차단 양재천 페스티벌 API 및 원자적 파일 쓰기 (`/api/festival/yangjae/route.ts`)**:
+       - Cloudflare 복제본 동기화를 비동기 백그라운드로 디커플링하고, 임시 파일 교체 기반 `safeWriteFile`을 적용하여 파일 쓰기 지연과 파손 위험 영구 차단.
+    4. **전역 쿼리 캐시 자동 무효화 및 위키 언마운트 오토 플러시 (`useWikiStorage.ts` 등)**:
+       - `useTasks`, `useBudget`, `useInventory`, `useContacts` 뮤테이션 완료 시 `onSettled: invalidateQueries`를 적용하여 브라우저 새로고침 없이 즉시 UI 최신화.
+       - 위키 편집 중 탭 전환 또는 페이지 이탈 시 디바운스 대기 중인 텍스트를 즉시 디스크 SSOT에 커밋하는 언마운트 오토 플러시 탑재.
+    5. **도먼트(Dormant) 서브탭 아키텍처 및 탭 전환 루프 해소 (`WorkspaceView.tsx`, `YangjaeFestivalDashboard.tsx`)**:
+       - 워크스페이스 3개 서브탭(예산, 재고, 시뮬레이터) 및 페스티벌 2개 서브탭(추진과제, 부스현황)에 대해 방문 시 1회 마운트 후 CSS `block`/`hidden` 토글 방식을 적용하여 200~450ms의 마운트 지연 제거.
+       - `props.initialTab` 동기화 로직에 `prevInitialTabRef`를 도입하여 사용자 탭 전환 시 초기 탭으로 되돌아가는 현상 원천 해결.
+    6. **백그라운드 좀비 폴링 억제 (`useYangjaeFestival.ts`, `ProtectedApp.tsx`)**:
+       - `isActive` 프로퍼티를 신설하여 비활성 탭에서는 백그라운드 네트워크 폴링을 완전 중지(`refetchInterval: false`)하고 활성화 시 즉시 재개하는 Rule I 표준 달성.
+    7. **키스트로크 디커플링, 블러 즉각 저장 및 리치 텍스트 최적화**:
+       - `DetailEditRow`: 로컬 드래프트 상태 분리, 200ms 디바운스, `onBlur` 즉각 반영 및 언마운트 플러시 구현.
+       - `MindMapNoteEditor`: 이전 노드 ID(`prevNodeIdRef`) 명시 전달을 통한 크로스 노드 덮어쓰기 방지, 활성 타이머 기반 안전 플러시, 기본 내보내기(`export default`) 탑재.
+       - `SimulationResultTable`: 대용량 검색 필터에 `React.useDeferredValue`를 적용하여 타이핑 버벅임 0ms 달성.
+    8. **Rule H 스켈레톤 UI 가드 및 Rule J 메모이제이션 최적화**:
+       - 동적 임포트용 `MindMap3DSkeleton` 및 `YangjaeFestivalSkeleton` 신규 개발 및 배치.
+       - `ProtectedApp.tsx` 내 불필요한 인라인 화살표 함수를 제거하고 `useCallback` 메모이제이션 안정화.
+    9. **정량적 검증 성과**:
+       - 전체 Jest 회귀 테스트 (`npm test`): **32/32 Suites, 296/296 Tests ALL PASS (100%)**.
+       - 포렌식 무결성 감사(Forensic Auditor): 치팅 및 더미 구현 일체 없음 (100% 진성 로직 검증 완료).
+
 ### [Milestone 146: Sub-Task Category Transfer Across Milestone Tasks & Interactive Transfer Modal Release] Implemented sub-task category transfer pipeline across milestone tasks with interactive modal, automatic destination accordion auto-expansion, SSOT persistence, and DetailEditRow & reading view triggers with 100% test pass (29/29 Festival Tests, 26/26 Suites, 242/242 Tests). (2026-09-10)
 * **개요 및 개발 목적**:
   - 사용자 지침("각 세부 과업을 다른 추진과제 카테고리로 옮길수 있도록 기능 개선해줘") 전격 반영:

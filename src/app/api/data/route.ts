@@ -9,6 +9,7 @@ import { RAGEngine } from '@/lib/rag/rag-engine';
 const ALLOWED_SHEETS = new Set([
   'TASKS', 'MEETINGS', 'PROJECTS',
   'BUDGET_CATEGORIES', 'BUDGET_ENTRIES',
+  'BUDGET_SIMULATIONS',
   'INVENTORY', 'STOCK_CHANGES',
   'SIGNAL_LOG',
   'MAP_CUSTOMIZATION',
@@ -348,6 +349,30 @@ export async function GET(request: Request) {
   }
 }
 
+// Async in-memory mutex queue per sheet to serialize read-modify-write cycles and prevent race conditions
+const sheetLocks = new Map<string, Promise<void>>();
+
+export async function withSheetLock<T>(sheet: string, fn: () => Promise<T>): Promise<T> {
+  const previousLock = sheetLocks.get(sheet) || Promise.resolve();
+  let release: () => void;
+  const currentLock = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+
+  const newChainedLock = previousLock.catch(() => {}).then(() => currentLock);
+  sheetLocks.set(sheet, newChainedLock);
+
+  try {
+    await previousLock.catch(() => {});
+    return await fn();
+  } finally {
+    release!();
+    if (sheetLocks.get(sheet) === newChainedLock) {
+      sheetLocks.delete(sheet);
+    }
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -361,10 +386,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Invalid sheet name' }, { status: 400 });
     }
 
-    let rows: any[] = [];
-    if (action !== 'replace') {
-      rows = await readData(sheet);
-    }
+    return await withSheetLock(sheet, async () => {
+      let rows: any[] = [];
+      if (action !== 'replace') {
+        rows = await readData(sheet);
+      }
 
     if (sheet === 'BUDGET_ENTRIES' && (action === 'add' || action === 'update')) {
       const categories = await readData('BUDGET_CATEGORIES');
@@ -580,7 +606,8 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, mtime, size });
+      return NextResponse.json({ success: true, mtime, size });
+    });
 
   } catch (e) {
     console.error(e);

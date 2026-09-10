@@ -65,6 +65,39 @@ const getCustomSlashMenuItems = (editor: any): DefaultReactSuggestionItem[] => [
   }
 ];
 
+class SaveStatusStore {
+  private message: string = '';
+  private listeners: Set<() => void> = new Set();
+
+  setMessage = (msg: string) => {
+    this.message = msg;
+    this.listeners.forEach((listener) => listener());
+  };
+
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
+
+  getSnapshot = () => this.message;
+}
+
+const WikiSaveIndicator = React.memo(function WikiSaveIndicator({
+  store,
+}: {
+  store: SaveStatusStore;
+}) {
+  const msg = useSyncExternalStore(store.subscribe, store.getSnapshot, () => '');
+  if (!msg) return null;
+  return (
+    <span className="text-xs text-emerald-600 font-medium animate-pulse">
+      {msg}
+    </span>
+  );
+});
+
 function WikiEditorComponent(props: WikiEditorProps) {
   const { nodeId, nodeTitle, initialBlocks, onChange, onClose } = props;
 
@@ -88,12 +121,12 @@ function WikiEditorComponent(props: WikiEditorProps) {
     }
   }, [editor, initialBlocks]);
 
-  const [lastSavedMsg, setLastSavedMsg] = useState('');
+  const saveStatusStore = React.useMemo(() => new SaveStatusStore(), []);
 
   const handleCloseAction = React.useCallback(async () => {
     if (onChange && editor) {
       onChange(editor.document);
-      setLastSavedMsg('저장 성공!');
+      saveStatusStore.setMessage('저장 성공!');
     }
     
     if (editor) {
@@ -109,15 +142,17 @@ function WikiEditorComponent(props: WikiEditorProps) {
     }
 
     setTimeout(() => onClose?.(), 100);
-  }, [editor, nodeId, nodeTitle, onChange, onClose, wikiSyncMutation]);
+  }, [editor, nodeId, nodeTitle, onChange, onClose, wikiSyncMutation, saveStatusStore]);
 
   const handleEditorChange = React.useCallback(() => {
     if (onChange && editor) {
       onChange(editor.document);
       const now = new Date();
-      setLastSavedMsg(`자동 저장됨 (${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')})`);
+      saveStatusStore.setMessage(
+        `자동 저장됨 (${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')})`
+      );
     }
-  }, [editor, onChange]);
+  }, [editor, onChange, saveStatusStore]);
 
   const customSlashMenuItems = React.useMemo(() => {
     if (!editor) return [];
@@ -150,11 +185,7 @@ function WikiEditorComponent(props: WikiEditorProps) {
           </h2>
         </div>
         <div className="flex items-center gap-3">
-          {lastSavedMsg && (
-            <span className="text-xs text-emerald-600 font-medium animate-pulse">
-              {lastSavedMsg}
-            </span>
-          )}
+          <WikiSaveIndicator store={saveStatusStore} />
 
           {onClose && (
             <button 

@@ -115,10 +115,10 @@ const FALLBACK_FESTIVAL_DATA = {
     "eventDate": "2026-10-31(토)",
     "eventTime": "08:00 ~ 14:00",
     "location": "양재천 수변문화쉼터 및 출발마당 (개포동 1279 일원)",
-    "course": "수변문화쉼터 ↔ 영동5교 왕복 (약 4km)",
+    "course": "수변문화쉼터 ↔ 영동4교 왕복 (약 3km)",
     "targetAudience": "강남구민 800명(사전접수)",
     "programStructure": [
-      "건강 걷기 체험 프로그램(3km, 구청장배 걷기대회 연계)",
+      "건강 걷기 체험 프로그램(구청장배 걷기대회 연계)",
       "의료 및 건강 관련 체험·홍보 부스 운영"
     ],
     "staffNote": "행사 참여 직원 대체휴무 시행 예정 (전 직원 참여)",
@@ -378,6 +378,22 @@ const FALLBACK_FESTIVAL_DATA = {
       "scale": "3동",
       "program": "각종 체험 프로그램",
       "status": "협의중"
+    },
+    {
+      "id": 14,
+      "category": "보건소 부서",
+      "name": "건강관리과",
+      "scale": "2동",
+      "program": "내 신체나이 알아보기, 운동 실습(웰에이징 센터)",
+      "status": "협의중"
+    },
+    {
+      "id": 15,
+      "category": "기타",
+      "name": "운영부스",
+      "scale": "3동",
+      "program": "응급 의료 및 홍보물 배부",
+      "status": "확정"
     }
   ]
 };

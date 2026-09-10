@@ -339,7 +339,7 @@ export const YANGJAE_FALLBACK_DATA: FestivalData = {
 
 export const initialFallbackData = YANGJAE_FALLBACK_DATA;
 
-export function useYangjaeFestival() {
+export function useYangjaeFestival(isActive: boolean = true) {
   return useQuery<FestivalData>({
     queryKey: ['festival', 'yangjae'],
     queryFn: async () => {
@@ -358,9 +358,9 @@ export function useYangjaeFestival() {
     placeholderData: initialFallbackData,
     staleTime: 1000,
     gcTime: 1000 * 60 * 30,
-    refetchInterval: 2500,
+    refetchInterval: isActive ? 2500 : false,
     refetchIntervalInBackground: false,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: isActive,
   });
 }
 

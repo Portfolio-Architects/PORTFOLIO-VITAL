@@ -1,0 +1,58 @@
+[
+  {
+    "name": "노르딕 워킹 폴",
+    "detailedProject": "건강생활실천사업(건강증진)",
+    "statItem": "201-01 사무관리비",
+    "unitPrice": 1980000,
+    "quantity": 1,
+    "amount": 1980000,
+    "memo": "",
+    "id": "mttvqus6h4y3ixkij",
+    "categoryId": "mnrcir0voap2bpm8z",
+    "createdAt": "2026-09-09T09:12:18.006Z",
+    "status": "PLANNED",
+    "budgetEntryId": "mttvqus7jbzq6e8qy"
+  },
+  {
+    "name": "행사 실비",
+    "detailedProject": "건강생활실천사업(건강증진)",
+    "statItem": "301-11 행사실비지원금",
+    "unitPrice": 3000000,
+    "quantity": 1,
+    "amount": 3000000,
+    "memo": "",
+    "id": "mttkw5n0vacjtddhv",
+    "categoryId": "mnrcir0vkiq1dafm3",
+    "createdAt": "2026-09-09T04:08:29.580Z",
+    "status": "PLANNED",
+    "budgetEntryId": "mttkw5n05zaabyvuz"
+  },
+  {
+    "name": "중년여성 비만예방 프로그램 강사비",
+    "detailedProject": "건강생활실천사업(건강증진)",
+    "statItem": "201-03 행사운영비",
+    "unitPrice": 2880000,
+    "quantity": 1,
+    "amount": 2880000,
+    "memo": "",
+    "id": "mttkuxbe2uice4jqq",
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "createdAt": "2026-09-09T04:07:32.138Z",
+    "status": "PLANNED",
+    "budgetEntryId": "mttkuxbe6wu5fmujq"
+  },
+  {
+    "name": "양재천 걷자! 건강 페스티벌 용역 계약",
+    "detailedProject": "건강생활실천사업(건강증진)",
+    "statItem": "201-03 행사운영비",
+    "unitPrice": 49900000,
+    "quantity": 1,
+    "amount": 49900000,
+    "memo": "",
+    "id": "mtth4xibhnjspzqqi",
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "createdAt": "2026-09-09T02:23:20.483Z",
+    "status": "PLANNED",
+    "budgetEntryId": "mtth4xibmmeynyj29"
+  }
+]

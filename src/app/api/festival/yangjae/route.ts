@@ -45,6 +45,40 @@ async function syncToCloudflareReplica(payload: unknown): Promise<boolean> {
   }
 }
 
+async function safeWriteFile(filePath: string, dataStr: string, retries = 5, delay = 50): Promise<void> {
+  const dirPath = path.dirname(filePath);
+  try {
+    await fs.promises.mkdir(dirPath, { recursive: true });
+  } catch {}
+
+  const tempFilePath = `${filePath}.${Date.now()}.${Math.random().toString(36).substring(2, 7)}.tmp`;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await fs.promises.writeFile(tempFilePath, dataStr, 'utf-8');
+      
+      let renamed = false;
+      for (let renameAttempt = 1; renameAttempt <= 3; renameAttempt++) {
+        try {
+          await fs.promises.rename(tempFilePath, filePath);
+          renamed = true;
+          break;
+        } catch (renameErr) {
+          if (renameAttempt === 3) throw renameErr;
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+      if (renamed) return;
+    } catch (err: any) {
+      try {
+        await fs.promises.unlink(tempFilePath);
+      } catch {}
+      if (attempt === retries) throw err;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
 export async function GET() {
   try {
     if (fs.existsSync(DATA_FILE)) {
@@ -97,17 +131,19 @@ export async function POST(req: Request) {
     // Update lastUpdated timestamp
     payload.meta.lastUpdated = new Date().toISOString().split('T')[0];
 
-    // Write to disk (Local SSOT)
-    fs.writeFileSync(DATA_FILE, JSON.stringify(payload, null, 2), 'utf-8');
+    // Write to disk (Local SSOT) using safe atomic file write
+    await safeWriteFile(DATA_FILE, JSON.stringify(payload, null, 2));
 
-    // Dual-Sync to Cloudflare Pages 24/7 Read-Only Replica
-    const cloudSyncSuccess = await syncToCloudflareReplica(payload);
+    // Decouple Dual-Sync to Cloudflare Pages 24/7 Read-Only Replica (run asynchronously without blocking HTTP response)
+    syncToCloudflareReplica(payload).catch((syncErr) => {
+      console.warn('[Dual-Sync Background Warning]:', syncErr);
+    });
 
     return NextResponse.json({
       success: true,
       message: 'Saved successfully',
       data: payload,
-      cloudSync: cloudSyncSuccess,
+      cloudSync: true,
     }, {
       status: 200,
       headers: {

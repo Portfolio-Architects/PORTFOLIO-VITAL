@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useState, useCallback, useMemo, useSyncExternalStore, useEffect, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { readSheet, replaceAll } from '@/lib/sheets-api';
 import { useBudget } from '@/hooks/useBudget';
 import { SimulationEntry, ProjectSimulationSummary, StatItemSimulationSummary, generateId, BudgetCategory, BudgetEntry } from '@/types';
 import { FESTIVAL_PRESET_SIMULATION_ENTRIES } from '@/lib/presets/festival5DomainPreset';
@@ -161,15 +163,40 @@ const getSimSnapshot = (): SimulationEntry[] => {
 const getSimServerSnapshot = () => emptySimEntries;
 
 export function useBudgetSimulator(): UseBudgetSimulatorReturn {
-  const {
-    categories,
-    entries: budgetEntries,
-    addEntry: addBudgetEntry,
-    updateEntry: updateBudgetEntry,
-    deleteEntry: deleteBudgetEntry,
-    getCategoryStats,
-    isLoading: budgetLoading
-  } = useBudget();
+  const budget = useBudget();
+  const categories = budget?.categories || [];
+  const budgetEntries = budget?.entries || [];
+  const addBudgetEntry = budget?.addEntry;
+  const updateBudgetEntry = budget?.updateEntry;
+  const deleteBudgetEntry = budget?.deleteEntry;
+  const getCategoryStats = budget?.getCategoryStats;
+  const budgetLoading = budget?.isLoading || false;
+
+  const queryClient = useQueryClient();
+
+  const { data: diskSimEntries = [], isLoading: simLoading } = useQuery({
+    queryKey: ['BUDGET_SIMULATIONS'],
+    queryFn: () => readSheet<SimulationEntry>('BUDGET_SIMULATIONS'),
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: false,
+  });
+
+  const saveSimulationsMut = useMutation({
+    mutationFn: (nextEntries: SimulationEntry[]) => replaceAll('BUDGET_SIMULATIONS', nextEntries),
+    onMutate: async (nextEntries) => {
+      await queryClient.cancelQueries({ queryKey: ['BUDGET_SIMULATIONS'] });
+      const previous = queryClient.getQueryData<SimulationEntry[]>(['BUDGET_SIMULATIONS']);
+      queryClient.setQueryData<SimulationEntry[]>(['BUDGET_SIMULATIONS'], nextEntries);
+      return { previous };
+    },
+    onError: (err, nextEntries, context) => {
+      if (context?.previous) queryClient.setQueryData(['BUDGET_SIMULATIONS'], context.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['BUDGET_SIMULATIONS'] });
+    },
+  });
 
   // Filter States
   const [selectedDetailedProject, setSelectedDetailedProject] = useState<string>('');
@@ -178,11 +205,33 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   // Simulation Entries State with SSR-safe useSyncExternalStore
   const storedEntries = useSyncExternalStore(subscribeSimStorage, getSimSnapshot, getSimServerSnapshot);
   const [entriesOverride, setEntriesOverride] = useState<SimulationEntry[] | null>(null);
-  const entries = entriesOverride ?? storedEntries;
+
+  // If disk entries are loaded and available, prefer them; otherwise fallback to storedEntries
+  const effectiveStored = diskSimEntries.length > 0 ? diskSimEntries : storedEntries;
+  const entries = entriesOverride ?? effectiveStored;
+
+  // Single-run auto-sync between disk SSOT and localStorage cache to prevent infinite render loops
+  const hasSyncedRef = useRef(false);
+  useEffect(() => {
+    if (hasSyncedRef.current || simLoading) return;
+
+    if (diskSimEntries && diskSimEntries.length > 0) {
+      hasSyncedRef.current = true;
+      try {
+        const local = getSimSnapshot();
+        if (JSON.stringify(diskSimEntries) !== JSON.stringify(local)) {
+          localStorage.setItem(SIMULATION_STORAGE_KEY, JSON.stringify(diskSimEntries));
+        }
+      } catch {}
+    } else if (diskSimEntries && diskSimEntries.length === 0 && storedEntries.length > 0) {
+      hasSyncedRef.current = true;
+      saveSimulationsMut.mutate(storedEntries);
+    }
+  }, [diskSimEntries, simLoading, storedEntries, saveSimulationsMut]);
 
   const setEntries = useCallback((updater: SimulationEntry[] | ((prev: SimulationEntry[]) => SimulationEntry[])) => {
     setEntriesOverride(prev => {
-      const current = prev ?? getSimSnapshot();
+      const current = prev ?? (diskSimEntries.length > 0 ? diskSimEntries : getSimSnapshot());
       const next = typeof updater === 'function' ? updater(current) : updater;
       if (typeof window !== 'undefined') {
         try {
@@ -191,9 +240,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           console.warn('[useBudgetSimulator] Failed to save simulation entries:', err);
         }
       }
+      saveSimulationsMut.mutate(next);
       return next;
     });
-  }, []);
+  }, [diskSimEntries, saveSimulationsMut]);
 
   // Combine storedEntries with any SSOT budgetEntries that are planned (isPlanned: true)
   const mergedEntries = useMemo<SimulationEntry[]>(() => {
@@ -388,21 +438,55 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   }, [resolveCategoryId, addBudgetEntry, setEntries]);
 
   const updateEntry = useCallback((id: string, partial: Partial<SimulationEntry>) => {
+    const existing = mergedEntries.find(item => item.id === id);
+    const budgetEntryId = partial.budgetEntryId || existing?.budgetEntryId;
+
+    let computedAmount: number | undefined;
+    if (partial.amount !== undefined) {
+      computedAmount = partial.amount;
+    } else if (partial.unitPrice !== undefined || partial.quantity !== undefined) {
+      const u = partial.unitPrice !== undefined ? partial.unitPrice : (existing?.unitPrice || 0);
+      const q = partial.quantity !== undefined ? partial.quantity : (existing?.quantity || 1);
+      computedAmount = u * q;
+    }
+
+    const nextDetailedProject = partial.detailedProject !== undefined ? partial.detailedProject : existing?.detailedProject;
+    const nextStatItem = partial.statItem !== undefined ? partial.statItem : existing?.statItem;
+    const targetCategoryId = partial.categoryId || (nextDetailedProject && nextStatItem ? resolveCategoryId(nextDetailedProject, nextStatItem) : undefined) || existing?.categoryId;
+
+    if (budgetEntryId) {
+      const budgetUpdate: Partial<BudgetEntry> = {};
+      if (computedAmount !== undefined) budgetUpdate.amount = computedAmount;
+      if (partial.name !== undefined) budgetUpdate.purpose = partial.name;
+      if (targetCategoryId) budgetUpdate.categoryId = targetCategoryId;
+      if (partial.memo !== undefined) {
+        budgetUpdate.memo = `[시뮬레이션] ${partial.memo}`;
+      } else if (computedAmount !== undefined) {
+        const u = partial.unitPrice !== undefined ? partial.unitPrice : (existing?.unitPrice || 0);
+        const q = partial.quantity !== undefined ? partial.quantity : (existing?.quantity || 1);
+        budgetUpdate.memo = `[시뮬레이션] 단가 ₩${u.toLocaleString('ko-KR')} × ${q}개`;
+      }
+
+      try {
+        updateBudgetEntry(budgetEntryId, budgetUpdate);
+      } catch (err) {
+        console.warn('[useBudgetSimulator] Failed to sync update to BudgetEntry:', err);
+      }
+    }
+
     setEntries(prev => prev.map(item => {
       if (item.id !== id) return item;
       
       const updated = { ...item, ...partial };
-      if (partial.unitPrice !== undefined || partial.quantity !== undefined) {
-        const u = updated.unitPrice || 0;
-        const q = updated.quantity || 1;
-        updated.amount = u * q;
+      if (computedAmount !== undefined) {
+        updated.amount = computedAmount;
       }
-      if (partial.detailedProject !== undefined || partial.statItem !== undefined) {
-        updated.categoryId = resolveCategoryId(updated.detailedProject, updated.statItem);
+      if (targetCategoryId) {
+        updated.categoryId = targetCategoryId;
       }
       return updated;
     }));
-  }, [resolveCategoryId, setEntries]);
+  }, [mergedEntries, resolveCategoryId, updateBudgetEntry, setEntries]);
 
   const deleteEntry = useCallback((id: string) => {
     const target = mergedEntries.find(item => item.id === id);
@@ -666,7 +750,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     categories,
     budgetEntries,
     entries: mergedEntries,
-    isLoading: budgetLoading,
+    isLoading: budgetLoading || simLoading,
     selectedDetailedProject,
     selectedStatItem,
     availableDetailedProjects,

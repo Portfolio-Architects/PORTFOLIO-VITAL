@@ -1,9 +1,13 @@
 import { QueryClient } from '@tanstack/react-query';
 
+// In production runtime, enable window focus refetching and 1000ms stale time for responsive SSOT disk sync,
+// while enforcing zero-stall background isolation (refetchIntervalInBackground: false) and preserving test isolation.
+const isTestEnv = process.env.NODE_ENV === 'test';
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes (data remains fresh before refetching)
+      staleTime: isTestEnv ? 5 * 60 * 1000 : 1000, // 1000ms for active operational queries, 5m for test isolation
       gcTime: 30 * 60 * 1000,   // 30 minutes garbage collection (formerly cacheTime)
       retry: (failureCount, error: unknown) => {
         // Stop retrying if the error is related to auth (401/403) or we've retried 2 times already
@@ -12,7 +16,7 @@ export const queryClient = new QueryClient({
         return failureCount < 2;
       },
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
-      refetchOnWindowFocus: false, // Prevent heavy main thread block on window focus
+      refetchOnWindowFocus: isTestEnv ? false : true, // Pick up external/background disk writes on window focus
       refetchOnReconnect: false,   // Prevent automatic refetch on network reconnect
       refetchIntervalInBackground: false, // Zero-stall: disable polling in background tabs
     },

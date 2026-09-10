@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useSyncExternalStore, useCallback } from 'react';
+import React, { useState, useMemo, useSyncExternalStore, useCallback, useEffect } from 'react';
 import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, User, Building2, Tent, FolderInput, ArrowRightLeft } from 'lucide-react';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem } from '@/hooks/useYangjaeFestival';
 
@@ -468,6 +468,13 @@ const DetailEditRow = React.memo(function DetailEditRow({
   const [attendees, setAttendees] = useState<string>(parsed.attendees);
   const [text, setText] = useState<string>(parsed.text);
 
+  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const latestValuesRef = React.useRef({ date, status, attendees, text, lastEmitted });
+
+  useEffect(() => {
+    latestValuesRef.current = { date, status, attendees, text, lastEmitted };
+  }, [date, status, attendees, text, lastEmitted]);
+
   if (prevDetail !== initialDetail) {
     setPrevDetail(initialDetail);
     // 외부 변경(순서 이동 ▲/▼, 초기 로드 등)인 경우에만 파싱값 동기화, 자체 타이핑 시 덮어쓰기 차단
@@ -480,14 +487,73 @@ const DetailEditRow = React.memo(function DetailEditRow({
     }
   }
 
-  const emitChange = useCallback(
-    (newDate: string, newStatus: 'done' | 'in-progress' | 'todo', newAttendees: string, newText: string) => {
-      const formatted = formatDetail({ date: newDate, status: newStatus, attendees: newAttendees, text: newText });
+  const flushChange = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    const { date: d, status: s, attendees: a, text: t, lastEmitted: le } = latestValuesRef.current;
+    const formatted = formatDetail({ date: d, status: s, attendees: a, text: t });
+    if (formatted !== le) {
       setLastEmitted(formatted);
+      latestValuesRef.current.lastEmitted = formatted;
       onUpdate(formatted);
+    }
+  }, [onUpdate]);
+
+  const scheduleEmit = useCallback(
+    (newDate: string, newStatus: 'done' | 'in-progress' | 'todo', newAttendees: string, newText: string) => {
+      latestValuesRef.current = { date: newDate, status: newStatus, attendees: newAttendees, text: newText, lastEmitted: latestValuesRef.current.lastEmitted };
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        debounceTimerRef.current = null;
+        const formatted = formatDetail({ date: newDate, status: newStatus, attendees: newAttendees, text: newText });
+        setLastEmitted(formatted);
+        latestValuesRef.current.lastEmitted = formatted;
+        onUpdate(formatted);
+      }, 200);
     },
     [onUpdate]
   );
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+        const { date: d, status: s, attendees: a, text: t, lastEmitted: le } = latestValuesRef.current;
+        const formatted = formatDetail({ date: d, status: s, attendees: a, text: t });
+        if (formatted !== le) {
+          onUpdate(formatted);
+        }
+      }
+    };
+  }, [onUpdate]);
+
+  const handleMoveUpWithFlush = useCallback(() => {
+    flushChange();
+    onMoveUp?.();
+  }, [flushChange, onMoveUp]);
+
+  const handleMoveDownWithFlush = useCallback(() => {
+    flushChange();
+    onMoveDown?.();
+  }, [flushChange, onMoveDown]);
+
+  const handleDeleteWithFlush = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    onDelete();
+  }, [onDelete]);
+
+  const handleTransferWithFlush = useCallback(() => {
+    flushChange();
+    onTransfer?.();
+  }, [flushChange, onTransfer]);
 
   return (
     <div className="p-2 bg-white rounded-lg border border-slate-200 space-y-1.5 shadow-2xs">
@@ -498,8 +564,9 @@ const DetailEditRow = React.memo(function DetailEditRow({
           value={date}
           onChange={(e) => {
             setDate(e.target.value);
-            emitChange(e.target.value, status, attendees, text);
+            scheduleEmit(e.target.value, status, attendees, text);
           }}
+          onBlur={flushChange}
           placeholder="날짜 (7.29)"
           className="w-24 px-2 py-0.5 border border-amber-400 rounded bg-amber-50/40 text-xs font-bold font-mono shrink-0"
         />
@@ -509,8 +576,9 @@ const DetailEditRow = React.memo(function DetailEditRow({
           onChange={(e) => {
             const nextStatus = e.target.value as 'done' | 'in-progress' | 'todo';
             setStatus(nextStatus);
-            emitChange(date, nextStatus, attendees, text);
+            scheduleEmit(date, nextStatus, attendees, text);
           }}
+          onBlur={flushChange}
           className={`px-1.5 py-0.5 text-xs font-black rounded border cursor-pointer shrink-0 ${
             status === 'done'
               ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
@@ -529,8 +597,9 @@ const DetailEditRow = React.memo(function DetailEditRow({
           value={attendees}
           onChange={(e) => {
             setAttendees(e.target.value);
-            emitChange(date, status, e.target.value, text);
+            scheduleEmit(date, status, e.target.value, text);
           }}
+          onBlur={flushChange}
           placeholder="참석자 (예: 과장님 7010, 오창선 7116, 김지현 7173, 김형종 7250, 강남차병원 0992, 서울대병원 8276, 유디 2210, 한국신체정보 3732, 제이민(김다희) 0544, 지영팀장님 7031, 희선팀장님 7011...)"
           className="flex-1 min-w-0 px-2 py-0.5 border border-slate-300 rounded text-xs font-medium text-slate-800 bg-white"
         />
@@ -539,7 +608,7 @@ const DetailEditRow = React.memo(function DetailEditRow({
           <button
             type="button"
             disabled={!canMoveUp}
-            onClick={onMoveUp}
+            onClick={handleMoveUpWithFlush}
             className={`p-1 rounded cursor-pointer transition-colors ${
               canMoveUp
                 ? 'text-slate-700 hover:bg-slate-200 hover:text-slate-900 active:scale-95'
@@ -552,7 +621,7 @@ const DetailEditRow = React.memo(function DetailEditRow({
           <button
             type="button"
             disabled={!canMoveDown}
-            onClick={onMoveDown}
+            onClick={handleMoveDownWithFlush}
             className={`p-1 rounded cursor-pointer transition-colors ${
               canMoveDown
                 ? 'text-slate-700 hover:bg-slate-200 hover:text-slate-900 active:scale-95'
@@ -567,7 +636,7 @@ const DetailEditRow = React.memo(function DetailEditRow({
               <span className="w-[1px] h-3 bg-slate-300 mx-0.5" />
               <button
                 type="button"
-                onClick={onTransfer}
+                onClick={handleTransferWithFlush}
                 className="p-1 text-amber-700 hover:bg-amber-100 rounded cursor-pointer transition-colors active:scale-95"
                 title="다른 추진과제 카테고리로 이동"
               >
@@ -578,7 +647,7 @@ const DetailEditRow = React.memo(function DetailEditRow({
           <span className="w-[1px] h-3 bg-slate-300 mx-0.5" />
           <button
             type="button"
-            onClick={onDelete}
+            onClick={handleDeleteWithFlush}
             className="p-1 text-red-500 hover:bg-red-50 hover:text-red-700 rounded cursor-pointer transition-colors active:scale-95"
             title="과업 삭제"
           >
@@ -591,13 +660,57 @@ const DetailEditRow = React.memo(function DetailEditRow({
         value={text}
         onChange={(e) => {
           setText(e.target.value);
-          emitChange(date, status, attendees, e.target.value);
+          scheduleEmit(date, status, attendees, e.target.value);
         }}
+        onBlur={flushChange}
         rows={2}
         placeholder="세부 과업 내용 입력 (엔터로 줄바꿈하여 한 줄씩 개조식 작성 가능)"
         className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs font-medium text-slate-900 bg-white leading-relaxed resize-y focus:outline-none focus:ring-1 focus:ring-amber-500"
       />
     </div>
+  );
+});
+
+interface EditableDetailItemProps {
+  draft: DetailDraft;
+  dIdx: number;
+  totalCount: number;
+  milestoneId: number;
+  onUpdate: (index: number, newDetailStr: string) => void;
+  onMoveUp: (index: number) => void;
+  onMoveDown: (index: number) => void;
+  onTransfer: (milestoneId: number, index: number, raw: string) => void;
+  onDelete: (index: number) => void;
+}
+
+const EditableDetailItem = React.memo(function EditableDetailItem({
+  draft,
+  dIdx,
+  totalCount,
+  milestoneId,
+  onUpdate,
+  onMoveUp,
+  onMoveDown,
+  onTransfer,
+  onDelete,
+}: EditableDetailItemProps) {
+  const handleMoveUp = useCallback(() => onMoveUp(dIdx), [onMoveUp, dIdx]);
+  const handleMoveDown = useCallback(() => onMoveDown(dIdx), [onMoveDown, dIdx]);
+  const handleTransfer = useCallback(() => onTransfer(milestoneId, dIdx, draft.raw), [onTransfer, milestoneId, dIdx, draft.raw]);
+  const handleUpdate = useCallback((newRaw: string) => onUpdate(dIdx, newRaw), [onUpdate, dIdx]);
+  const handleDelete = useCallback(() => onDelete(dIdx), [onDelete, dIdx]);
+
+  return (
+    <DetailEditRow
+      initialDetail={draft.raw}
+      canMoveUp={dIdx > 0}
+      canMoveDown={dIdx < totalCount - 1}
+      onMoveUp={handleMoveUp}
+      onMoveDown={handleMoveDown}
+      onTransfer={handleTransfer}
+      onUpdate={handleUpdate}
+      onDelete={handleDelete}
+    />
   );
 });
 
@@ -621,8 +734,12 @@ const getClientIsLocalAdmin = () => {
 };
 const getServerIsLocalAdmin = () => false;
 
-function YangjaeFestivalDashboardComponent() {
-  const { data = YANGJAE_FALLBACK_DATA } = useYangjaeFestival();
+export interface YangjaeFestivalDashboardProps {
+  isActive?: boolean;
+}
+
+function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalDashboardProps = {}) {
+  const { data = YANGJAE_FALLBACK_DATA } = useYangjaeFestival(isActive);
   const saveMutation = useSaveYangjaeFestival();
 
   // 로컬 관리자 여부 (외부 링크로 접속한 일반 사용자는 false -> 공유/편집 기능 숨김)
@@ -652,9 +769,55 @@ function YangjaeFestivalDashboardComponent() {
   const [isTransferring, setIsTransferring] = useState<boolean>(false);
 
   const [selectedTab, setSelectedTab] = useState<'milestones' | 'booths'>('milestones');
+  const [visitedFestivalTabs, setVisitedFestivalTabs] = useState<Record<string, boolean>>({
+    milestones: true,
+    booths: false,
+  });
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
   const [copied, setCopied] = useState<boolean>(false);
   const [isLargeFont, setIsLargeFont] = useState<boolean>(false);
+
+  // DetailEditRow memoized stable handlers
+  const handleUpdateDetailRow = useCallback((dIdx: number, newDetailStr: string) => {
+    setDetailDrafts((prev) => {
+      const next = [...prev];
+      if (next[dIdx]) {
+        next[dIdx] = { ...next[dIdx], raw: newDetailStr };
+      }
+      return next;
+    });
+    setEditMilestoneData((prev) => (prev ? { ...prev, details: (prev.details || []).map((d, i) => (i === dIdx ? newDetailStr : d)) } : null));
+  }, []);
+
+  const handleMoveUpDetailRow = useCallback((dIdx: number) => {
+    if (dIdx <= 0) return;
+    setDetailDrafts((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(dIdx, 1);
+      next.splice(dIdx - 1, 0, moved);
+      setEditMilestoneData((mPrev) => (mPrev ? { ...mPrev, details: next.map((d) => d.raw) } : null));
+      return next;
+    });
+  }, []);
+
+  const handleMoveDownDetailRow = useCallback((dIdx: number) => {
+    setDetailDrafts((prev) => {
+      if (dIdx >= prev.length - 1) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(dIdx, 1);
+      next.splice(dIdx + 1, 0, moved);
+      setEditMilestoneData((mPrev) => (mPrev ? { ...mPrev, details: next.map((d) => d.raw) } : null));
+      return next;
+    });
+  }, []);
+
+  const handleDeleteDetailRow = useCallback((dIdx: number) => {
+    setDetailDrafts((prev) => {
+      const next = prev.filter((_, i) => i !== dIdx);
+      setEditMilestoneData((mPrev) => (mPrev ? { ...mPrev, details: next.map((d) => d.raw) } : null));
+      return next;
+    });
+  }, []);
 
   // 과제별 Collapse / Expand 상태 (ID 단위, 기본 전체 접힘: Default Collapsed)
   const [expandedTaskIds, setExpandedTaskIds] = useState<Set<number>>(() => new Set());
@@ -711,16 +874,6 @@ function YangjaeFestivalDashboardComponent() {
     return (editingBooths ? editBoothsData : (data?.booths || [])) || [];
   }, [editingBooths, editBoothsData, data?.booths]);
 
-  const confirmedBoothCount = useMemo(() => {
-    let count = 0;
-    const list = activeBooths || [];
-    for (let i = 0; i < list.length; i++) {
-      if (list[i]?.status === '확정') {
-        count++;
-      }
-    }
-    return count;
-  }, [activeBooths]);
 
   const boothMetrics = useMemo(() => {
     const list = activeBooths || [];
@@ -798,6 +951,7 @@ function YangjaeFestivalDashboardComponent() {
   }, [activeBooths]);
 
   const handleSelectTab = useCallback((tabId: 'milestones' | 'booths') => {
+    setVisitedFestivalTabs((prev) => (prev[tabId] ? prev : { ...prev, [tabId]: true }));
     setSelectedTab(tabId);
   }, []);
 
@@ -937,6 +1091,10 @@ function YangjaeFestivalDashboardComponent() {
     const otherMilestones = (data?.milestones || []).filter((m) => m.id !== sourceMilestoneId);
     setSelectedTargetMilestoneId(otherMilestones.length > 0 ? otherMilestones[0].id : null);
   }, [data?.milestones]);
+
+  const handleTransferDetailRow = useCallback((targetItemId: number, dIdx: number, raw: string) => {
+    handleOpenTransferModal(targetItemId, dIdx, raw);
+  }, [handleOpenTransferModal]);
 
   const handleCloseTransferModal = useCallback(() => {
     if (isTransferring) return;
@@ -1542,8 +1700,8 @@ ${targetUrl}`;
           </div>
 
           {/* TAB 1: 추진과제별 현황 (협조부서 통합) */}
-          {selectedTab === 'milestones' && (
-            <div className="space-y-3.5">
+          {visitedFestivalTabs.milestones && (
+            <div className={selectedTab === 'milestones' ? 'block space-y-3.5' : 'hidden'}>
               {/* Top Controls: 전체 펼치기/접기 + 과제 추가 */}
               <div className="px-1 flex items-center justify-between">
                 <button
@@ -1766,41 +1924,17 @@ ${targetUrl}`;
                                 return (
                                   <>
                                     {activeDetailItems.map((draft, dIdx) => (
-                                      <DetailEditRow
+                                      <EditableDetailItem
                                         key={draft.uid}
-                                        initialDetail={draft.raw}
-                                        canMoveUp={dIdx > 0}
-                                        canMoveDown={dIdx < activeDetailItems.length - 1}
-                                        onMoveUp={() => {
-                                          if (dIdx <= 0) return;
-                                          const next = [...activeDetailItems];
-                                          const [moved] = next.splice(dIdx, 1);
-                                          next.splice(dIdx - 1, 0, moved);
-                                          setDetailDrafts(next);
-                                          setEditMilestoneData((prev) => (prev ? { ...prev, details: next.map((d) => d.raw) } : null));
-                                        }}
-                                        onMoveDown={() => {
-                                          if (dIdx >= activeDetailItems.length - 1) return;
-                                          const next = [...activeDetailItems];
-                                          const [moved] = next.splice(dIdx, 1);
-                                          next.splice(dIdx + 1, 0, moved);
-                                          setDetailDrafts(next);
-                                          setEditMilestoneData((prev) => (prev ? { ...prev, details: next.map((d) => d.raw) } : null));
-                                        }}
-                                        onTransfer={() => {
-                                          handleOpenTransferModal(targetItem.id, dIdx, draft.raw);
-                                        }}
-                                        onUpdate={(newDetailStr) => {
-                                          const next = [...activeDetailItems];
-                                          next[dIdx] = { ...next[dIdx], raw: newDetailStr };
-                                          setDetailDrafts(next);
-                                          setEditMilestoneData((prev) => (prev ? { ...prev, details: next.map((d) => d.raw) } : null));
-                                        }}
-                                        onDelete={() => {
-                                          const next = activeDetailItems.filter((_, i) => i !== dIdx);
-                                          setDetailDrafts(next);
-                                          setEditMilestoneData((prev) => (prev ? { ...prev, details: next.map((d) => d.raw) } : null));
-                                        }}
+                                        draft={draft}
+                                        dIdx={dIdx}
+                                        totalCount={activeDetailItems.length}
+                                        milestoneId={targetItem.id}
+                                        onMoveUp={handleMoveUpDetailRow}
+                                        onMoveDown={handleMoveDownDetailRow}
+                                        onTransfer={handleTransferDetailRow}
+                                        onUpdate={handleUpdateDetailRow}
+                                        onDelete={handleDeleteDetailRow}
                                       />
                                     ))}
                                     <button
@@ -1936,77 +2070,78 @@ ${targetUrl}`;
           )}
 
           {/* TAB 2: 부스 현황 */}
-          {selectedTab === 'booths' && (
-            <div className="space-y-3.5">
-              <div className="flex items-center justify-between gap-2 px-1 flex-wrap sm:flex-nowrap">
-                <h3 className={`${isLargeFont ? 'text-base' : 'text-sm'} font-extrabold text-slate-900 flex items-center gap-1.5 whitespace-nowrap shrink-0`}>
-                  <span className={`inline-block ${isLargeFont ? 'w-3.5 h-3.5 border-2' : 'w-3 h-3 border-[1.5px]'} border-slate-900 rounded-[1px] shrink-0`} />
-                  <span>부스 배치 계획</span>
-                </h3>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={`inline-flex items-center gap-1 ${isLargeFont ? 'text-xs' : 'text-[11px] sm:text-xs'} font-bold text-slate-700 bg-slate-100 border border-slate-200/90 px-2.5 py-1 rounded-full whitespace-nowrap shadow-3xs`}>
+          {visitedFestivalTabs.booths && (
+            <div className={selectedTab === 'booths' ? 'block space-y-3.5' : 'hidden'}>
+              <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-2 px-1">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <h3 className={`${isLargeFont ? 'text-base' : 'text-sm'} font-extrabold text-slate-900 flex items-center gap-1.5 whitespace-nowrap shrink-0`}>
+                    <span className={`inline-block ${isLargeFont ? 'w-3.5 h-3.5 border-2' : 'w-3 h-3 border-[1.5px]'} border-slate-900 rounded-[1px] shrink-0`} />
+                    <span>부스 배치 계획</span>
+                  </h3>
+                  <span className={`inline-flex items-center gap-1 ${isLargeFont ? 'text-xs' : 'text-[11px] sm:text-xs'} font-bold text-slate-700 bg-slate-100 border border-slate-200/90 px-2.5 py-1 rounded-full whitespace-nowrap shadow-3xs shrink-0`}>
                     <span>확정 <strong className="font-black text-slate-900">{boothMetrics.confirmedEntities}</strong> / 총 <strong className="font-black text-slate-900">{boothMetrics.totalEntities}개</strong></span>
                     <span className="text-slate-400 mx-0.5">·</span>
                     <span className="font-black text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] border border-emerald-300/60">
                       필요 {boothMetrics.totalDong}동
                     </span>
                   </span>
-                  {editingBooths ? (
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const maxId = (editBoothsData || []).reduce((max, b) => Math.max(max, Number(b?.id) || 0), 0);
-                          const nextId = (Number.isFinite(maxId) ? maxId : 0) + 1;
-                          setEditBoothsData([
-                            ...editBoothsData,
-                            {
-                              id: nextId,
-                              category: '보건소 부서',
-                              name: '신규 부스명',
-                              scale: '1동',
-                              program: '체험 프로그램 내용',
-                              status: '확정',
-                            }
-                          ]);
-                        }}
-                        className="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-900 rounded border border-amber-300 hover:bg-amber-200 flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
-                        title="부스 추가"
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span>추가</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleSaveBooths}
-                        disabled={saveMutation.isPending}
-                        className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
-                        title="부스 저장"
-                      >
-                        {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                        <span>저장</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleCancelEditBooths}
-                        className="px-2 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
-                        title="취소"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ) : isLocalAdmin ? (
+                </div>
+
+                {editingBooths ? (
+                  <div className="flex items-center gap-1 shrink-0 ml-auto">
                     <button
                       type="button"
-                      onClick={handleStartEditBooths}
-                      className="px-2.5 py-1 text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-lg border border-amber-300 flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap shrink-0"
-                      title="부스 순서 변경 및 현황 수정"
+                      onClick={() => {
+                        const maxId = (editBoothsData || []).reduce((max, b) => Math.max(max, Number(b?.id) || 0), 0);
+                        const nextId = (Number.isFinite(maxId) ? maxId : 0) + 1;
+                        setEditBoothsData([
+                          ...editBoothsData,
+                          {
+                            id: nextId,
+                            category: '보건소 부서',
+                            name: '신규 부스명',
+                            scale: '1동',
+                            program: '체험 프로그램 내용',
+                            status: '확정',
+                          }
+                        ]);
+                      }}
+                      className="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-900 rounded border border-amber-300 hover:bg-amber-200 flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
+                      title="부스 추가"
                     >
-                      <ArrowUpDown className="w-3.5 h-3.5 text-amber-700" />
-                      <span>순서 변경 / 편집</span>
+                      <Plus className="w-3 h-3" />
+                      <span>추가</span>
                     </button>
-                  ) : null}
-                </div>
+                    <button
+                      type="button"
+                      onClick={handleSaveBooths}
+                      disabled={saveMutation.isPending}
+                      className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
+                      title="부스 저장"
+                    >
+                      {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                      <span>저장</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelEditBooths}
+                      className="px-2 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
+                      title="취소"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : isLocalAdmin ? (
+                  <button
+                    type="button"
+                    onClick={handleStartEditBooths}
+                    className="px-2.5 py-1 text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-lg border border-amber-300 flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap shrink-0 ml-auto"
+                    title="부스 순서 변경 및 현황 수정"
+                  >
+                    <ArrowUpDown className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                    <span>순서 변경 / 편집</span>
+                  </button>
+                ) : null}
               </div>
 
               {/* Booth Summary Metrics Card (행렬 정렬 & 프리미엄 다크 카드) */}

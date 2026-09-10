@@ -13,16 +13,16 @@ export function useInventory() {
   const { data: items = [] } = useQuery({
     queryKey: ['INVENTORY'],
     queryFn: () => readSheet<InventoryItem>('INVENTORY'),
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
     refetchIntervalInBackground: false,
   });
 
   const { data: stockChanges = [] } = useQuery({
     queryKey: ['STOCK_CHANGES'],
     queryFn: () => readSheet<StockChange>('STOCK_CHANGES'),
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
     refetchIntervalInBackground: false,
   });
 
@@ -36,6 +36,11 @@ export function useInventory() {
     },
     onError: (err, newItem, context) => {
       if (context?.previous) queryClient.setQueryData(['INVENTORY'], context.previous);
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['INVENTORY'] });
+      }
     },
   });
 
@@ -53,6 +58,11 @@ export function useInventory() {
     onError: (err, vars, context) => {
       if (context?.previous) queryClient.setQueryData(['INVENTORY'], context.previous);
     },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['INVENTORY'] });
+      }
+    },
   });
 
   const deleteItemMut = useMutation({
@@ -66,6 +76,11 @@ export function useInventory() {
     onError: (err, id, context) => {
       if (context?.previous) queryClient.setQueryData(['INVENTORY'], context.previous);
     },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['INVENTORY'] });
+      }
+    },
   });
 
   const addStockChangeMut = useMutation({
@@ -78,6 +93,11 @@ export function useInventory() {
     },
     onError: (err, sc, context) => {
       if (context?.previous) queryClient.setQueryData(['STOCK_CHANGES'], context.previous);
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['STOCK_CHANGES'] });
+      }
     },
   });
 
@@ -98,6 +118,11 @@ export function useInventory() {
     },
     onError: (err, itemId, context) => {
       if (context?.previous) queryClient.setQueryData(['STOCK_CHANGES'], context.previous);
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['STOCK_CHANGES'] });
+      }
     },
   });
 

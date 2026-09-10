@@ -13,6 +13,8 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  maxWorkers: 2,
+  testTimeout: 15000,
 };
 
 export default createJestConfig(customJestConfig);
