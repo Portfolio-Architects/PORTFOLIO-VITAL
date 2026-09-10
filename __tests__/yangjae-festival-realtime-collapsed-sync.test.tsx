@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, calculateFestivalBudgetSummary } from '@/hooks/useYangjaeFestival';
-import { YangjaeFestivalDashboard, STAFF_PHONE_MAP, getStaffInfo, parseDetail } from '@/components/festival/YangjaeFestivalDashboard';
+import { YangjaeFestivalDashboard, STAFF_PHONE_MAP, getStaffInfo, parseDetail, parseBoothScale } from '@/components/festival/YangjaeFestivalDashboard';
 import { renderHook } from '@testing-library/react';
 
 // Mock fetch globally
@@ -574,6 +574,20 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(STAFF_PHONE_MAP['과장님']).toEqual({ ext: '7010', full: '02-3423-7010', role: '과장' });
       expect(STAFF_PHONE_MAP['제이민']).toEqual({ ext: '0544', full: '010-8494-0544', role: '대행사(김다희 팀장)' });
       expect(STAFF_PHONE_MAP['김다희팀장님']).toEqual({ ext: '0544', full: '010-8494-0544', role: '대행사 팀장' });
+      expect(STAFF_PHONE_MAP['김형종']).toEqual({ ext: '7250', full: '02-3423-7250', role: '주임' });
+      expect(STAFF_PHONE_MAP['김형종 주임님']).toEqual({ ext: '7250', full: '02-3423-7250', role: '주임' });
+      expect(STAFF_PHONE_MAP['한국신체정보']).toEqual({ ext: '3732', full: '010-9985-3732', role: '민간 헬스케어 부스' });
+      expect(STAFF_PHONE_MAP['한국신체정보(주)']).toEqual({ ext: '3732', full: '010-9985-3732', role: '민간 헬스케어 부스' });
+
+      const infoKim = getStaffInfo('김형종 주임님');
+      expect(infoKim).not.toBeNull();
+      expect(infoKim?.ext).toBe('7250');
+      expect(infoKim?.full).toBe('02-3423-7250');
+
+      const infoBody = getStaffInfo('한국신체정보(주)');
+      expect(infoBody).not.toBeNull();
+      expect(infoBody?.ext).toBe('3732');
+      expect(infoBody?.full).toBe('010-9985-3732');
 
       const infoChief = getStaffInfo('과장님');
       expect(infoChief).not.toBeNull();
@@ -652,10 +666,10 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(boothsTabBtn).toBeInTheDocument();
       fireEvent.click(boothsTabBtn);
 
-      // Verify all 9 booths are present
+      // Verify representative booths are present
       expect(await screen.findByText('강남 차병원')).toBeInTheDocument();
       expect(screen.getByText('고려대학교부설 척추측만증연구소')).toBeInTheDocument();
-      expect(screen.getByText('서울시 간호조무사회')).toBeInTheDocument();
+      expect(screen.getByText('서울대학교병원 강남센터')).toBeInTheDocument();
       expect(screen.getByText('유디치과')).toBeInTheDocument();
       expect(screen.getByText('자생한방병원')).toBeInTheDocument();
       expect(screen.getByText('케이스튜디오 (디아르스)')).toBeInTheDocument();
@@ -663,8 +677,8 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(screen.getByText('금연·절주 영양 보건 사업 홍보')).toBeInTheDocument();
       expect(screen.getByText('서울체력장 강남센터')).toBeInTheDocument();
 
-      // Verify sequential numbering No.1 through No.9 exists
-      for (let i = 1; i <= 9; i++) {
+      // Verify sequential numbering exists
+      for (let i = 1; i <= YANGJAE_FALLBACK_DATA.booths.length; i++) {
         expect(screen.getByText(`No.${i}`)).toBeInTheDocument();
       }
 
@@ -679,27 +693,23 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       const boothsTabBtn = await screen.findByRole('button', { name: /2\. 부스현황/i });
       fireEvent.click(boothsTabBtn);
 
-      // Click '전문 의료·검진' filter
-      const medicalFilter = await screen.findByRole('button', { name: '전문 의료·검진' });
-      fireEvent.click(medicalFilter);
+      // Click '민간' filter
+      const privateFilter = await screen.findByRole('button', { name: '민간' });
+      fireEvent.click(privateFilter);
       expect(screen.getByText('강남 차병원')).toBeInTheDocument();
       expect(screen.getByText('자생한방병원')).toBeInTheDocument();
-      expect(screen.queryByText('한국신체정보(주)')).toBeNull();
-      expect(screen.queryByText('서울체력장 강남센터')).toBeNull();
-
-      // Click '민간 헬스케어' filter
-      const privateFilter = screen.getByRole('button', { name: '민간 헬스케어' });
-      fireEvent.click(privateFilter);
       expect(screen.getByText('케이스튜디오 (디아르스)')).toBeInTheDocument();
       expect(screen.getByText('한국신체정보(주)')).toBeInTheDocument();
-      expect(screen.queryByText('강남 차병원')).toBeNull();
+      expect(screen.queryByText('금연·절주 영양 보건 사업 홍보')).toBeNull();
+      expect(screen.queryByText('서울체력장 강남센터')).toBeNull();
 
-      // Click '보건소 사업' filter
-      const publicFilter = screen.getByRole('button', { name: '보건소 사업' });
+      // Click '보건소 부서' filter
+      const publicFilter = screen.getByRole('button', { name: '보건소 부서' });
       fireEvent.click(publicFilter);
       expect(screen.getByText('금연·절주 영양 보건 사업 홍보')).toBeInTheDocument();
       expect(screen.getByText('서울체력장 강남센터')).toBeInTheDocument();
       expect(screen.queryByText('강남 차병원')).toBeNull();
+      expect(screen.queryByText('한국신체정보(주)')).toBeNull();
     });
   });
 
@@ -778,6 +788,39 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       // Verify save button exists
       const saveBtn = screen.getByTitle('부스 저장');
       expect(saveBtn).toBeInTheDocument();
+    });
+  });
+
+  describe('R12. Booth Total Participating Entities & Required Booth Scale (동수) Dynamic Calculation', () => {
+    it('correctly parses various scale formats with parseBoothScale', () => {
+      expect(parseBoothScale('3동')).toEqual({ dong: 3, bus: 0 });
+      expect(parseBoothScale('1동')).toEqual({ dong: 1, bus: 0 });
+      expect(parseBoothScale('2동 + 검진버스')).toEqual({ dong: 2, bus: 1 });
+      expect(parseBoothScale('1동 + 검진버스 2대')).toEqual({ dong: 1, bus: 2 });
+      expect(parseBoothScale('4')).toEqual({ dong: 4, bus: 0 });
+      expect(parseBoothScale('')).toEqual({ dong: 0, bus: 0 });
+    });
+
+    it('displays total participating entities and total required booth dong count at the top of Booths tab', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      // Switch to Booths tab
+      const boothsTabBtn = await screen.findByRole('button', { name: /2\. 부스현황/i });
+      fireEvent.click(boothsTabBtn);
+
+      // Verify Booth Summary Metrics Card titles are rendered
+      expect(await screen.findByText('총 부스 참여 주체')).toBeInTheDocument();
+      expect(screen.getByText('총 필요 부스 규모')).toBeInTheDocument();
+
+      // Verify total entities count
+      expect(screen.getByText(new RegExp(`총 ${YANGJAE_FALLBACK_DATA.booths.length}개 기관`))).toBeInTheDocument();
+
+      // Verify required booth scale dong count
+      const totalExpectedDong = YANGJAE_FALLBACK_DATA.booths.reduce((acc, b) => acc + parseBoothScale(b.scale).dong, 0);
+      expect(screen.getByText(new RegExp(`총 ${totalExpectedDong}동`))).toBeInTheDocument();
+
+      // Verify header badge displays required dong count
+      expect(screen.getByText(new RegExp(`필요 ${totalExpectedDong}동`))).toBeInTheDocument();
     });
   });
 });

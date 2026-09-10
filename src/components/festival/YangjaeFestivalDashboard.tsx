@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useSyncExternalStore, useCallback } from 'react';
-import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, User } from 'lucide-react';
+import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, User, Building2, Tent } from 'lucide-react';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem } from '@/hooks/useYangjaeFestival';
 
 export interface DetailDraft {
@@ -52,7 +52,7 @@ function fallbackCopy(text: string): boolean {
   }
 }
 
-const FESTIVAL_CATEGORIES = ['전체', '전문 의료·검진', '민간 헬스케어', '보건소 사업'];
+const FESTIVAL_CATEGORIES = ['전체', '민간', '보건소 부서'];
 const FESTIVAL_TARGET_TIMESTAMP = new Date("2026-10-31T09:00:00").getTime();
 
 const LARGE_FONT_STYLES = `
@@ -105,6 +105,30 @@ const YANGJAE_REPORT_TABS = [
   { id: 'milestones' as const, label: '1. 추진과제' },
   { id: 'booths' as const, label: '2. 부스현황' },
 ];
+
+export interface BoothScaleParsed {
+  dong: number;
+  bus: number;
+}
+
+export function parseBoothScale(scale: string): BoothScaleParsed {
+  if (!scale || typeof scale !== 'string') return { dong: 0, bus: 0 };
+  const dongMatch = scale.match(/(\d+)\s*동/);
+  let dong = 0;
+  if (dongMatch) {
+    dong = parseInt(dongMatch[1], 10);
+  } else {
+    const numOnly = scale.match(/^(\d+)$/);
+    if (numOnly) dong = parseInt(numOnly[1], 10);
+  }
+  const busMatch = scale.match(/(?:검진)?버스\s*(\d+)\s*대|(\d+)\s*대\s*(?:검진)?버스|(?:검진)?버스/);
+  let bus = 0;
+  if (busMatch) {
+    const num = busMatch[1] || busMatch[2];
+    bus = num ? parseInt(num, 10) : 1;
+  }
+  return { dong, bus };
+}
 
 export interface ParsedDetail {
   date: string;
@@ -224,6 +248,23 @@ export const STAFF_PHONE_MAP: Record<string, { ext: string; full: string; role: 
   '남상희': { ext: '7025', full: '02-3423-7025', role: '주무관' },
   '남상희주무관': { ext: '7025', full: '02-3423-7025', role: '주무관' },
   '남상희 주무관': { ext: '7025', full: '02-3423-7025', role: '주무관' },
+  // 김형종 주임님 (내선 7250 / 02-3423-7250)
+  '김형종': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  '김형종주임': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  '김형종 주임': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  '김형종주임님': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  '김형종 주임님': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  '형종': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  '형종주임': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  '형종 주임': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  '형종주임님': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  '형종 주임님': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  // 한국신체정보 (010-9985-3732 / 3732)
+  '한국신체정보': { ext: '3732', full: '010-9985-3732', role: '민간 헬스케어 부스' },
+  '한국신체정보(주)': { ext: '3732', full: '010-9985-3732', role: '민간 헬스케어 부스' },
+  '한국신체정보 (주)': { ext: '3732', full: '010-9985-3732', role: '민간 헬스케어 부스' },
+  '한국신체정보주식회사': { ext: '3732', full: '010-9985-3732', role: '민간 헬스케어 부스' },
+  '한국신체': { ext: '3732', full: '010-9985-3732', role: '민간 헬스케어 부스' },
   // 김희선 팀장님 (내선 7011)
   '김희선팀장님': { ext: '7011', full: '02-3423-7011', role: '팀장' },
   '김희선 팀장님': { ext: '7011', full: '02-3423-7011', role: '팀장' },
@@ -274,6 +315,10 @@ export function getStaffInfo(name: string): { ext: string; full: string; role: s
   let result: { ext: string; full: string; role: string } | null = null;
   if (STAFF_PHONE_MAP[clean]) {
     result = STAFF_PHONE_MAP[clean];
+  } else if (clean.includes('형종')) {
+    result = STAFF_PHONE_MAP['김형종'];
+  } else if (clean.includes('한국신체정보') || clean.includes('한국신체')) {
+    result = STAFF_PHONE_MAP['한국신체정보'];
   } else if (clean.includes('희선')) {
     result = STAFF_PHONE_MAP['희선팀장님'];
   } else if (clean.includes('지영')) {
@@ -450,7 +495,7 @@ const DetailEditRow = React.memo(function DetailEditRow({
             setAttendees(e.target.value);
             emitChange(date, status, e.target.value, text);
           }}
-          placeholder="참석자 (예: 과장님 7010, 오창선 7116, 제이민(김다희) 0544, 지영팀장님 7031, 희선팀장님 7011, 서승오 7034, 임석훤 7012, 남상희 7025)"
+          placeholder="참석자 (예: 과장님 7010, 오창선 7116, 김형종 7250, 한국신체정보 3732, 제이민(김다희) 0544, 지영팀장님 7031, 희선팀장님 7011, 서승오 7034, 임석훤 7012, 남상희 7025)"
           className="flex-1 min-w-0 px-2 py-0.5 border border-slate-300 rounded text-xs font-medium text-slate-800 bg-white"
         />
         {/* 위치(순서) 이동 및 삭제 버튼 그룹 */}
@@ -619,6 +664,48 @@ function YangjaeFestivalDashboardComponent() {
     return count;
   }, [activeBooths]);
 
+  const boothMetrics = useMemo(() => {
+    const list = activeBooths || [];
+    let confirmedEntities = 0;
+    let pendingEntities = 0;
+    let totalDong = 0;
+    let confirmedDong = 0;
+    let pendingDong = 0;
+    let totalBus = 0;
+    let confirmedBus = 0;
+
+    for (let i = 0; i < list.length; i++) {
+      const b = list[i];
+      if (!b) continue;
+      const isConfirmed = b.status === '확정';
+      if (isConfirmed) {
+        confirmedEntities++;
+      } else {
+        pendingEntities++;
+      }
+      const parsed = parseBoothScale(b.scale);
+      totalDong += parsed.dong;
+      totalBus += parsed.bus;
+      if (isConfirmed) {
+        confirmedDong += parsed.dong;
+        confirmedBus += parsed.bus;
+      } else {
+        pendingDong += parsed.dong;
+      }
+    }
+
+    return {
+      totalEntities: list.length,
+      confirmedEntities,
+      pendingEntities,
+      totalDong,
+      confirmedDong,
+      pendingDong,
+      totalBus,
+      confirmedBus,
+    };
+  }, [activeBooths]);
+
   const categoryBoothsMap = useMemo(() => {
     const map = new Map<string, BoothItem[]>();
     const list = activeBooths || [];
@@ -631,19 +718,19 @@ function YangjaeFestivalDashboardComponent() {
         map.set(cat, []);
       }
       map.get(cat)!.push(b);
-      // Dual-key alias support for '보건소 사업' and '보건소 특화'
-      if (cat === '보건소 사업') {
-        if (!map.has('보건소 특화')) map.set('보건소 특화', []);
-        map.get('보건소 특화')!.push(b);
-      } else if (cat === '보건소 특화') {
-        if (!map.has('보건소 사업')) map.set('보건소 사업', []);
-        map.get('보건소 사업')!.push(b);
+      // Dual-key alias support for '보건소 부서' and legacy aliases
+      if (cat === '보건소 부서' || cat === '보건소 사업' || cat === '보건소 특화') {
+        const publicAliases = ['보건소 부서', '보건소 사업', '보건소 특화'];
+        for (const alias of publicAliases) {
+          if (!map.has(alias)) map.set(alias, []);
+          if (alias !== cat) map.get(alias)!.push(b);
+        }
       }
 
-      // Multi-key alias support for '전문 의료·검진', '의료·검진', '의료 검진'
-      if (cat === '전문 의료·검진' || cat === '의료·검진' || cat === '의료 검진') {
-        const medicalAliases = ['전문 의료·검진', '의료·검진', '의료 검진'];
-        for (const alias of medicalAliases) {
+      // Multi-key alias support for '민간' and legacy aliases
+      if (cat === '민간' || cat === '민간 헬스케어' || cat === '전문 의료·검진' || cat === '의료·검진' || cat === '의료 검진') {
+        const privateAliases = ['민간', '민간 헬스케어', '전문 의료·검진', '의료·검진', '의료 검진'];
+        for (const alias of privateAliases) {
           if (!map.has(alias)) map.set(alias, []);
           if (alias !== cat) map.get(alias)!.push(b);
         }
@@ -809,11 +896,11 @@ function YangjaeFestivalDashboardComponent() {
         return list;
       } else {
         const filtered = list.filter((b) => {
-          if (selectedCategory === '보건소 사업' || selectedCategory === '보건소 특화') {
-            return b.category === '보건소 사업' || b.category === '보건소 특화';
+          if (selectedCategory === '보건소 부서' || selectedCategory === '보건소 사업' || selectedCategory === '보건소 특화') {
+            return b.category === '보건소 부서' || b.category === '보건소 사업' || b.category === '보건소 특화';
           }
-          if (selectedCategory === '전문 의료·검진' || selectedCategory === '의료·검진' || selectedCategory === '의료 검진') {
-            return b.category === '전문 의료·검진' || b.category === '의료·검진' || b.category === '의료 검진';
+          if (selectedCategory === '민간' || selectedCategory === '민간 헬스케어' || selectedCategory === '전문 의료·검진' || selectedCategory === '의료·검진' || selectedCategory === '의료 검진') {
+            return b.category === '민간' || b.category === '민간 헬스케어' || b.category === '전문 의료·검진' || b.category === '의료·검진' || b.category === '의료 검진';
           }
           return b.category === selectedCategory || (typeof b.category === 'string' && b.category.includes(selectedCategory));
         });
@@ -844,11 +931,11 @@ function YangjaeFestivalDashboardComponent() {
         return list;
       } else {
         const filtered = list.filter((b) => {
-          if (selectedCategory === '보건소 사업' || selectedCategory === '보건소 특화') {
-            return b.category === '보건소 사업' || b.category === '보건소 특화';
+          if (selectedCategory === '보건소 부서' || selectedCategory === '보건소 사업' || selectedCategory === '보건소 특화') {
+            return b.category === '보건소 부서' || b.category === '보건소 사업' || b.category === '보건소 특화';
           }
-          if (selectedCategory === '전문 의료·검진' || selectedCategory === '의료·검진' || selectedCategory === '의료 검진') {
-            return b.category === '전문 의료·검진' || b.category === '의료·검진' || b.category === '의료 검진';
+          if (selectedCategory === '민간' || selectedCategory === '민간 헬스케어' || selectedCategory === '전문 의료·검진' || selectedCategory === '의료·검진' || selectedCategory === '의료 검진') {
+            return b.category === '민간' || b.category === '민간 헬스케어' || b.category === '전문 의료·검진' || b.category === '의료·검진' || b.category === '의료 검진';
           }
           return b.category === selectedCategory || (typeof b.category === 'string' && b.category.includes(selectedCategory));
         });
@@ -1673,20 +1760,24 @@ ${targetUrl}`;
             </div>
           )}
 
-          {/* TAB 2: 테마별 부스 현황 */}
+          {/* TAB 2: 부스 현황 */}
           {selectedTab === 'booths' && (
             <div className="space-y-3.5">
-              <div className="flex items-center justify-between px-1">
-                <h3 className={`${isLargeFont ? 'text-base' : 'text-sm'} font-bold text-slate-900 flex items-center gap-1.5`}>
+              <div className="flex items-center justify-between gap-2 px-1 flex-wrap sm:flex-nowrap">
+                <h3 className={`${isLargeFont ? 'text-base' : 'text-sm'} font-extrabold text-slate-900 flex items-center gap-1.5 whitespace-nowrap shrink-0`}>
                   <span className={`inline-block ${isLargeFont ? 'w-3.5 h-3.5 border-2' : 'w-3 h-3 border-[1.5px]'} border-slate-900 rounded-[1px] shrink-0`} />
-                  <span>테마별 부스 배치 계획</span>
+                  <span>부스 배치 계획</span>
                 </h3>
-                <div className="flex items-center gap-1.5">
-                  <span className={`${isLargeFont ? 'text-sm' : 'text-xs'} font-bold text-slate-700 mr-1`}>
-                    확정 {confirmedBoothCount} / 총 {activeBooths.length}개
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`inline-flex items-center gap-1 ${isLargeFont ? 'text-xs' : 'text-[11px] sm:text-xs'} font-bold text-slate-700 bg-slate-100 border border-slate-200/90 px-2.5 py-1 rounded-full whitespace-nowrap shadow-3xs`}>
+                    <span>확정 <strong className="font-black text-slate-900">{boothMetrics.confirmedEntities}</strong> / 총 <strong className="font-black text-slate-900">{boothMetrics.totalEntities}개</strong></span>
+                    <span className="text-slate-400 mx-0.5">·</span>
+                    <span className="font-black text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] border border-emerald-300/60">
+                      필요 {boothMetrics.totalDong}동
+                    </span>
                   </span>
                   {editingBooths ? (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 shrink-0">
                       <button
                         type="button"
                         onClick={() => {
@@ -1696,7 +1787,7 @@ ${targetUrl}`;
                             ...editBoothsData,
                             {
                               id: nextId,
-                              category: '보건소 사업',
+                              category: '보건소 부서',
                               name: '신규 부스명',
                               scale: '1동',
                               program: '체험 프로그램 내용',
@@ -1704,7 +1795,7 @@ ${targetUrl}`;
                             }
                           ]);
                         }}
-                        className="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-900 rounded border border-amber-300 hover:bg-amber-200 flex items-center gap-0.5 cursor-pointer"
+                        className="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-900 rounded border border-amber-300 hover:bg-amber-200 flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
                         title="부스 추가"
                       >
                         <Plus className="w-3 h-3" />
@@ -1714,7 +1805,7 @@ ${targetUrl}`;
                         type="button"
                         onClick={handleSaveBooths}
                         disabled={saveMutation.isPending}
-                        className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded flex items-center gap-0.5 cursor-pointer"
+                        className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
                         title="부스 저장"
                       >
                         {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -1723,7 +1814,7 @@ ${targetUrl}`;
                       <button
                         type="button"
                         onClick={handleCancelEditBooths}
-                        className="px-2 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded flex items-center gap-0.5 cursor-pointer"
+                        className="px-2 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
                         title="취소"
                       >
                         <X className="w-3 h-3" />
@@ -1733,13 +1824,85 @@ ${targetUrl}`;
                     <button
                       type="button"
                       onClick={handleStartEditBooths}
-                      className="px-2.5 py-1 text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-lg border border-amber-300 flex items-center gap-1 cursor-pointer transition-colors shadow-3xs"
+                      className="px-2.5 py-1 text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-lg border border-amber-300 flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap shrink-0"
                       title="부스 순서 변경 및 현황 수정"
                     >
                       <ArrowUpDown className="w-3.5 h-3.5 text-amber-700" />
                       <span>순서 변경 / 편집</span>
                     </button>
                   ) : null}
+                </div>
+              </div>
+
+              {/* Booth Summary Metrics Card (행렬 정렬 & 프리미엄 다크 카드) */}
+              <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-950 text-white rounded-xl shadow-xs border border-slate-700 p-3 sm:p-3.5">
+                <div className="grid grid-cols-2 divide-x divide-slate-800 gap-x-3 sm:gap-x-4">
+                  {/* Col 1: 총 부스 참여 주체 */}
+                  <div className="flex flex-col justify-between pr-1">
+                    {/* Row 1: Header / Label */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5">
+                      <div className="w-6 h-6 rounded-md bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center shrink-0">
+                        <Building2 className="w-3.5 h-3.5 text-indigo-300" />
+                      </div>
+                      <span className="text-[11px] sm:text-xs font-bold text-slate-300 whitespace-nowrap">
+                        총 부스 참여 주체
+                      </span>
+                    </div>
+
+                    {/* Row 2: Primary Big Metric */}
+                    <div className="py-0.5">
+                      <div className={`${isLargeFont ? 'text-2xl' : 'text-xl sm:text-2xl'} font-black text-white tracking-tight whitespace-nowrap`}>
+                        총 {boothMetrics.totalEntities}개 기관
+                      </div>
+                    </div>
+
+                    {/* Row 3: Aligned Status Chips */}
+                    <div className="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-indigo-950/80 text-indigo-300 border border-indigo-700/60 whitespace-nowrap">
+                        확정 {boothMetrics.confirmedEntities}
+                      </span>
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-800/90 text-slate-300 border border-slate-700 whitespace-nowrap">
+                        협의 {boothMetrics.pendingEntities}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Col 2: 총 필요 부스 규모 */}
+                  <div className="flex flex-col justify-between pl-3 sm:pl-4">
+                    {/* Row 1: Header / Label */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5">
+                      <div className="w-6 h-6 rounded-md bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shrink-0">
+                        <Tent className="w-3.5 h-3.5 text-emerald-300" />
+                      </div>
+                      <span className="text-[11px] sm:text-xs font-bold text-slate-300 whitespace-nowrap">
+                        총 필요 부스 규모
+                      </span>
+                    </div>
+
+                    {/* Row 2: Primary Big Metric */}
+                    <div className="py-0.5">
+                      <div className={`${isLargeFont ? 'text-2xl' : 'text-xl sm:text-2xl'} font-black text-emerald-400 tracking-tight whitespace-nowrap`}>
+                        총 {boothMetrics.totalDong}동
+                      </div>
+                    </div>
+
+                    {/* Row 3: Aligned Status Chips */}
+                    <div className="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 whitespace-nowrap">
+                        확정 {boothMetrics.confirmedDong}동
+                      </span>
+                      {boothMetrics.pendingDong > 0 && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-amber-950/70 text-amber-300 border border-amber-700/60 whitespace-nowrap">
+                          협의 {boothMetrics.pendingDong}동
+                        </span>
+                      )}
+                      {boothMetrics.totalBus > 0 && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-sky-950/80 text-sky-300 border border-sky-700/60 whitespace-nowrap">
+                          버스 {boothMetrics.totalBus}대
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 

@@ -4281,6 +4281,75 @@ sequenceDiagram
       - TypeScript 컴파일 (`npx tsc --noEmit`): 0 errors PASS.
       - Jest 전체 회귀 테스트 (`npm test`): 26/26 Suites, 238/238 Tests ALL PASS (100%).
       - Zod 데이터 무결성 검증 (`node scripts/run-harness.js --quick`): 0 errors PASS.
+- [x] **건강페스티벌 김형종 주임님(02-3423-7250 / 내선 7250) 및 한국신체정보(010-9985-3732 / 3732) 연락처 연동 (Milestone 141 - 2026-09-09)**
+  - 사용자 요구사항: "건강페스티벌 프론트엔드에 김형종 주임님 번호 02-3423-7250 / 한국신체정보 번호 010-9985-3732 업데이트"
+  - 개선 내역:
+    * **김형종 주임님 행정 직통번호 공식 매핑 (`02-3423-7250`, 내선 `7250`)**:
+      - `src/components/festival/YangjaeFestivalDashboard.tsx`: `STAFF_PHONE_MAP`에 `김형종`, `김형종주임`, `김형종 주임`, `김형종주임님`, `김형종 주임님`, `형종`, `형종주임`, `형종 주임`, `형종주임님`, `형종 주임님` 등록 (`ext: '7250'`, `full: '02-3423-7250'`, `role: '주임'`).
+      - `getStaffInfo` 및 `scripts/pages-template.html`에 `clean.includes('형종')` 숏컷 탐색 분기 탑재.
+    * **한국신체정보(주) 부스 대표 연락처 등록 (`010-9985-3732`, 식별번호 `3732`)**:
+      - `STAFF_PHONE_MAP`에 `한국신체정보`, `한국신체정보(주)`, `한국신체정보 (주)`, `한국신체정보주식회사`, `한국신체` 등록 (`ext: '3732'`, `full: '010-9985-3732'`, `role: '민간 헬스케어 부스'`).
+      - 추진과제 세부 실행일정 참석자 태그(`[참여:오창선, 김형종, 한국신체정보(주)]`) 등에서 김형종 주임님(내선 7250)과 한국신체정보(3732)가 모바일 원클릭 `tel:` 링크 및 숫자 뱃지로 동적 표출.
+    * **상세 일정 편집 모달 안내 및 SSOT/정적 템플릿 일치화**:
+      - `DetailEditRow` 참석자 입력 플레이스홀더를 `과장님 7010, 오창선 7116, 김형종 7250, 한국신체정보 3732...`로 업데이트.
+      - `scripts/pages-template.html` 내 `STAFF_PHONE_MAP` 및 `attendeesHtml` 갱신 후 `node scripts/prepare-pages-output.js` 재구동으로 `out/` 및 Cloudflare Pages 배포 번들 일치.
+      - 전사 주소록 `data/CONTACTS.json` SSOT에 김형종(`02-3423-7250`) 및 한국신체정보(`010-9985-3732`) 공식 추가.
+    * **정량적 검증 성과**:
+      - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: R7 매핑 및 단언 4종 추가, 25/25 Tests ALL PASS (100%).
+      - TypeScript 컴파일 (`npx tsc --noEmit`): 0 errors PASS.
+      - 전체 Jest 회귀 테스트 (`npm test`): 26/26 Suites, 238/238 Tests ALL PASS (100%).
+- [x] **건강페스티벌 부스 카테고리 2대 대분류(민간 / 보건소 부서) 일원화 및 타이틀 간소화 (Milestone 142 - 2026-09-09)**
+  - 사용자 요구사항: "부스 카테고리 구분은 '민간'과 '보건소 부서' 로만 나누자", "테마별 이라는 텍스트는 삭제해줘"
+  - 개선 내역:
+    * **카테고리 2대 대분류 개편 (`FESTIVAL_CATEGORIES`)**:
+      - `['전체', '전문 의료·검진', '민간 헬스케어', '보건소 사업']` $\to$ `['전체', '민간', '보건소 부서']`로 축소 및 필터 탭 최적화.
+    * **SSOT 및 폴백 부스 데이터 일괄 갱신**:
+      - `data/FESTIVAL_YANGJAE_2026.json`: 11개 부스 카테고리를 `민간`(1~9번) 및 `보건소 부서`(10~11번)로 전면 통합.
+      - `src/hooks/useYangjaeFestival.ts`: 폴백 부스 12종 `category` 동시 갱신.
+    * **부스 섹션 타이틀 문구 간결화**:
+      - `테마별 부스 배치 계획` $\to$ `부스 배치 계획`으로 통일 (`YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`).
+      - 부스 신규 추가 기본 카테고리를 `보건소 부서`로 정합성 부여.
+    * **정적 Pages 템플릿 및 Edge Functions 일치**:
+      - `scripts/pages-template.html` 내 필터 칩 및 필터링 함수 갱신 후 `node scripts/prepare-pages-output.js` 자동 빌드 실행 완료.
+    * **정량적 검증 성과**:
+- [x] **건강페스티벌 부스 규모 파싱 및 참여 주체 수 / 총 필요 부스 동수 실시간 계산 표기 (Milestone 143 - 2026-09-09)**
+  - 사용자 요구사항: "부스 현황 맨위에 총 부스 참여 주체는 몇개고, 총 부스 몇동이 필요한지도 계산해서 표기해줘"
+  - 개선 내역:
+    * **부스 규모 정규식 파서(`parseBoothScale`) 구현**:
+      - `3동`, `2동 + 검진버스`, `1동 + 검진버스 2대`, `4` 등 임의의 규모 문자열에서 텐트 동수(`dong`)와 검진버스 대수(`bus`)를 완벽 분리 추출하는 파서 제작 및 익스포트.
+    * **실시간 통계 연산(`boothMetrics`) 및 최상단 KPI 배너 신설**:
+      - `activeBooths` 상태 기반으로 총 참여 주체 수(총 주체, 확정, 협의중) 및 총 필요 부스 동수(총 동수, 확정 동수, 협의 동수, 검진버스 대수)를 $O(N)$ 메모이제이션 연산.
+      - '2. 부스현황' 진입 시 최상단(헤더 아래, 필터 칩 위)에 2열 그리드의 다크 슬레이트 KPI 카드 배치:
+        · **총 부스 참여 주체**: `Building2` 아이콘과 함께 `총 N개 기관 (확정 N · 협의 N)`
+        · **총 필요 부스 규모**: `Tent` 아이콘과 함께 `총 N동 (확정 N동 · 협의 N동 + 검진버스 N대)`
+      - 상단 헤더 우측 뱃지에도 `확정 N / 총 N개 (필요 N동)` 표기 강화.
+    * **정적 Pages 템플릿(`scripts/pages-template.html`) 및 Edge Functions 일치**:
+      - 독립 HTML 템플릿 내 동일한 `parseBoothScale` 및 `#booth-summary-banner` SVG 아이콘 렌더링 구현.
+      - `node scripts/prepare-pages-output.js` 자동 빌드로 Cloudflare Pages 배포 번들(`out/`) 및 `functions/api/festival/yangjae.ts` 완전 일치 보장.
+    * **정량적 검증 성과**:
+- [x] **건강페스티벌 부스 배치 헤더 줄바꿈 차단, 2열 행렬(Matrix) 정렬 및 프리미엄 다크 카드 고도화 (Milestone 144 - 2026-09-10)**
+  - 사용자 요구사항: "양재천 페스티벌 현황표가 왜 프론트엔드에 업데이트 되지 않지?", "이 부분 텍스트 디자인 행렬 정렬 해주고 디자인 고도화 해줘", "끝나고 커밋 푸시 진행하자"
+  - 개선 내역:
+    * **Cloudflare Pages KV 캐시 제약 해소 및 13개 부스 SSOT 정합성 복구**:
+      - `functions/api/festival/yangjae.ts` 내 `cacheTtl: 0` 설정으로 인한 Cloudflare KV RangeError(최소 60초 필요)를 파악하고 `cacheTtl: 60`으로 보정.
+      - `scripts/sync-festival-fallbacks.py` 구동으로 `data/FESTIVAL_YANGJAE_2026.json`(13개 부스, 6개 추진과제)을 `useYangjaeFestival.ts` 및 Edge Functions에 완벽 동기화.
+    * **부스 헤더 음절 단위 줄바꿈 영구 방지 (Header Wrapping Guard)**:
+      - 모바일 뷰포트에서 `부스 배치 계획`이 `부스 배치 계 \n 획`으로 쪼개지거나 버튼/배지가 어색하게 접히던 문제를 `whitespace-nowrap shrink-0` 및 `flex-wrap sm:flex-nowrap gap-2`로 원천 차단.
+      - `확정 11 / 총 13개 · 필요 23동`을 독립된 둥근 알약형(Pill) 캡슐 배지로 승격하고 `필요 23동` 에메랄드 강조 칩 분리 적용.
+    * **KPI 다크 배너 2열 동기화 행렬 정렬 (Synchronized 2-Column Matrix Alignment)**:
+      - 비대칭 flex 레이아웃으로 인해 좌우 컬럼 높이와 타이틀 베이스라인이 어긋나던 문제를 완벽한 3-Tier 2열 행렬 그리드(`grid grid-cols-2 divide-x divide-slate-800 gap-x-3 sm:gap-x-4`)로 개편:
+        · **Tier 1 (헤더 & 아이콘 열)**: 좌측 `[🏢] 총 부스 참여 주체`와 우측 `[⛺] 총 필요 부스 규모`가 수평선상 동일 베이스라인에 일치.
+        · **Tier 2 (메인 KPI 수치 열)**: 좌측 `총 13개 기관`(White)과 우측 `총 23동`(Emerald)이 동일 수직 높이에서 대형 폰트로 당당하게 표출.
+        · **Tier 3 (세부 현황 칩 열)**: 괄호형 단순 텍스트를 탈피하여 상단 보더라인(`border-t border-slate-800/90`) 아래에 전용 틴트 칩(`[확정 11]`, `[협의 2]`, `[확정 19동]`, `[협의 4동]`, `[버스 2대]`)으로 격조 높은 대시보드 비주얼 구현.
+    * **정적 Pages 템플릿 및 자동 번들러 동기화**:
+      - `scripts/pages-template.html` 내 배너 DOM 및 헤더 알약 뱃지 구조를 일치시키고 `node scripts/prepare-pages-output.js`로 `out/` 정적 파일 100% 동기화.
+    * **정량적 검증 성과**:
+      - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: 27/27 Tests ALL PASS (100%).
+      - 전체 Jest 회귀 테스트 (`npm test`): 26/26 Suites, 240/240 Tests ALL PASS (100%).
+      - Playwright 모바일 뷰포트 실치수 캡처 스크린샷(`scratch/booth_matrix_mobile.png`) 검증 완료.
+
+
+
 
 
 

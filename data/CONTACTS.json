@@ -1456,5 +1456,23 @@
     "id": "mttv7qs4anqz03xzm",
     "createdAt": "2026-09-09T08:57:26.356Z",
     "updatedAt": "2026-09-09T08:57:26.356Z"
+  },
+  {
+    "name": "김형종",
+    "phone": "02-3423-7250",
+    "email": "",
+    "notes": "강남구보건소 보건행정과",
+    "id": "mtml-kim-hyeong-jong-7250",
+    "createdAt": "2026-09-09T10:20:00.000Z",
+    "updatedAt": "2026-09-09T10:20:00.000Z"
+  },
+  {
+    "name": "한국신체정보",
+    "phone": "010-9985-3732",
+    "email": "",
+    "notes": "민간 헬스케어 부스",
+    "id": "mtml-korea-body-info-3732",
+    "createdAt": "2026-09-09T10:20:00.000Z",
+    "updatedAt": "2026-09-09T10:20:00.000Z"
   }
 ]
