@@ -170,6 +170,28 @@
       '김형종주임님': { ext: '7250', tel: '02-3423-7250' },
       '김형종 주임님': { ext: '7250', tel: '02-3423-7250' },
       '형종': { ext: '7250', tel: '02-3423-7250' },
+      '김지현': { ext: '7173', tel: '02-3423-7173' },
+      '김지현주무관': { ext: '7173', tel: '02-3423-7173' },
+      '김지현 주무관': { ext: '7173', tel: '02-3423-7173' },
+      '김지현주무관님': { ext: '7173', tel: '02-3423-7173' },
+      '김지현 주무관님': { ext: '7173', tel: '02-3423-7173' },
+      '지현': { ext: '7173', tel: '02-3423-7173' },
+      '김지현담당자': { ext: '7173', tel: '02-3423-7173' },
+      '서울대병원 강남센터': { ext: '8276', tel: '010-5663-8276' },
+      '서울대병원강남센터': { ext: '8276', tel: '010-5663-8276' },
+      '서울대학교병원 강남센터': { ext: '8276', tel: '010-5663-8276' },
+      '서울대학교병원강남센터': { ext: '8276', tel: '010-5663-8276' },
+      '서울대병원': { ext: '8276', tel: '010-5663-8276' },
+      '서울대학교병원': { ext: '8276', tel: '010-5663-8276' },
+      '(주)유디': { ext: '2210', tel: '010-5192-2210' },
+      '주식회사 유디': { ext: '2210', tel: '010-5192-2210' },
+      '유디': { ext: '2210', tel: '010-5192-2210' },
+      '유디치과': { ext: '2210', tel: '010-5192-2210' },
+      '(주)유디치과': { ext: '2210', tel: '010-5192-2210' },
+      '유디 치과': { ext: '2210', tel: '010-5192-2210' },
+      '강남차병원': { ext: '0992', tel: '010-2698-0992' },
+      '강남 차병원': { ext: '0992', tel: '010-2698-0992' },
+      '차병원': { ext: '0992', tel: '010-2698-0992' },
       '한국신체정보': { ext: '3732', tel: '010-9985-3732' },
       '한국신체정보(주)': { ext: '3732', tel: '010-9985-3732' },
       '한국신체정보 (주)': { ext: '3732', tel: '010-9985-3732' },
@@ -340,6 +362,10 @@
                       if (!staff) {
                         if (clean.includes('형종')) staff = STAFF_PHONE_MAP['김형종'];
                         else if (clean.includes('한국신체정보') || clean.includes('한국신체')) staff = STAFF_PHONE_MAP['한국신체정보'];
+                        else if (clean.includes('김지현') || clean.includes('지현')) staff = STAFF_PHONE_MAP['김지현'];
+                        else if (clean.includes('서울대병원') || clean.includes('서울대학교병원')) staff = STAFF_PHONE_MAP['서울대병원 강남센터'];
+                        else if (clean.includes('유디')) staff = STAFF_PHONE_MAP['(주)유디'];
+                        else if (clean.includes('강남차병원') || clean.includes('차병원')) staff = STAFF_PHONE_MAP['강남차병원'];
                         else if (clean.includes('희선')) staff = STAFF_PHONE_MAP['희선팀장님'];
                         else if (clean.includes('지영')) staff = STAFF_PHONE_MAP['지영팀장님'];
                         else if (clean.includes('제이민') || clean.includes('김다희') || clean.includes('다희')) staff = STAFF_PHONE_MAP['제이민'];

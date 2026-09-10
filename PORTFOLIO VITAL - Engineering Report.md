@@ -4347,6 +4347,28 @@ sequenceDiagram
       - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: 27/27 Tests ALL PASS (100%).
       - 전체 Jest 회귀 테스트 (`npm test`): 26/26 Suites, 240/240 Tests ALL PASS (100%).
       - Playwright 모바일 뷰포트 실치수 캡처 스크린샷(`scratch/booth_matrix_mobile.png`) 검증 완료.
+- [x] **건강페스티벌 김지현(내선 7173), 서울대병원 강남센터(010-5663-8276), (주)유디(010-5192-2210), 강남차병원(010-2698-0992) 연락처 연동 (Milestone 145 - 2026-09-10)**
+  - 사용자 요구사항: "김지현 보건소 담당자 내선 7173 / 서울대병원 강남센터 번호 010-5663-8276 / (주)유디 010-5192-2210 / 강남차병원 010-2698-0992 / 번호 업데이트"
+  - 개선 내역:
+    * **보건소 및 민간 의료기관 핵심 연락처 4종 전면 연동**:
+      - `김지현`: 내선 `7173`, 직통 `02-3423-7173`, 역할 `보건소 담당자`
+      - `서울대병원 강남센터`: 번호 `010-5663-8276`, 식별번호 `8276`, 역할 `민간 의료기관 부스`
+      - `(주)유디`: 번호 `010-5192-2210`, 식별번호 `2210`, 역할 `민간 의료기관 부스`
+      - `강남차병원`: 번호 `010-2698-0992`, 식별번호 `0992`, 역할 `민간 의료기관 부스`
+    * **전역 전화번호 맵 및 자동 탐색 로직 확충**:
+      - `YangjaeFestivalDashboard.tsx`: `STAFF_PHONE_MAP` 및 `getStaffInfo`에 키워드 검색(`김지현`, `지현`, `서울대병원`, `서울대학교병원`, `유디`, `강남차병원`, `차병원`) 및 단축 매핑 탑재.
+      - `peoplePattern` 정규식에 4종 참여 주체 추가.
+      - `DetailEditRow` 참석자 입력창 플레이스홀더 갱신.
+    * **Cloudflare Pages 복제본 및 전사 주소록 동기화**:
+      - `scripts/pages-template.html`: `STAFF_PHONE_MAP` 및 fallback 숏컷 매핑 갱신.
+      - `node scripts/prepare-pages-output.js` 구동으로 `out/` 및 `functions/api/festival/yangjae.ts` 최신화.
+      - `data/CONTACTS.json` SSOT에 4개 연락처 신규 등록.
+    * **정량적 검증 성과**:
+      - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: R7 스위트에 4종 번호 매핑 단언 추가 및 통과 (27/27 Tests ALL PASS).
+      - 전체 Jest 회귀 테스트 (`npm test`): 26/26 Suites, 240/240 Tests ALL PASS (100%).
+      - TypeScript 컴파일 (`npx tsc --noEmit`): 0 errors PASS.
+      - Playwright 실 브라우저 DOM 렌더링 검증: 4종 연락처 뱃지 및 `tel:` 링크 100% 검출.
+
 
 
 

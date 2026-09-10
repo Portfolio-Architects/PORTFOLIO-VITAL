@@ -2,6 +2,28 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 145: Health Festival Kim Ji-hyeon (7173), SNUH Gangnam (010-5663-8276), UD (010-5192-2210), Gangnam Cha Hospital (010-2698-0992) Contact Integration Release] Integrated Kim Ji-hyeon (02-3423-7173 / ext: 7173), SNUH Gangnam Center (010-5663-8276 / ext: 8276), UD Dental (010-5192-2210 / ext: 2210), and Gangnam Cha Hospital (010-2698-0992 / ext: 0992) across STAFF_PHONE_MAP, attendee badge linkers, DetailEditRow placeholder, pages-template.html Cloudflare replica, and CONTACTS.json SSOT with 100% test pass (27/27 Festival Tests, 26/26 Suites, 240/240 Tests). (2026-09-10)
+* **개요 및 개발 목적**:
+  - 사용자 지침("김지현 보건소 담당자 내선 7173 / 서울대병원 강남센터 번호 010-5663-8276 / (주)유디 010-5192-2210 / 강남차병원 010-2698-0992 / 번호 업데이트") 전격 반영:
+    1. **보건소 및 민간 의료기관 핵심 연락처 4종 전면 연동**:
+       - 김지현: 내선 `7173`, 직통 `02-3423-7173`, 역할 `보건소 담당자`
+       - 서울대병원 강남센터: 번호 `010-5663-8276`, 식별번호 `8276`, 역할 `민간 의료기관 부스`
+       - (주)유디: 번호 `010-5192-2210`, 식별번호 `2210`, 역할 `민간 의료기관 부스 (유디치과)`
+       - 강남차병원: 번호 `010-2698-0992`, 식별번호 `0992`, 역할 `민간 의료기관 부스`
+    2. **전역 전화번호 맵 및 자동 탐색 로직 확충**:
+       - `YangjaeFestivalDashboard.tsx`: `STAFF_PHONE_MAP` 및 `getStaffInfo`에 키워드 검색(`김지현`, `지현`, `서울대병원`, `서울대학교병원`, `유디`, `강남차병원`, `차병원`) 및 단축 매핑 탑재.
+       - `peoplePattern` 정규식에 4종 참여 주체 추가.
+       - `DetailEditRow` 참석자 입력창 플레이스홀더 갱신.
+    3. **Cloudflare Pages 복제본 및 전사 주소록 동기화**:
+       - `scripts/pages-template.html`: `STAFF_PHONE_MAP` 및 fallback 숏컷 매핑 갱신.
+       - `node scripts/prepare-pages-output.js` 구동으로 `out/` 및 `functions/api/festival/yangjae.ts` 최신화.
+       - `data/CONTACTS.json` SSOT에 4개 연락처 신규 등록.
+    4. **정량적 검증 성과**:
+       - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: R7 스위트에 4종 번호 매핑 단언 추가 및 통과 (27/27 Tests ALL PASS).
+       - 전체 Jest 회귀 테스트 (`npm test`): 26/26 Suites, 240/240 Tests ALL PASS (100%).
+       - TypeScript 컴파일 (`npx tsc --noEmit`): 0 errors PASS.
+       - Playwright 실 브라우저 DOM 렌더링 검증: 4종 연락처 뱃지 및 `tel:` 링크 100% 검출.
+
 ### [Milestone 144: Festival Booth Header Wrapping Guard, Synchronized 2-Column Matrix Alignment & Premium Dark Card Overhaul Release] Refactored Booth Header with whitespace-nowrap and styled capsule badge to eliminate word-splitting, converted KPI Banner into a synchronized 3-tier 2-column matrix layout with matching horizontal baselines and distinct status chips, and synchronized Cloudflare Pages replica with 100% test pass (27/27 Festival Tests, 26/26 Suites, 240/240 Tests). (2026-09-10)
 * **개요 및 개발 목적**:
   - 사용자 지침("양재천 페스티벌 현황표가 왜 프론트엔드에 업데이트 되지 않지?", "이 부분 텍스트 디자인 행렬 정렬 해주고 디자인 고도화 해줘", "끝나고 커밋 푸시 진행하자") 전격 반영:

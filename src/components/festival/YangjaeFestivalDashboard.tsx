@@ -216,7 +216,7 @@ export function parseDetail(raw: string): ParsedDetail {
     const header = parts[0].trim();
     const rest = parts.slice(1).join(':').trim();
     
-    const peoplePattern = /(과장|팀장(\([^)]*\))?|오창선|서승오|임석훤|남상희|김지영|제이민(\(대행사\))?|김다희)/g;
+    const peoplePattern = /(과장|팀장(\([^)]*\))?|오창선|서승오|임석훤|남상희|김지영|제이민(\(대행사\))?|김다희|김형종|한국신체정보|김지현|서울대병원|유디|강남차병원)/g;
     const matches = rest.match(peoplePattern);
     if (matches && matches.length >= 2) {
       attendees = matches.map(m => m.replace(/\s+/g, '')).join(', ');
@@ -259,6 +259,32 @@ export const STAFF_PHONE_MAP: Record<string, { ext: string; full: string; role: 
   '형종 주임': { ext: '7250', full: '02-3423-7250', role: '주임' },
   '형종주임님': { ext: '7250', full: '02-3423-7250', role: '주임' },
   '형종 주임님': { ext: '7250', full: '02-3423-7250', role: '주임' },
+  // 김지현 보건소 담당자 (내선 7173 / 02-3423-7173)
+  '김지현': { ext: '7173', full: '02-3423-7173', role: '보건소 담당자' },
+  '김지현주무관': { ext: '7173', full: '02-3423-7173', role: '보건소 담당자' },
+  '김지현 주무관': { ext: '7173', full: '02-3423-7173', role: '보건소 담당자' },
+  '김지현주무관님': { ext: '7173', full: '02-3423-7173', role: '보건소 담당자' },
+  '김지현 주무관님': { ext: '7173', full: '02-3423-7173', role: '보건소 담당자' },
+  '지현': { ext: '7173', full: '02-3423-7173', role: '보건소 담당자' },
+  '김지현담당자': { ext: '7173', full: '02-3423-7173', role: '보건소 담당자' },
+  // 서울대병원 강남센터 (010-5663-8276 / 8276)
+  '서울대병원 강남센터': { ext: '8276', full: '010-5663-8276', role: '민간 의료기관 부스' },
+  '서울대병원강남센터': { ext: '8276', full: '010-5663-8276', role: '민간 의료기관 부스' },
+  '서울대학교병원 강남센터': { ext: '8276', full: '010-5663-8276', role: '민간 의료기관 부스' },
+  '서울대학교병원강남센터': { ext: '8276', full: '010-5663-8276', role: '민간 의료기관 부스' },
+  '서울대병원': { ext: '8276', full: '010-5663-8276', role: '민간 의료기관 부스' },
+  '서울대학교병원': { ext: '8276', full: '010-5663-8276', role: '민간 의료기관 부스' },
+  // (주)유디 (010-5192-2210 / 2210)
+  '(주)유디': { ext: '2210', full: '010-5192-2210', role: '민간 의료기관 부스' },
+  '주식회사 유디': { ext: '2210', full: '010-5192-2210', role: '민간 의료기관 부스' },
+  '유디': { ext: '2210', full: '010-5192-2210', role: '민간 의료기관 부스' },
+  '유디치과': { ext: '2210', full: '010-5192-2210', role: '민간 의료기관 부스' },
+  '(주)유디치과': { ext: '2210', full: '010-5192-2210', role: '민간 의료기관 부스' },
+  '유디 치과': { ext: '2210', full: '010-5192-2210', role: '민간 의료기관 부스' },
+  // 강남차병원 (010-2698-0992 / 0992)
+  '강남차병원': { ext: '0992', full: '010-2698-0992', role: '민간 의료기관 부스' },
+  '강남 차병원': { ext: '0992', full: '010-2698-0992', role: '민간 의료기관 부스' },
+  '차병원': { ext: '0992', full: '010-2698-0992', role: '민간 의료기관 부스' },
   // 한국신체정보 (010-9985-3732 / 3732)
   '한국신체정보': { ext: '3732', full: '010-9985-3732', role: '민간 헬스케어 부스' },
   '한국신체정보(주)': { ext: '3732', full: '010-9985-3732', role: '민간 헬스케어 부스' },
@@ -319,6 +345,14 @@ export function getStaffInfo(name: string): { ext: string; full: string; role: s
     result = STAFF_PHONE_MAP['김형종'];
   } else if (clean.includes('한국신체정보') || clean.includes('한국신체')) {
     result = STAFF_PHONE_MAP['한국신체정보'];
+  } else if (clean.includes('김지현') || clean.includes('지현')) {
+    result = STAFF_PHONE_MAP['김지현'];
+  } else if (clean.includes('서울대병원') || clean.includes('서울대학교병원')) {
+    result = STAFF_PHONE_MAP['서울대병원 강남센터'];
+  } else if (clean.includes('유디')) {
+    result = STAFF_PHONE_MAP['(주)유디'];
+  } else if (clean.includes('강남차병원') || clean.includes('차병원')) {
+    result = STAFF_PHONE_MAP['강남차병원'];
   } else if (clean.includes('희선')) {
     result = STAFF_PHONE_MAP['희선팀장님'];
   } else if (clean.includes('지영')) {
@@ -495,7 +529,7 @@ const DetailEditRow = React.memo(function DetailEditRow({
             setAttendees(e.target.value);
             emitChange(date, status, e.target.value, text);
           }}
-          placeholder="참석자 (예: 과장님 7010, 오창선 7116, 김형종 7250, 한국신체정보 3732, 제이민(김다희) 0544, 지영팀장님 7031, 희선팀장님 7011, 서승오 7034, 임석훤 7012, 남상희 7025)"
+          placeholder="참석자 (예: 과장님 7010, 오창선 7116, 김지현 7173, 김형종 7250, 강남차병원 0992, 서울대병원 8276, 유디 2210, 한국신체정보 3732, 제이민(김다희) 0544, 지영팀장님 7031, 희선팀장님 7011...)"
           className="flex-1 min-w-0 px-2 py-0.5 border border-slate-300 rounded text-xs font-medium text-slate-800 bg-white"
         />
         {/* 위치(순서) 이동 및 삭제 버튼 그룹 */}

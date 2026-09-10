@@ -623,6 +623,26 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(infoHeesun).not.toBeNull();
       expect(infoHeesun?.ext).toBe('7011');
       expect(infoHeesun?.full).toBe('02-3423-7011');
+
+      const infoJihyeon = getStaffInfo('김지현');
+      expect(infoJihyeon).not.toBeNull();
+      expect(infoJihyeon?.ext).toBe('7173');
+      expect(infoJihyeon?.full).toBe('02-3423-7173');
+
+      const infoSnuh = getStaffInfo('서울대병원강남센터');
+      expect(infoSnuh).not.toBeNull();
+      expect(infoSnuh?.ext).toBe('8276');
+      expect(infoSnuh?.full).toBe('010-5663-8276');
+
+      const infoUd = getStaffInfo('(주)유디');
+      expect(infoUd).not.toBeNull();
+      expect(infoUd?.ext).toBe('2210');
+      expect(infoUd?.full).toBe('010-5192-2210');
+
+      const infoCha = getStaffInfo('강남차병원');
+      expect(infoCha).not.toBeNull();
+      expect(infoCha?.ext).toBe('0992');
+      expect(infoCha?.full).toBe('010-2698-0992');
     });
   });
 
