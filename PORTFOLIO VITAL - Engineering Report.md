@@ -4347,6 +4347,29 @@ sequenceDiagram
       - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: 27/27 Tests ALL PASS (100%).
       - 전체 Jest 회귀 테스트 (`npm test`): 26/26 Suites, 240/240 Tests ALL PASS (100%).
       - Playwright 모바일 뷰포트 실치수 캡처 스크린샷(`scratch/booth_matrix_mobile.png`) 검증 완료.
+- [x] **세부 과업 다른 추진과제 카테고리 이동 기능 및 대화형 모달 구축 (Milestone 146 - 2026-09-10)**
+  - 사용자 요구사항: "각 세부 과업을 다른 추진과제 카테고리로 옮길수 있도록 기능 개선해줘"
+  - 개선 내역:
+    * **세부 과업 카테고리(추진과제) 이동 파이프라인(`handleExecuteTransfer`) 신규 구현**:
+      - `data.milestones` 배열 내에서 원본 과제(`sourceMilestoneId`)의 특정 세부 과업(`detailRaw`, `detailIndex`)을 정밀 제거하고, 대상 과제(`selectedTargetMilestoneId`)의 과업 목록 맨 아래로 즉각 이동.
+      - SSOT 로컬 디스크(`data/FESTIVAL_YANGJAE_2026.json`) 및 API(`POST /api/festival/yangjae`) 영속화 완벽 연동.
+      - 이동 완료 시 대상 추진과제를 자동으로 펼침(`setExpandedTaskIds`) 처리하여 사용자가 즉시 이동 결과를 시각적으로 확인할 수 있도록 보장.
+      - 편집 모드 상태(`editingMilestoneId`)와의 무결성 동기화(드래프트 목록 즉시 반영 및 덮어쓰기 방지).
+    * **대시보드 조회 화면 및 편집 모드 양방향 이동 트리거 제공**:
+      - 조회 뷰: 각 세부 과업 행 우측 상단에 고대비 `[⤹ 이동]` 캡슐 버튼 탑재.
+      - 편집 뷰(`DetailEditRow`): 순서 이동(▲/▼)과 삭제(휴지통) 버튼 사이에 직관적인 `FolderInput` 카테고리 이동 버튼 탑재.
+    * **고대비 대화형 카테고리 이동 모달 (`TransferTaskModal`) 설계 및 적용**:
+      - 다크 헤더(`세부 과업 카테고리 이동`), 닫기 버튼 및 반응형 모달 컨테이너.
+      - Section 1: 이동 대상 세부 과업 카드(날짜 뱃지, 완료 상태, 본문, 참석자) 및 현재 소속 추진과제 시각 미리보기.
+      - Section 2: 전체 추진과제 목록 대상 선택 리스트(현재 소속은 `현재 위치` 비활성화 뱃지 부여, 타 추진과제는 선택 시 앰버 링 및 라디오 뱃지 하이라이트, 현재 보유 과업 수 실시간 표기).
+      - Footer: 취소 및 `[과업 이동 실행]` 버튼, 로딩 스피너 및 토스트 알림 연동.
+    * **정적 Pages 템플릿 및 자동 빌드 파이프라인 동기화**:
+      - `node scripts/prepare-pages-output.js` 구동으로 Edge Functions 및 `out/` 번들 100% 동기화.
+    * **정량적 검증 성과**:
+      - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: R13 단위 테스트 2종 신규 구현 및 통과 (29/29 Tests ALL PASS).
+      - 전체 Jest 회귀 테스트 (`npm test`): 26/26 Suites, 242/242 Tests ALL PASS (100%).
+      - Playwright 실 브라우저 DOM 렌더링 및 이동 실행 검증: 모달 렌더링 캡처(`task_transfer_modal.png`) 및 이동 실행 성공 스크린샷(`task_transfer_success.png`) 100% 확인.
+
 - [x] **건강페스티벌 김지현(내선 7173), 서울대병원 강남센터(010-5663-8276), (주)유디(010-5192-2210), 강남차병원(010-2698-0992) 연락처 연동 (Milestone 145 - 2026-09-10)**
   - 사용자 요구사항: "김지현 보건소 담당자 내선 7173 / 서울대병원 강남센터 번호 010-5663-8276 / (주)유디 010-5192-2210 / 강남차병원 010-2698-0992 / 번호 업데이트"
   - 개선 내역:
@@ -4368,6 +4391,26 @@ sequenceDiagram
       - 전체 Jest 회귀 테스트 (`npm test`): 26/26 Suites, 240/240 Tests ALL PASS (100%).
       - TypeScript 컴파일 (`npx tsc --noEmit`): 0 errors PASS.
       - Playwright 실 브라우저 DOM 렌더링 검증: 4종 연락처 뱃지 및 `tel:` 링크 100% 검출.
+- [x] **예산 시뮬레이션 통계목 클릭 시 세부 지출내역 팝업(StatItemDetailModal) 연동 개발 (Milestone 146 - 2026-09-10)**
+  - 사용자 요구사항: "예산 페이지 예산시뮬레이션 탭에서 통계목 클릭하면 세부 지출내역 팝업으로 띄워주는 기능 개발해보자"
+  - 개선 내역:
+    * **통합 세부 지출내역 팝업 모달 (`StatItemDetailModal.tsx`) 신규 개발**:
+      - `size="4xl"` 고대비 다크/라이트 반응형 모달 컴포넌트 신규 구현.
+      - **상단 6대 KPI 요약 배너**: 총 예산액, 현재 실집행액(집행률 %), 현재 집행 잔액, 시뮬레이션 예정액, 최종 예상 잔액, 일상경비 미집행 잔액을 카드형으로 집계 표출.
+      - **3대 세부 탭 시스템**:
+        · **1) 실제 지출 집행 내역 (Actual Expenditures)**: e-호조 실지출 원장(`budgetEntries`, `!isPlanned`)을 세부사업 및 통계목 카테고리 ID 기준으로 자동 필터링하여 일자, 지출목적/품의내용, 구분 배지(일반지출, 일상교부, 일상지출, 이용/전용, 정산결산), 시행문서번호(`docRegNum`), 집행금액, 비고/채주 테이블 및 실시간 검색/정렬/합계 행 표출.
+        · **2) 시뮬레이션 예정 내역 (Simulation Entries)**: 시뮬레이터에 등록된 미집행 예정 품의 항목(단가, 수량, 차감 예정액, 예정/정산완료 상태) 목록 및 수정/삭제/정산 전환 인라인 액션 제공.
+        · **3) 본예산 산출 기초 (Budget Calculations)**: 예산 편성 시 등록된 세부 산출내역(`subItems`) 및 산출기초 식(`calculations`, 단가×수량×회수 등)을 원본 서식 그대로 대조 표출.
+    * **시뮬레이터 훅 및 데이터 파이프라인 확장 (`useBudgetSimulator.ts`)**:
+      - `UseBudgetSimulatorReturn`에 `categories: BudgetCategory[]`와 `budgetEntries: BudgetEntry[]` SSOT 데이터 바인딩 추가 및 반환.
+    * **시뮬레이션 결과 테이블 연동 (`SimulationResultTable.tsx`, `BudgetSimulator.tsx`)**:
+      - `categories`, `budgetEntries` props 연결 및 `selectedStatForModal` 상태 관리.
+      - Level 2 통계목 행의 통계목 라벨을 인터랙티브 버튼으로 개편 (`hover:text-indigo-600 hover:underline`, `Receipt` 영수증 아이콘, "클릭하여 세부 지출내역(e-호조 원장 및 산출기초) 조회" 툴팁 적용).
+      - 통계목 클릭 시 `StatItemDetailModal`이 팝업으로 즉시 오픈되어 상세 원장을 대조할 수 있도록 연동.
+    * **정량적 검증 성과**:
+      - `__tests__/stat-item-detail-modal.test.tsx` 신규 단위/통합 테스트 5개 작성 및 100% 통과 (5/5 Tests PASS).
+      - 전체 Jest 회귀 테스트 (`npm test`): **27/27 Suites, 247/247 Tests ALL PASS (100%)**.
+      - TypeScript 타입 검사 (`npx tsc --noEmit`): 0 errors PASS.
 
 
 

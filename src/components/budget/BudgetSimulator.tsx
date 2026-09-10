@@ -7,9 +7,10 @@ import { SimulationInputForm } from './ui/SimulationInputForm';
 import { SimulationResultTable } from './ui/SimulationResultTable';
 import { SimulationEntry } from '@/types';
 import { Calculator, Sparkles, RotateCcw, ShieldAlert, CheckCircle2 } from 'lucide-react';
-
 export const BudgetSimulator: React.FC = React.memo(() => {
   const {
+    categories,
+    budgetEntries,
     entries,
     availableDetailedProjects,
     getStatItemsForProject,
@@ -192,6 +193,8 @@ export const BudgetSimulator: React.FC = React.memo(() => {
 
       {/* 4. Aggregated Simulation Result Table & Active Entry List */}
       <SimulationResultTable
+        categories={categories}
+        budgetEntries={budgetEntries}
         projectSummaries={projectSummaries}
         statItemSummaries={statItemSummaries}
         entries={entries}

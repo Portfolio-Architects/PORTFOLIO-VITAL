@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ProjectSimulationSummary, StatItemSimulationSummary, SimulationEntry } from '@/types';
+import { ProjectSimulationSummary, StatItemSimulationSummary, SimulationEntry, BudgetCategory, BudgetEntry } from '@/types';
 import {
   Search,
   Filter,
@@ -19,10 +19,15 @@ import {
   Pencil,
   Trash2,
   Coins,
+  Receipt,
+  ExternalLink,
 } from 'lucide-react';
 import { SimulationEntryList } from './SimulationEntryList';
+import { StatItemDetailModal } from './StatItemDetailModal';
 
 export interface SimulationResultTableProps {
+  categories?: BudgetCategory[];
+  budgetEntries?: BudgetEntry[];
   projectSummaries: ProjectSimulationSummary[];
   statItemSummaries: StatItemSimulationSummary[];
   entries: SimulationEntry[];
@@ -37,6 +42,8 @@ export type ViewMode = 'project' | 'stat' | 'entry';
 export type StatusFilter = 'all' | 'deficit' | 'normal';
 
 export const SimulationResultTable: React.FC<SimulationResultTableProps> = React.memo(({
+  categories,
+  budgetEntries,
   projectSummaries,
   statItemSummaries,
   entries,
@@ -52,6 +59,9 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [onlyWithEntries, setOnlyWithEntries] = useState<boolean>(false);
   const [onlyWithDailyExpenses, setOnlyWithDailyExpenses] = useState<boolean>(false);
+
+  // Selected Stat Item for Expenditure Detail Modal
+  const [selectedStatForModal, setSelectedStatForModal] = useState<{ detailedProject: string; statItem: string } | null>(null);
 
   // Collapse State for Detailed Project Groups in Stat View
   const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
@@ -674,7 +684,15 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                                       ) : (
                                         <CornerDownRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                       )}
-                                      <span className="font-bold text-slate-900 text-sm">{s.statItem}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setSelectedStatForModal({ detailedProject: s.detailedProject, statItem: s.statItem })}
+                                        className="font-bold text-slate-900 text-sm hover:text-indigo-600 hover:underline flex items-center gap-1.5 transition-colors cursor-pointer group text-left"
+                                        title="클릭하여 세부 지출내역(e-호조 원장 및 산출기초) 조회"
+                                      >
+                                        <span className="group-hover:text-indigo-600 transition-colors">{s.statItem}</span>
+                                        <Receipt className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 transition-colors opacity-70 group-hover:opacity-100 shrink-0" />
+                                      </button>
                                       {(s.dailyExpenseIssued || 0) > 0 && (
                                         <span
                                           className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono inline-flex items-center gap-1 shadow-3xs"
@@ -1054,6 +1072,25 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
             )}
           </table>
         </div>
+      )}
+
+      {/* 5. Stat Item Expenditure Detail Modal */}
+      {selectedStatForModal && (
+        <StatItemDetailModal
+          isOpen={!!selectedStatForModal}
+          onClose={() => setSelectedStatForModal(null)}
+          detailedProject={selectedStatForModal.detailedProject}
+          statItem={selectedStatForModal.statItem}
+          summary={statItemSummaries.find(
+            s => s.detailedProject === selectedStatForModal.detailedProject && s.statItem === selectedStatForModal.statItem
+          )}
+          categories={categories || []}
+          actualEntries={budgetEntries || []}
+          simulationEntries={entriesByProjectAndStat.get(`${selectedStatForModal.detailedProject}|||${selectedStatForModal.statItem}`) || []}
+          onEditSimEntry={onEditEntry}
+          onDeleteSimEntry={onDeleteEntry}
+          onSettleSimEntry={onSettleEntry}
+        />
       )}
     </div>
   );

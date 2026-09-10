@@ -2,6 +2,29 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 146: Sub-Task Category Transfer Across Milestone Tasks & Interactive Transfer Modal Release] Implemented sub-task category transfer pipeline across milestone tasks with interactive modal, automatic destination accordion auto-expansion, SSOT persistence, and DetailEditRow & reading view triggers with 100% test pass (29/29 Festival Tests, 26/26 Suites, 242/242 Tests). (2026-09-10)
+* **개요 및 개발 목적**:
+  - 사용자 지침("각 세부 과업을 다른 추진과제 카테고리로 옮길수 있도록 기능 개선해줘") 전격 반영:
+    1. **세부 과업 카테고리(추진과제) 이동 파이프라인(`handleExecuteTransfer`) 신규 구현**:
+       - `data.milestones` 배열 내에서 원본 과제(`sourceMilestoneId`)의 특정 세부 과업(`detailRaw`, `detailIndex`)을 정밀 제거하고, 대상 과제(`selectedTargetMilestoneId`)의 과업 목록 맨 아래로 즉각 이동.
+       - SSOT 로컬 디스크(`data/FESTIVAL_YANGJAE_2026.json`) 및 API(`POST /api/festival/yangjae`) 영속화 완벽 연동.
+       - 이동 완료 시 대상 추진과제를 자동으로 펼침(`setExpandedTaskIds`) 처리하여 사용자가 즉시 이동 결과를 시각적으로 확인할 수 있도록 보장.
+       - 편집 모드 상태(`editingMilestoneId`)와의 무결성 동기화(드래프트 목록 즉시 반영 및 덮어쓰기 방지).
+    2. **대시보드 조회 화면 및 편집 모드 양방향 이동 트리거 제공**:
+       - 조회 뷰: 각 세부 과업 행 우측 상단에 고대비 `[⤹ 이동]` 캡슐 버튼 탑재.
+       - 편집 뷰(`DetailEditRow`): 순서 이동(▲/▼)과 삭제(휴지통) 버튼 사이에 직관적인 `FolderInput` 카테고리 이동 버튼 탑재.
+    3. **고대비 대화형 카테고리 이동 모달 (`TransferTaskModal`) 설계 및 적용**:
+       - 다크 헤더(`세부 과업 카테고리 이동`), 닫기 버튼 및 반응형 모달 컨테이너.
+       - Section 1: 이동 대상 세부 과업 카드(날짜 뱃지, 완료 상태, 본문, 참석자) 및 현재 소속 추진과제 시각 미리보기.
+       - Section 2: 전체 추진과제 목록 대상 선택 리스트(현재 소속은 `현재 위치` 비활성화 뱃지 부여, 타 추진과제는 선택 시 앰버 링 및 라디오 뱃지 하이라이트, 현재 보유 과업 수 실시간 표기).
+       - Footer: 취소 및 `[과업 이동 실행]` 버튼, 로딩 스피너 및 토스트 알림 연동.
+    4. **정적 Pages 템플릿 및 자동 빌드 파이프라인 동기화**:
+       - `node scripts/prepare-pages-output.js` 구동으로 Edge Functions 및 `out/` 번들 100% 동기화.
+    5. **정량적 검증 성과**:
+       - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: R13 단위 테스트 2종 신규 구현 및 통과 (29/29 Tests ALL PASS).
+       - 전체 Jest 회귀 테스트 (`npm test`): 26/26 Suites, 242/242 Tests ALL PASS (100%).
+       - Playwright 실 브라우저 DOM 렌더링 및 이동 실행 검증: 모달 렌더링 캡처(`task_transfer_modal.png`) 및 이동 실행 성공 스크린샷(`task_transfer_success.png`) 100% 확인.
+
 ### [Milestone 145: Health Festival Kim Ji-hyeon (7173), SNUH Gangnam (010-5663-8276), UD (010-5192-2210), Gangnam Cha Hospital (010-2698-0992) Contact Integration Release] Integrated Kim Ji-hyeon (02-3423-7173 / ext: 7173), SNUH Gangnam Center (010-5663-8276 / ext: 8276), UD Dental (010-5192-2210 / ext: 2210), and Gangnam Cha Hospital (010-2698-0992 / ext: 0992) across STAFF_PHONE_MAP, attendee badge linkers, DetailEditRow placeholder, pages-template.html Cloudflare replica, and CONTACTS.json SSOT with 100% test pass (27/27 Festival Tests, 26/26 Suites, 240/240 Tests). (2026-09-10)
 * **개요 및 개발 목적**:
   - 사용자 지침("김지현 보건소 담당자 내선 7173 / 서울대병원 강남센터 번호 010-5663-8276 / (주)유디 010-5192-2210 / 강남차병원 010-2698-0992 / 번호 업데이트") 전격 반영:

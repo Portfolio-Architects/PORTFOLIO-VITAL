@@ -1,6 +1,6 @@
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, calculateFestivalBudgetSummary } from '@/hooks/useYangjaeFestival';
 import { YangjaeFestivalDashboard, STAFF_PHONE_MAP, getStaffInfo, parseDetail, parseBoothScale } from '@/components/festival/YangjaeFestivalDashboard';
@@ -843,7 +843,85 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(screen.getByText(new RegExp(`필요 ${totalExpectedDong}동`))).toBeInTheDocument();
     });
   });
+
+  describe('R13. Sub-Task Category Transfer Across Milestone Tasks', () => {
+    it('opens transfer modal when clicking transfer button in reading view and executes category move', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      // Expand all tasks so details are visible
+      const toggleAllBtn = await screen.findByRole('button', { name: /전체 펼치기/i });
+      fireEvent.click(toggleAllBtn);
+
+      // Verify task 1 details are visible
+      expect(screen.getByText(/수변문화쉼터.*검토/i)).toBeInTheDocument();
+
+      // Find transfer buttons in reading view
+      const transferBtns = screen.getAllByTitle('다른 추진과제로 이동');
+      expect(transferBtns.length).toBeGreaterThan(0);
+
+      // Click transfer button on the first sub-task
+      fireEvent.click(transferBtns[0]);
+
+      // Verify transfer modal opens
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByText('세부 과업 카테고리 이동')).toBeInTheDocument();
+      expect(screen.getByText(/이동할 세부 과업/i)).toBeInTheDocument();
+
+      // Current location should be disabled
+      expect(screen.getByText('현재 위치')).toBeInTheDocument();
+
+      // Execute button should be available
+      const executeBtn = screen.getByRole('button', { name: /과업 이동 실행/i });
+      expect(executeBtn).toBeInTheDocument();
+      expect(executeBtn).not.toBeDisabled();
+
+      // Click execute
+      fireEvent.click(executeBtn);
+
+      // Verify save API was called with updated milestones
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/api/festival/yangjae',
+          expect.objectContaining({
+            method: 'POST',
+          })
+        );
+      });
+    });
+
+    it('allows transferring sub-tasks in edit mode via DetailEditRow transfer button', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      // Expand all tasks
+      const toggleAllBtn = await screen.findByRole('button', { name: /전체 펼치기/i });
+      fireEvent.click(toggleAllBtn);
+
+      // Click edit milestone on Task 1
+      const editButtons = screen.getAllByTitle('과제 수정');
+      fireEvent.click(editButtons[0]);
+
+      // Verify DetailEditRow action bar contains transfer button
+      const editTransferBtns = screen.getAllByTitle('다른 추진과제 카테고리로 이동');
+      expect(editTransferBtns.length).toBeGreaterThan(0);
+
+      // Click the edit transfer button
+      fireEvent.click(editTransferBtns[0]);
+
+      // Modal should open
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(screen.getByText('세부 과업 카테고리 이동')).toBeInTheDocument();
+
+      // Close modal by clicking cancel inside dialog
+      const cancelBtn = within(dialog).getByRole('button', { name: '취소' });
+      fireEvent.click(cancelBtn);
+
+      // Modal should be closed
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  });
 });
+
 
 
 

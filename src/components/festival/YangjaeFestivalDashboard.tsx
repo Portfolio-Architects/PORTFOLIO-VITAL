@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useSyncExternalStore, useCallback } from 'react';
-import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, User, Building2, Tent } from 'lucide-react';
+import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, User, Building2, Tent, FolderInput, ArrowRightLeft } from 'lucide-react';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem } from '@/hooks/useYangjaeFestival';
 
 export interface DetailDraft {
@@ -447,6 +447,7 @@ interface DetailEditRowProps {
   onMoveDown?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
+  onTransfer?: () => void;
 }
 
 const DetailEditRow = React.memo(function DetailEditRow({
@@ -457,6 +458,7 @@ const DetailEditRow = React.memo(function DetailEditRow({
   onMoveDown,
   canMoveUp = false,
   canMoveDown = false,
+  onTransfer,
 }: DetailEditRowProps) {
   const parsed = useMemo(() => parseDetail(initialDetail), [initialDetail]);
   const [lastEmitted, setLastEmitted] = useState<string>(initialDetail);
@@ -560,6 +562,19 @@ const DetailEditRow = React.memo(function DetailEditRow({
           >
             <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
           </button>
+          {onTransfer && (
+            <>
+              <span className="w-[1px] h-3 bg-slate-300 mx-0.5" />
+              <button
+                type="button"
+                onClick={onTransfer}
+                className="p-1 text-amber-700 hover:bg-amber-100 rounded cursor-pointer transition-colors active:scale-95"
+                title="다른 추진과제 카테고리로 이동"
+              >
+                <FolderInput className="w-3.5 h-3.5 stroke-[2.2]" />
+              </button>
+            </>
+          )}
           <span className="w-[1px] h-3 bg-slate-300 mx-0.5" />
           <button
             type="button"
@@ -626,6 +641,15 @@ function YangjaeFestivalDashboardComponent() {
 
   const [saveToast, setSaveToast] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>('수정 사항이 저장되었습니다!');
+
+  // 세부 과업 다른 추진과제 카테고리로 이동(Transfer) 상태
+  const [transferTarget, setTransferTarget] = useState<{
+    sourceMilestoneId: number;
+    detailIndex: number;
+    detailRaw: string;
+  } | null>(null);
+  const [selectedTargetMilestoneId, setSelectedTargetMilestoneId] = useState<number | null>(null);
+  const [isTransferring, setIsTransferring] = useState<boolean>(false);
 
   const [selectedTab, setSelectedTab] = useState<'milestones' | 'booths'>('milestones');
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
@@ -904,6 +928,104 @@ function YangjaeFestivalDashboardComponent() {
       setTimeout(() => setSaveToast(false), 3000);
     } catch {
       alert('과제 삭제에 실패했습니다.');
+    }
+  };
+
+  // 2-1. 세부 과업 카테고리(추진과제) 이동 모달 및 실행 핸들러
+  const handleOpenTransferModal = useCallback((sourceMilestoneId: number, detailIndex: number, detailRaw: string) => {
+    setTransferTarget({ sourceMilestoneId, detailIndex, detailRaw });
+    const otherMilestones = (data?.milestones || []).filter((m) => m.id !== sourceMilestoneId);
+    setSelectedTargetMilestoneId(otherMilestones.length > 0 ? otherMilestones[0].id : null);
+  }, [data?.milestones]);
+
+  const handleCloseTransferModal = useCallback(() => {
+    if (isTransferring) return;
+    setTransferTarget(null);
+    setSelectedTargetMilestoneId(null);
+  }, [isTransferring]);
+
+  const handleExecuteTransfer = async () => {
+    if (!transferTarget || selectedTargetMilestoneId === null) return;
+    if (selectedTargetMilestoneId === transferTarget.sourceMilestoneId) return;
+
+    const { sourceMilestoneId, detailIndex, detailRaw } = transferTarget;
+    setIsTransferring(true);
+
+    try {
+      const currentMilestones: MilestoneItem[] = safeClone(data?.milestones || []);
+      const sourceMilestone = currentMilestones.find((m) => m.id === sourceMilestoneId);
+      const targetMilestone = currentMilestones.find((m) => m.id === selectedTargetMilestoneId);
+
+      if (!sourceMilestone || !targetMilestone) {
+        alert('대상 추진과제를 찾을 수 없습니다.');
+        setIsTransferring(false);
+        return;
+      }
+
+      const nextMilestones = currentMilestones.map((m) => {
+        if (m.id === sourceMilestoneId) {
+          const nextDetails = [...(m.details || [])];
+          if (detailIndex >= 0 && detailIndex < nextDetails.length) {
+            nextDetails.splice(detailIndex, 1);
+          } else {
+            const matchIdx = nextDetails.findIndex((d) => d === detailRaw);
+            if (matchIdx !== -1) nextDetails.splice(matchIdx, 1);
+          }
+          return {
+            ...m,
+            details: nextDetails,
+          };
+        }
+        if (m.id === selectedTargetMilestoneId) {
+          return {
+            ...m,
+            details: [...(m.details || []), detailRaw],
+          };
+        }
+        return m;
+      });
+
+      await saveMutation.mutateAsync({
+        ...data,
+        milestones: nextMilestones,
+      });
+
+      // 현재 소속 과제를 편집 중이었던 경우 드래프트 목록 동기화
+      if (editingMilestoneId === sourceMilestoneId) {
+        setDetailDrafts((prev) => prev.filter((_, i) => i !== detailIndex));
+        setEditMilestoneData((prev) => {
+          if (!prev) return null;
+          const nextDetails = [...(prev.details || [])];
+          nextDetails.splice(detailIndex, 1);
+          return { ...prev, details: nextDetails };
+        });
+      }
+
+      // 대상 과제를 편집 중이었던 경우 드래프트 목록에 추가
+      if (editingMilestoneId === selectedTargetMilestoneId) {
+        const newDraft: DetailDraft = {
+          uid: `m-${selectedTargetMilestoneId}-detail-transferred-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          raw: detailRaw,
+        };
+        setDetailDrafts((prev) => [...prev, newDraft]);
+        setEditMilestoneData((prev) => {
+          if (!prev) return null;
+          return { ...prev, details: [...(prev.details || []), detailRaw] };
+        });
+      }
+
+      // 이동된 대상 추진과제를 자동으로 펼쳐서 즉각 시각 확인 가능하도록 보장
+      setExpandedTaskIds((prev) => new Set([...prev, selectedTargetMilestoneId]));
+
+      setTransferTarget(null);
+      setSelectedTargetMilestoneId(null);
+      setToastMessage(`과업이 '${targetMilestone.number || '추진과제'}. ${targetMilestone.title}'(으)로 이동되었습니다!`);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 3000);
+    } catch {
+      alert('과업 이동에 실패했습니다. 다시 시도해 주세요.');
+    } finally {
+      setIsTransferring(false);
     }
   };
 
@@ -1665,6 +1787,9 @@ ${targetUrl}`;
                                           setDetailDrafts(next);
                                           setEditMilestoneData((prev) => (prev ? { ...prev, details: next.map((d) => d.raw) } : null));
                                         }}
+                                        onTransfer={() => {
+                                          handleOpenTransferModal(targetItem.id, dIdx, draft.raw);
+                                        }}
                                         onUpdate={(newDetailStr) => {
                                           const next = [...activeDetailItems];
                                           next[dIdx] = { ...next[dIdx], raw: newDetailStr };
@@ -1743,8 +1868,24 @@ ${targetUrl}`;
 
                                       {/* 3. 본문 텍스트 (개조식 렌더링) 및 참석자 태그 */}
                                       <div className="flex-1 min-w-0 pt-0.5 space-y-1.5">
-                                        <div className={parsed.status === 'done' ? 'text-slate-800' : 'text-slate-950 font-medium'}>
-                                          {renderBulletedContent(parsed.text, isLargeFont)}
+                                        <div className="flex items-start justify-between gap-2">
+                                          <div className={`flex-1 min-w-0 ${parsed.status === 'done' ? 'text-slate-800' : 'text-slate-950 font-medium'}`}>
+                                            {renderBulletedContent(parsed.text, isLargeFont)}
+                                          </div>
+                                          {isLocalAdmin && (
+                                            <button
+                                              type="button"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleOpenTransferModal(item.id, dIdx, detail);
+                                              }}
+                                              className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10.5px] font-extrabold text-slate-500 hover:text-amber-950 bg-slate-100 hover:bg-amber-100/90 rounded-md border border-slate-200/80 hover:border-amber-300 transition-all cursor-pointer shadow-3xs active:scale-95"
+                                              title="다른 추진과제로 이동"
+                                            >
+                                              <FolderInput className="w-3 h-3 text-slate-500" />
+                                              <span>이동</span>
+                                            </button>
+                                          )}
                                         </div>
 
                                         {/* 4. 분리된 참석자 태그 & 행정번호 연동 */}
@@ -2156,6 +2297,216 @@ ${targetUrl}`;
           )}
         </div>
       </div>
+
+      {/* Floating Save / Action Toast */}
+      {saveToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 backdrop-blur-xs text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Sub-Task Category Transfer Modal */}
+      {transferTarget && (() => {
+        const currentMilestones = data?.milestones || [];
+        const sourceMilestone = currentMilestones.find((m) => m.id === transferTarget.sourceMilestoneId);
+        const parsedPreview = parseDetail(transferTarget.detailRaw);
+        const isTimeRange = parsedPreview.date.includes('~');
+        const isShortDate = parsedPreview.date.length <= 5 && !isTimeRange;
+        const displayDate = parsedPreview.date ? parsedPreview.date.replace(/\.$/, '') : '상시';
+        const otherMilestones = currentMilestones.filter((m) => m.id !== transferTarget.sourceMilestoneId);
+
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
+            <div 
+              className="bg-white rounded-2xl shadow-2xl border-2 border-slate-300 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="transfer-modal-title"
+            >
+              {/* Modal Header */}
+              <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400">
+                    <FolderInput className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 id="transfer-modal-title" className="text-sm font-black tracking-tight text-white flex items-center gap-1.5">
+                      세부 과업 카테고리 이동
+                    </h3>
+                    <p className="text-[11px] text-slate-400 font-medium">과업을 다른 추진과제 카테고리로 재분류합니다.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCloseTransferModal}
+                  disabled={isTransferring}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  aria-label="닫기"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-4 overflow-y-auto space-y-4 text-slate-800">
+                {/* Section 1: 이동 대상 과업 미리보기 */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-600">
+                    <span>이동할 세부 과업</span>
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      현재 소속: <strong className="text-amber-800 font-black">{sourceMilestone ? `${sourceMilestone.number || '추진과제'}. ${sourceMilestone.title}` : '미확인'}</strong>
+                    </span>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-3 shadow-2xs">
+                    <div className={`shrink-0 flex flex-col items-center justify-center rounded-lg border overflow-hidden shadow-xs font-mono min-w-[64px] text-center bg-white ${
+                      parsedPreview.status === 'done'
+                        ? 'border-emerald-500'
+                        : parsedPreview.status === 'in-progress'
+                        ? 'border-amber-500'
+                        : 'border-slate-400'
+                    }`}>
+                      <span className={`w-full bg-slate-50 text-slate-950 font-black px-1 py-1 text-xs border-b border-slate-200 ${
+                        isTimeRange ? 'text-[10px]' : isShortDate ? 'text-xs' : 'text-[11px]'
+                      }`}>
+                        {displayDate}
+                      </span>
+                      <span className={`w-full px-1 py-0.5 text-[10px] font-black ${
+                        parsedPreview.status === 'done'
+                          ? 'bg-emerald-600 text-white'
+                          : parsedPreview.status === 'in-progress'
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-slate-600 text-white'
+                      }`}>
+                        {parsedPreview.status === 'done' ? '✓ 완료' : parsedPreview.status === 'in-progress' ? '▶ 진행' : '○ 예정'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0 pt-0.5 space-y-1">
+                      <div className="text-xs font-bold text-slate-900 leading-snug">
+                        {parsedPreview.text}
+                      </div>
+                      {parsedPreview.attendees && (
+                        <div className="text-[10.5px] text-slate-500 font-medium flex items-center gap-1">
+                          <User className="w-3 h-3 text-slate-400" />
+                          <span>참석자: {parsedPreview.attendees}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: 이동할 목표 추진과제 선택 */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                    <span className="flex items-center gap-1">
+                      <ArrowRightLeft className="w-3.5 h-3.5 text-amber-600" />
+                      <span>이동할 대상 추진과제 선택</span>
+                    </span>
+                    <span className="text-[10.5px] font-normal text-slate-500">
+                      선택한 과제의 맨 아래로 배치됩니다.
+                    </span>
+                  </div>
+
+                  {otherMilestones.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                      이동할 수 있는 다른 추진과제가 없습니다.
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                      {currentMilestones.map((m) => {
+                        const isCurrent = m.id === transferTarget.sourceMilestoneId;
+                        const isSelected = selectedTargetMilestoneId === m.id;
+
+                        if (isCurrent) {
+                          return (
+                            <div
+                              key={`transfer-dest-${m.id}`}
+                              className="p-2.5 rounded-xl border border-slate-200 bg-slate-100/80 opacity-60 flex items-center justify-between text-xs cursor-not-allowed"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="font-bold text-slate-400 font-mono text-[11px] shrink-0">{m.number || `과제 ${m.id}`}</span>
+                                <span className="font-medium text-slate-500 truncate">{m.title}</span>
+                              </div>
+                              <span className="text-[10.5px] font-bold text-slate-400 bg-slate-200 px-2 py-0.5 rounded-full shrink-0">
+                                현재 위치
+                              </span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <button
+                            key={`transfer-dest-${m.id}`}
+                            type="button"
+                            disabled={isTransferring}
+                            onClick={() => setSelectedTargetMilestoneId(m.id)}
+                            className={`w-full p-2.5 rounded-xl border-2 transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] ${
+                              isSelected
+                                ? 'border-amber-500 bg-amber-50/80 shadow-xs ring-2 ring-amber-400/30'
+                                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                                isSelected ? 'border-amber-600 bg-amber-500 text-white' : 'border-slate-300 bg-white'
+                              }`}>
+                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                              </div>
+                              <span className={`font-mono text-xs font-black shrink-0 ${isSelected ? 'text-amber-900' : 'text-slate-700'}`}>
+                                {m.number || `과제 ${m.id}`}
+                              </span>
+                              <span className={`text-xs font-bold truncate ${isSelected ? 'text-amber-950 font-black' : 'text-slate-900'}`}>
+                                {m.title}
+                              </span>
+                            </div>
+                            <span className="text-[11px] font-medium text-slate-500 shrink-0 ml-2">
+                              {m.details?.length || 0}개 과업
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-slate-50 px-4 py-3 border-t border-slate-200 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={handleCloseTransferModal}
+                  disabled={isTransferring}
+                  className="px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 rounded-lg border border-slate-300 transition-colors cursor-pointer"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExecuteTransfer}
+                  disabled={isTransferring || !selectedTargetMilestoneId || selectedTargetMilestoneId === transferTarget.sourceMilestoneId}
+                  className={`px-4 py-1.5 text-xs font-black text-white rounded-lg flex items-center gap-1.5 shadow-sm transition-all ${
+                    isTransferring || !selectedTargetMilestoneId || selectedTargetMilestoneId === transferTarget.sourceMilestoneId
+                      ? 'bg-slate-400 cursor-not-allowed opacity-60'
+                      : 'bg-amber-600 hover:bg-amber-500 active:scale-95 cursor-pointer ring-1 ring-amber-700'
+                  }`}
+                >
+                  {isTransferring ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>이동 저장 중...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRightLeft className="w-3.5 h-3.5" />
+                      <span>과업 이동 실행</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

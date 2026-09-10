@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useBudget } from '@/hooks/useBudget';
-import { SimulationEntry, ProjectSimulationSummary, StatItemSimulationSummary, generateId } from '@/types';
+import { SimulationEntry, ProjectSimulationSummary, StatItemSimulationSummary, generateId, BudgetCategory, BudgetEntry } from '@/types';
 import { FESTIVAL_PRESET_SIMULATION_ENTRIES } from '@/lib/presets/festival5DomainPreset';
 
 const SIMULATION_STORAGE_KEY = 'hchps-budget-simulations';
@@ -86,6 +86,10 @@ export const TEST_PRESET_ENTRIES: Omit<SimulationEntry, 'id' | 'createdAt'>[] = 
 ];
 
 export interface UseBudgetSimulatorReturn {
+  // Budget Core State
+  categories: BudgetCategory[];
+  budgetEntries: BudgetEntry[];
+
   // Data State
   entries: SimulationEntry[];
   isLoading: boolean;
@@ -659,6 +663,8 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   }, [categories, getCategoryStats, mergedEntries]);
 
   return {
+    categories,
+    budgetEntries,
     entries: mergedEntries,
     isLoading: budgetLoading,
     selectedDetailedProject,
