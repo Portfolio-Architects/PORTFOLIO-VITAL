@@ -2,6 +2,24 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 148: Festival Booth & Task Sync, '기타' Category Filter Expansion & Cloudflare Pages 24/7 Replica Dual-Sync Release] Synchronized updated 2026 Yangjae Health Festival SSOT (17 booth entities, detailed public health center departments, walking course survey completion, 9.21 pre-registration schedule, Po-i park coordination), expanded category filter pills with '기타' in YangjaeFestivalDashboard and pages-template.html, updated client and Edge Function fallback datasets, and published to Cloudflare KV replica with 100% test pass (32/32 Festival Tests, 32/32 Suites, 296/296 Tests). (2026-09-11)
+* **개요 및 개발 목적**:
+  - 건강페스티벌 추진 현황판 프론트엔드 및 데이터 파이프라인 전면 동기화:
+    1. **로컬 SSOT 최신화 및 보건소 부서 부스 개편 반영 (`data/FESTIVAL_YANGJAE_2026.json`)**:
+       - 추진과제 1: 9. 11. 신규 걷기 코스 2km 답사 완료 및 9. 18. 전 부서 알림 일정 최신화.
+       - 추진과제 2: 공원녹지과 포이공원 장소 및 전기 사용 협조 완료 이동 정리.
+       - 추진과제 3 & 4: 의약과 약무팀·의무1팀 부스 신청서 접수, 9. 21. 온라인 사전접수 시스템 오픈 일정 조율 반영.
+       - 부스 현황 개편: 기존 포괄적 '질병관리과' 부스를 '의약과 의무1팀(CPR 체험존)', '질병관리과 감염병관리팀(강남도감)', '질병관리과 만성질환관리팀', '건강관리과(웰에이징)'로 정밀 세분화하고, 보건행정과 총괄 운영·응급의료·VIP 대기 부스(4동)를 확정 반영하여 총 17개 참여 주체 및 25개 부스 규모로 재편.
+    2. **대시보드 카테고리 필터 '기타' 탭 신설 및 UI 최적화 (`YangjaeFestivalDashboard.tsx`, `pages-template.html`)**:
+       - `FESTIVAL_CATEGORIES` 배열에 `'기타'` 탭을 추가(`['전체', '민간', '보건소 부서', '기타']`)하여 보건행정과 총괄 운영 부스를 전용 필터로 즉시 열람 가능하도록 개선.
+    3. **클라이언트 및 Cloudflare Functions 폴백 데이터 동기화**:
+       - `src/hooks/useYangjaeFestival.ts` 및 `functions/api/festival/yangjae.ts`의 기본 폴백 데이터를 최신 SSOT로 동기화(`sync-festival-fallbacks.py`).
+       - `node scripts/prepare-pages-output.js`로 정적 빌드 산출물(`out/`) 최신화.
+    4. **Cloudflare Pages 24/7 Read-Only Replica 듀얼 싱크 완료**:
+       - `node scripts/sync-festival-to-cloud.js`를 통해 Cloudflare KV 엔드포인트(`https://portfolio-hchps.pages.dev/api/festival/yangjae`)로 18개 부스 및 최신 일정 원격 동기화 배포 완료.
+    5. **테스트 무결성 검증 (100% PASS)**:
+       - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx` 부스 검증 로직 동적화 및 페스티벌 테스트 32/32개, 전체 테스트 스위트 32/32 Suites, 296/296 Tests 전원 통과.
+
 ### [Milestone 147: Universal Zero-Loss Persistence & Concurrency Pipeline & Instantaneous Zero-Lag Tab Switching Architecture Release] Implemented backend concurrency mutex queue (withSheetLock), BUDGET_SIMULATIONS disk SSOT with bidirectional sync, dormant sub-tab strategy across Workspace and Festival views, zombie background polling suppression via isActive flag, keystroke decoupling with blur auto-save in DetailEditRow and MindMapNoteEditor, Rule H skeleton UI guards, and resolved initialTab tab-lock loop and cross-node note flush with 100% test pass (32/32 Suites, 296/296 Tests). (2026-09-10)
 * **개요 및 개발 목적**:
   - 사용자 지침("데이터 영속성 및 상태 동기화 파이프라인 전면 강화 및 탭 전환 즉각성/무지연 UX 달성") 전격 반영:

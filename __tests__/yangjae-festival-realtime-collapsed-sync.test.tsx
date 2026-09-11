@@ -702,8 +702,8 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
         expect(screen.getByText(`No.${i}`)).toBeInTheDocument();
       }
 
-      // Verify No.14 no longer exists
-      expect(screen.queryByText('No.14')).toBeNull();
+      // Verify next sequential index beyond length no longer exists
+      expect(screen.queryByText(`No.${YANGJAE_FALLBACK_DATA.booths.length + 1}`)).toBeNull();
     });
 
     it('filters booths accurately by category without losing any booth items', async () => {

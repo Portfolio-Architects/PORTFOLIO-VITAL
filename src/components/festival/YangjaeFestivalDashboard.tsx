@@ -52,7 +52,7 @@ function fallbackCopy(text: string): boolean {
   }
 }
 
-const FESTIVAL_CATEGORIES = ['전체', '민간', '보건소 부서'];
+const FESTIVAL_CATEGORIES = ['전체', '민간', '보건소 부서', '기타'];
 const FESTIVAL_TARGET_TIMESTAMP = new Date("2026-10-31T09:00:00").getTime();
 
 const LARGE_FONT_STYLES = `
