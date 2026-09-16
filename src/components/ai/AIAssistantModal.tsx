@@ -314,13 +314,13 @@ function AIAssistantModalComponent({ isOpen, onClose, contextData, appMode = 'VI
                 <Sparkles size={24} />
               </div>
               <h3 className="text-base font-bold text-slate-800 mb-2">
-                {appMode} AI Assistant
+                {appMode} 행정 인텔리전스 어시스턴트
                 <br />
-                <span className="text-sm font-semibold text-slate-450">무엇이든 물어보세요!</span>
+                <span className="text-xs font-semibold text-slate-450">공문서 표준 개조식 문체 및 행정 분석 제공</span>
               </h3>
-              <div className="flex flex-col gap-1.5 text-xs font-semibold text-slate-400">
-                <p>&quot;내일까지 예산 기획안 작성해줘&quot;</p>
-                <p>&quot;강남체육센터 예산 현황 보여줘&quot;</p>
+              <div className="flex flex-col gap-1.5 text-xs font-semibold text-slate-450">
+                <p>&quot;2026 양재천 건강페스티벌 부스 배치 계획 보고&quot;</p>
+                <p>&quot;보건소 예산 비목별 실집행액 및 잔액 현황 분석&quot;</p>
               </div>
             </div>
           ) : (

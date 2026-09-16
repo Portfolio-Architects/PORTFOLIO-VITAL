@@ -733,13 +733,28 @@ export const MindMapInspector = React.memo(function MindMapInspector(props: Mind
                             ))}
                             {emails.map((email) => (
                               <div key={email} className="flex items-center justify-between bg-white/70 dark:bg-slate-850/70 p-2.5 rounded-xl border border-slate-200/30 dark:border-slate-750 text-[11.5px] font-semibold text-slate-700 dark:text-slate-350 shadow-2xs min-w-0">
-                                <span className="truncate mr-2 text-slate-600 dark:text-slate-400" title={email}>{email}</span>
-                                <a
-                                  href={`mailto:${email}`}
-                                  className="px-2.5 py-1 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-bold shadow-2xs hover:shadow-xs transition-all duration-150 flex items-center gap-1 shrink-0 text-[10.5px]"
+                                <span 
+                                  className="truncate mr-2 text-slate-600 dark:text-slate-400 select-text cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" 
+                                  title="클릭하여 이메일 텍스트 복사"
+                                  onClick={() => navigator.clipboard.writeText(email)}
                                 >
-                                  메일
-                                </a>
+                                  {email}
+                                </span>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <button
+                                    onClick={() => navigator.clipboard.writeText(email)}
+                                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-750 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg font-bold shadow-2xs hover:shadow-xs transition-all duration-150 flex items-center gap-1 text-[10.5px] cursor-pointer"
+                                    title="이메일 텍스트 복사"
+                                  >
+                                    복사
+                                  </button>
+                                  <a
+                                    href={`mailto:${email}`}
+                                    className="px-2.5 py-1 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-bold shadow-2xs hover:shadow-xs transition-all duration-150 flex items-center gap-1 text-[10.5px]"
+                                  >
+                                    메일
+                                  </a>
+                                </div>
                               </div>
                             ))}
 

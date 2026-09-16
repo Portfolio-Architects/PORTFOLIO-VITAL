@@ -1,19 +1,5 @@
 [
   {
-    "name": "노르딕 워킹 폴",
-    "detailedProject": "건강생활실천사업(건강증진)",
-    "statItem": "201-01 사무관리비",
-    "unitPrice": 1980000,
-    "quantity": 1,
-    "amount": 1980000,
-    "memo": "",
-    "id": "mttvqus6h4y3ixkij",
-    "categoryId": "mnrcir0voap2bpm8z",
-    "createdAt": "2026-09-09T09:12:18.006Z",
-    "status": "PLANNED",
-    "budgetEntryId": "mttvqus7jbzq6e8qy"
-  },
-  {
     "name": "행사 실비",
     "detailedProject": "건강생활실천사업(건강증진)",
     "statItem": "301-11 행사실비지원금",

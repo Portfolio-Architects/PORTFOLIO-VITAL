@@ -629,15 +629,14 @@
     "id": "mttkw5n05zaabyvuz"
   },
   {
-    "categoryId": "mnrcir0voap2bpm8z",
+    "categoryId": "mnrcir0vhyhg1xb87",
     "amount": 1980000,
-    "date": "2026-09-09",
-    "purpose": "노르딕 워킹 폴",
-    "memo": "[시뮬레이션] 단가 ₩1,980,000 × 1개",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general",
-    "simulationEntryId": "mttvqus6h4y3ixkij",
-    "id": "mttvqus7jbzq6e8qy"
+    "date": "2026-09-15",
+    "purpose": "(일상경비) 중년여성 비만예방 프로그램 운영 물품(노르딕 워킹 폴) 구매비 지급",
+    "memo": "",
+    "docRegNum": "보건행정과-11466",
+    "actionType": "daily_expense",
+    "isPlanned": false,
+    "id": "mu2jspzoiwczhe0cn"
   }
 ]

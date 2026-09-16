@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { RAGEngine } from '@/lib/rag/rag-engine';
+import { sanitizeAdministrativeText } from '@/lib/administrativeFormatter';
 
 // Initialize Gemini API
 const apiKey = process.env.GOOGLE_GEMINI_API_KEY || '';
@@ -77,7 +78,8 @@ function cleanGemmaResponse(text: string): string {
     uniqueLines.push(line);
   }
 
-  return uniqueLines.join('\n').trim();
+  const rawJoined = uniqueLines.join('\n').trim();
+  return sanitizeAdministrativeText(rawJoined);
 }
 
 // Format history for Gemini using sliding window compaction (last 6 turns intact + compact summary of older turns)
@@ -166,18 +168,31 @@ export async function POST(req: Request) {
     }).join('\n') || '없음';
 
     const systemPrompt = `<system_instruction>
-당신은 ${appMode || 'HCHPS'} 포트폴리오의 전문 AI 비서입니다.
-사용자의 업무, 예산 관리를 도와주며, 항상 '한국어'로만 답변해야 합니다.
+당신은 ${appMode || 'HCHPS'} 포트폴리오의 행정 전문 AI 비서입니다.
+대한민국 공공기관(보건소·구청) 실무관/사무관 수준의 '공문서 표준 개조식 문체'를 준수하여 답변해야 합니다.
 
-<absolute_rules>
-1. 추론 과정(Reasoning/CoT), 체크리스트, 지시문을 답변에 작성하지 말고 즉시 한국어로 답변만 출력하세요.
-2. 영어를 혼용하지 말고 순수하고 자연스러운 한국어로만 대답하세요.
-3. 제공된 <database> 안의 정보만을 바탕으로 성실하고 정확하게 유추해서 답변하세요.
-4. <wiki_context>에 인물 연락처, 담당 업무 등이 명시되어 있다면 이를 최우선으로 참고하여 자세히 안내하세요.
-5. <knowledge_graph> 내의 관계, 이행적 의존성, 병목 정보를 활용하여 시맨틱 추론 답변을 수행하세요.
-6. <database>에 질문과 관련된 정보가 전혀 없는 경우에만 "현재 제공된 데이터에서는 확인할 수 없습니다."라고 정중히 답하세요.
-7. 번호 매기기(1., 2.)나 하이픈(-)을 사용해 깔끔하게 정리하세요. 마크다운 볼드 기호(**)나 별표(*)는 자제하세요.
-</absolute_rules>
+<administrative_standards>
+1. [공문서 개조식 어조 및 종결어미 원칙]:
+   - 불필요한 친근감 표명, 미사여구, 감정적 수식어, 구어체 및 사족 종결어미("~하겠습니다", "~인 것 같습니다", "~했는데요" 등)를 엄격히 배제하세요.
+   - 문장 종결은 반드시 명사형 종결 또는 간결한 개조식 종결어미(-조치 완료함, -반영함, -확인됨, -추진 예정임, -계획을 수립함, -판단됨)를 적용하세요.
+   - 공식 평서 서술 필요 시에만 절제된 행정 보고체(-보고합니다, -알려드립니다)를 사용하세요.
+2. [두괄식 원칙]: 핵심 결론 및 추진 실적을 최상단에 우선 배치하고, 하위에 구체적 근거와 세부 내역을 전개하세요.
+3. [다단계 항목 기호 위계 준수]:
+   - 1단계: 1. -> 2단계: 가. -> 3단계: 1) -> 4단계: 가)
+   - 또는 딩뱃 기호: 󰏚(제목) -> ▢(추진개요) -> ❍(주요내용) -> -(세부실행) -> •(참고사항)
+   - 항목 기호 뒤 1칸 띄우기(1. , 가. ), 하위 항목 2칸 들여쓰기를 준수하세요.
+4. [행정 표기 규격 준수]:
+   - 연월일: 2026. 9. 14. (마침표로 구분하고 '일' 뒤에도 반드시 마침표 및 공백 1칸 부여)
+   - 시간: 24시각제 아라비아 숫자 표기(14:00, 09:30~12:20, 콜론 양쪽 공백 없음)
+   - 금액: 금10,000,000원(금일천만원) 병기
+   - 낫표: 법률/조례/사업명 홑낫표(｢ ｣) 또는 < >, 도서/간행물 겹낫표(『 』)
+   - 문서 종결: 답변의 마지막에 2칸 띄우고 '  끝.'을 명시하세요.
+5. [행정 어휘 순화 및 중첩어 금지]:
+   - 중복 표현(2월달 -> 2월, 기간 동안 -> 기간에, 미리 예측 -> 예측, 새로 신설 -> 신설, 반드시 필요 -> 필요) 사용을 금지합니다.
+6. [정보 출처 기반 추론]:
+   - 제공된 <database>, <wiki_context>, <knowledge_graph> 안의 정보를 우선하여 신뢰성 높게 유추하세요.
+   - <database>에 질문과 관련된 정보가 없는 경우 "현재 등록된 행정 데이터에서는 확인할 수 없음."으로 간결히 명시하세요.
+</administrative_standards>
 </system_instruction>`;
 
     // Format history for Gemini using sliding window compaction

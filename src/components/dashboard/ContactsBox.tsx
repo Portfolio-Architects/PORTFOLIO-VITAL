@@ -17,8 +17,7 @@ import {
   Check, 
   Building, 
   Sparkles,
-  ArrowUpDown,
-  Tag
+  ArrowUpDown
 } from 'lucide-react';
 import { Contact } from '@/types';
 
@@ -247,34 +246,6 @@ const HighlightText = React.memo(({
 });
 HighlightText.displayName = 'HighlightText';
 
-// ============ Memoized FilterChipItem Subcomponent ============
-interface FilterChipItemProps {
-  tag: string;
-  isSelected: boolean;
-  onSelect: (tag: string) => void;
-}
-
-const FilterChipItem = React.memo(({ tag, isSelected, onSelect }: FilterChipItemProps) => {
-  const handleClick = useCallback(() => {
-    onSelect(tag);
-  }, [onSelect, tag]);
-
-  return (
-    <button
-      type="button"
-      onClick={handleClick}
-      className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
-        isSelected
-          ? 'bg-emerald-600 text-white shadow-2xs'
-          : 'bg-slate-100/90 text-slate-600 hover:bg-slate-200/90'
-      }`}
-    >
-      {tag}
-    </button>
-  );
-});
-FilterChipItem.displayName = 'FilterChipItem';
-
 // ============ Memoized ContactCard Subcomponent ============
 const ContactCard = React.memo(({ 
   contact, 
@@ -289,15 +260,25 @@ const ContactCard = React.memo(({
   onStartEdit: (contact: Contact) => void; 
   onDelete: (id: string) => void; 
 }) => {
-  const [copied, setCopied] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
   const handleCopyPhone = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (!contact.phone) return;
     navigator.clipboard.writeText(contact.phone);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    setCopiedPhone(true);
+    setTimeout(() => setCopiedPhone(false), 1500);
   }, [contact.phone]);
+
+  const handleCopyEmail = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!contact.email) return;
+    navigator.clipboard.writeText(contact.email);
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 1500);
+  }, [contact.email]);
 
   const handleEdit = useCallback(() => {
     onStartEdit(contact);
@@ -361,7 +342,7 @@ const ContactCard = React.memo(({
               className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-md transition-colors cursor-pointer"
               title="전화번호 복사"
             >
-              {copied ? (
+              {copiedPhone ? (
                 <>
                   <Check className="w-3 h-3 text-emerald-600" />
                   <span className="text-emerald-600 font-bold">복사됨</span>
@@ -376,14 +357,37 @@ const ContactCard = React.memo(({
           </div>
 
           {contact.email && (
-            <a 
-              href={`mailto:${contact.email}`}
-              className="flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 transition-colors text-[11px]"
-              title="이메일 보내기"
-            >
-              <Mail className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-              <HighlightText text={contact.email} queryTokens={queryTokens} />
-            </a>
+            <div className="flex items-center justify-between group/email">
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="flex items-center gap-1.5 text-slate-600 hover:text-indigo-600 transition-colors text-[11px] font-medium text-left truncate cursor-pointer select-text"
+                title="클릭하여 이메일 텍스트 복사"
+              >
+                <Mail className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span className="truncate select-text">
+                  <HighlightText text={contact.email} queryTokens={queryTokens} />
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors cursor-pointer shrink-0"
+                title="이메일 텍스트 복사"
+              >
+                {copiedEmail ? (
+                  <>
+                    <Check className="w-3 h-3 text-indigo-600" />
+                    <span className="text-indigo-600 font-bold">복사됨</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3 h-3" />
+                    <span className="opacity-0 group-hover/email:opacity-100 transition-opacity">복사</span>
+                  </>
+                )}
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -430,9 +434,8 @@ ContactCard.displayName = 'ContactCard';
 const ContactsBoxComponent: React.FC = () => {
   const { contacts, loading, addContact, updateContact, deleteContact } = useContacts();
 
-  // 검색 및 퀵 필터 상태
+  // 검색 및 정렬 상태
   const [localSearchTerm, setLocalSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string>('ALL');
   const [sortOrder, setSortOrder] = useState<'NAME_ASC' | 'NEWEST'>('NAME_ASC');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -512,19 +515,6 @@ const ContactsBoxComponent: React.FC = () => {
     setSortOrder(prev => (prev === 'NAME_ASC' ? 'NEWEST' : 'NAME_ASC'));
   }, []);
 
-  const handleSelectAllTag = useCallback(() => {
-    setSelectedTag('ALL');
-  }, []);
-
-  const handleSelectTag = useCallback((tag: string) => {
-    setSelectedTag(prev => (prev === tag ? 'ALL' : tag));
-  }, []);
-
-  const handleResetFilters = useCallback(() => {
-    setLocalSearchTerm('');
-    setSelectedTag('ALL');
-  }, []);
-
   const deferredSearchTerm = useDeferredValue(localSearchTerm);
 
   // Pre-index contacts (runs ONLY when contacts array changes, NOT on every keystroke)
@@ -557,29 +547,6 @@ const ContactsBoxComponent: React.FC = () => {
     return deferredSearchTerm.trim().split(/\s+/).filter(Boolean);
   }, [deferredSearchTerm]);
 
-  // 출처/소속 기반 상위 퀵 필터 칩 목록 동적 추출
-  const availableTags = useMemo(() => {
-    const tagCountMap: Record<string, number> = {};
-
-    for (let i = 0; i < indexedContacts.length; i++) {
-      const parsed = indexedContacts[i].parsedNotes;
-      if (parsed.source) {
-        tagCountMap[parsed.source] = (tagCountMap[parsed.source] || 0) + 1;
-      }
-      if (parsed.affiliation) {
-        const affBase = parsed.affiliation.split(' ')[0];
-        if (affBase && affBase.length >= 2) {
-          tagCountMap[affBase] = (tagCountMap[affBase] || 0) + 1;
-        }
-      }
-    }
-
-    return Object.entries(tagCountMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([tag]) => tag);
-  }, [indexedContacts]);
-
   // 초고속 다차원 검색 및 단일 순회 필터링
   const filteredContacts = useMemo<IndexedContact[]>(() => {
     const list: IndexedContact[] = [];
@@ -595,17 +562,8 @@ const ContactsBoxComponent: React.FC = () => {
 
     for (let i = 0; i < indexedContacts.length; i++) {
       const item = indexedContacts[i];
-      
-      // 1. 태그 필터
-      if (selectedTag !== 'ALL') {
-        const p = item.parsedNotes;
-        const matchesTag = p.source === selectedTag || 
-          (p.affiliation !== undefined && p.affiliation.includes(selectedTag)) || 
-          (item.contact.notes !== undefined && item.contact.notes.includes(selectedTag));
-        if (!matchesTag) continue;
-      }
 
-      // 2. 다중 토큰 검색 (미일치 시 즉시 break)
+      // 다중 토큰 검색 (미일치 시 즉시 break)
       if (hasTokens) {
         let allTokensMatch = true;
         for (let j = 0; j < processedTokens.length; j++) {
@@ -638,7 +596,7 @@ const ContactsBoxComponent: React.FC = () => {
     }
 
     return list;
-  }, [indexedContacts, selectedTag, queryTokens, sortOrder]);
+  }, [indexedContacts, queryTokens, sortOrder]);
 
   // 가상 스크롤 계산 (가시 영역 아이템만 렌더링하여 DOM 프리징 제거)
   const { startIndex, endIndex, topPadding, bottomPadding } = useContainerVirtualGrid({
@@ -712,7 +670,7 @@ const ContactsBoxComponent: React.FC = () => {
         
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <span className="text-[11px] font-semibold px-3 py-1 bg-emerald-500/10 border border-emerald-500/15 text-emerald-700 rounded-full shadow-3xs">
-            {localSearchTerm || selectedTag !== 'ALL' ? (
+            {localSearchTerm ? (
               <>검색 <strong className="text-emerald-800 font-bold">{filteredContacts.length}</strong>명 / 전체 {contacts.length}명</>
             ) : (
               <>총 <strong className="text-emerald-800 font-bold">{contacts.length}</strong>명</>
@@ -850,32 +808,6 @@ const ContactsBoxComponent: React.FC = () => {
             )}
           </div>
 
-          {/* Quick Category Filter Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-3 pt-0.5 scrollbar-none">
-            <span className="text-[11px] font-bold text-slate-400 shrink-0 flex items-center gap-1 mr-1">
-              <Tag className="w-3 h-3" /> 필터:
-            </span>
-            <button
-              type="button"
-              onClick={handleSelectAllTag}
-              className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
-                selectedTag === 'ALL'
-                  ? 'bg-emerald-600 text-white shadow-2xs'
-                  : 'bg-slate-100/90 text-slate-600 hover:bg-slate-200/90'
-              }`}
-            >
-              전체 ({contacts.length})
-            </button>
-            {availableTags.map(tag => (
-              <FilterChipItem
-                key={tag}
-                tag={tag}
-                isSelected={selectedTag === tag}
-                onSelect={handleSelectTag}
-              />
-            ))}
-          </div>
-
           {/* Contacts Card Grid with Window Virtualization */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24 text-slate-400">
@@ -886,17 +818,17 @@ const ContactsBoxComponent: React.FC = () => {
             <div className="flex flex-col items-center justify-center py-20 bg-white/40 border border-dashed border-slate-200 rounded-2xl">
               <BookOpen className="w-10 h-10 text-slate-300 mb-3" />
               <p className="text-sm font-bold text-slate-500">
-                {localSearchTerm || selectedTag !== 'ALL' 
-                  ? `"${localSearchTerm || selectedTag}" 관련 검색 결과가 없습니다.`
+                {localSearchTerm 
+                  ? `"${localSearchTerm}" 관련 검색 결과가 없습니다.`
                   : '등록된 연락처가 없습니다.'}
               </p>
-              {(localSearchTerm || selectedTag !== 'ALL') && (
+              {localSearchTerm && (
                 <button
                   type="button"
-                  onClick={handleResetFilters}
+                  onClick={handleClearSearch}
                   className="mt-3 text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
                 >
-                  필터 및 검색어 초기화
+                  검색어 초기화
                 </button>
               )}
             </div>

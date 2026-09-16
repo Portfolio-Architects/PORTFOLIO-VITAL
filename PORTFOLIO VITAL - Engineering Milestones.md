@@ -2,6 +2,100 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 165: Dashboard Contacts Management Tab & Email Text Direct Copy Pipeline Release] Integrated Dashboard Tab Switcher (Budget Overview, Contacts Directory, All-in-One), optimized zero-overhead conditional rendering, and added instant email text copy with visual feedback across ContactsBox and MindMapInspector. (2026-09-16)
+* **개요 및 개발 목적**:
+  - 대시보드 내 연락처 관리 서브 탭 분리 및 이메일 텍스트 다이렉트 복사 기능 전면 구현:
+    1. 대시보드 상단 서브 탭 컨트롤러 신규 탑재: `예산 종합 분석`, `연락처 관리`(실시간 등록 건수 배지 연동), `전체 보기` 3-State 세그먼트 전환 지원.
+    2. 로컬 스토리지(`vital-dashboard-active-tab`) 연동을 통한 사용자 선택 탭 영속화 및 탭 전환 시 제로 오버헤드 조건부 렌더링 최적화.
+    3. 연락처 카드(`ContactsBox.tsx`) 내 이메일 항목에 텍스트 복사 핸들러 및 원클릭 복사 버튼 탑재, 클릭 즉시 클립보드 복사 및 '복사됨' 시각적 애니메이션 피드백 제공 (mailto 앱 강제 실행 차단).
+    4. 마인드맵 인스펙터(`MindMapInspector.tsx`) 이메일 목록에도 텍스트 복사 버튼 추가 및 `select-text` 적용.
+    5. 사용자 요청에 따른 연락처 검색창 하단 퀵 카테고리 필터 칩 바(`FilterChipItem`, `availableTags`, `selectedTag`) 전면 소거 및 스마트 초성·키워드 통합 검색창 중심 UI 간소화 완료.
+    6. 대시보드 기본 활성 탭을 '전체 보기'(`all`)로 기본값 지정 및 로컬 스토리지 캐시 키 v2 업그레이드(`vital-dashboard-active-tab-v2`)를 통한 즉각 기본 뷰 반영 완료.
+
+### [Milestone 162: Public Administrative File Organizer & Archiving Pipeline Tool Release] End-to-end 60-document mock testbed, 0.0% scan missing rate, >=90% 3-level classification, dry-run 0-byte immutability, WAL audit journal, 100% SHA-256 rollback integrity, and standalone rollback script generation. (2026-09-16)
+* **개요 및 개발 목적**:
+  - 공공 행정 문서 자동 정리 및 보존 아카이빙 파이프라인 도구(`tools/file_organizer`) 전사 릴리즈 및 100% 회귀 검증 완료:
+    1. 60개 실제 행정 모의 문서 생성 벤치마크 테스트베드 구축 (`tools/file_organizer/benchmark/test_generator.py`).
+    2. 스캔 누락율 0.0%, 3단계 분류 정확도 90% 초과, 드라이런 0-byte 수학적 불변성 검증.
+    3. 4계층 물리 이동 및 WAL `audit_journal.jsonl` 트랜잭션 기록, 100% SHA-256 복원 및 디렉토리 정리 검증.
+    4. 독립 실행형 `rollback.py` 서브프로세스 롤백 검증 및 전체 회귀 테스트 101/101 통과 (100% ALL PASS).
+
+### [Milestone 159: Administrative Official Document System Enterprise Full-Regression Certification & 100% Integrity Verification Release] Validated 10 recursive self-improvement iterations, executed entire Jest regression test suite (33/33 Suites, 305/305 Tests ALL PASS), certified zero regressions across multi-agent pipelines, and published definitive walkthrough. (2026-09-14)
+* **개요 및 개발 목적**:
+  - 공문서 표준 문체 10회 연속 재귀적 자기개선(RSI Iterations 1~10) 종합 완결 및 무결성 검증:
+    1. 신규 구축된 행정 포매터 단위 테스트(`__tests__/administrative-formatter.test.ts`) 및 전사 회귀 테스트 구동: **33/33 Suites, 305/305 Tests ALL PASS(100%)** 달성.
+    2. 에이전트 매니페스트(`AGENTS.md`) 및 엔지니어링 리포트 간 100% 양방향 동기화 완료.
+
+### [Milestone 158: Engineering Milestones & Report 10-Iteration Chained Synchronization Release] Registered 10 consecutive recursive self-improvement milestones (Milestones 150-159) across Engineering Milestones, updated Engineering Report completion checklists, and executed sync-rules.js automated pipeline. (2026-09-14)
+* **개요 및 개발 목적**:
+  - 10회 연속 재귀적 개선 내역의 엔지니어링 리포트 및 마일스톤 문서 연쇄 커밋:
+    1. `PORTFOLIO VITAL - Engineering Milestones.md` 및 `PORTFOLIO VITAL - Engineering Report.md`에 10회 개선 사이클 상세 수록.
+    2. `node scripts/sync-rules.js` 자동 구동을 통해 `AGENTS.md`의 동기화 마일스톤 매니페스트 최신화.
+
+### [Milestone 157: Administrative Standard Word Purification Glossary (20 Words) & Statutory Heading Table Release] Enshrined 20 core administrative purified words and statutory symbol mapping tables within AGENTS.md Rule M. (2026-09-14)
+* **개요 및 개발 목적**:
+  - 행정안전부 및 국립국어원 표준 행정용어 순화 사전(20선) 명문화:
+    1. 기한(마감), 시한(정한 때), 감안하다(고려하다), 시건장치(잠금장치), 익일(다음 날), 결재를 득하다(결재를 받다) 등 20개 행정 어휘 순화 규격 제정.
+    2. 다단계 법정 기호 체계(`1.` $\to$ `가.` $\to$ `1)` $\to$ `가)`)와 디자인 딩뱃 기호(`󰏚` $\to$ `▢` $\to$ `❍` $\to$ `-`) 간의 대응 매트릭스 정립.
+
+### [Milestone 156: Official Tripartite Document Structure & Administrative Recipient Syntax Expansion Release] Codified tripartite document syntax (Heading, Body, Ending) and formal recipient styling (internal approval, agency heads, citizen petitions) into AGENTS.md Rule M. (2026-09-14)
+* **개요 및 개발 목적**:
+  - 공문서 3단 구성(두문·본문·결문) 및 수신자란 법정 서식 체계 규격화:
+    1. 두문(기관명, 수신, 경유), 본문(제목 1안건 1기안, 내용 다단계 위계, 붙임), 결문(발신명의, 서명, 등록번호, 도로명주소) 3단 체계 정립.
+    2. 내부결재(`수신  내부결재`), 기관장 및 보조기관 병기(`행정안전부장관(자치행정과장)`), 민원 회신(`귀하`, 도로명주소) 표기 원칙 공식화.
+
+### [Milestone 155: Multi-Agent Harness Evaluator Administrative Linter Integration Release] Integrated evaluateAdministrativeText linter and self-healing error reporting into src/lib/agents/evaluator.ts. (2026-09-14)
+* **개요 및 개발 목적**:
+  - 다중 에이전트 하네스 Evaluator에 공문서 표준 문체 검증 및 자가 치유 피드백 루프 탑재:
+    1. `src/lib/agents/evaluator.ts`에 `evaluateAdministrativeText` 함수 신규 구현.
+    2. 금지 중첩어 및 구어체 종결어미 검출 시 자가 치유 피드백 메시지 생성 및 Generator 자율 재생성 연계.
+
+### [Milestone 154: LLM Chat CleanGemmaResponse Administrative Text Sanitizer Pipeline Release] Bound sanitizeAdministrativeText post-processing pipeline into cleanGemmaResponse in src/app/llm/chat/route.ts. (2026-09-14)
+* **개요 및 개발 목적**:
+  - LLM 백엔드 스트리밍 및 응답 정제 파이프라인에 공문서 린터 사후 필터 결합:
+    1. `cleanGemmaResponse`의 최종 반환 단계에 `sanitizeAdministrativeText`를 바인딩하여 런타임 모델 출력에서 남아있는 중첩어, 구어체 어미, 비표준 일자 표기를 원천 정제.
+
+### [Milestone 153: Administrative Formatter & Linter Unit Test Suite (9/9 Tests ALL PASS) Release] Developed __tests__/administrative-formatter.test.ts covering 5 core domains and achieved 100% test pass. (2026-09-14)
+* **개요 및 개발 목적**:
+  - 공문서 표준 포매터 5대 핵심 도메인에 대한 단위 테스트 스위트 신규 구축:
+    1. 연월일, 24시각제 시간, 한글 금액 병기, 중첩어/구어체 정제, 끝 표기 보정 등 9개 세부 테스트 케이스 작성 및 100% 통과(9/9 Tests PASS).
+
+### [Milestone 152: Administrative Document Formatter & Redundancy Linter Utility Release] Implemented src/lib/administrativeFormatter.ts featuring official date, 24h time, Korean currency words, and 34 redundancy replacements. (2026-09-14)
+* **개요 및 개발 목적**:
+  - 대한민국 공문서 표준 규격 변환 및 정제 전용 유틸리티 신규 개발:
+    1. `formatAdministrativeDate`(`YYYY. M. D.`), `formatAdministrativeTime`(`HH:mm`), `numberToKoreanHanja`(`금일천만원`), `formatAdministrativeCurrency`(`금10,000,000원(금일천만원)`).
+    2. `ADMINISTRATIVE_REDUNDANCY_MAP`(34개 중첩어) 및 `ADMINISTRATIVE_ENDING_MAP`(18개 개조식 종결어미) 정제 엔진 구축.
+
+### [Milestone 151: Client AI Assistant Administrative Context & Prompt Preset Overhaul Release] Upgraded AIAssistantModal.tsx header badge, administrative query placeholders, and formal reporting prompts. (2026-09-14)
+* **개요 및 개발 목적**:
+  - 프론트엔드 AI 비서 모달의 안내 문구 및 예시 질의를 행정 공문서 표준으로 전면 개편:
+    1. `AIAssistantModal.tsx`의 타이틀을 '행정 인텔리전스 어시스턴트'로 개편하고 플레이스홀더를 공공기관 업무 보고 질의(페스티벌 부스 계획, 예산 비목 분석)로 갱신.
+
+### [Milestone 150: LLM Chat Route Administrative Standards System Prompt Injection Release] Injected Rule M administrative declarative tone, ending clauses, and punctuation protocols into src/app/llm/chat/route.ts system prompt. (2026-09-14)
+* **개요 및 개발 목적**:
+  - Gemini/Gemma LLM 챗 라우트 시스템 프롬프트에 Rule M 공문서 표준 문체 헌장 전면 주입:
+    1. 구어체 및 사족 종결어미 금지, 개조식 명사형 종결어미(-함, -임, -됨, -조치 완료함) 의무화, 두괄식 결론, 다단계 기호 위계, 일자/시간/금액 표기 규격을 시스템 지침으로 강제.
+
+### [Milestone 149: Recursive Self-Improvement - Administrative Official Document Style & Communication Protocol Integration] Codified Rule M (Administrative Communication & Reporting Standard) into AGENTS.md, standardized administrative declarative clause endings, hierarchical indentation syntax, and official document punctuation rules, established self-verification output guards, and synchronized milestone manifests. (2026-09-14)
+* **개요 및 개발 목적**:
+  - 사용자 지침("엔지니어링 리포트하고 에이전트 md 파일 재귀적 자기개선 요청하는데, 제일 문제가 답변할때, 공문서 말투 및 문체를 잘 반영하지 못한다는점임") 전격 반영:
+  - 에이전트의 응답 페르소나 및 문체를 대한민국 공공기관 실무관/사무관 수준의 공문서 표준 개조식 문체로 전면 개편하고 시스템 헌장(`AGENTS.md`)에 공식화:
+    1. **에이전트 행동 수칙 내 Rule M (공문서 및 행정 보고 표준 문체 헌장) 신설 (`AGENTS.md`)**:
+       - 친근감 표명, 미사여구, 감정적 수식어, 구어체 및 사족 종결어미("~하겠습니다", "~인 것 같습니다" 등)를 엄격히 배제.
+       - 핵심 결론 및 추진 실적을 최상단에 전진 배치하는 두괄식 행정 보고 원칙 확립.
+    2. **개조식 종결어미 표준 체계 정립**:
+       - 조치/실행 완료(`-조치 완료함`, `-반영함`, `-구현함`, `-동기화 완료함`), 추진/계획(`-추진 예정임`, `-계획을 수립함`), 상태 서술(`-으로 확인됨`, `-체계를 유지함`) 등 명사형 및 간결한 개조식 종결어미를 기본 원칙으로 강제.
+    3. **다단계 항목 기호 및 공문서 위계·띄어쓰기 규격화**:
+       - 법정 공문서 위계(`1.` $\to$ `가.` $\to$ `1)` $\to$ `가)` $\to$ `⑴` $\to$ `㈎` $\to$ `①` $\to$ `㉮`) 및 기획서 딩뱃 기호(`󰏚` $\to$ `▢` $\to$ `❍` $\to$ `-` $\to$ `•` $\to$ `※`) 체계 정립.
+       - 항목 기호 뒤 1타(1칸) 띄우기 및 하위 항목 2타(2칸) 들여쓰기 원칙 명문화.
+    4. **행정 문장부호 및 단위 표기 표준 규격화**:
+       - 연월일: `2026. 9. 14.` (일 뒤 마침표 필수), 24시각제 시간: `14:00`, `09:30~12:20`, 금액: `금10,000,000원(금일천만원)` 병기, 낫표(법령·사업명 홑낫표 `｢ ｣`, 도서·간행물 겹낫표 `『 』`), 문서 종결 2타 띄기 `  끝.` 엄수.
+    5. **행정 어휘 순화 및 자가 점검 필터(Self-Verification Guard) 탑재**:
+       - 중복 오류 표현("2월달", "기간 동안", "미리 예측", "새로 신설", "반드시 필요") 사용 금지.
+       - 사용자 응답 출력 직전 공문서 개조식 어조 부합 여부를 사전 검증하는 자기 점검 가드 구축.
+    6. **마일스톤 및 에이전트 매니페스트 재귀적 자동 동기화**:
+       - `node scripts/sync-rules.js` 구동을 통한 마일스톤 로그 최신화 완료.
+
 ### [Milestone 148: Festival Booth & Task Sync, '기타' Category Filter Expansion & Cloudflare Pages 24/7 Replica Dual-Sync Release] Synchronized updated 2026 Yangjae Health Festival SSOT (17 booth entities, detailed public health center departments, walking course survey completion, 9.21 pre-registration schedule, Po-i park coordination), expanded category filter pills with '기타' in YangjaeFestivalDashboard and pages-template.html, updated client and Edge Function fallback datasets, and published to Cloudflare KV replica with 100% test pass (32/32 Festival Tests, 32/32 Suites, 296/296 Tests). (2026-09-11)
 * **개요 및 개발 목적**:
   - 건강페스티벌 추진 현황판 프론트엔드 및 데이터 파이프라인 전면 동기화:

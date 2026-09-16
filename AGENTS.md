@@ -38,14 +38,14 @@
 ### F. 외부 참고 데이터 활용 규칙 (External References)
 1. **기획 및 계획서 초안 작성 시 우선 참조 경로**:
    - 향후 새로운 기획서, 보고서, 혹은 계획서의 초안을 작성할 경우, 반드시 아래 지정된 두 경로 내의 파일 목록을 조회하고 관련 자료를 우선적으로 분석·참고하여 작성해야 합니다:
-     * **수동 이동된 데이터 경로:** `F:\부엉이_정리됨\2026년` (기초 보건 계획서, 결과보고서 및 공문서 서식)
-     * **연도별 아카이브 경로:** `F:\부엉이_정리됨` (2021년~2026년 연도별 디렉토리 내 축적된 실무 업무 파일)
+     * **최신 실무 워크스페이스 경로:** `D:\Desktop\_Organized_Archive\2026년` (2026년 당해연도 현행 사업 및 공문서 실무 파일)
+     * **전사 마스터 아카이브 경로:** `F:\_Organized_Archive` (2015년~2026년 연도별 디렉토리 및 레거시 축적 공공 행정 영구 보존소)
 
 ### G. 공문서 한글(HWPX) 자동 변환 파이프라인 (HWPX Document Generation)
 1. **행정 보고서 한글(HWPX) 자동 문서화 종합 프로세스 (3-Step Pipeline)**:
    - 사용자가 행정 문서 생성 또는 "변환해줘" 지시를 내리면 에이전트는 다음 3단계 프로세스를 엄격히 이행하여 신규 문서를 빌드해야 합니다.
      * **1단계 (아카이브 검색 및 법적 근거 RAG 정립)**:
-       - 바탕화면(`d:/Desktop`) 및 연도별 아카이브 폴더(`F:\부엉이_정리됨`) 내 축적된 실무 문서(견적서, 구성안, 이전 결과보고서 등)를 스캔하여 팩트 컨텍스트를 확보합니다.
+       - 바탕화면(`D:/Desktop/_Organized_Archive`) 및 전사 마스터 아카이브(`F:\_Organized_Archive`) 내 축적된 실무 문서(견적서, 구성안, 이전 결과보고서 등)를 스캔하여 팩트 컨텍스트를 확보합니다.
        - 관련 상위 법령(예: 지역보건법, 국민체육진흥법) 및 지자체 조례(예: 강남구 구민체육진흥 조례)는 로컬 DB 및 RAG 검색을 통해 사실 관계를 엄밀히 대조·정립합니다.
      * **2단계 (기안서/사업계획서 초안 마크다운 생성)**:
        - 확보된 실무 아카이브 팩트와 법적 근거를 융합하여 격식 있고 전문적인 공공기관 개조식 문체로 작성된 기안서/사업계획서 초안 마크다운 파일(`.md`)을 scratch 또는 아티팩트 디렉토리에 우선 생성합니다.
@@ -98,24 +98,100 @@
    - 사회자가 *"애국가 제창 및 순국선열에 대한 묵념은 생략하겠습니다"*, *"애국가 제창 등 이하 생략하겠습니다"* 등의 생략 표현을 발언하는 것은 국가상징의 품격을 저해하므로 **규정상 엄격히 금지**합니다.
    - 약식절차 1에서는 국기에 대한 경례 시 전주 없는 애국가 반주 1절에 맞춰 경례하고 이어서 묵념곡을 연주하므로, 별도의 애국가 가창(제창) 시간 없이도 신속하고 품격 있는 공공 의전 규정을 완벽하게 충족합니다.
 
+### M. 공문서 및 행정 보고 표준 문체 헌장 (Administrative Communication & Reporting Standard)
+1. **행정 보고 페르소나 및 어조 (Administrative Tone & Persona)**:
+   - 에이전트의 모든 사용자 응답, 기안서 초안, 기술 보고서, 진행 경과 안내는 대한민국 공공기관(보건소·구청·시청) 실무관/사무관 수준의 **공문서 표준 개조식 문체**를 전면 의무 적용합니다.
+   - 불필요한 친근감 표명, 미사여구, 감정적 수식어, 구어체 및 장황한 대화형 종결어미("~하겠습니다", "~인 것 같습니다", "~했는데요", "~해보도록 하겠습니다" 등)를 엄격히 배제합니다.
+   - **두괄식 원칙**: 핵심 결론 및 추진 실적을 최상단에 우선 배치하고, 하위에 구체적 근거와 세부 내역을 전개합니다.
+2. **개조식 종결어미 표준 체계 (Ending Clause Standards)**:
+   - 보고 및 설명 문장의 종결은 명사형 종결 또는 간결한 개조식 종결어미를 기본 원칙으로 적용합니다:
+     * 조치/실행 완료: `-조치 완료함`, `-반영함`, `-구현함`, `-동기화 완료함`
+     * 추진/계획: `-추진 예정임`, `-계획을 수립함`, `-검토 중임`
+     * 사실 서술 및 상태: `-으로 확인됨`, `-으로 판단됨`, `-체계를 유지함`
+     * 공식 평서 서술 필요 시: 절제되고 정중한 행정 보고체(`-보고합니다`, `-알려드립니다`)를 제한적으로 사용합니다.
+3. **다단계 항목 기호 및 위계 체계 (Hierarchical Bullet System)**:
+   - 법정 공문서 및 기안서 서식 작성 시 다음의 위계를 순차적으로 준수합니다:
+     * **기본 법정 서식 위계**: `1.` $\to$ `가.` $\to$ `1)` $\to$ `가)` $\to$ `⑴` $\to$ `㈎` $\to$ `①` $\to$ `㉮`
+     * **보고서/기획서 딩뱃 기호 위계**: `󰏚`(제목/대과제) $\to$ `▢`(추진배경/개요) $\to$ `❍`(주요내용) $\to$ `-`(세부실행) $\to$ `•`(참고사항/비고) $\to$ `※`(유의사항)
+     * **띄어쓰기 규격**: 항목 기호 뒤 1타(공백 1칸) 띄우기(`1. `, `가. `, `❍ `), 하위 항목은 직전 상위 항목 시작 위치에서 2타(공백 2칸) 들여쓰기를 철저히 적용합니다.
+4. **행정 문장부호 및 단위 표기 표준 (Punctuation & Unit Standards)**:
+   - **연월일 표기**: 마침표(.)로 구분하며, 반드시 '일' 뒤에도 마침표를 찍고 1칸을 띄웁니다.
+     * 올바른 표기: `2026. 9. 14.` / 틀린 표기: `2026.9.14`, `2026. 9. 14`, `'26. 9. 14.`
+     * 기간 표기: `2026. 9. 14.~9. 21.` (물결표 `~` 사용, 연도 중복 시 생략 가능)
+   - **시간 표기**: 24시각제 아라비아 숫자로 표기하며, 시·분 사이에 쌍점(:)을 공백 없이 표기합니다.
+     * 올바른 표기: `14:00`, `09:30~12:20` / 틀린 표기: `오후 2시`, `14:00시`, `14 : 00`
+   - **금액 표기**: 변조 방지를 위해 아라비아 숫자와 한글을 병기합니다.
+     * 올바른 표기: `금10,000,000원(금일천만원)` / 도표 내 단독 표기: `10,000,000원`
+   - **문장부호 (낫표 규격)**:
+     * 홑낫표(`｢ ｣`) 또는 홑화살괄호(`< >`): 법률, 조례, 규정, 훈령, 지침, 세부 사업명
+     * 겹낫표(`『 』`) 또는 겹화살괄호(`《 》`): 도서명, 정기간행물, 신문명
+   - **문서 종결 표시**:
+     * 본문 또는 첨부물(붙임) 끝에서 1자(공백 2칸) 띄우고 `끝.`을 명시합니다.
+5. **행정 어휘 순화 및 중첩어 배제 (Clarity & Anti-Redundancy)**:
+   - 의미가 중복되는 일상적 오류 표현을 전면 금지합니다:
+     * `2월달` $\to$ `2월`, `기간 동안` $\to$ `기간 중/기간에`, `미리 예측` $\to$ `예측`, `새로 신설` $\to$ `신설`, `반드시 필요` $\to$ `필요`
+     * `안전선 밖으로 물러나다` $\to$ `안전선 안으로 물러나다`, `자문을 구하다` $\to$ `자문을 받다/자문하다`
+6. **답변 생성 전 자가 점검 필터 (Self-Verification Guard)**:
+   - 에이전트는 최종 응답을 출력하기 직전, "본 답변이 공문서 개조식 어조 및 행정 표준 규격을 빈틈없이 충족하는가?"를 스스로 평가하고, 구어체나 비표준 종결어가 발견될 경우 즉시 공문서 서식으로 정제한 후 사용자에게 제출해야 합니다.
+7. **공문서 3단 구성 체계 준수 (Tripartite Document Structure)**:
+   - 모든 공식 기안문 및 행정 보고서는 다음의 3단 구성을 준거합니다:
+     * **두문(頭文)**: 행정기관명, 수신, 경유
+     * **본문(本文)**: 제목(1안건 1기안 명확화), 내용(다단계 항목 및 도표), 붙임(첨부물 명칭 및 부수)
+     * **결문(結文)**: 발신명의, 기안자/검토자/결재권자 직위·서명, 시행/접수 등록번호, 도로명주소 및 공개구분
+8. **수신자란 및 발신명의 표준 표기 규칙 (Recipient Standards)**:
+   - **내부결재 문서**: `수신  내부결재` 표기 (발신명의 생략)
+   - **독임제·합의제 기관**: 기관장 직위 표기 및 괄호 내 보조/보좌기관 명시 (`수신  행정안전부장관(자치행정과장)`)
+   - **민원 회신 문서**: 성명 뒤 `귀하` 호칭 부여 및 도로명 주소 병기 (`홍길동 귀하[우. 06647 서울특별시 서초구 반포대로30길 12-6]`)
+   - **다수 수신자 분기**: 두문 `수신  수신자 참조`, 결문 발신명의 다음 줄에 `수신자  ...` 별도 설치
+9. **행정용어 표준 순화 대조 사전 (Administrative Glossary Standards)**:
+   - 관행적·외래어·한자어 오류를 배제하고 공공언어 표준 순화어를 의무 적용합니다:
+     | 일상·비표준 표현 | 공문서 표준 순화어 | 일상·비표준 표현 | 공문서 표준 순화어 |
+     |:---|:---|:---|:---|
+     | 기한(期限) | 마감 | 시한(時限) | 정한 때/끝난 때 |
+     | 감안하다 | 고려하다 | 개소 | 곳, 군데 |
+     | 공여하다 | 주다, 제공하다 | 득하다 | 받다, 얻다 |
+     | 명기하다 | 분명히 적다 | 별송(別送) | 별도 보냄, 따로 보냄 |
+     | 시건장치 | 잠금장치 | 익일(翌日) | 다음 날 |
+     | 일응(一應) | 우선, 일단 | 잔여 | 남은 것, 잔여분 |
+     | 차출하다 | 뽑아내다 | 폄훼하다 | 깎아내리다 |
+     | 필하다 | 마치다, 끝내다 | 하달하다 | 내려보내다 |
+     | 괘념하다 | 마음에 두다 | 기망하다 | 속이다 |
+     | 결재를 득하다 | 결재를 받다 | 과태료를 부과하다 | 과태료를 매기다 |
+
+### N. 16:9 공공 캠페인 인포그래픽 포스터 표준 디자인 헌장 (Public Infographic Poster Design Standard)
+1. **황금비율 16:9 랜드스케이프 레이아웃 (16:9 Golden Ratio Composition)**:
+   - **상단 좌측 (Top-Left)**: 굵고 또렷한 2~3줄 메인 헤드라인 텍스트 및 기간 배지 (`(9.16~12.31)` 등)를 배치합니다.
+   - **상단 중앙 (Top-Center)**: 3대 핵심 리워드/참여 지표 캡슐 카드 (선착순 인원, 총 리워드 규모, 건당 리워드 지급액)를 시각적으로 정렬합니다.
+   - **상단 우측 (Top-Right)**: 공식 3단 붓글씨 슬로건(`강남을 힘차게! / 구민을 신나게! / 강남 대전환!!` 등) 캘리그라피 원형을 100% 무손실로 독립 배치합니다.
+   - **기관 CI 로고 전면 배제 원칙 (NO Logo)**: 시각적 산만함과 중복을 차단하기 위해 지자체 CI 로고는 전면 배제하여 시각적 개방감과 현대적 포스터 감성을 극대화합니다.
+2. **5대 릴레이 코스 수직 그리드 0.1px 칼정렬 (Strict Vertical Grid Alignment)**:
+   - 가로 전폭을 균등 분할하고, 각 컬럼 중심축($X_n$)에 **[상단 원형 순번 마커(1~N)] - [코스명] - [대표 일러스트레이션] - [하단 인원 및 리워드 뱃지]**가 단 0.1px의 어긋남 없이 완벽하게 수직 1열 일치하도록 수학적 좌표를 설계합니다.
+   - 각 코스 카드를 부드러운 산책로(웨이브 패스)로 연결하여 릴레이 완주 여정(Journey)을 시각화합니다.
+3. **인포그래픽 본연의 텍스트 최소화 원칙 (Minimal Text & Visual Impact)**:
+   - PPT 슬라이드식의 긴 줄글 설명, 자질구레한 부연 설명을 100% 영구 배제합니다.
+   - [헤드라인] + [3대 캡슐 숫자] + [코스 명소명] + [리워드 뱃지]만 남겨 3초 내에 핵심 정보가 각인되도록 설계합니다.
+4. **오탈자 방지 및 공공 표준 용어 감수 파이프라인 (Anti-Typo & Standard Glossary)**:
+   - AI 이미지 생성기의 한글 글리프 왜곡 및 오탈자('3산 트로케킹', '3개 산', 'Okt', 'Deg' 등)를 엄격히 감수 및 차단합니다.
+   - 공식 공공 행정 표준 용어(예: ｢3대 명산 트레킹｣, 정식 국문 월차 `9월`, `10월 ①`, `10월 ②`, `11월`, `12월`)를 의무 적용합니다.
+
 ## 3. 다중 에이전트 파이프라인 맵
 - `src/lib/agents/planner.ts`: 작업 분해 및 컨텍스트 검색.
 - `src/lib/agents/generator.ts`: 실행 및 코드 합성.
 - `src/lib/agents/evaluator.ts`: Zod 스키마 및 TypeScript 검증 피드백 루프.
 
 ## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)
-- **최신 동기화 일자:** 2026-09-11
+- **최신 동기화 일자:** 2026-09-16
 - **동기화된 마일스톤:**
-  - [Milestone 148: Festival Booth & Task Sync, '기타' Category Filter Expansion & Cloudflare Pages 24/7 Replica Dual-Sync Release] Synchronized updated 2026 Yangjae Health Festival SSOT (17 booth entities, detailed public health center departments, walking course survey completion, 9.21 pre-registration schedule, Po-i park coordination), expanded category filter pills with '기타' in YangjaeFestivalDashboard and pages-template.html, updated client and Edge Function fallback datasets, and published to Cloudflare KV replica with 100% test pass (32/32 Festival Tests, 32/32 Suites, 296/296 Tests). (2026-09-11)
-  - [Milestone 147: Universal Zero-Loss Persistence & Concurrency Pipeline & Instantaneous Zero-Lag Tab Switching Architecture Release] Implemented backend concurrency mutex queue (withSheetLock), BUDGET_SIMULATIONS disk SSOT with bidirectional sync, dormant sub-tab strategy across Workspace and Festival views, zombie background polling suppression via isActive flag, keystroke decoupling with blur auto-save in DetailEditRow and MindMapNoteEditor, Rule H skeleton UI guards, and resolved initialTab tab-lock loop and cross-node note flush with 100% test pass (32/32 Suites, 296/296 Tests). (2026-09-10)
-  - [Milestone 146: Sub-Task Category Transfer Across Milestone Tasks & Interactive Transfer Modal Release] Implemented sub-task category transfer pipeline across milestone tasks with interactive modal, automatic destination accordion auto-expansion, SSOT persistence, and DetailEditRow & reading view triggers with 100% test pass (29/29 Festival Tests, 26/26 Suites, 242/242 Tests). (2026-09-10)
-  - [Milestone 145: Health Festival Kim Ji-hyeon (7173), SNUH Gangnam (010-5663-8276), UD (010-5192-2210), Gangnam Cha Hospital (010-2698-0992) Contact Integration Release] Integrated Kim Ji-hyeon (02-3423-7173 / ext: 7173), SNUH Gangnam Center (010-5663-8276 / ext: 8276), UD Dental (010-5192-2210 / ext: 2210), and Gangnam Cha Hospital (010-2698-0992 / ext: 0992) across STAFF_PHONE_MAP, attendee badge linkers, DetailEditRow placeholder, pages-template.html Cloudflare replica, and CONTACTS.json SSOT with 100% test pass (27/27 Festival Tests, 26/26 Suites, 240/240 Tests). (2026-09-10)
-  - [Milestone 144: Festival Booth Header Wrapping Guard, Synchronized 2-Column Matrix Alignment & Premium Dark Card Overhaul Release] Refactored Booth Header with whitespace-nowrap and styled capsule badge to eliminate word-splitting, converted KPI Banner into a synchronized 3-tier 2-column matrix layout with matching horizontal baselines and distinct status chips, and synchronized Cloudflare Pages replica with 100% test pass (27/27 Festival Tests, 26/26 Suites, 240/240 Tests). (2026-09-10)
-  - [Milestone 143: Health Festival Booth Scale Parsing & Real-time Metrics (참여 주체 수 및 총 필요 부스 동수) Integration Release] Implemented dynamic booth scale parsing (parseBoothScale) and aggregate metric calculation (total/confirmed entities, total/confirmed/pending dong scale, and examination bus counts), embedded a high-contrast KPI banner at the very top of Booth Status across YangjaeFestivalDashboard and Cloudflare Pages replica (pages-template.html & out/), and updated header badge with 100% test pass (27/27 Festival Tests, 26/26 Suites, 240/240 Tests). (2026-09-09)
-  - [Milestone 142: Festival Booth Category Binary Streamlining (민간 & 보건소 부서) Release] Streamlined booth category taxonomy from 3 legacy groups to binary classification ('민간' and '보건소 부서') across FESTIVAL_YANGJAE_2026.json SSOT (11 booths), YangjaeFestivalDashboard filter tabs and cards, useYangjaeFestival fallback, Cloudflare Pages replica (pages-template.html & out/), and Edge Functions with 100% test pass (25/25 Festival Tests, 26/26 Suites, 238/238 Tests). (2026-09-09)
-  - [Milestone 141: Health Festival Kim Hyeong-jong Extension 7250 (02-3423-7250) & Korea Body Information (010-9985-3732) Contact Integration Release] Integrated Kim Hyeong-jong (02-3423-7250 / ext: 7250) and Korea Body Information (010-9985-3732 / ext: 3732) across STAFF_PHONE_MAP, attendee badge linkers, DetailEditRow placeholder, pages-template.html Cloudflare replica, and CONTACTS.json SSOT with 100% test pass (25/25 Festival Tests, 26/26 Suites, 238/238 Tests). (2026-09-09)
-  - [Milestone 140: Budget Simulator Daily Expense Unexecuted Balance (교부액 중 미집행비용) Tracking & Effective Available Funds Surface Integration Release] Added dailyExpenseIssued, dailyExpenseSpent, and dailyExpenseRemaining tracking across useBudgetSimulator project and stat item summaries, surfaced unexecuted daily expense badges and real effective available funds in SimulationResultTable (Level 2 stat rows, Level 1 group headers, project view, and table footer), added dedicated ' 일상경비 교부목만' toolbar quick filter chip, and updated SimulationSummaryCards with 100% test pass (26/26 Suites, 238/238 Tests). (2026-09-09)
-  - [Milestone 139: Budget Simulator Key Duplication & SSOT MergedEntries Deduplication Hardening Release] Resolved React duplicate key console warning (Encountered two children with the same key), hardened useBudgetSimulator mergedEntries bidirectional deduplication between local storage and BUDGET_ENTRIES.json, and added defensive indexed keys across SimulationResultTable and SimulationEntryList with 100% test pass (26/26 Suites, 238/238 Tests). (2026-09-09)
-  - [Milestone 138: Budget Simulator Hierarchical Level 3 Drilldown & Grouped Entry List Release] Implemented Level 3 nested simulation entry drilldown with inline settlement/edit/delete actions in Stat Item Balance view, added dedicated 'Registered Stat Items Only' quick filter chip and bulk toggle, and introduced 'Grouped by Stat Item' view mode in SimulationEntryList with 100% test pass. (2026-09-09)
-  - [Milestone 137: Festival Timetable, Booth Roster & Outreach Organization Real-time Sync Release] Synchronized updated festival timeline (booth operation extended to 13:30, walk incentive cutoff at 12:30, cleanup 13:30-14:30), confirmed Gangnam Korean Medicine Association booth (26.9.8), and added Yangjaecheon Keepers outreach across SSOT and Cloudflare replica with 100% test pass. (2026-09-08)
-  - 그 외 과거 누적 마일스톤 총 214건 통합 요약 (초기 ~ 2026-09-08 이전 패치 내역)
+  - [Milestone 165: Dashboard Contacts Management Tab & Email Text Direct Copy Pipeline Release] Integrated Dashboard Tab Switcher (Budget Overview, Contacts Directory, All-in-One), optimized zero-overhead conditional rendering, and added instant email text copy with visual feedback across ContactsBox and MindMapInspector. (2026-09-16)
+  - [Milestone 162: Public Administrative File Organizer & Archiving Pipeline Tool Release] End-to-end 60-document mock testbed, 0.0% scan missing rate, >=90% 3-level classification, dry-run 0-byte immutability, WAL audit journal, 100% SHA-256 rollback integrity, and standalone rollback script generation. (2026-09-16)
+  - [Milestone 159: Administrative Official Document System Enterprise Full-Regression Certification & 100% Integrity Verification Release] Validated 10 recursive self-improvement iterations, executed entire Jest regression test suite (33/33 Suites, 305/305 Tests ALL PASS), certified zero regressions across multi-agent pipelines, and published definitive walkthrough. (2026-09-14)
+  - [Milestone 158: Engineering Milestones & Report 10-Iteration Chained Synchronization Release] Registered 10 consecutive recursive self-improvement milestones (Milestones 150-159) across Engineering Milestones, updated Engineering Report completion checklists, and executed sync-rules.js automated pipeline. (2026-09-14)
+  - [Milestone 157: Administrative Standard Word Purification Glossary (20 Words) & Statutory Heading Table Release] Enshrined 20 core administrative purified words and statutory symbol mapping tables within AGENTS.md Rule M. (2026-09-14)
+  - [Milestone 156: Official Tripartite Document Structure & Administrative Recipient Syntax Expansion Release] Codified tripartite document syntax (Heading, Body, Ending) and formal recipient styling (internal approval, agency heads, citizen petitions) into AGENTS.md Rule M. (2026-09-14)
+  - [Milestone 155: Multi-Agent Harness Evaluator Administrative Linter Integration Release] Integrated evaluateAdministrativeText linter and self-healing error reporting into src/lib/agents/evaluator.ts. (2026-09-14)
+  - [Milestone 154: LLM Chat CleanGemmaResponse Administrative Text Sanitizer Pipeline Release] Bound sanitizeAdministrativeText post-processing pipeline into cleanGemmaResponse in src/app/llm/chat/route.ts. (2026-09-14)
+  - [Milestone 153: Administrative Formatter & Linter Unit Test Suite (9/9 Tests ALL PASS) Release] Developed __tests__/administrative-formatter.test.ts covering 5 core domains and achieved 100% test pass. (2026-09-14)
+  - [Milestone 152: Administrative Document Formatter & Redundancy Linter Utility Release] Implemented src/lib/administrativeFormatter.ts featuring official date, 24h time, Korean currency words, and 34 redundancy replacements. (2026-09-14)
+  - [Milestone 151: Client AI Assistant Administrative Context & Prompt Preset Overhaul Release] Upgraded AIAssistantModal.tsx header badge, administrative query placeholders, and formal reporting prompts. (2026-09-14)
+  - [Milestone 150: LLM Chat Route Administrative Standards System Prompt Injection Release] Injected Rule M administrative declarative tone, ending clauses, and punctuation protocols into src/app/llm/chat/route.ts system prompt. (2026-09-14)
+  - 그 외 과거 누적 마일스톤 총 227건 통합 요약 (초기 ~ 2026-09-14 이전 패치 내역)
