@@ -2,8 +2,6 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { PieChart, Pie, Cell, Line, Bar, ReferenceLine, XAxis, YAxis, Tooltip as RechartsTooltip, Area, CartesianGrid, ComposedChart, ResponsiveContainer } from 'recharts';
 import { Task, BudgetCategory, BudgetEntry } from '@/types';
 import { usePortfolioAnalytics } from '@/hooks/usePortfolioAnalytics';
-import { useContacts } from '@/hooks/useContacts';
-import { BookOpen, Layers, PieChart as PieChartIcon, Sparkles } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 
@@ -106,36 +104,11 @@ CustomComposedTooltip.displayName = 'CustomComposedTooltip';
 const HCHPS_THEME_COLORS = ['#059669', '#064e3b', '#34d399', '#047857', '#6ee7b7', '#d1fae5'];
 const VITAL_THEME_COLORS = ['#3B82F6', '#1E3A8A', '#93C5FD', '#1D4ED8', '#60A5FA', '#DBEAFE'];
 
-export type DashboardTab = 'budget' | 'contacts' | 'all';
-
 function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appMode = 'VITAL' }: DashboardProps) {
   const [chartType, setChartType] = useState<'monthly' | 'cumulative'>('monthly');
-  const [dashboardTab, setDashboardTab] = useState<DashboardTab>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('vital-dashboard-active-tab-v2');
-        if (saved === 'budget' || saved === 'contacts' || saved === 'all') {
-          return saved;
-        }
-      } catch {}
-    }
-    return 'all';
-  });
 
-  const { contacts } = useContacts();
   const renderContacts = useIdleMount();
   const renderCharts = useDeferredChartMount();
-
-  const handleTabChange = useCallback((tab: DashboardTab) => {
-    setDashboardTab(tab);
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('vital-dashboard-active-tab-v2', tab);
-      } catch {}
-    }
-  }, []);
-
-  const shouldRenderContacts = renderContacts || dashboardTab === 'contacts' || dashboardTab === 'all';
 
   const {
     selectedProject, setSelectedProject,
@@ -168,87 +141,11 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
     ];
   }, [pieData, isHchps]);
 
-  const activeTabAccentColor = isHchps 
-    ? 'text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-700 shadow-sm border-slate-200/60 dark:border-slate-650' 
-    : 'text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-700 shadow-sm border-slate-200/60 dark:border-slate-650';
-
-  const activeBadgeColor = isHchps
-    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-    : 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300';
-
   return (
-    <div className="w-full flex flex-col gap-5 animate-in fade-in duration-300 relative min-h-screen font-sans">
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-300 relative min-h-screen font-sans">
       
-      {/* Dashboard Sub-navigation Tabs */}
-      <div className="flex items-center justify-between flex-wrap gap-3 pb-1 border-b border-slate-200/60 dark:border-slate-800">
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
-          <button
-            type="button"
-            onClick={() => handleTabChange('budget')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
-              dashboardTab === 'budget'
-                ? activeTabAccentColor
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/40'
-            }`}
-          >
-            <PieChartIcon className="w-4 h-4" />
-            <span>예산 종합 분석</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleTabChange('contacts')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
-              dashboardTab === 'contacts'
-                ? activeTabAccentColor
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/40'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>연락처 관리</span>
-            <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold transition-colors ${
-              dashboardTab === 'contacts'
-                ? activeBadgeColor
-                : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-            }`}>
-              {contacts.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleTabChange('all')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
-              dashboardTab === 'all'
-                ? activeTabAccentColor
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/40'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>전체 보기</span>
-          </button>
-        </div>
-
-        {/* Status indicator badge */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-450">
-          {dashboardTab === 'contacts' ? (
-            <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50/90 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 rounded-xl border border-emerald-200/60 dark:border-emerald-800/60 text-[11px]">
-              <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              실무 협업자 및 마인드맵 공약제안 노드별 연락처 통합 주소록
-            </span>
-          ) : (
-            <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 rounded-xl border border-slate-200/50 dark:border-slate-800 text-[11px]">
-              <span>연락처 <strong className="text-slate-700 dark:text-slate-200">{contacts.length}</strong>건</span>
-              <span>·</span>
-              <span>예산 집행률 <strong className="text-slate-700 dark:text-slate-200">{executionRate.toFixed(1)}%</strong></span>
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Main Budget Panels (Visible when tab is 'budget' or 'all') */}
-      {(dashboardTab === 'budget' || dashboardTab === 'all') && (
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-1">
+      {/* Main Panels */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-4">
         
         {/* Left Column */}
         <div className="xl:col-span-6 flex flex-col gap-6">
@@ -480,22 +377,18 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
             </div>
           </div>
         </div>
-        </div>
-      )}
+      </div>
 
-      {/* Contacts Management Panel (Visible when tab is 'contacts' or 'all') */}
-      {(dashboardTab === 'contacts' || dashboardTab === 'all') && (
-        <div className="mt-2 mb-8 flex flex-col gap-8 animate-in fade-in duration-200">
-          {shouldRenderContacts ? (
-            <ContactsBox />
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 gap-4 glass-panel rounded-[2rem] p-8 shadow-2xs border border-white/20 h-[250px] animate-pulse">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-              <p className="text-sm text-slate-500 font-bold">연락처 관리 위젯을 불러오는 중...</p>
-            </div>
-          )}
-        </div>
-      )}
+      <div className="mt-8 mb-8 flex flex-col gap-8">
+        {renderContacts ? (
+          <ContactsBox />
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 gap-4 glass-panel rounded-[2rem] p-8 shadow-2xs border border-white/20 h-[250px] animate-pulse">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+            <p className="text-sm text-slate-500 font-bold">주소록 위젯을 순차 로딩하는 중...</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

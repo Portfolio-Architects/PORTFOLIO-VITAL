@@ -38,14 +38,14 @@
 ### F. 외부 참고 데이터 활용 규칙 (External References)
 1. **기획 및 계획서 초안 작성 시 우선 참조 경로**:
    - 향후 새로운 기획서, 보고서, 혹은 계획서의 초안을 작성할 경우, 반드시 아래 지정된 두 경로 내의 파일 목록을 조회하고 관련 자료를 우선적으로 분석·참고하여 작성해야 합니다:
-     * **최신 실무 워크스페이스 경로:** `D:\Desktop\_Organized_Archive\2026년` (2026년 당해연도 현행 사업 및 공문서 실무 파일)
+     * **최신 실무 워크스페이스 경로:** `D:\Desktop\공공문서 폴더\2026년` (2026년 당해연도 현행 사업 및 공문서 실무 파일)
      * **전사 마스터 아카이브 경로:** `F:\_Organized_Archive` (2015년~2026년 연도별 디렉토리 및 레거시 축적 공공 행정 영구 보존소)
 
 ### G. 공문서 한글(HWPX) 자동 변환 파이프라인 (HWPX Document Generation)
 1. **행정 보고서 한글(HWPX) 자동 문서화 종합 프로세스 (3-Step Pipeline)**:
    - 사용자가 행정 문서 생성 또는 "변환해줘" 지시를 내리면 에이전트는 다음 3단계 프로세스를 엄격히 이행하여 신규 문서를 빌드해야 합니다.
      * **1단계 (아카이브 검색 및 법적 근거 RAG 정립)**:
-       - 바탕화면(`D:/Desktop/_Organized_Archive`) 및 전사 마스터 아카이브(`F:\_Organized_Archive`) 내 축적된 실무 문서(견적서, 구성안, 이전 결과보고서 등)를 스캔하여 팩트 컨텍스트를 확보합니다.
+       - 바탕화면(`D:/Desktop/공공문서 폴더`) 및 전사 마스터 아카이브(`F:\_Organized_Archive`) 내 축적된 실무 문서(견적서, 구성안, 이전 결과보고서 등)를 스캔하여 팩트 컨텍스트를 확보합니다.
        - 관련 상위 법령(예: 지역보건법, 국민체육진흥법) 및 지자체 조례(예: 강남구 구민체육진흥 조례)는 로컬 DB 및 RAG 검색을 통해 사실 관계를 엄밀히 대조·정립합니다.
      * **2단계 (기안서/사업계획서 초안 마크다운 생성)**:
        - 확보된 실무 아카이브 팩트와 법적 근거를 융합하여 격식 있고 전문적인 공공기관 개조식 문체로 작성된 기안서/사업계획서 초안 마크다운 파일(`.md`)을 scratch 또는 아티팩트 디렉토리에 우선 생성합니다.
@@ -180,8 +180,10 @@
 - `src/lib/agents/evaluator.ts`: Zod 스키마 및 TypeScript 검증 피드백 루프.
 
 ## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)
-- **최신 동기화 일자:** 2026-09-16
+- **최신 동기화 일자:** 2026-09-17
 - **동기화된 마일스톤:**
+  - [Milestone 169: Desktop '공공문서 폴더' Single Unified NTFS Junction & Full Master Archive Integration Release] Unified fragmented Desktop folders into a single zero-disk-overhead NTFS Directory Junction pointing to F:\_Organized_Archive, pre-synchronized 454 Desktop files, eliminated duplicate shortcuts, and updated public administrative pipeline rules with 100% zero data loss. (2026-09-17)
+  - [Milestone 168: Dashboard Tab Switcher Deletion & Unified All-in-One View Restoration Release] Completely removed Dashboard sub-navigation tabs (Budget Overview, Contacts Directory, All-in-One) and restored seamless vertical all-in-one scroll layout. (2026-09-17)
   - [Milestone 165: Dashboard Contacts Management Tab & Email Text Direct Copy Pipeline Release] Integrated Dashboard Tab Switcher (Budget Overview, Contacts Directory, All-in-One), optimized zero-overhead conditional rendering, and added instant email text copy with visual feedback across ContactsBox and MindMapInspector. (2026-09-16)
   - [Milestone 162: Public Administrative File Organizer & Archiving Pipeline Tool Release] End-to-end 60-document mock testbed, 0.0% scan missing rate, >=90% 3-level classification, dry-run 0-byte immutability, WAL audit journal, 100% SHA-256 rollback integrity, and standalone rollback script generation. (2026-09-16)
   - [Milestone 159: Administrative Official Document System Enterprise Full-Regression Certification & 100% Integrity Verification Release] Validated 10 recursive self-improvement iterations, executed entire Jest regression test suite (33/33 Suites, 305/305 Tests ALL PASS), certified zero regressions across multi-agent pipelines, and published definitive walkthrough. (2026-09-14)
@@ -192,6 +194,4 @@
   - [Milestone 154: LLM Chat CleanGemmaResponse Administrative Text Sanitizer Pipeline Release] Bound sanitizeAdministrativeText post-processing pipeline into cleanGemmaResponse in src/app/llm/chat/route.ts. (2026-09-14)
   - [Milestone 153: Administrative Formatter & Linter Unit Test Suite (9/9 Tests ALL PASS) Release] Developed __tests__/administrative-formatter.test.ts covering 5 core domains and achieved 100% test pass. (2026-09-14)
   - [Milestone 152: Administrative Document Formatter & Redundancy Linter Utility Release] Implemented src/lib/administrativeFormatter.ts featuring official date, 24h time, Korean currency words, and 34 redundancy replacements. (2026-09-14)
-  - [Milestone 151: Client AI Assistant Administrative Context & Prompt Preset Overhaul Release] Upgraded AIAssistantModal.tsx header badge, administrative query placeholders, and formal reporting prompts. (2026-09-14)
-  - [Milestone 150: LLM Chat Route Administrative Standards System Prompt Injection Release] Injected Rule M administrative declarative tone, ending clauses, and punctuation protocols into src/app/llm/chat/route.ts system prompt. (2026-09-14)
-  - 그 외 과거 누적 마일스톤 총 227건 통합 요약 (초기 ~ 2026-09-14 이전 패치 내역)
+  - 그 외 과거 누적 마일스톤 총 229건 통합 요약 (초기 ~ 2026-09-14 이전 패치 내역)

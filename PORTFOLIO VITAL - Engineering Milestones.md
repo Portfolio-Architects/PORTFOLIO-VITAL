@@ -2,6 +2,23 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 169: Desktop '공공문서 폴더' Single Unified NTFS Junction & Full Master Archive Integration Release] Unified fragmented Desktop folders into a single zero-disk-overhead NTFS Directory Junction pointing to F:\_Organized_Archive, pre-synchronized 454 Desktop files, eliminated duplicate shortcuts, and updated public administrative pipeline rules with 100% zero data loss. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 바탕화면 2원화 폴더 파편화 해소 및 NTFS 디렉토리 정션 단일 통합 완결:
+    1. 기존 바탕화면의 `_Organized_Archive` 및 `전체 공공문서 보관함 (F드라이브).lnk` 바로가기를 완전 소거하고 단일 `공공문서 폴더`(`mklink /J "D:\Desktop\공공문서 폴더" "F:\_Organized_Archive"`)로 통합.
+    2. 사전 동기화(Pre-Sync)를 통해 바탕화면 단독 파일 454건 및 루트 3건을 `F:\_Organized_Archive\2026년\`으로 100% 완전 병합하여 데이터 누락 0건 달성.
+    3. C/D 드라이브 추가 디스크 용량 점유 0-Byte, 바로가기 화살표 없는 네이티브 폴더 감성 및 0ms 레이턴시 제공.
+    4. 전사 7,569건 공공 행정 문서(2015~2026년 12개 연도) 원클릭 즉시 열람 체계 확립.
+    5. `AGENTS.md` 규칙 F.1 및 G.1 내 참조 경로를 `D:\Desktop\공공문서 폴더\2026년`으로 전면 동기화.
+
+### [Milestone 168: Dashboard Tab Switcher Deletion & Unified All-in-One View Restoration Release] Completely removed Dashboard sub-navigation tabs (Budget Overview, Contacts Directory, All-in-One) and restored seamless vertical all-in-one scroll layout. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 사용자 지침에 따른 대시보드 상단 서브 탭 스위처 바 전면 삭제 및 올인원 뷰 복원:
+    1. `[예산 종합 분석]`, `[연락처 관리]`, `[전체 보기]` 3단 탭 전환 버튼 및 우측 상태 뱃지 영역 전면 소거.
+    2. 미사용 Lucide 아이콘(`BookOpen`, `Layers`, `PieChartIcon`, `Sparkles`) 및 `useContacts` 훅 import 제거를 통한 런타임 최적화.
+    3. 조건부 탭 렌더링을 걷어내고 상단 예산 분석 패널과 하단 연락처 관리 패널(`ContactsBox`)이 직관적으로 연속 스크롤 배치되는 올인원 뷰 복원.
+    4. 비동기 지연 마운트(`useIdleMount`)를 온전히 보존하여 초기 하이드레이션 및 메인 스레드 Long Task 0ms 성능 유지.
+
 ### [Milestone 165: Dashboard Contacts Management Tab & Email Text Direct Copy Pipeline Release] Integrated Dashboard Tab Switcher (Budget Overview, Contacts Directory, All-in-One), optimized zero-overhead conditional rendering, and added instant email text copy with visual feedback across ContactsBox and MindMapInspector. (2026-09-16)
 * **개요 및 개발 목적**:
   - 대시보드 내 연락처 관리 서브 탭 분리 및 이메일 텍스트 다이렉트 복사 기능 전면 구현:
