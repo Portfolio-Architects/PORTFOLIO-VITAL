@@ -629,7 +629,7 @@
     "id": "mttkw5n05zaabyvuz"
   },
   {
-    "categoryId": "mnrcir0vhyhg1xb87",
+    "categoryId": "mnrcir0voap2bpm8z",
     "amount": 1980000,
     "date": "2026-09-15",
     "purpose": "(일상경비) 중년여성 비만예방 프로그램 운영 물품(노르딕 워킹 폴) 구매비 지급",
@@ -638,5 +638,89 @@
     "actionType": "daily_expense",
     "isPlanned": false,
     "id": "mu2jspzoiwczhe0cn"
+  },
+  {
+    "categoryId": "mnrcir0vl18vfnb68",
+    "amount": 3300000,
+    "date": "2026-09-17",
+    "purpose": "서울체력장 리플릿",
+    "memo": "[시뮬레이션] 단가 ₩3,300,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mu4vbhgvugf2fdtxm",
+    "id": "mu4vbhgvktvxsqwqq"
+  },
+  {
+    "categoryId": "mnrcir0vbxmmvztoq",
+    "amount": 22000000,
+    "date": "2026-09-17",
+    "purpose": "찾아가는 AI 서울체력장 측정 장비",
+    "memo": "[시뮬레이션] 단가 ₩22,000,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mu4vccjvstgkn7wvh",
+    "id": "mu4vccjvt3vsdlepg"
+  },
+  {
+    "categoryId": "mnrcir0voap2bpm8z",
+    "amount": 8000000,
+    "date": "2026-09-17",
+    "purpose": "페스티벌 사무관리비 지출",
+    "memo": "[시뮬레이션] 단가 ₩8,000,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mu4xb2z0trfnulgat",
+    "id": "mu4xb2z0bi9ah7ova"
+  },
+  {
+    "categoryId": "mnrcir0v56b8pixdb",
+    "amount": 3232000,
+    "date": "2026-09-17",
+    "purpose": "건증실 전산 소모품 토너",
+    "memo": "[시뮬레이션] 단가 ₩3,232,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mu4yo0jez73qlrntp",
+    "id": "mu4yo0jevx9takj17"
+  },
+  {
+    "categoryId": "mnrcir0v5zjn4qxyg",
+    "amount": 28800000,
+    "date": "2026-09-17",
+    "purpose": "건운사 급여",
+    "memo": "[시뮬레이션] 단가 ₩7,200,000 × 4개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mu4yrmo4pu5k9x484",
+    "id": "mu4yrmo4hl8d0bvkr"
+  },
+  {
+    "categoryId": "mnrcir0v56b8pixdb",
+    "amount": 580000,
+    "date": "2026-09-17",
+    "purpose": "서울체력장 동계복 구매",
+    "memo": "[시뮬레이션] 단가 ₩580,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mu5a96jyhvwoixsfn",
+    "id": "mu5a96jz174njnr4b"
+  },
+  {
+    "categoryId": "mnrcir0v0vx5ae1qd",
+    "amount": 3840000,
+    "date": "2026-09-17",
+    "purpose": "헬스체크업 강사료",
+    "memo": "[시뮬레이션] 단가 ₩1,920,000 × 2개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mu5aau7ouusgerzby",
+    "id": "mu5aau7ognvzo8ucm"
   }
 ]

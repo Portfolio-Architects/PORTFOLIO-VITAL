@@ -140,6 +140,8 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
   const finalExpectedBalance = summary?.finalExpectedBalance || (currentRemaining - simulatedExpenditure);
   const isDeficit = finalExpectedBalance < 0;
   const executionRate = totalBudget > 0 ? ((currentSpent / totalBudget) * 100) : 0;
+  const remainingRate = totalBudget > 0 ? ((currentRemaining / totalBudget) * 100) : 0;
+  const finalRemainingRate = totalBudget > 0 ? ((finalExpectedBalance / totalBudget) * 100) : 0;
   const dailyExpenseIssued = summary?.dailyExpenseIssued || 0;
   const dailyExpenseSpent = summary?.dailyExpenseSpent || 0;
   const dailyExpenseRemaining = summary?.dailyExpenseRemaining || (dailyExpenseIssued - dailyExpenseSpent);
@@ -148,31 +150,31 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
     switch (actionType) {
       case 'issuance':
         return (
-          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-1">
-            <Coins size={11} className="text-amber-600" /> 일상교부
+          <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 inline-flex items-center gap-1 shadow-2xs">
+            <Coins size={13} className="text-amber-700" /> 일상교부
           </span>
         );
       case 'daily_expense':
         return (
-          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 inline-flex items-center gap-1">
-            <Coins size={11} className="text-amber-700" /> 일상지출
+          <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-950 border border-amber-300 inline-flex items-center gap-1 shadow-2xs">
+            <Coins size={13} className="text-amber-800" /> 일상지출
           </span>
         );
       case 'transfer':
         return (
-          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+          <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs">
             이용/전용
           </span>
         );
       case 'settle':
         return (
-          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
             정산결산
           </span>
         );
       default:
         return (
-          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+          <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200 shadow-2xs">
             일반지출
           </span>
         );
@@ -214,45 +216,62 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
           <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex flex-col">
             <span className="text-[11px] font-bold text-slate-500">총 예산액</span>
-            <span className="text-sm sm:text-base font-extrabold font-mono text-slate-900 mt-1">
-              ₩{formatN(totalBudget)}
+            <span className="text-sm sm:text-base font-extrabold font-mono tabular-nums text-slate-900 mt-1">
+              {formatN(totalBudget)}
+              <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
             </span>
           </div>
 
           <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-3 flex flex-col">
             <span className="text-[11px] font-bold text-indigo-700 flex items-center justify-between">
               <span>현재 실집행액</span>
-              <span className="font-mono text-[10px] font-bold text-indigo-600">{executionRate.toFixed(1)}%</span>
+              <span className="font-mono text-[10px] font-bold text-indigo-600 bg-indigo-100/70 px-1.5 py-0.2 rounded shadow-3xs">
+                집행 {executionRate.toFixed(1)}%
+              </span>
             </span>
-            <span className="text-sm sm:text-base font-extrabold font-mono text-indigo-800 mt-1">
-              ₩{formatN(currentSpent)}
+            <span className="text-sm sm:text-base font-extrabold font-mono tabular-nums text-indigo-800 mt-1">
+              {formatN(currentSpent)}
+              <span className="text-xs font-semibold text-indigo-400 ml-1">원</span>
             </span>
           </div>
 
           <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-3 flex flex-col">
-            <span className="text-[11px] font-bold text-emerald-800">현재 집행 잔액</span>
-            <span className="text-sm sm:text-base font-extrabold font-mono text-emerald-800 mt-1">
-              ₩{formatN(currentRemaining)}
+            <span className="text-[11px] font-bold text-emerald-800 flex items-center justify-between">
+              <span>현재 집행 잔액</span>
+              <span className="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded shadow-3xs">
+                미집행 {remainingRate.toFixed(1)}%
+              </span>
+            </span>
+            <span className="text-sm sm:text-base font-extrabold font-mono tabular-nums text-emerald-800 mt-1">
+              {formatN(currentRemaining)}
+              <span className="text-xs font-semibold text-emerald-500 ml-1">원</span>
             </span>
           </div>
 
           <div className="bg-purple-50/60 border border-purple-100 rounded-xl p-3 flex flex-col">
             <span className="text-[11px] font-bold text-purple-700">시뮬레이션 예정액</span>
-            <span className="text-sm sm:text-base font-extrabold font-mono text-purple-800 mt-1">
-              ₩{formatN(simulatedExpenditure)}
+            <span className="text-sm sm:text-base font-extrabold font-mono tabular-nums text-purple-800 mt-1">
+              {formatN(simulatedExpenditure)}
+              <span className="text-xs font-semibold text-purple-400 ml-1">원</span>
             </span>
           </div>
 
           <div className={`rounded-xl p-3 flex flex-col border ${
             isDeficit ? 'bg-rose-50 border-rose-200' : 'bg-slate-900 text-white border-slate-800'
           }`}>
-            <span className={`text-[11px] font-bold ${isDeficit ? 'text-rose-700' : 'text-slate-300'}`}>
-              최종 예상 잔액
+            <span className={`text-[11px] font-bold flex items-center justify-between ${isDeficit ? 'text-rose-700' : 'text-slate-300'}`}>
+              <span>최종 예상 잔액</span>
+              <span className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded shadow-3xs ${
+                isDeficit ? 'bg-rose-100 text-rose-800' : 'bg-slate-800 text-slate-200'
+              }`}>
+                {isDeficit ? `초과 ${Math.abs(finalRemainingRate).toFixed(1)}%` : `잔여 ${finalRemainingRate.toFixed(1)}%`}
+              </span>
             </span>
-            <span className={`text-sm sm:text-base font-black font-mono mt-1 ${
+            <span className={`text-sm sm:text-base font-black font-mono tabular-nums mt-1 ${
               isDeficit ? 'text-rose-700' : 'text-emerald-400'
             }`}>
-              ₩{formatN(finalExpectedBalance)}
+              {formatN(finalExpectedBalance)}
+              <span className={`text-xs font-semibold ml-1 ${isDeficit ? 'text-rose-400' : 'text-emerald-500'}`}>원</span>
             </span>
           </div>
 
@@ -261,8 +280,9 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
               <Coins size={12} className="text-amber-600" />
               <span>일상 미집행 잔액</span>
             </span>
-            <span className="text-sm sm:text-base font-extrabold font-mono text-amber-900 mt-1">
-              ₩{formatN(dailyExpenseRemaining)}
+            <span className="text-sm sm:text-base font-extrabold font-mono tabular-nums text-amber-900 mt-1">
+              {formatN(dailyExpenseRemaining)}
+              <span className="text-xs font-semibold text-amber-500 ml-1">원</span>
             </span>
           </div>
         </div>

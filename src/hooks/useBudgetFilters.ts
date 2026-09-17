@@ -4,40 +4,12 @@ import { BudgetCategory, BudgetEntry } from '@/types';
 
 function formatN(n: number) { return n.toLocaleString('ko-KR'); }
 
-export type CategoryStatus = 'OVER' | 'WARNING' | 'NORMAL';
-
-export function getCategoryStatus(usageRate: number, remaining: number): CategoryStatus {
-  if (usageRate >= 95 || remaining < 0) {
-    return 'OVER';
-  }
-  if (usageRate >= 80) {
-    return 'WARNING';
-  }
-  return 'NORMAL';
-}
-
-export const STATUS_CONFIG: Record<CategoryStatus, { label: string; badgeClass: string }> = {
-  OVER: {
-    label: '초과/위험',
-    badgeClass: 'bg-red-500/20 text-red-400 border border-red-500/30'
-  },
-  WARNING: {
-    label: '주의',
-    badgeClass: 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-  },
-  NORMAL: {
-    label: '정상',
-    badgeClass: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-  }
-};
-
 interface SavedBudgetFilters {
   policy: string[];
   unit: string[];
   detail: string[];
   stat: string[];
   month: string;
-  status: string;
 }
 
 const DEFAULT_SAVED_FILTERS: SavedBudgetFilters = {
@@ -45,8 +17,7 @@ const DEFAULT_SAVED_FILTERS: SavedBudgetFilters = {
   unit: [],
   detail: [],
   stat: [],
-  month: '전체',
-  status: '전체'
+  month: '전체'
 };
 
 let cachedFiltersJson = '';
@@ -77,8 +48,7 @@ const getFiltersSnapshot = (): SavedBudgetFilters => {
       unit: Array.isArray(parsed.unit) ? parsed.unit : [],
       detail: Array.isArray(parsed.detail) ? parsed.detail : [],
       stat: Array.isArray(parsed.stat) ? parsed.stat : [],
-      month: typeof parsed.month === 'string' ? parsed.month : '전체',
-      status: typeof parsed.status === 'string' ? parsed.status : '전체'
+      month: typeof parsed.month === 'string' ? parsed.month : '전체'
     };
     return cachedFilters;
   } catch {
@@ -101,14 +71,12 @@ export function useBudgetFilters(
   const [filterDetailState, setFilterDetailState] = useState<string[] | null>(null);
   const [filterStatState, setFilterStatState] = useState<string[] | null>(null);
   const [filterMonthState, setFilterMonthState] = useState<string | null>(null);
-  const [filterStatusState, setFilterStatusState] = useState<string | null>(null);
 
   const filterPolicy = filterPolicyState ?? savedFilters.policy;
   const filterUnit = filterUnitState ?? savedFilters.unit;
   const filterDetail = filterDetailState ?? savedFilters.detail;
   const filterStat = filterStatState ?? savedFilters.stat;
   const filterMonth = filterMonthState ?? savedFilters.month;
-  const filterStatus = filterStatusState ?? savedFilters.status;
 
   const setFilterPolicy = useCallback((val: React.SetStateAction<string[]>) => {
     setFilterPolicyState(prev => {
@@ -145,13 +113,6 @@ export function useBudgetFilters(
     });
   }, [savedFilters.month]);
 
-  const setFilterStatus = useCallback((val: React.SetStateAction<string>) => {
-    setFilterStatusState(prev => {
-      const cur = prev ?? savedFilters.status;
-      return typeof val === 'function' ? val(cur) : val;
-    });
-  }, [savedFilters.status]);
-
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
   const isLoaded = true;
@@ -169,8 +130,7 @@ export function useBudgetFilters(
       unit: filterUnit,
       detail: filterDetail,
       stat: filterStat,
-      month: filterMonth,
-      status: filterStatus
+      month: filterMonth
     }));
     alert('✅ 현재 필터링 상태가 저장되었습니다. 앞으로 페이지 접속 시 이 필터가 유지됩니다.');
   };
@@ -181,7 +141,6 @@ export function useBudgetFilters(
     setFilterDetailState([]);
     setFilterStatState([]);
     setFilterMonthState('전체');
-    setFilterStatusState('전체');
     setSearchTerm('');
     setDebouncedSearchTerm('');
     localStorage.removeItem('hchps-budget-filters-v2');
@@ -259,16 +218,6 @@ export function useBudgetFilters(
       const dMatch = !hasDetail || detailSet.has(c.detailedProject || '');
       const sMatch = !hasStat || statSet.has(c.statItem || '');
 
-      // Status filter check
-      let statusMatch = true;
-      if (filterStatus && filterStatus !== '전체') {
-        const catStats = getCategoryStats(c.id);
-        const status = catStats ? getCategoryStatus(catStats.usageRate, catStats.remaining) : 'NORMAL';
-        if (filterStatus === '초과') statusMatch = (status === 'OVER');
-        else if (filterStatus === '주의') statusMatch = (status === 'WARNING');
-        else if (filterStatus === '정상') statusMatch = (status === 'NORMAL');
-      }
-
       // Month filter check: O(1) pre-indexed set lookup
       const monthMatch = categoryIdsMatchingMonth ? categoryIdsMatchingMonth.has(c.id) : true;
 
@@ -317,7 +266,7 @@ export function useBudgetFilters(
         statSums[c.statItem] = (statSums[c.statItem] || 0) + c.totalBudget;
       }
 
-      if (pMatch && uMatch && dMatch && sMatch && statusMatch && monthMatch && searchMatch) {
+      if (pMatch && uMatch && dMatch && sMatch && monthMatch && searchMatch) {
         tree.push(c);
       }
     }
@@ -360,7 +309,7 @@ export function useBudgetFilters(
       statOptions,
       filteredCategoriesTree: tree
     };
-  }, [categories, policySet, unitSet, detailSet, statSet, filterStatus, searchKeyword, matchingCategoryIdsFromEntries, categoryIdsMatchingMonth, getCategoryStats]);
+  }, [categories, policySet, unitSet, detailSet, statSet, searchKeyword, matchingCategoryIdsFromEntries, categoryIdsMatchingMonth, getCategoryStats]);
 
   const groupedByPolicy = useMemo(() => {
     const groupsMap: Record<string, BudgetCategory[]> = {};
@@ -410,7 +359,6 @@ export function useBudgetFilters(
     filterDetail, setFilterDetail,
     filterStat, setFilterStat,
     filterMonth, setFilterMonth,
-    filterStatus, setFilterStatus,
     searchTerm, setSearchTerm,
     deferredSearchTerm: debouncedSearchTerm,
     isLoaded,

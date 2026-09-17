@@ -51,17 +51,22 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
     }
 
     const currentExecutionRate = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+    const currentRemainingRate = totalBudget > 0 ? (totalRemaining / totalBudget) * 100 : 0;
     const projectedExecutionRate =
       totalBudget > 0 ? ((totalSpent + simulatedExpenditure) / totalBudget) * 100 : 0;
+    const projectedRemainingRate =
+      totalBudget > 0 ? (finalExpectedBalance / totalBudget) * 100 : 0;
 
     return {
       totalBudget,
       totalSpent,
       totalRemaining,
       currentExecutionRate,
+      currentRemainingRate,
       simulatedExpenditure,
       finalExpectedBalance,
       projectedExecutionRate,
+      projectedRemainingRate,
       deficitCount,
       requiredBalance,
       totalDailyIssued,
@@ -81,10 +86,14 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-            ₩{metrics.totalBudget.toLocaleString('ko-KR')}
+          <div className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums tracking-tight">
+            {metrics.totalBudget.toLocaleString('ko-KR')}
+            <span className="text-sm font-semibold text-slate-400 ml-1">원</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 font-medium">전체 세부사업 총 편성 예산</p>
+          <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500 font-medium">
+            <span>집행 {metrics.currentExecutionRate.toFixed(1)}%</span>
+            <span>미집행 {metrics.currentRemainingRate.toFixed(1)}%</span>
+          </div>
         </div>
       </div>
 
@@ -98,13 +107,14 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
         </div>
         <div className="mt-3">
           <div className="flex items-baseline justify-between gap-1">
-            <span className="text-xl sm:text-2xl font-extrabold text-indigo-700 font-mono tracking-tight">
-              ₩{metrics.totalSpent.toLocaleString('ko-KR')}
+            <span className="text-xl sm:text-2xl font-extrabold text-indigo-700 font-mono tabular-nums tracking-tight">
+              {metrics.totalSpent.toLocaleString('ko-KR')}
+              <span className="text-sm font-semibold text-indigo-400 ml-1">원</span>
             </span>
           </div>
           {metrics.totalDailyIssued > 0 && (
-            <div className="text-[10px] text-amber-700 font-normal font-sans tracking-tight mt-0.5">
-              (교부 ₩{metrics.totalDailyIssued.toLocaleString('ko-KR')})
+            <div className="text-[10px] text-amber-700 font-medium font-sans tracking-tight mt-0.5">
+              (교부 {metrics.totalDailyIssued.toLocaleString('ko-KR')}원)
             </div>
           )}
           <div className="flex items-center justify-between mt-1">
@@ -131,19 +141,26 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-xl sm:text-2xl font-extrabold text-emerald-600 font-mono tracking-tight">
-            ₩{metrics.totalRemaining.toLocaleString('ko-KR')}
+          <div className="text-xl sm:text-2xl font-extrabold text-emerald-600 font-mono tabular-nums tracking-tight">
+            {metrics.totalRemaining.toLocaleString('ko-KR')}
+            <span className="text-sm font-semibold text-emerald-400 ml-1">원</span>
           </div>
           {metrics.totalDailyRemaining > 0 ? (
             <div className="mt-1 text-[11px] font-sans font-medium text-amber-700 flex items-center justify-between flex-wrap gap-1">
-              <span>+ 일상 미집행 ₩{metrics.totalDailyRemaining.toLocaleString('ko-KR')}</span>
+              <span>+ 일상 미집행 {metrics.totalDailyRemaining.toLocaleString('ko-KR')}원</span>
               <span className="text-emerald-700 font-bold" title="교부 잔액 포함 실질 가용 총액">
-                (실가용 ₩{(metrics.totalRemaining + metrics.totalDailyRemaining).toLocaleString('ko-KR')})
+                (실가용 {(metrics.totalRemaining + metrics.totalDailyRemaining).toLocaleString('ko-KR')}원)
               </span>
             </div>
           ) : (
             <p className="text-[11px] text-slate-400 mt-1 font-medium">지출 예정액 차감 전 순잔액</p>
           )}
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-[11px] text-slate-400 font-medium">현재 미집행률</span>
+            <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full border bg-emerald-50 border-emerald-200 text-emerald-700 shadow-3xs">
+              {metrics.currentRemainingRate.toFixed(1)}%
+            </span>
+          </div>
         </div>
       </div>
 
@@ -156,8 +173,9 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-xl sm:text-2xl font-extrabold text-purple-700 font-mono tracking-tight">
-            ₩{metrics.simulatedExpenditure.toLocaleString('ko-KR')}
+          <div className="text-xl sm:text-2xl font-extrabold text-purple-700 font-mono tabular-nums tracking-tight">
+            {metrics.simulatedExpenditure.toLocaleString('ko-KR')}
+            <span className="text-sm font-semibold text-purple-400 ml-1">원</span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1 font-medium">확정 지출 예정 항목 합계</p>
         </div>
@@ -189,15 +207,18 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
         </div>
         <div className="mt-3">
           <div
-            className={`text-xl sm:text-2xl font-extrabold font-mono tracking-tight ${
+            className={`text-xl sm:text-2xl font-extrabold font-mono tabular-nums tracking-tight ${
               metrics.finalExpectedBalance < 0 ? 'text-rose-600' : 'text-emerald-600'
             }`}
           >
-            ₩{metrics.finalExpectedBalance.toLocaleString('ko-KR')}
+            {metrics.finalExpectedBalance.toLocaleString('ko-KR')}
+            <span className={`text-sm font-semibold ml-1 ${
+              metrics.finalExpectedBalance < 0 ? 'text-rose-400' : 'text-emerald-400'
+            }`}>원</span>
           </div>
           {metrics.totalDailyRemaining > 0 && (
-            <div className="text-[10px] text-slate-500 font-normal font-sans tracking-tight mt-0.5">
-              (일상 포함 ₩{(metrics.finalExpectedBalance + metrics.totalDailyRemaining).toLocaleString('ko-KR')})
+            <div className="text-[10px] text-slate-500 font-medium font-sans tracking-tight mt-0.5">
+              (일상 포함 {(metrics.finalExpectedBalance + metrics.totalDailyRemaining).toLocaleString('ko-KR')}원)
             </div>
           )}
           <div className="flex items-center justify-between mt-1">
@@ -212,6 +233,20 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
               }`}
             >
               {metrics.projectedExecutionRate.toFixed(1)}%
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-[11px] text-slate-400 font-medium">예상 최종 미집행률</span>
+            <span
+              className={`text-xs font-bold font-mono px-2 py-0.5 rounded-full border shadow-3xs ${
+                metrics.projectedRemainingRate < 0
+                  ? 'bg-rose-100 border-rose-300 text-rose-700'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              }`}
+            >
+              {metrics.projectedRemainingRate < 0
+                ? `초과 ${Math.abs(metrics.projectedRemainingRate).toFixed(1)}%`
+                : `${metrics.projectedRemainingRate.toFixed(1)}%`}
             </span>
           </div>
         </div>
@@ -245,7 +280,7 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
                 <span className="text-xs font-semibold text-rose-700">사업 초과</span>
               </div>
               <p className="text-xs text-rose-700/90 mt-1 font-mono font-bold">
-                추가 필요: ₩{metrics.requiredBalance.toLocaleString('ko-KR')}
+                추가 필요: {metrics.requiredBalance.toLocaleString('ko-KR')}원
               </p>
             </>
           ) : (

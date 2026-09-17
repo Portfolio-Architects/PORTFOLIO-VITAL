@@ -2,6 +2,62 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 178: Budget Burn-down Guide Badges Full Purge & Pure Public Ledger Interface Restoration Release] Completely eliminated all '소진가이드: 월 OOO원' micro-chips and burn-down pace hint bars across BudgetCategoryCardItem and PolicyGroupCard per user direct instruction ("소진 가이드 기능도 삭제해줘"), leaving only pristine, authoritative public budget metrics (Total Budget, Spent, Execution %, Unexecuted %, and Remaining Balance). (2026-09-17)
+* **개요 및 개발 목적**:
+  - 사용자 지침("소진 가이드 기능도 삭제해줘") 및 첨부 화면에 따라:
+    1. 통계목 카드 요약 알약 및 확장 뷰 내 '소진가이드: 월 OOO원' 뱃지와 '연말 100% 소진 목표 가이드' 바 완전 삭제 (`BudgetCategoryCardItem.tsx`).
+    2. 세부사업 행 및 정책사업 헤더 내 '소진가이드: 월 OOO원' 및 '연말 100% 소진 페이스' 텍스트 완전 소거 (`PolicyGroupCard.tsx`).
+    3. 복잡한 추산 가이드를 일체 걷어내고 순수한 공공 예산 핵심 수치(예산 총액, 사용액, 잔여액, 집행률, 미집행률) 중심의 명료한 장부 인터페이스 완성.
+    4. TypeScript 컴파일 0 errors 및 ESLint 0 errors 완벽 검증 완료.
+
+### [Milestone 177: Budget Burn-Down Calculator Widget Deletion & Direct Dashboard View Simplification Release] Completely removed the Fiscal Year-End Burn-down Calculator panel widget from BudgetDashboard per user direct instruction ("이 탭 삭제해줘"), restoring a clean, clutter-free dashboard view while preserving dual-track data consistency and paired execution/unexecution rate visualization. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 사용자 지침("이 탭 삭제해줘") 및 첨부 화면에 따라 예산 대시보드 상단에 배치되었던 대형 '회계연도 마감 소진 목표 계산기' 패널 위젯을 즉시 완전 삭제함.
+  - 대시보드의 시각적 과밀을 해소하고, 4대 총괄 요약 카드 및 정책·세부사업 목록으로 곧바로 이어지는 직관적인 뷰를 복원함.
+  - 본청 e-호조 vs 보건소 실질 가용 데이터 정합성과 집행률·미집행률 대등 표기 체계는 완벽히 유지함.
+
+### [Milestone 176: Fiscal Year-End Target Spend & Burn-down Pace Engine & Dual-Track Budget Reconciliation Release] Established mathematical dual-track budget data consistency (e-Hojo vs. Actual Health Center Cash), created BudgetBurnDownCalculator & useBudgetBurnDown hook for real-time target burn rate forecasting (monthly/weekly/daily burn paces toward 100%, 98%, 95% execution targets), and reinforced paired execution/unexecution rate visualization across all categories and policy groups. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 사용자 지침("나한테 가장 중요한것은 데이터 정합성과 집행률 미집행률 표시해서, 앞으로 남은기간동안 얼마를 더 써야하나를 계산하는게 가장 중요해")에 따라:
+    1. 본청 e-호조 기준(집행률 56.6%)과 보건소 통장 실질 현금 기준(실질 집행률 54.0%, 가용 미집행률 14.8%)의 수학적 정합성을 1원의 오차 없이 완전 투명화함.
+    2. 회계연도 말(12.31)까지 남은 기간(D-105일, 3.5개월, 15주, 73영업일) 동안 목표 집행률(100% 완전 소진, 98% 우수, 95% 권고)을 달성하기 위해 **월평균/주평균/일평균 얼마를 더 소진해야 하는지 실시간으로 정밀 연산하는 `BudgetBurnDownCalculator` 위젯 및 `useBudgetBurnDown` 훅 신설**.
+    3. 순수 추가 품의 기준(미계획 잔여 5,753만 원 대상 월 1,643만 원)과 실질 통장 현금 지출 기준(통장 잔액 + 기 품의 총 1.78억 원 대상 월 5,104만 원) 2대 현실적 시나리오 전환 제공.
+    4. 대시보드 요약 카드, 정책사업/단위사업 카드 헤더, 세부사업 행, 개별 통계목 카드 전반에 `집행 OO.O%` | `미집행 OO.O%` 듀얼 뱃지 및 **"소진가이드: 월 OOO원"** 인포 칩 상시 표기 완료.
+
+### [Milestone 175: Budget Management Normal/Abnormal Classification Feature Deletion & UI Clutter Cleanup Release] Removed arbitrary status classification badges (정상, 초과/위험, 주의) across BudgetCategoryCardItem and PolicyGroupCard, and purged the status filter selector and underlying filtering logic from BudgetDashboard and useBudgetFilters, establishing a clean, streamlined budget overview without false danger alarms. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 사용자 지침("예산관리탭.. 기능이 점점 많아지니까 보기가 너무 힘들다.. 흠.. 일단 정상 비정상 구분하는 기능은 삭제하자")에 따라 예산 관리 탭 내 불필요한 시각적 피로도와 노이즈를 유발하던 '정상/비정상' 임의 판정 및 상태별 필터링 기능을 전면 삭제함.
+  - 공공 행정 예산 실무에서 계획대로 100% 정상 집행된 항목(예: 시책추진업무추진비, 의료 및 회복비)에 '초과/위험'이라는 부적절한 경고 배지가 부착되던 구조적 모순을 해소함.
+* **핵심 변경 내역**:
+  1. **통계목 행 상태 배지 전면 소거 (`BudgetCategoryCardItem.tsx`)**:
+     - 카테고리명 우측에 부착되어 있던 `[ 정상 ]`, `[ 초과/위험 ]`, `[ 주의 ]` 마이크로 배지 렌더링 및 미사용 `catStatus`, `statusCfg` 상태 계산 로직 완전 제거.
+  2. **정책사업 헤더 상태 배지 전면 소거 (`PolicyGroupCard.tsx`)**:
+     - 정책사업명 우측의 `groupStatusCfg` 상태 배지 및 `groupStatus` 계산 로직 완전 소거.
+  3. **다중 필터 툴바 '상태별' 셀렉터 제거 (`BudgetDashboard.tsx`)**:
+     - 필터 컨트롤 행의 `상태별: 전체 / 🚨 초과/위험 (95%↑) / ⚠️ 주의 (80%↑) / ✅ 정상 (<80%)` 드롭다운 UI 완전 제거.
+  4. **필터링 훅 및 스토리지 정합성 간소화 (`useBudgetFilters.ts`)**:
+     - `getCategoryStatus`, `STATUS_CONFIG`, `CategoryStatus` 타입 및 `filterStatus` 상태·핸들러·`statusMatch` 루프 판정 로직 완전 소거로 런타임 오버헤드 경감.
+
+### [Milestone 174: Expense Category Re-Mapping & 2-Tier Detailed Project/Stat-Item Visualization Release] Rectified data category mapping for 2026-09-15 daily expense from Event Operation to Office Administration, and overhauled PolicyGroupCard expense history to display 2-tier Detailed Project and Stat Item with tooltip navigation. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 2026.09.15 지출건(`mu2jspzoiwczhe0cn`, 1,980,000원)의 카테고리 오매핑을 행사운영비에서 사무관리비(`mnrcir0voap2bpm8z`)로 정상화 교정.
+  - 지출내역 목록에서 혼란을 주던 단위사업 단독 출력을 1행 세부사업명, 2행 통계목명 2단 수직 정보 구조로 개편.
+
+### [Milestone 173: Ultra-Small Font Elimination & High-Contrast Micro-Chip Typography Overhaul Release] Eliminated all 10-11px ultra-small fonts across SimulationResultTable and modals, elevating numeric legibility and converting secondary metrics into high-contrast micro-chips. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 화면 내 10~11px 초소형 텍스트 전면 박멸 및 주요 금액 폰트 15px~16px 확대.
+  - 교부, 일상 미집행, 실가용, 일상 포함 보조 텍스트를 독립형 고대비 마이크로 칩 컨테이너로 표준화.
+
+### [Milestone 172: High-Precision Matrix Grid Alignment & Numeric Typography Overhaul Release] Established 2-tier vertical stack matrix alignment across SimulationResultTable, removed cluttered currency glyphs, and enforced tabular-nums coordinate alignment. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 금액과 % 뱃지가 수평 인라인으로 엉키던 레이아웃을 1행 금액, 2행 % 뱃지, 3행 교부/일상경비의 2단/3단 수직 스택 셀로 전면 개편.
+  - `tabular-nums` 및 분리형 통화 단위 라벨 적용으로 상하 열(Column) 0.1px 수학적 칼정렬 달성.
+
+### [Milestone 171: Budget Simulation Result Table 1-Line Typography & Zero-Wrap Formatting Release] Expanded column min-widths across table headers, reinforced whitespace-nowrap and shrink-0 constraints on all numeric cells and micro-chips, eliminating awkward 2-line wraps and establishing paired execution/unexecution rate visualization. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 예산 시뮬레이션 결과 테이블 내 마이크로 칩 및 텍스트의 2줄 꺾임 현상 방지를 위해 컬럼 최소 너비 확장 및 `whitespace-nowrap`, `shrink-0` 전면 부여.
+  - 예산관리 및 시뮬레이터 전반에 집행률과 미집행률 대등 시각화 인프라 정립.
+
 ### [Milestone 170: Desktop File Preservation & Explicit-Instruction-Only Archiving Policy Release] Established strict behavioral rule prohibiting arbitrary archiving of desktop surface files, ensuring working surface immunity and requiring explicit user command before any file migration. (2026-09-17)
 * **개요 및 개발 목적**:
   - 바탕화면 파일 임의 이동·아카이빙 전면 금지 및 사용자 직접 지시 한정 수동 이관 원칙 확립:

@@ -6,7 +6,6 @@ import { CategoryStats } from '@/hooks/useBudget';
 import { ChevronDown, Pencil, Trash2, ArrowUp, ArrowDown, FileCheck } from 'lucide-react';
 import { InlineEditCell } from './InlineEditCell';
 import { useDocumentVisibility } from '@/hooks/useDocumentVisibility';
-import { getCategoryStatus, STATUS_CONFIG } from '@/hooks/useBudgetFilters';
 
 function formatN(n: number) { return n.toLocaleString('ko-KR'); }
 
@@ -128,12 +127,6 @@ const BudgetCategoryCardItemComponent = ({
   const [activeCellId, setActiveCellId] = useState<string | null>(null);
   const isVisible = useDocumentVisibility();
 
-  const catStatus = useMemo(() => {
-    return stats ? getCategoryStatus(stats.usageRate, stats.remaining) : 'NORMAL';
-  }, [stats]);
-
-  const statusCfg = STATUS_CONFIG[catStatus];
-
   const { cellIdList, cellIdIndexMap } = useMemo(() => {
     const list: string[] = [`${cat.id}:statItem`, `${cat.id}:totalBudget`];
     if (cat.subItems) {
@@ -237,9 +230,16 @@ const BudgetCategoryCardItemComponent = ({
               className="font-bold text-gray-800 hover:text-[var(--color-primary)]"
             />
             {cat.managementProject && <span className="text-gray-600 font-bold">({cat.managementProject})</span>}
-            
-            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg flex-shrink-0 border shadow-3xs ${statusCfg.badgeClass}`}>
-              {statusCfg.label}
+
+            {/* Compact summary pill: total budget, execution rate, remaining rate, remaining won */}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100/90 border border-slate-200 text-slate-700 text-xs font-mono font-medium shadow-3xs flex-wrap" title="예산 총액 / 집행률 / 미집행률 / 잔여액">
+              <span>예산 {formatN(cat.totalBudget)}원</span>
+              <span className="text-slate-300 font-normal">|</span>
+              <span className="font-bold text-indigo-700">집행 {(stats.usageRate || 0).toFixed(1)}%</span>
+              <span className="text-slate-300 font-normal">|</span>
+              <span className="font-bold text-emerald-700">미집행 {(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%</span>
+              <span className="text-slate-300 font-normal">|</span>
+              <span className="font-bold text-slate-900">잔여 {formatN(stats.remaining)}원</span>
             </span>
 
             <div className={`text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
@@ -271,9 +271,14 @@ const BudgetCategoryCardItemComponent = ({
 
       {isExpanded && (
         <div className="mt-3 space-y-3 pt-3 border-t border-slate-100">
-          <div className="flex items-center justify-between bg-slate-50/70 rounded-xl p-3 mb-3 border border-slate-100">
+          <div className="flex items-center justify-between bg-slate-50/70 rounded-xl p-3 mb-3 border border-slate-100 flex-wrap gap-2">
             <div className="flex flex-col">
-              <span className="text-gray-500 font-bold mb-1 text-[13px]">사용 (집행+품의)</span>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-gray-500 font-bold text-[13px]">사용 (집행+품의)</span>
+                <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-3xs" title="통계목 집행률">
+                  집행 {(stats.usageRate || 0).toFixed(1)}%
+                </span>
+              </div>
               <span className="text-gray-800 font-semibold tracking-tight text-base font-mono tabular-nums">
                 {formatN(stats.spent + stats.planned)} <span className="text-gray-400 font-medium mx-0.5">/</span>{' '}
                 <InlineEditCell
@@ -294,7 +299,12 @@ const BudgetCategoryCardItemComponent = ({
               </span>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-gray-500 font-bold mb-1 text-[13px]">잔여금액</span>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-3xs" title="통계목 미집행률(잔여율)">
+                  미집행 {(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%
+                </span>
+                <span className="text-gray-500 font-bold text-[13px]">잔여금액</span>
+              </div>
               <span className={`font-bold tracking-tight text-[17px] font-mono tabular-nums ${stats.remaining < 0 ? 'text-red-500 font-extrabold' : 'text-blue-600'}`}>
                 {formatN(stats.remaining)}원
               </span>
@@ -302,13 +312,17 @@ const BudgetCategoryCardItemComponent = ({
           </div>
 
           <div className="flex items-center gap-3 px-1 mb-3">
-            <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden flex shadow-inner border border-slate-200/30 relative">
+            <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden flex shadow-inner border border-slate-200/30 relative" title={`집행률: ${(stats.usageRate || 0).toFixed(1)}% | 미집행률: ${(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%`}>
               <div 
-                className={`h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden ${(stats.usageRate || 0) >= 95 ? 'bg-gradient-to-r from-red-500 to-rose-500' : (stats.usageRate || 0) >= 80 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'}`} 
+                className={`h-full transition-all duration-500 ease-out relative overflow-hidden ${(stats.usageRate || 0) >= 95 ? 'bg-gradient-to-r from-red-500 to-rose-500' : (stats.usageRate || 0) >= 80 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'}`} 
                 style={{ width: `${Math.min(100, stats.usageRate || 0)}%` }} 
               >
                 <div className={`absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent ${isVisible ? 'animate-shimmer' : ''}`} style={{ backgroundSize: '200% 100%' }} />
               </div>
+              <div 
+                className="h-full bg-emerald-400/80 transition-all duration-500" 
+                style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, stats.usageRate || 0), cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0))}%` }} 
+              />
             </div>
             <span className="text-[12.5px] font-semibold text-slate-600 w-12 text-right tracking-tight font-mono tabular-nums">{(stats.usageRate || 0).toFixed(1)}%</span>
           </div>

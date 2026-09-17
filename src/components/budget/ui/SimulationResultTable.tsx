@@ -20,7 +20,6 @@ import {
   Trash2,
   Coins,
   Receipt,
-  ExternalLink,
 } from 'lucide-react';
 import { SimulationEntryList } from './SimulationEntryList';
 import { StatItemDetailModal } from './StatItemDetailModal';
@@ -536,18 +535,18 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
         <div className="overflow-x-auto custom-scrollbar rounded-xl border border-slate-200 bg-white shadow-xs">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold tracking-wider text-xs">
-                <th className="py-3 px-4 min-w-[250px]">
+              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold tracking-wider text-xs whitespace-nowrap">
+                <th className="py-3 px-4 min-w-[260px] whitespace-nowrap">
                   {viewMode === 'project' ? '세부사업명' : '세부사업 / 통계목 / 등록 세부 항목'}
                 </th>
-                <th className="py-3 px-4 text-right min-w-[130px]">총 예산액</th>
-                <th className="py-3 px-4 text-right min-w-[130px]">현재 집행액</th>
-                <th className="py-3 px-4 text-right min-w-[130px]">현재 집행 잔액</th>
-                <th className="py-3 px-4 text-right min-w-[140px] text-purple-700">
+                <th className="py-3 px-4 text-right min-w-[140px] whitespace-nowrap">총 예산액</th>
+                <th className="py-3 px-4 text-right min-w-[170px] whitespace-nowrap">현재 집행액 (집행률)</th>
+                <th className="py-3 px-4 text-right min-w-[190px] whitespace-nowrap">현재 집행 잔액 (미집행률)</th>
+                <th className="py-3 px-4 text-right min-w-[145px] text-purple-700 whitespace-nowrap">
                   시뮬레이션 예정액
                 </th>
-                <th className="py-3 px-4 text-right min-w-[150px] font-extrabold text-slate-900">최종 예상 잔액</th>
-                <th className="py-3 px-4 text-center min-w-[110px]">상태 경고 / 관리</th>
+                <th className="py-3 px-4 text-right min-w-[190px] font-extrabold text-slate-900 whitespace-nowrap">최종 예상 잔액 (잔여율)</th>
+                <th className="py-3 px-4 text-center min-w-[110px] whitespace-nowrap">상태 경고 / 관리</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-mono text-sm">
@@ -584,53 +583,99 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                             )}
                             {group.dailyExpenseIssued > 0 && (
                               <span
-                                className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-sans flex items-center gap-1"
-                                title={`일상경비 교부액: ₩${group.dailyExpenseIssued.toLocaleString('ko-KR')} / 실집행액: ₩${group.dailyExpenseSpent.toLocaleString('ko-KR')}`}
+                                className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-sans flex items-center gap-1 whitespace-nowrap shrink-0"
+                                title={`일상경비 교부액: ${group.dailyExpenseIssued.toLocaleString('ko-KR')}원 / 실집행액: ${group.dailyExpenseSpent.toLocaleString('ko-KR')}원`}
                               >
-                                <Coins className="w-3 h-3 text-amber-600" />
-                                <span>일상 미집행 ₩{group.dailyExpenseRemaining.toLocaleString('ko-KR')}</span>
+                                <Coins className="w-3 h-3 text-amber-600 shrink-0" />
+                                <span className="whitespace-nowrap shrink-0">일상 미집행 {group.dailyExpenseRemaining.toLocaleString('ko-KR')}원</span>
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-right text-slate-800 font-bold text-base">
-                          ₩{group.totalBudget.toLocaleString('ko-KR')}
+                        <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                          <div className="font-mono font-bold text-base tracking-tight tabular-nums text-slate-800">
+                            {group.totalBudget.toLocaleString('ko-KR')}
+                            <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-right text-indigo-700 font-bold text-base">
-                          <div>₩{group.currentSpent.toLocaleString('ko-KR')}</div>
+                        <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                          <div className="font-mono font-bold text-base tracking-tight tabular-nums text-indigo-700">
+                            {group.currentSpent.toLocaleString('ko-KR')}
+                            <span className="text-xs font-semibold text-indigo-400 ml-1">원</span>
+                          </div>
+                          <div className="mt-1 flex justify-end">
+                            <span className="text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-2xs whitespace-nowrap" title="현재 집행률">
+                              집행 {group.totalBudget > 0 ? ((group.currentSpent / group.totalBudget) * 100).toFixed(1) : '0.0'}%
+                            </span>
+                          </div>
                           {group.dailyExpenseIssued > 0 && (
-                            <div className="text-[10px] text-amber-700 font-normal font-sans tracking-tight">
-                              (교부 ₩{group.dailyExpenseIssued.toLocaleString('ko-KR')})
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-right text-emerald-700 font-bold text-base">
-                          <div>₩{group.currentRemaining.toLocaleString('ko-KR')}</div>
-                          {group.dailyExpenseRemaining > 0 && (
-                            <div className="text-[10px] text-amber-700 font-medium font-sans tracking-tight" title="교부 잔액 포함 실질 가용액">
-                              + 일상 미집행 ₩{group.dailyExpenseRemaining.toLocaleString('ko-KR')}
-                              <span className="text-emerald-700 font-bold ml-1">
-                                (실가용 ₩{(group.currentRemaining + group.dailyExpenseRemaining).toLocaleString('ko-KR')})
+                            <div className="mt-1.5 flex justify-end">
+                              <span className="text-xs font-bold text-amber-950 bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                                <span className="text-xs font-bold font-sans text-amber-800 shrink-0 whitespace-nowrap">교부</span>
+                                <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{group.dailyExpenseIssued.toLocaleString('ko-KR')}원</span>
                               </span>
                             </div>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-right text-purple-700 font-extrabold text-base">
-                          ₩{group.simulatedExpenditure.toLocaleString('ko-KR')}
-                        </td>
-                        <td
-                          className={`py-3 px-4 text-right font-extrabold text-base ${
-                            group.isDeficit ? 'text-rose-600' : 'text-emerald-600'
-                          }`}
-                        >
-                          <div>₩{group.finalExpectedBalance.toLocaleString('ko-KR')}</div>
+                        <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                          <div className="font-mono font-bold text-base tracking-tight tabular-nums text-emerald-700">
+                            {group.currentRemaining.toLocaleString('ko-KR')}
+                            <span className="text-xs font-semibold text-emerald-500 ml-1">원</span>
+                          </div>
+                          <div className="mt-1 flex justify-end">
+                            <span className="text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs whitespace-nowrap" title="현재 미집행률(잔여율)">
+                              미집행 {group.totalBudget > 0 ? ((group.currentRemaining / group.totalBudget) * 100).toFixed(1) : '0.0'}%
+                            </span>
+                          </div>
                           {group.dailyExpenseRemaining > 0 && (
-                            <div className="text-[10px] text-slate-500 font-normal font-sans tracking-tight">
-                              (일상 포함 ₩{(group.finalExpectedBalance + group.dailyExpenseRemaining).toLocaleString('ko-KR')})
+                            <div className="mt-1.5 flex flex-col items-end gap-1">
+                              <span className="text-xs font-bold text-amber-950 bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                                <span className="text-xs font-bold font-sans text-amber-800 shrink-0 whitespace-nowrap">일상 미집행</span>
+                                <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{group.dailyExpenseRemaining.toLocaleString('ko-KR')}원</span>
+                              </span>
+                              <span className="text-xs font-black text-emerald-950 bg-emerald-100 border border-emerald-400 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0" title="교부 잔액 포함 실질 가용 총액">
+                                <span className="text-xs font-bold font-sans text-emerald-800 shrink-0 whitespace-nowrap">실가용</span>
+                                <span className="font-mono text-[13px] font-black text-emerald-950 shrink-0 whitespace-nowrap">{(group.currentRemaining + group.dailyExpenseRemaining).toLocaleString('ko-KR')}원</span>
+                              </span>
                             </div>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-center font-sans">
+                        <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                          <div className={`font-mono font-extrabold text-base tracking-tight tabular-nums ${
+                            group.simulatedExpenditure > 0 ? 'text-purple-700' : 'text-slate-400 font-normal'
+                          }`}>
+                            {group.simulatedExpenditure.toLocaleString('ko-KR')}
+                            <span className={`text-xs ml-1 ${group.simulatedExpenditure > 0 ? 'text-purple-400 font-semibold' : 'text-slate-400'}`}>원</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                          <div className={`font-mono font-extrabold text-base tracking-tight tabular-nums ${
+                            group.isDeficit ? 'text-rose-600' : 'text-emerald-600'
+                          }`}>
+                            {group.finalExpectedBalance.toLocaleString('ko-KR')}
+                            <span className={`text-xs ml-1 font-semibold ${group.isDeficit ? 'text-rose-400' : 'text-emerald-400'}`}>원</span>
+                          </div>
+                          <div className="mt-1 flex justify-end">
+                            <span className={`text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md border shadow-2xs whitespace-nowrap ${
+                              group.isDeficit 
+                                ? 'bg-rose-100 text-rose-900 border-rose-300' 
+                                : 'bg-slate-100 text-slate-800 border-slate-300'
+                            }`} title={group.isDeficit ? '초과 집행률' : '최종 예상 잔여율'}>
+                              {group.isDeficit
+                                ? `초과 ${group.totalBudget > 0 ? (Math.abs(group.finalExpectedBalance) / group.totalBudget * 100).toFixed(1) : 0}%`
+                                : `잔여 ${group.totalBudget > 0 ? ((group.finalExpectedBalance / group.totalBudget) * 100).toFixed(1) : 0}%`}
+                            </span>
+                          </div>
+                          {group.dailyExpenseRemaining > 0 && (
+                            <div className="mt-1.5 flex justify-end">
+                              <span className="text-xs font-bold text-slate-800 bg-slate-200/90 border border-slate-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                                <span className="text-xs font-bold font-sans text-slate-600 shrink-0 whitespace-nowrap">일상 포함</span>
+                                <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(group.finalExpectedBalance + group.dailyExpenseRemaining).toLocaleString('ko-KR')}원</span>
+                              </span>
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-center font-sans align-middle">
                           {group.isDeficit ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 border border-rose-300 text-rose-700 text-xs font-bold animate-pulse">
                               <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
@@ -688,92 +733,136 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                                       <button
                                         type="button"
                                         onClick={() => setSelectedStatForModal({ detailedProject: s.detailedProject, statItem: s.statItem })}
-                                        className="font-bold text-slate-900 text-sm hover:text-indigo-600 hover:underline flex items-center gap-1.5 transition-colors cursor-pointer group text-left"
+                                        className="font-extrabold text-slate-950 text-[15px] sm:text-base hover:text-indigo-600 hover:underline flex items-center gap-1.5 transition-colors cursor-pointer group text-left"
                                         title="클릭하여 세부 지출내역(e-호조 원장 및 산출기초) 조회"
                                       >
                                         <span className="group-hover:text-indigo-600 transition-colors">{s.statItem}</span>
-                                        <Receipt className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 transition-colors opacity-70 group-hover:opacity-100 shrink-0" />
+                                        <Receipt className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors opacity-70 group-hover:opacity-100 shrink-0" />
                                       </button>
-                                      {(s.dailyExpenseIssued || 0) > 0 && (
-                                        <span
-                                          className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono inline-flex items-center gap-1 shadow-3xs"
-                                          title={`일상경비 교부: ₩${(s.dailyExpenseIssued || 0).toLocaleString('ko-KR')}, 실집행: ₩${(s.dailyExpenseSpent || 0).toLocaleString('ko-KR')}, 미집행 잔액: ₩${(s.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}`}
+                                        {(s.dailyExpenseIssued || 0) > 0 && (
+                                          <span
+                                            className="text-xs font-bold px-3 py-1 rounded-lg bg-amber-100/90 border border-amber-300 text-amber-950 inline-flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0"
+                                            title={`일상경비 교부: ${(s.dailyExpenseIssued || 0).toLocaleString('ko-KR')}원, 실집행: ${(s.dailyExpenseSpent || 0).toLocaleString('ko-KR')}원, 미집행 잔액: ${(s.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}원`}
+                                          >
+                                            <Coins className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                                            <span className="whitespace-nowrap shrink-0">일상 미집행 <strong className="font-mono text-[13px] font-black text-amber-950">{(s.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}</strong>원</span>
+                                            <span className="text-amber-800 font-semibold whitespace-nowrap shrink-0">(교부 <strong className="font-mono text-[13px] font-bold text-amber-900">{(s.dailyExpenseIssued || 0).toLocaleString('ko-KR')}</strong>원)</span>
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {/* Interactive Badge to Toggle Level 3 Registered Items */}
+                                      {hasEntries && (
+                                        <button
+                                          type="button"
+                                          onClick={() => toggleStatItemExpand(statKey)}
+                                          className={`text-xs font-extrabold px-3 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95 whitespace-nowrap shrink-0 ${
+                                            isStatExpanded
+                                              ? 'bg-purple-700 text-white border-purple-700'
+                                              : 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
+                                          }`}
+                                          title="등록된 세부 지출 항목 펼치기/접기"
                                         >
-                                          <Coins className="w-2.5 h-2.5 text-amber-600" />
-                                          <span>일상 미집행 ₩{(s.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}</span>
-                                          <span className="text-amber-600 font-normal">(교부 ₩{(s.dailyExpenseIssued || 0).toLocaleString('ko-KR')})</span>
-                                        </span>
+                                          <span className="whitespace-nowrap">📌 {itemEntries.length}건 등록</span>
+                                          {isStatExpanded ? (
+                                            <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+                                          ) : (
+                                            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+                                          )}
+                                        </button>
                                       )}
                                     </div>
-
-                                    {/* Interactive Badge to Toggle Level 3 Registered Items */}
-                                    {hasEntries && (
-                                      <button
-                                        type="button"
-                                        onClick={() => toggleStatItemExpand(statKey)}
-                                        className={`text-[11px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 shadow-3xs active:scale-95 ${
-                                          isStatExpanded
-                                            ? 'bg-purple-600 text-white border-purple-600'
-                                            : 'bg-purple-100/90 hover:bg-purple-200/90 text-purple-800 border-purple-300'
-                                        }`}
-                                        title="등록된 세부 지출 항목 펼치기/접기"
-                                      >
-                                        <span>📌 {itemEntries.length}건 등록</span>
-                                        {isStatExpanded ? (
-                                          <ChevronDown className="w-3 h-3" />
-                                        ) : (
-                                          <ChevronRight className="w-3 h-3" />
-                                        )}
-                                      </button>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-right text-slate-700 font-semibold text-sm">
-                                  ₩{s.totalBudget.toLocaleString('ko-KR')}
-                                </td>
-                                <td className="py-3 px-4 text-right text-indigo-700 font-semibold text-sm">
-                                  <div>₩{s.currentSpent.toLocaleString('ko-KR')}</div>
-                                  {(s.dailyExpenseIssued || 0) > 0 && (
-                                    <div className="text-[10px] text-amber-700 font-normal font-sans tracking-tight">
-                                      교부 ₩{(s.dailyExpenseIssued || 0).toLocaleString('ko-KR')}
+                                  </td>
+                                  <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                                    <div className="font-mono font-bold text-[15px] sm:text-base tracking-tight tabular-nums text-slate-900">
+                                      {s.totalBudget.toLocaleString('ko-KR')}
+                                      <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
                                     </div>
-                                  )}
-                                </td>
-                                <td className="py-3 px-4 text-right text-emerald-700 font-semibold text-sm">
-                                  <div>₩{s.currentRemaining.toLocaleString('ko-KR')}</div>
-                                  {(s.dailyExpenseRemaining || 0) > 0 && (
-                                    <div className="text-[10px] text-amber-700 font-medium font-sans tracking-tight" title="교부 잔액 포함 실가용액">
-                                      + 일상 미집행 ₩{(s.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}
-                                      <span className="text-emerald-700 font-bold ml-1">
-                                        (실가용 ₩{(s.currentRemaining + (s.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')})
+                                  </td>
+                                  <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                                    <div className={`font-mono font-bold text-[15px] sm:text-base tracking-tight tabular-nums ${s.currentSpent > 0 ? 'text-indigo-800' : 'text-slate-400 font-normal'}`}>
+                                      {s.currentSpent.toLocaleString('ko-KR')}
+                                      <span className={`text-xs font-semibold ml-1 ${s.currentSpent > 0 ? 'text-indigo-400' : 'text-slate-400'}`}>원</span>
+                                    </div>
+                                    <div className="mt-1 flex justify-end">
+                                      <span className="text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-2xs whitespace-nowrap" title="현재 집행률">
+                                        집행 {s.totalBudget > 0 ? ((s.currentSpent / s.totalBudget) * 100).toFixed(1) : '0.0'}%
                                       </span>
                                     </div>
-                                  )}
-                                </td>
-                                <td className="py-3 px-4 text-right text-purple-700 font-extrabold text-sm">
-                                  ₩{s.simulatedExpenditure.toLocaleString('ko-KR')}
-                                </td>
-                                <td
-                                  className={`py-3 px-4 text-right font-extrabold text-base ${
-                                    isNegative ? 'text-rose-600' : 'text-emerald-600'
-                                  }`}
-                                >
-                                  <div>₩{s.finalExpectedBalance.toLocaleString('ko-KR')}</div>
-                                  {(s.dailyExpenseRemaining || 0) > 0 && (
-                                    <div className="text-[10px] text-slate-500 font-normal font-sans tracking-tight">
-                                      (일상 포함 ₩{(s.finalExpectedBalance + (s.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')})
+                                    {(s.dailyExpenseIssued || 0) > 0 && (
+                                      <div className="mt-1.5 flex justify-end">
+                                        <span className="text-xs font-bold text-amber-950 bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                                          <span className="text-xs font-bold font-sans text-amber-800 shrink-0 whitespace-nowrap">교부</span>
+                                          <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(s.dailyExpenseIssued || 0).toLocaleString('ko-KR')}원</span>
+                                        </span>
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                                    <div className={`font-mono font-bold text-[15px] sm:text-base tracking-tight tabular-nums ${s.currentRemaining > 0 ? 'text-emerald-800' : 'text-slate-400 font-normal'}`}>
+                                      {s.currentRemaining.toLocaleString('ko-KR')}
+                                      <span className={`text-xs font-semibold ml-1 ${s.currentRemaining > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>원</span>
                                     </div>
-                                  )}
-                                </td>
-                                <td className="py-3 px-4 text-center font-sans">
+                                    <div className="mt-1 flex justify-end">
+                                      <span className="text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs whitespace-nowrap" title="현재 미집행률(잔여율)">
+                                        미집행 {s.totalBudget > 0 ? ((s.currentRemaining / s.totalBudget) * 100).toFixed(1) : '0.0'}%
+                                      </span>
+                                    </div>
+                                    {(s.dailyExpenseRemaining || 0) > 0 && (
+                                      <div className="mt-1.5 flex flex-col items-end gap-1">
+                                        <span className="text-xs font-bold text-amber-950 bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                                          <span className="text-xs font-bold font-sans text-amber-800 shrink-0 whitespace-nowrap">일상 미집행</span>
+                                          <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(s.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}원</span>
+                                        </span>
+                                        <span className="text-xs font-black text-emerald-950 bg-emerald-100 border border-emerald-400 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0" title="교부 잔액 포함 실가용액">
+                                          <span className="text-xs font-bold font-sans text-emerald-800 shrink-0 whitespace-nowrap">실가용</span>
+                                          <span className="font-mono text-[13px] font-black text-emerald-950 shrink-0 whitespace-nowrap">{(s.currentRemaining + (s.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')}원</span>
+                                        </span>
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                                    <div className={`font-mono font-extrabold text-[15px] sm:text-base tracking-tight tabular-nums ${s.simulatedExpenditure > 0 ? 'text-purple-800' : 'text-slate-400 font-normal'}`}>
+                                      {s.simulatedExpenditure.toLocaleString('ko-KR')}
+                                      <span className={`text-xs ml-1 ${s.simulatedExpenditure > 0 ? 'text-purple-500 font-semibold' : 'text-slate-400'}`}>원</span>
+                                    </div>
+                                  </td>
+                                  <td className="py-3 px-4 text-right align-top whitespace-nowrap">
+                                    <div className={`font-mono font-extrabold text-[15px] sm:text-base tracking-tight tabular-nums ${
+                                      isNegative ? 'text-rose-700' : s.finalExpectedBalance > 0 ? 'text-emerald-800' : 'text-slate-500'
+                                    }`}>
+                                      {s.finalExpectedBalance.toLocaleString('ko-KR')}
+                                      <span className={`text-xs ml-1 font-semibold ${isNegative ? 'text-rose-400' : 'text-emerald-400'}`}>원</span>
+                                    </div>
+                                    <div className="mt-1 flex justify-end">
+                                      <span className={`text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md border shadow-2xs whitespace-nowrap ${
+                                        isNegative 
+                                          ? 'bg-rose-100 text-rose-900 border-rose-300' 
+                                          : 'bg-slate-100 text-slate-800 border-slate-300'
+                                      }`} title={isNegative ? '초과 집행률' : '최종 예상 잔여율'}>
+                                        {isNegative
+                                          ? `초과 ${s.totalBudget > 0 ? (Math.abs(s.finalExpectedBalance) / s.totalBudget * 100).toFixed(1) : 0}%`
+                                          : `잔여 ${s.totalBudget > 0 ? ((s.finalExpectedBalance / s.totalBudget) * 100).toFixed(1) : 0}%`}
+                                      </span>
+                                    </div>
+                                    {(s.dailyExpenseRemaining || 0) > 0 && (
+                                      <div className="mt-1.5 flex justify-end">
+                                        <span className="text-xs font-bold text-slate-800 bg-slate-200/90 border border-slate-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                                          <span className="text-xs font-bold font-sans text-slate-600 shrink-0 whitespace-nowrap">일상 포함</span>
+                                          <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(s.finalExpectedBalance + (s.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')}원</span>
+                                        </span>
+                                      </div>
+                                    )}
+                                  </td>
+                                 <td className="py-3 px-4 text-center font-sans align-middle">
                                   {isNegative ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-100 border border-rose-300 text-rose-700 text-xs font-bold">
-                                      <AlertTriangle className="w-3 h-3 text-rose-600" />
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-100 border border-rose-300 text-rose-800 text-xs font-extrabold shadow-2xs animate-pulse">
+                                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
                                       초과 예정
                                     </span>
                                   ) : (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
-                                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold shadow-2xs">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                       정상
                                     </span>
                                   )}
@@ -795,83 +884,92 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                                           <div className="space-y-0.5 min-w-0">
                                             <div className="flex items-center gap-2 flex-wrap">
                                               {isSettled ? (
-                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-0.5">
-                                                  <CheckCircle2 className="w-2.5 h-2.5" /> 집행 완료
+                                                <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                                                  <CheckCircle2 className="w-3 h-3" /> 집행 완료
                                                 </span>
                                               ) : (
-                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 flex items-center gap-0.5">
-                                                  <Clock className="w-2.5 h-2.5" /> 집행 대기
+                                                <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200 flex items-center gap-1">
+                                                  <Clock className="w-3 h-3" /> 집행 대기
                                                 </span>
                                               )}
                                               <span
-                                                className={`font-bold ${
+                                                className={`text-sm font-bold ${
                                                   isSettled ? 'text-slate-400 line-through' : 'text-slate-900'
                                                 }`}
                                               >
                                                 {entry.name}
                                               </span>
                                               {entry.createdAt && (
-                                                <span className="text-[10px] text-slate-400 font-mono">
+                                                <span className="text-xs text-slate-500 font-mono">
                                                   {entry.createdAt.split('T')[0]}
                                                 </span>
                                               )}
                                             </div>
                                             {entry.memo && (
-                                              <p className="text-[11px] text-slate-500 flex items-center gap-1 line-clamp-1">
-                                                <FileText className="w-3 h-3 text-slate-400 shrink-0" />
+                                              <p className="text-xs text-slate-600 flex items-center gap-1 line-clamp-1">
+                                                <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                                 <span>{entry.memo}</span>
                                               </p>
                                             )}
                                           </div>
                                         </div>
                                       </td>
-                                      <td className="py-2.5 px-4 text-right font-mono text-slate-600 text-xs">
-                                        <span className="text-[11px] text-slate-500 font-sans">
-                                          ₩{entry.unitPrice.toLocaleString('ko-KR')} × {entry.quantity}개
-                                        </span>
+                                      <td className="py-2.5 px-4 text-right align-top font-mono text-xs">
+                                        <div className="text-slate-700 font-mono tabular-nums font-semibold text-xs">
+                                          {entry.unitPrice.toLocaleString('ko-KR')}
+                                          <span className="text-xs text-slate-400 ml-0.5">원</span>
+                                          <span className="text-xs text-slate-500 font-sans ml-1 font-semibold">× {entry.quantity}개</span>
+                                        </div>
                                       </td>
-                                      <td className="py-2.5 px-4 text-right font-mono text-xs text-slate-400">
+                                      <td className="py-2.5 px-4 text-right align-top font-mono text-xs text-slate-400">
                                         {isSettled ? (
-                                          <span className="text-emerald-700 font-semibold text-[11px]">
+                                          <span className="text-emerald-800 font-bold text-xs font-sans">
                                             e-호조 반영됨
                                           </span>
                                         ) : (
-                                          <span className="text-slate-300">-</span>
+                                          <span className="text-slate-300 font-mono">-</span>
                                         )}
                                       </td>
-                                      <td className="py-2.5 px-4 text-right font-mono text-xs text-slate-300">
+                                      <td className="py-2.5 px-4 text-right align-top font-mono text-xs text-slate-300">
                                         -
                                       </td>
-                                      <td className="py-2.5 px-4 text-right font-mono">
-                                        <span
-                                          className={`font-extrabold text-xs px-2 py-0.5 rounded-md inline-block ${
-                                            isSettled
-                                              ? 'text-slate-400 bg-slate-100'
-                                              : 'text-purple-700 bg-purple-100/80 border border-purple-200/80'
-                                          }`}
-                                        >
-                                          ₩{(entry.amount || 0).toLocaleString('ko-KR')}
-                                        </span>
+                                      <td className="py-2.5 px-4 text-right align-top">
+                                        <div className="font-mono tabular-nums text-sm font-extrabold">
+                                          {isSettled ? (
+                                            <span className="text-slate-400 line-through">
+                                              {(entry.amount || 0).toLocaleString('ko-KR')}
+                                              <span className="text-xs ml-0.5 font-semibold">원</span>
+                                            </span>
+                                          ) : (
+                                            <span className="text-purple-700">
+                                              {(entry.amount || 0).toLocaleString('ko-KR')}
+                                              <span className="text-xs text-purple-400 ml-0.5 font-semibold">원</span>
+                                            </span>
+                                          )}
+                                        </div>
                                       </td>
-                                      <td className="py-2.5 px-4 text-right font-mono text-xs font-semibold">
-                                        {isSettled ? (
-                                          <span className="text-slate-400">0</span>
-                                        ) : (
-                                          <span className="text-purple-700">
-                                            -₩{(entry.amount || 0).toLocaleString('ko-KR')}
-                                          </span>
-                                        )}
+                                      <td className="py-2.5 px-4 text-right align-top">
+                                        <div className="font-mono tabular-nums text-sm font-extrabold">
+                                          {isSettled ? (
+                                            <span className="text-slate-300">-</span>
+                                          ) : (
+                                            <span className="text-rose-600">
+                                              -{(entry.amount || 0).toLocaleString('ko-KR')}
+                                              <span className="text-xs text-rose-400 ml-0.5 font-semibold">원</span>
+                                            </span>
+                                          )}
+                                        </div>
                                       </td>
-                                      <td className="py-2.5 px-4 text-center font-sans">
-                                        <div className="flex items-center justify-center gap-1">
+                                      <td className="py-2.5 px-4 text-center font-sans align-middle">
+                                        <div className="flex items-center justify-center gap-1.5">
                                           {!isSettled && onSettleEntry && (
                                             <button
                                               type="button"
                                               onClick={() => onSettleEntry(entry.id)}
-                                              className="px-2 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                              className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer shadow-2xs transition-all active:scale-95"
                                               title="실제 지출로 집행 (정산)"
                                             >
-                                              <CheckCircle2 className="w-3 h-3" />
+                                              <CheckCircle2 className="w-3.5 h-3.5" />
                                               <span>정산</span>
                                             </button>
                                           )}
@@ -879,19 +977,19 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                                             <button
                                               type="button"
                                               onClick={() => onEditEntry(entry)}
-                                              className="p-1 rounded-md bg-white hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 text-[10px] cursor-pointer transition-all shadow-3xs"
+                                              className="p-1.5 rounded-md bg-white hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 cursor-pointer transition-all shadow-2xs"
                                               title="항목 수정"
                                             >
-                                              <Pencil className="w-3 h-3" />
+                                              <Pencil className="w-3.5 h-3.5" />
                                             </button>
                                           )}
                                           <button
                                             type="button"
                                             onClick={() => onDeleteEntry(entry.id)}
-                                            className="p-1 rounded-md bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 text-[10px] cursor-pointer transition-all shadow-3xs"
+                                            className="p-1.5 rounded-md bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 cursor-pointer transition-all shadow-2xs"
                                             title="항목 삭제"
                                           >
-                                            <Trash2 className="w-3 h-3" />
+                                            <Trash2 className="w-3.5 h-3.5" />
                                           </button>
                                         </div>
                                       </td>
@@ -927,40 +1025,84 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                           <span>{p.detailedProject}</span>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-right text-slate-700 font-semibold text-base">
-                        ₩{p.totalBudget.toLocaleString('ko-KR')}
+                      <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                        <div className="font-mono font-bold text-base tracking-tight tabular-nums text-slate-800">
+                          {p.totalBudget.toLocaleString('ko-KR')}
+                          <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
+                        </div>
                       </td>
-                      <td className="py-3.5 px-4 text-right text-indigo-700 font-semibold text-base">
-                        <div>₩{p.currentSpent.toLocaleString('ko-KR')}</div>
+                      <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                        <div className="font-mono font-bold text-base tracking-tight tabular-nums text-indigo-700">
+                          {p.currentSpent.toLocaleString('ko-KR')}
+                          <span className="text-xs font-semibold text-indigo-400 ml-1">원</span>
+                        </div>
+                        <div className="mt-1 flex justify-end">
+                          <span className="text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-2xs whitespace-nowrap" title="현재 집행률">
+                            집행 {p.executionRate.toFixed(1)}%
+                          </span>
+                        </div>
                         {(p.dailyExpenseIssued || 0) > 0 && (
-                          <div className="text-[10px] text-amber-700 font-normal font-sans tracking-tight">
-                            (교부 ₩{(p.dailyExpenseIssued || 0).toLocaleString('ko-KR')})
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 text-right text-emerald-700 font-semibold text-base">
-                        <div>₩{p.currentRemaining.toLocaleString('ko-KR')}</div>
-                        {(p.dailyExpenseRemaining || 0) > 0 && (
-                          <div className="text-[10px] text-amber-700 font-medium font-sans tracking-tight" title="교부 잔액 포함 실질 가용액">
-                            + 일상 미집행 ₩{(p.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}
-                            <span className="text-emerald-700 font-bold ml-1">
-                              (실가용 ₩{(p.currentRemaining + (p.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')})
+                          <div className="mt-1.5 flex justify-end">
+                            <span className="text-xs font-bold text-amber-950 bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                              <span className="text-xs font-bold font-sans text-amber-800 shrink-0 whitespace-nowrap">교부</span>
+                              <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(p.dailyExpenseIssued || 0).toLocaleString('ko-KR')}원</span>
                             </span>
                           </div>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-right text-purple-700 font-extrabold text-base">
-                        ₩{p.simulatedExpenditure.toLocaleString('ko-KR')}
-                      </td>
-                      <td
-                        className={`py-3.5 px-4 text-right font-extrabold text-lg ${
-                          isNegative ? 'text-rose-600' : 'text-emerald-600'
-                        }`}
-                      >
-                        <div>₩{p.finalExpectedBalance.toLocaleString('ko-KR')}</div>
+                      <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                        <div className="font-mono font-bold text-base tracking-tight tabular-nums text-emerald-700">
+                          {p.currentRemaining.toLocaleString('ko-KR')}
+                          <span className="text-xs font-semibold text-emerald-500 ml-1">원</span>
+                        </div>
+                        <div className="mt-1 flex justify-end">
+                          <span className="text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs whitespace-nowrap" title="현재 미집행률(잔여율)">
+                            미집행 {p.totalBudget > 0 ? ((p.currentRemaining / p.totalBudget) * 100).toFixed(1) : '0.0'}%
+                          </span>
+                        </div>
                         {(p.dailyExpenseRemaining || 0) > 0 && (
-                          <div className="text-[10px] text-slate-500 font-normal font-sans tracking-tight">
-                            (일상 포함 ₩{(p.finalExpectedBalance + (p.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')})
+                          <div className="mt-1.5 flex flex-col items-end gap-1">
+                            <span className="text-xs font-bold text-amber-950 bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                              <span className="text-xs font-bold font-sans text-amber-800 shrink-0 whitespace-nowrap">일상 미집행</span>
+                              <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(p.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}원</span>
+                            </span>
+                            <span className="text-xs font-black text-emerald-950 bg-emerald-100 border border-emerald-400 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0" title="교부 잔액 포함 실질 가용액">
+                              <span className="text-xs font-bold font-sans text-emerald-800 shrink-0 whitespace-nowrap">실가용</span>
+                              <span className="font-mono text-[13px] font-black text-emerald-950 shrink-0 whitespace-nowrap">{(p.currentRemaining + (p.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')}원</span>
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                        <div className={`font-mono font-extrabold text-base tracking-tight tabular-nums ${p.simulatedExpenditure > 0 ? 'text-purple-700' : 'text-slate-400 font-normal'}`}>
+                          {p.simulatedExpenditure.toLocaleString('ko-KR')}
+                          <span className={`text-xs ml-1 ${p.simulatedExpenditure > 0 ? 'text-purple-400 font-semibold' : 'text-slate-400'}`}>원</span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                        <div className={`font-mono font-extrabold text-lg tracking-tight tabular-nums ${
+                          isNegative ? 'text-rose-600' : 'text-emerald-600'
+                        }`}>
+                          {p.finalExpectedBalance.toLocaleString('ko-KR')}
+                          <span className={`text-xs ml-1 font-semibold ${isNegative ? 'text-rose-400' : 'text-emerald-400'}`}>원</span>
+                        </div>
+                        <div className="mt-1 flex justify-end">
+                          <span className={`text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md border shadow-2xs whitespace-nowrap ${
+                            isNegative 
+                              ? 'bg-rose-100 text-rose-900 border-rose-300' 
+                              : 'bg-slate-100 text-slate-800 border-slate-300'
+                          }`} title={isNegative ? '초과 집행률' : '최종 예상 잔여율'}>
+                            {isNegative
+                              ? `초과 ${p.totalBudget > 0 ? (Math.abs(p.finalExpectedBalance) / p.totalBudget * 100).toFixed(1) : 0}%`
+                              : `잔여 ${p.totalBudget > 0 ? ((p.finalExpectedBalance / p.totalBudget) * 100).toFixed(1) : 0}%`}
+                          </span>
+                        </div>
+                        {(p.dailyExpenseRemaining || 0) > 0 && (
+                          <div className="mt-1.5 flex justify-end">
+                            <span className="text-xs font-bold text-slate-800 bg-slate-200/90 border border-slate-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                              <span className="text-xs font-bold font-sans text-slate-600 shrink-0 whitespace-nowrap">일상 포함</span>
+                              <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(p.finalExpectedBalance + (p.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')}원</span>
+                            </span>
                           </div>
                         )}
                       </td>
@@ -1031,41 +1173,93 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
             {tableTotals && (
               <tfoot>
                 <tr className="bg-slate-100/90 font-bold border-t-2 border-slate-300 text-slate-900 font-mono text-sm">
-                  <td className="py-3.5 px-4 font-sans text-base font-extrabold">합계 ({viewMode === 'project' ? filteredProjects.length : filteredStatItems.length}개 항목)</td>
-                  <td className="py-3.5 px-4 text-right text-base">₩{tableTotals.totalBudget.toLocaleString('ko-KR')}</td>
-                  <td className="py-3.5 px-4 text-right text-indigo-700 text-base">
-                    <div>₩{tableTotals.currentSpent.toLocaleString('ko-KR')}</div>
-                    {(tableTotals.dailyExpenseIssued || 0) > 0 && (
-                      <div className="text-[10px] text-amber-700 font-normal font-sans tracking-tight">
-                        (교부 ₩{(tableTotals.dailyExpenseIssued || 0).toLocaleString('ko-KR')})
-                      </div>
-                    )}
+                  <td className="py-3.5 px-4 font-sans text-base font-extrabold align-top">합계 ({viewMode === 'project' ? filteredProjects.length : filteredStatItems.length}개 항목)</td>
+                  <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                    <div className="font-mono font-extrabold text-base tracking-tight tabular-nums text-slate-900">
+                      {tableTotals.totalBudget.toLocaleString('ko-KR')}
+                      <span className="text-xs font-semibold text-slate-500 ml-1">원</span>
+                    </div>
                   </td>
-                  <td className="py-3.5 px-4 text-right text-emerald-700 text-base">
-                    <div>₩{tableTotals.currentRemaining.toLocaleString('ko-KR')}</div>
-                    {(tableTotals.dailyExpenseRemaining || 0) > 0 && (
-                      <div className="text-[10px] text-amber-700 font-medium font-sans tracking-tight" title="교부 잔액 포함 실질 가용액">
-                        + 일상 미집행 ₩{(tableTotals.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}
-                        <span className="text-emerald-700 font-bold ml-1">
-                          (실가용 ₩{(tableTotals.currentRemaining + (tableTotals.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')})
+                  <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                    <div className="font-mono font-extrabold text-base tracking-tight tabular-nums text-indigo-700">
+                      {tableTotals.currentSpent.toLocaleString('ko-KR')}
+                      <span className="text-xs font-semibold text-indigo-400 ml-1">원</span>
+                    </div>
+                    <div className="mt-1 flex justify-end">
+                      <span className="text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-2xs whitespace-nowrap" title="전체 총 집행률">
+                        집행 {tableTotals.totalBudget > 0 ? ((tableTotals.currentSpent / tableTotals.totalBudget) * 100).toFixed(1) : '0.0'}%
+                      </span>
+                    </div>
+                    {(tableTotals.dailyExpenseIssued || 0) > 0 && (
+                      <div className="mt-1.5 flex justify-end">
+                        <span className="text-xs font-bold text-amber-950 bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                          <span className="text-xs font-bold font-sans text-amber-800 shrink-0 whitespace-nowrap">교부</span>
+                          <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(tableTotals.dailyExpenseIssued || 0).toLocaleString('ko-KR')}원</span>
                         </span>
                       </div>
                     )}
                   </td>
-                  <td className="py-3.5 px-4 text-right text-purple-700 font-extrabold text-base">₩{tableTotals.simulatedExpenditure.toLocaleString('ko-KR')}</td>
-                  <td className={`py-3.5 px-4 text-right text-lg font-extrabold ${tableTotals.finalExpectedBalance < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                    <div>₩{tableTotals.finalExpectedBalance.toLocaleString('ko-KR')}</div>
+                  <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                    <div className="font-mono font-extrabold text-base tracking-tight tabular-nums text-emerald-700">
+                      {tableTotals.currentRemaining.toLocaleString('ko-KR')}
+                      <span className="text-xs font-semibold text-emerald-500 ml-1">원</span>
+                    </div>
+                    <div className="mt-1 flex justify-end">
+                      <span className="text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs whitespace-nowrap" title="전체 총 미집행률(잔여율)">
+                        미집행 {tableTotals.totalBudget > 0 ? ((tableTotals.currentRemaining / tableTotals.totalBudget) * 100).toFixed(1) : '0.0'}%
+                      </span>
+                    </div>
                     {(tableTotals.dailyExpenseRemaining || 0) > 0 && (
-                      <div className="text-[10px] text-slate-500 font-normal font-sans tracking-tight">
-                        (일상 포함 ₩{(tableTotals.finalExpectedBalance + (tableTotals.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')})
+                      <div className="mt-1.5 flex flex-col items-end gap-1" title="교부 잔액 포함 실질 가용액">
+                        <span className="text-xs font-bold text-amber-950 bg-amber-100/90 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                          <span className="text-xs font-bold font-sans text-amber-800 shrink-0 whitespace-nowrap">일상 미집행</span>
+                          <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(tableTotals.dailyExpenseRemaining || 0).toLocaleString('ko-KR')}원</span>
+                        </span>
+                        <span className="text-xs font-black text-emerald-950 bg-emerald-100 border border-emerald-400 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                          <span className="text-xs font-bold font-sans text-emerald-800 shrink-0 whitespace-nowrap">실가용</span>
+                          <span className="font-mono text-[13px] font-black text-emerald-950 shrink-0 whitespace-nowrap">{(tableTotals.currentRemaining + (tableTotals.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')}원</span>
+                        </span>
                       </div>
                     )}
                   </td>
-                  <td className="py-3.5 px-4 text-center font-sans">
+                  <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                    <div className={`font-mono font-extrabold text-base tracking-tight tabular-nums ${tableTotals.simulatedExpenditure > 0 ? 'text-purple-700' : 'text-slate-400 font-normal'}`}>
+                      {tableTotals.simulatedExpenditure.toLocaleString('ko-KR')}
+                      <span className={`text-xs ml-1 ${tableTotals.simulatedExpenditure > 0 ? 'text-purple-400 font-semibold' : 'text-slate-400'}`}>원</span>
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-4 text-right align-top whitespace-nowrap">
+                    <div className={`font-mono font-extrabold text-lg tracking-tight tabular-nums ${
+                      tableTotals.finalExpectedBalance < 0 ? 'text-rose-600' : 'text-emerald-600'
+                    }`}>
+                      {tableTotals.finalExpectedBalance.toLocaleString('ko-KR')}
+                      <span className={`text-xs ml-1 font-semibold ${tableTotals.finalExpectedBalance < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>원</span>
+                    </div>
+                    <div className="mt-1 flex justify-end">
+                      <span className={`text-xs font-extrabold font-mono px-2.5 py-0.5 rounded-md border shadow-2xs whitespace-nowrap ${
+                        tableTotals.finalExpectedBalance < 0 
+                          ? 'bg-rose-100 text-rose-900 border-rose-300' 
+                          : 'bg-slate-100 text-slate-800 border-slate-300'
+                      }`} title={tableTotals.finalExpectedBalance < 0 ? '전체 초과 집행률' : '전체 최종 예상 잔여율'}>
+                        {tableTotals.finalExpectedBalance < 0
+                          ? `초과 ${tableTotals.totalBudget > 0 ? (Math.abs(tableTotals.finalExpectedBalance) / tableTotals.totalBudget * 100).toFixed(1) : 0}%`
+                          : `잔여 ${tableTotals.totalBudget > 0 ? ((tableTotals.finalExpectedBalance / tableTotals.totalBudget) * 100).toFixed(1) : 0}%`}
+                      </span>
+                    </div>
+                    {(tableTotals.dailyExpenseRemaining || 0) > 0 && (
+                      <div className="mt-1.5 flex justify-end">
+                        <span className="text-xs font-bold text-slate-800 bg-slate-200/90 border border-slate-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                          <span className="text-xs font-bold font-sans text-slate-600 shrink-0 whitespace-nowrap">일상 포함</span>
+                          <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(tableTotals.finalExpectedBalance + (tableTotals.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')}원</span>
+                        </span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-3.5 px-4 text-center font-sans align-middle">
                     {tableTotals.finalExpectedBalance < 0 ? (
-                      <span className="text-rose-600 text-xs font-extrabold">전체 적자</span>
+                      <span className="text-rose-600 text-xs font-extrabold px-2 py-1 rounded bg-rose-50 border border-rose-200 inline-block">전체 적자</span>
                     ) : (
-                      <span className="text-emerald-600 text-xs font-bold">전체 양호</span>
+                      <span className="text-emerald-600 text-xs font-bold px-2 py-1 rounded bg-emerald-50 border border-emerald-200 inline-block">전체 양호</span>
                     )}
                   </td>
                 </tr>

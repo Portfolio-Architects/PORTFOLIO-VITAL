@@ -8,7 +8,6 @@ import { BudgetCategoryCardItem } from './BudgetCategoryCardItem';
 import { InlineEditCell } from './InlineEditCell';
 import { useVirtualList } from '@/hooks/useVirtualList';
 import { useDocumentVisibility } from '@/hooks/useDocumentVisibility';
-import { getCategoryStatus, STATUS_CONFIG, CategoryStatus } from '@/hooks/useBudgetFilters';
 
 function formatN(n: number) { return n.toLocaleString('ko-KR'); }
 
@@ -136,7 +135,7 @@ const PolicyGroupCardComponent = ({
 
   const { policyName, cats } = group;
 
-  const { totalBudget, spent, planned, remaining, usageRate, groupEntries, entriesByCatId, groupedByDetail, groupFunding, groupTypes, groupStatus, catMap } = useMemo(() => {
+  const { totalBudget, spent, planned, remaining, usageRate, groupEntries, entriesByCatId, groupedByDetail, groupFunding, groupTypes, catMap } = useMemo(() => {
     let tBudget = 0;
     let tSpent = 0;
     let tPlanned = 0;
@@ -262,7 +261,6 @@ const PolicyGroupCardComponent = ({
 
     const groupFunding = Array.from(groupFundingSet);
     const groupTypes = Array.from(groupTypesSet);
-    const groupStatus: CategoryStatus = getCategoryStatus(rate, tRemaining);
 
     return { 
       totalBudget: tBudget, 
@@ -275,12 +273,9 @@ const PolicyGroupCardComponent = ({
       groupedByDetail: groups, 
       groupFunding, 
       groupTypes, 
-      groupStatus,
       catMap: categoryLookupMap 
     };
   }, [cats, entries, getCategoryStats]);
-
-  const groupStatusCfg = STATUS_CONFIG[groupStatus as keyof typeof STATUS_CONFIG];
 
   // Stable swap callback function passed down to BudgetCategoryCardItem instances
   const handleSwapCat = useCallback((catId: string, dir: -1 | 1) => {
@@ -354,9 +349,6 @@ const PolicyGroupCardComponent = ({
               <div>
                  <h3 className="font-bold text-[18px] text-gray-800 tracking-tight group-hover:text-[var(--color-primary)] transition-colors flex items-center gap-1.5 flex-wrap">
                    {policyName}
-                   <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg border shadow-3xs ${groupStatusCfg.badgeClass}`}>
-                     {groupStatusCfg.label}
-                   </span>
                    {groupTypes.map(t => (
                      <span key={t} className={`text-[11px] font-semibold px-2 py-0.5 rounded-lg border ${t === '간주예산' ? 'bg-purple-50/80 text-purple-700 border-purple-200/60 shadow-3xs' : 'bg-rose-50/80 text-rose-700 border-rose-200/60 shadow-3xs'}`}>{t}</span>
                    ))}
@@ -375,29 +367,43 @@ const PolicyGroupCardComponent = ({
           </div>
           
           <div className="bg-slate-50/60 rounded-2xl p-4 flex flex-col gap-3 border border-slate-200/20">
-            <div className="flex justify-between items-end">
+            <div className="flex justify-between items-end flex-wrap gap-2">
               <div className="flex flex-col">
-                 <span className="text-slate-500 font-bold text-[14px] mb-1">총 예산 대비 사용액</span>
-                 <span className="font-extrabold text-slate-800 font-mono tracking-tight text-[21px]">{formatN(spent + planned)} <span className="text-[14px] text-slate-400 font-medium mx-1">/</span> <span className="text-slate-600 font-bold text-[18px]">{formatN(totalBudget)}</span></span>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-slate-500 font-bold text-[14px]">총 예산 대비 사용액</span>
+                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-3xs" title="정책사업 집행률">
+                    집행 {usageRate.toFixed(1)}%
+                  </span>
+                </div>
+                <span className="font-extrabold text-slate-800 font-mono tracking-tight text-[21px]">{formatN(spent + planned)} <span className="text-[14px] text-slate-400 font-medium mx-1">/</span> <span className="text-slate-600 font-bold text-[18px]">{formatN(totalBudget)}</span></span>
               </div>
               <div className="flex flex-col items-end">
-                 <span className="text-slate-500 font-bold text-[14px] mb-1">총 잔여액</span>
-                 <span className="font-extrabold text-[var(--color-primary)] text-[25px] font-mono tracking-tight">{formatN(remaining)}<span className="text-[15px] font-bold ml-0.5">원</span></span>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-3xs" title="정책사업 미집행률(잔여율)">
+                    미집행 {(totalBudget > 0 ? (remaining / totalBudget * 100) : 0).toFixed(1)}%
+                  </span>
+                  <span className="text-slate-500 font-bold text-[14px]">총 잔여액</span>
+                </div>
+                <span className="font-extrabold text-[var(--color-primary)] text-[25px] font-mono tracking-tight">{formatN(remaining)}<span className="text-[15px] font-bold ml-0.5">원</span></span>
               </div>
             </div>
-            <div className="h-2 w-full bg-slate-200/40 rounded-full overflow-hidden border border-slate-100 relative">
+            <div className="h-2 w-full bg-slate-200/40 rounded-full overflow-hidden border border-slate-100 flex relative" title={`집행률: ${usageRate.toFixed(1)}% | 미집행률: ${(totalBudget > 0 ? (remaining / totalBudget * 100) : 0).toFixed(1)}%`}>
                <div 
-                 className={`h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden ${
+                 className={`h-full transition-all duration-500 ease-out relative overflow-hidden ${
                    usageRate >= 95 
                      ? 'bg-gradient-to-r from-red-500 to-rose-600' 
                      : usageRate >= 80 
                        ? 'bg-gradient-to-r from-amber-400 to-amber-600' 
                        : 'bg-gradient-to-r from-blue-500 to-indigo-600'
                  }`} 
-                 style={{ width: `${Math.min(100, usageRate)}%` }}
+                 style={{ width: `${Math.min(100, usageRate)}%` }} 
                >
                  <div className={`absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent ${isVisible ? 'animate-shimmer' : ''}`} style={{ backgroundSize: '200% 100%' }} />
                </div>
+               <div 
+                 className="h-full bg-emerald-400/80 transition-all duration-500" 
+                 style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, usageRate), totalBudget > 0 ? (remaining / totalBudget * 100) : 0))}%` }} 
+               />
             </div>
             {planned > 0 && <div className="text-[11px] text-amber-700 font-bold bg-amber-50/80 px-2 py-1 rounded-lg inline-block self-start border border-amber-200/60 shadow-3xs">📋 품의 진행/예정: {formatN(planned)}원</div>}
           </div>
@@ -452,37 +458,63 @@ const PolicyGroupCardComponent = ({
                       예산 {formatN(detailTotalBudget)}원
                     </span>
 
-                    {/* 세부사업별 총예산 대비 사용액 % 표시 */}
+                    {/* 세부사업별 총예산 대비 사용액 & 집행률 */}
                     <span className={`font-extrabold rounded-lg border font-mono tabular-nums shadow-3xs flex items-center gap-1.5 ${
                       detailUsageRate >= 95 
                         ? 'bg-rose-50 text-rose-700 border-rose-200/80' 
                         : detailUsageRate >= 80 
                           ? 'bg-amber-50 text-amber-700 border-amber-200/80' 
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+                          : 'bg-indigo-50 text-indigo-700 border-indigo-200/80'
                     } ${hidePolicyHeader ? 'text-xs px-2.5 py-0.5' : 'text-[12px] px-2 py-0.5'}`}>
-                      <span>사용 {formatN(detailTotalUsed)}원</span>
+                      <span>집행 {formatN(detailTotalUsed)}원</span>
                       <span className={`font-black px-1.5 py-0.2 rounded shadow-3xs ${
                         detailUsageRate >= 95 
                           ? 'bg-rose-100 text-rose-800' 
                           : detailUsageRate >= 80 
                             ? 'bg-amber-100 text-amber-800' 
-                            : 'bg-emerald-100 text-emerald-800'
+                            : 'bg-indigo-100 text-indigo-800'
                       }`}>
                         {detailUsageRate.toFixed(1)}%
                       </span>
                     </span>
 
-                    {/* 세부사업 집행률 미니 프로그래스 바 */}
-                    <div className="w-16 h-2 bg-slate-200/70 rounded-full overflow-hidden border border-slate-200/50 inline-flex items-center align-middle shrink-0 mr-1" title={`세부사업 집행률: ${detailUsageRate.toFixed(1)}%`}>
+                    {/* 세부사업별 미집행액 & 잔여율 뱃지 */}
+                    {(() => {
+                      const detailRemaining = detailTotalBudget - detailTotalUsed;
+                      const detailRemainingRate = detailTotalBudget > 0 ? (detailRemaining / detailTotalBudget) * 100 : 0;
+                      return (
+                        <span className={`font-extrabold rounded-lg border font-mono tabular-nums shadow-3xs flex items-center gap-1.5 ${
+                          detailRemaining < 0 
+                            ? 'bg-rose-50 text-rose-700 border-rose-200/80' 
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+                        } ${hidePolicyHeader ? 'text-xs px-2.5 py-0.5' : 'text-[12px] px-2 py-0.5'}`}>
+                          <span>잔여 {formatN(detailRemaining)}원</span>
+                          <span className={`font-black px-1.5 py-0.2 rounded shadow-3xs ${
+                            detailRemaining < 0 
+                              ? 'bg-rose-100 text-rose-800' 
+                              : 'bg-emerald-100 text-emerald-800'
+                          }`}>
+                            미집행 {detailRemainingRate.toFixed(1)}%
+                          </span>
+                        </span>
+                      );
+                    })()}
+
+                    {/* 세부사업 투톤 듀얼 프로그래스 바 */}
+                    <div className="w-16 h-2 bg-slate-200/70 rounded-full overflow-hidden border border-slate-200/50 inline-flex items-center align-middle shrink-0 mr-1" title={`집행률: ${detailUsageRate.toFixed(1)}% | 미집행률: ${(detailTotalBudget > 0 ? ((detailTotalBudget - detailTotalUsed) / detailTotalBudget * 100) : 0).toFixed(1)}%`}>
                       <div 
-                        className={`h-full rounded-full transition-all duration-300 ${
+                        className={`h-full transition-all duration-300 ${
                           detailUsageRate >= 95 
                             ? 'bg-rose-500' 
                             : detailUsageRate >= 80 
                               ? 'bg-amber-500' 
-                              : 'bg-emerald-500'
+                              : 'bg-indigo-500'
                         }`} 
                         style={{ width: `${Math.min(100, detailUsageRate)}%` }} 
+                      />
+                      <div 
+                        className="h-full bg-emerald-400 transition-all duration-300" 
+                        style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, detailUsageRate), detailTotalBudget > 0 ? ((detailTotalBudget - detailTotalUsed) / detailTotalBudget * 100) : 0))}%` }} 
                       />
                     </div>
 
@@ -582,9 +614,12 @@ const PolicyGroupCardComponent = ({
                       <div className="w-[70px] flex-shrink-0">
                         <span className={`px-2 py-1 rounded-md text-[13px] font-bold border whitespace-nowrap ${cfg.badge === '경비지출' ? 'bg-teal-50 text-teal-700 border-teal-200' : cfg.badge === '교부' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{cfg.badge}</span>
                       </div>
-                      <div className="w-[180px] hidden sm:flex items-center flex-shrink-0 pr-3">
-                        <span className="text-[13px] bg-gray-50 border border-gray-200 text-gray-600 px-2 py-0.5 rounded-md whitespace-nowrap overflow-visible">
-                          {parentCat?.unitProject || '알수없음'}
+                      <div className="w-[190px] hidden sm:flex flex-col justify-center flex-shrink-0 pr-3 leading-tight">
+                        <span className="text-xs font-bold text-slate-800 whitespace-nowrap truncate" title={parentCat ? `${parentCat.unitProject} > ${parentCat.detailedProject}` : ''}>
+                          {parentCat?.detailedProject || parentCat?.unitProject || '알수없음'}
+                        </span>
+                        <span className="text-[11px] text-slate-500 font-semibold whitespace-nowrap truncate">
+                          {parentCat?.statItem || parentCat?.name || ''}
                         </span>
                       </div>
                       <div className="w-[90px] flex items-center flex-shrink-0 pr-3">
