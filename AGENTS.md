@@ -174,6 +174,14 @@
    - AI 이미지 생성기의 한글 글리프 왜곡 및 오탈자('3산 트로케킹', '3개 산', 'Okt', 'Deg' 등)를 엄격히 감수 및 차단합니다.
    - 공식 공공 행정 표준 용어(예: ｢3대 명산 트레킹｣, 정식 국문 월차 `9월`, `10월 ①`, `10월 ②`, `11월`, `12월`)를 의무 적용합니다.
 
+### O. 바탕화면 파일 보존 및 수동 이관 엄수 원칙 (Desktop File Preservation & Explicit Instruction Constraint)
+1. **바탕화면 파일 임의 이동·아카이빙 전면 금지 (Explicit-Instruction-Only Guard)**:
+   - 사용자가 명시적으로 직접 지시(예: *"바탕화면 파일 아카이브로 옮겨줘"*, *"바탕화면 파일 정리해줘"* 등)하지 않는 한, 에이전트는 어떠한 경우에도 바탕화면(`D:\Desktop`) 및 작업 공간에 위치한 파일·폴더를 아카이브(`F:\_Organized_Archive` 또는 `공공문서 폴더`)로 자동 이동, 수집, 삭제, 또는 정리하지 않아야 합니다.
+2. **현행 작업물 및 임시 파일의 바탕화면 상시 존치 보장 (Working Surface Immunity)**:
+   - 사용자가 바탕화면에 생성, 다운로드, 편집 중인 모든 작업 파일, 바로가기, 임시 메모 등은 현행 실무를 위한 고유 작업 영역으로 간주하며, 에이전트의 자율적 정리·동기화 대상에서 100% 영구 면제(Exempt)됩니다.
+3. **명시적 지시 시에도 사전 확인 및 절차 엄수**:
+   - 사용자가 직접 명시적으로 이동을 지시한 경우에 한하여 대상을 식별하고, 사전 시뮬레이션(Dry-Run) 또는 이동 대상 목록을 사용자에게 명확히 보고한 후 지침에 따라 안전하게 이관을 수행해야 합니다.
+
 ## 3. 다중 에이전트 파이프라인 맵
 - `src/lib/agents/planner.ts`: 작업 분해 및 컨텍스트 검색.
 - `src/lib/agents/generator.ts`: 실행 및 코드 합성.
@@ -182,6 +190,7 @@
 ## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)
 - **최신 동기화 일자:** 2026-09-17
 - **동기화된 마일스톤:**
+  - [Milestone 170: Desktop File Preservation & Explicit-Instruction-Only Archiving Policy Release] Established strict behavioral rule prohibiting arbitrary archiving of desktop surface files, ensuring working surface immunity and requiring explicit user command before any file migration. (2026-09-17)
   - [Milestone 169: Desktop '공공문서 폴더' Single Unified NTFS Junction & Full Master Archive Integration Release] Unified fragmented Desktop folders into a single zero-disk-overhead NTFS Directory Junction pointing to F:\_Organized_Archive, pre-synchronized 454 Desktop files, eliminated duplicate shortcuts, and updated public administrative pipeline rules with 100% zero data loss. (2026-09-17)
   - [Milestone 168: Dashboard Tab Switcher Deletion & Unified All-in-One View Restoration Release] Completely removed Dashboard sub-navigation tabs (Budget Overview, Contacts Directory, All-in-One) and restored seamless vertical all-in-one scroll layout. (2026-09-17)
   - [Milestone 165: Dashboard Contacts Management Tab & Email Text Direct Copy Pipeline Release] Integrated Dashboard Tab Switcher (Budget Overview, Contacts Directory, All-in-One), optimized zero-overhead conditional rendering, and added instant email text copy with visual feedback across ContactsBox and MindMapInspector. (2026-09-16)
@@ -193,5 +202,4 @@
   - [Milestone 155: Multi-Agent Harness Evaluator Administrative Linter Integration Release] Integrated evaluateAdministrativeText linter and self-healing error reporting into src/lib/agents/evaluator.ts. (2026-09-14)
   - [Milestone 154: LLM Chat CleanGemmaResponse Administrative Text Sanitizer Pipeline Release] Bound sanitizeAdministrativeText post-processing pipeline into cleanGemmaResponse in src/app/llm/chat/route.ts. (2026-09-14)
   - [Milestone 153: Administrative Formatter & Linter Unit Test Suite (9/9 Tests ALL PASS) Release] Developed __tests__/administrative-formatter.test.ts covering 5 core domains and achieved 100% test pass. (2026-09-14)
-  - [Milestone 152: Administrative Document Formatter & Redundancy Linter Utility Release] Implemented src/lib/administrativeFormatter.ts featuring official date, 24h time, Korean currency words, and 34 redundancy replacements. (2026-09-14)
-  - 그 외 과거 누적 마일스톤 총 229건 통합 요약 (초기 ~ 2026-09-14 이전 패치 내역)
+  - 그 외 과거 누적 마일스톤 총 230건 통합 요약 (초기 ~ 2026-09-14 이전 패치 내역)

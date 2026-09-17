@@ -2,6 +2,14 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 170: Desktop File Preservation & Explicit-Instruction-Only Archiving Policy Release] Established strict behavioral rule prohibiting arbitrary archiving of desktop surface files, ensuring working surface immunity and requiring explicit user command before any file migration. (2026-09-17)
+* **개요 및 개발 목적**:
+  - 바탕화면 파일 임의 이동·아카이빙 전면 금지 및 사용자 직접 지시 한정 수동 이관 원칙 확립:
+    1. 사용자 명시적 지시(Explicit Instruction) 시에만 바탕화면 파일 정리 및 아카이브 이관 허용.
+    2. 바탕화면 내 작성 중인 문서, 임시 파일, 바로가기 등 현행 실무 작업물의 100% 면제 및 상시 존치 보장 (Working Surface Immunity).
+    3. 명시적 지시 접수 시 사전 목록 보고 및 승인 절차 의무화.
+    4. 에이전트 매니페스트(`AGENTS.md`) `### O. 바탕화면 파일 보존 및 수동 이관 엄수 원칙` 제정 및 마일스톤 연동 완료.
+
 ### [Milestone 169: Desktop '공공문서 폴더' Single Unified NTFS Junction & Full Master Archive Integration Release] Unified fragmented Desktop folders into a single zero-disk-overhead NTFS Directory Junction pointing to F:\_Organized_Archive, pre-synchronized 454 Desktop files, eliminated duplicate shortcuts, and updated public administrative pipeline rules with 100% zero data loss. (2026-09-17)
 * **개요 및 개발 목적**:
   - 바탕화면 2원화 폴더 파편화 해소 및 NTFS 디렉토리 정션 단일 통합 완결:
