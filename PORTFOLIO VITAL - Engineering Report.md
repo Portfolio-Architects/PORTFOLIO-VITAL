@@ -319,6 +319,59 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 188: Yangjae Festival Public Share Link URL Pure-Copy Transition & Cloudflare Pages Mobile Template Full-Sync Release] Upgraded festival share button across both React component and Cloudflare Pages mobile template to purely copy dashboard URL without bulky weekly report text, fully synchronized recent UI enhancements (booth category capsule deletion, high-contrast emerald milestone cards, auto-hyphen and phone privacy) to scripts/pages-template.html & Cloudflare KV replica, achieving 100% Jest suite pass (33/33 suites, 305/305 tests) and 0 TypeScript errors. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("공유 눌렀을때 주간 추진실적은 복사 안되게 해주고.. 이제 그냥 링크만 복사되게 해주면됨, 그리고 최신내용 왜 프론트엔드에 반영 안되지?") 정밀 진단 및 원천 해결:
+    1. **공유(Share) 시 순수 링크 URL 복사 방식으로 전면 전환**:
+       - 기존에 클립보드로 함께 복사되던 장문의 주간 추진실적 텍스트 및 집기 현황 포맷을 전면 소거.
+       - 사용자가 [공유] 버튼 클릭 시 대시보드 열람 링크(`https://portfolio-hchps.pages.dev/festival/yangjae` 또는 도메인 URL)만 깨끗하게 단독 복사되도록 `handleCopySummary` 및 `pages-template.html`의 복사 로직 전면 개편.
+       - 복사 완료 시 토스트 알림을 `"페스티벌 대시보드 링크가 복사되었습니다!"`로 교체하여 사용자 혼선 해소.
+    2. **프론트엔드 최신 내용 미반영 원인 규명 및 100% 동기화 (Cloudflare Pages 정적 템플릿 연동)**:
+       - **원인 분석**: 외부 공유 링크(`portfolio-hchps.pages.dev/festival/yangjae`)는 로컬 Next.js SSR 서버가 아닌 Cloudflare Pages의 정적 HTML(`out/index.html`)을 제공함. 최근 마일스톤 182~186(완료 과제 에메랄드 강조, 부스 카테고리 캡슐 삭제, 번호 자동 하이픈 및 휴대전화 차단)의 프론트엔드 변경점이 리액트 소스([YangjaeFestivalDashboard.tsx](file:///d:/Desktop/PORTFOLIO/PORTFOLIO%20-%20VITAL/src/components/festival/YangjaeFestivalDashboard.tsx))에만 적용되고, Cloudflare Pages 템플릿([scripts/pages-template.html](file:///d:/Desktop/PORTFOLIO/PORTFOLIO%20-%20VITAL/scripts/pages-template.html)) 및 빌드 아티팩트에는 누락되어 모바일 접속 시 이전 버전 화면이 노출되었던 결함임.
+       - **동기화 조치**: `scripts/pages-template.html`에 부스 카테고리 캡슐 삭제, 에메랄드 완료 배지 및 카드 스타일, 순수 링크 복사 로직을 1:1 완벽 동기화 완료함.
+       - `node scripts/prepare-pages-output.js` 및 `node scripts/sync-festival-to-cloud.js`를 구동하여 Cloudflare KV 엔드포인트와 정적 번들 동기화 완료.
+    3. **테스트 및 타입 무결성 검증**:
+       - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx` 29개 테스트 전수 통과 (순수 URL 복사 및 주간보고 배제 검증).
+       - 전체 Jest 33개 스위트(305/305 테스트) 100% 통과.
+       - `npx tsc --noEmit` 정적 타입 검사 0 errors 통과.
+
+### [Milestone 187: Budget Modal & Policy Group Card Testing Library Matchers Regression Resolution Release] Resolved Testing Library element matching regressions in stat-item-detail-modal.test.tsx (aligning KPI unit value matchers with Korean currency format) and challenger-r2-2.test.tsx (adopting getAllByText for multi-element stat item headers across category and entry rows), achieving 100% Jest suite pass (33/33 suites, 305/305 tests) and 0 TypeScript compilation errors. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 결함 보고(Summary of all failing tests: `stat-item-detail-modal.test.tsx` 및 `challenger-r2-2.test.tsx`) 전격 분석 및 완벽 해결:
+    1. **`stat-item-detail-modal.test.tsx` KPI 금액 단위 매칭 정합화**:
+       - `StatItemDetailModal.tsx` 상단 5대 KPI 카드(`총 예산액`, `현재 집행 잔액`, `최종 예상 잔액` 등)는 대한민국 공공 재정 규격에 따라 숫자 뒤 별도 `<span ...>원</span>` 배지를 분리 렌더링하고 있음.
+       - 테스트 케이스가 불필요하게 `₩` 접두사가 결합된 단일 문자열(`₩17,339,000`)을 엄격 탐색하여 발생하던 불일치를 교정, 실측 렌더링 값(`17,339,000`) 및 정규식 매칭으로 정합화 완료함.
+    2. **`challenger-r2-2.test.tsx` 다중 요소 탐색 매처 교정 (`getAllByText`)**:
+       - `PolicyGroupCard.tsx` 확장 시, 상단 카테고리 행(`<div data-cell-id="cat-1:statItem">통계목1</div>`)과 하단 최근 지출 내역 행(`<span ...>통계목1</span>`) 양측에 소속 통계목 명칭이 동시 노출되는 정상적인 UI 구조를 반영.
+       - 단일 요소를 전제하던 `getByText('통계목1')`를 Testing Library 표준 다중 요소 검증 매처인 `getAllByText('통계목1')`로 보정하여 결함 원천 해소.
+    3. **전체 테스트 스위트 100% 무결성 달성**:
+       - Jest 33개 테스트 스위트 전수 통과 (`33/33 passed`, `305/305 tests passed`).
+       - `npx tsc --noEmit` 0 errors 무결성 통과.
+
+### [Milestone 186: Yangjae Festival Completed Milestone Tasks High-Contrast Emerald Visual Identity Release] Upgraded completed milestone task cards from muted gray to high-contrast emerald visual identity (emerald card border & background, emerald capsule numbering, and high-visibility mint-emerald status badge), establishing intuitive task lifecycle contrast across Tab 1 with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("완료 과제는 조금 더 눈에 띄는 색으로 표기하자" 및 스크린샷 `media_1789990806961.png`) 전격 반영:
+    1. **완료 상태 배지(`[✓ 완료]`) 시각적 가독성 대폭 강화**:
+       - 기존의 밋밋하고 비활성 버튼처럼 보이던 회색조 배지(`bg-slate-100 text-slate-700 border-slate-300`)를 완전히 탈피.
+       - 선명하고 신뢰감 높은 에메랄드 테마(`bg-emerald-100 text-emerald-900 border-emerald-400 font-black shadow-3xs`)로 전면 개편하여 완료 상태를 0.1초 내 직관적으로 식별 가능하도록 조치함.
+    2. **추진과제 캡슐 번호(`{item.number}`) 에메랄드 하이라이트 연동**:
+       - 완료된 과제의 경우 좌측 블랙 캡슐 내 과제 번호(`추진과제 1`, `추진과제 2` 등) 폰트 색상을 `text-emerald-400`으로 전환하여 캡슐 자체에서도 완료 정체성을 선명히 각인.
+    3. **완료 카드 컨테이너(`milestone-card`) 에메랄드 테두리 및 은은한 배경 강조**:
+       - 완료 과제 카드에 `bg-emerald-50/35 border-emerald-300 ring-1 ring-emerald-200/60` 및 상단 헤더 구분선 `border-emerald-200/80`을 적용하여, 진행중(`amber`), 완료(`emerald`), 예정(`slate`) 3대 과제 라이프사이클의 시각적 위계를 완벽히 확립.
+    4. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
+### [Milestone 185: Yangjae Festival Booth Header Clutter Purge & Redundant Category Capsule Deletion Release] Completely eliminated redundant category capsule badge (`[운영본부]`, `[보건소 부서]`, `[민간]`) from the booth card header in view mode across all booths, leaving only pristine sequential position markers (`No.1`~`No.18` or `운영본부`) and action buttons, with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("이 캡슐이 꼭 필요한가? -> 승인") 전격 반영:
+    1. **부스 카드 헤더 중복 카테고리 캡슐 전면 삭제**:
+       - 1번 부스 카드의 `[운영본부]`(순번 마커) + `[운영본부]`(카테고리 캡슐) 중복 표출 및 일반 부스 카드의 `[No.X]` + `[보건소 부서]`(또는 `[민간]`) 캡슐 배지가 카드 타이틀의 부서/기관명과 중복되어 시각적 잡음(Clutter)을 유발하던 문제를 해소.
+       - 뷰 모드(`!isEditingThis`)에서 `{booth.category}` 캡슐 렌더링을 완전히 제거하여, 좌측에는 고유 순번 마커(`[운영본부]` 또는 `[No.X]`), 우측에는 상태 배지(`[확정]`) 및 액션 버튼(`[수정]`)만 남겨 직관적이고 군더더기 없는 공공 대시보드 인터페이스로 정돈함.
+    2. **편집 모드(`isEditingThis`) 카테고리 입력 제어 유지**:
+       - 부스 정보 수정 시 카테고리 변경이 필요한 관리자 실무를 보장하기 위해 인라인 편집 패널 내 `<input value={targetBooth.category} ... />`는 안전하게 유지함.
+    3. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
 ### [Milestone 184: Yangjae Festival Role-Based Private Mobile Contact Guard & Administrative Landline Exclusive Public Mode Release] Completely purged all personal mobile phone numbers from public/external frontend rendering, restricting contact strictly to administrative landlines (02-3423-XXXX) for general viewers, while implementing an exclusive Local-Admin-Only private view with an instant interactive toggle (showPrivateMobile) and Cloudflare edge replica API sanitization, with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
 * **개요 및 개발 목적**:
   - 사용자 지침("그럼 모든 핸드폰번호 프론트 엔드 출력은 삭제하고 행정번호인 경우에만 연락 가능하게 해줘, 혹시 나만 핸드폰 번호 보이게 설정할수는 없나?? 프론트 엔드에서") 전격 반영:

@@ -163,15 +163,10 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       });
 
       const copiedText = writeTextMock.mock.calls[0][0];
-      // Must contain festival title, period, staff note, weekly report items, and active Cloudflare URL
-      expect(copiedText).toContain('2026 양재천 걷자! 건강 페스티벌');
-      expect(copiedText).toContain('주간 추진실적 보고');
-      expect(copiedText).toContain('9. 7. ~ 9. 11.');
-      expect(copiedText).toContain('**행사 참여 직원 대체휴무 시행 예정 (전 직원 참여, 금연단속원 포함)**');
-      expect(copiedText).toContain('■ 추진내역');
-      expect(copiedText).toContain('https://portfolio-hchps.pages.dev/festival/yangjae');
-      expect(copiedText).toContain('1. [체육회/공동개최] 9. 7. 강남구체육회(걷기협회) 구청장배 걷기대회 공동 개최 협의');
-      expect(copiedText).toContain('※ 아래 링크 클릭하시면 전체 추진내역 열람이 가능합니다.');
+      // Must copy only active Cloudflare URL, and NOT weekly progress report
+      expect(copiedText).toBe('https://portfolio-hchps.pages.dev/festival/yangjae');
+      expect(copiedText).not.toContain('주간 추진실적 보고');
+      expect(copiedText).not.toContain('■ 추진내역');
     });
 
     it('falls back cleanly if weeklyReport is absent in custom payload', async () => {
@@ -201,8 +196,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       });
 
       const copiedText = writeTextMock.mock.calls[0][0];
-      expect(copiedText).toContain('https://portfolio-hchps.pages.dev/festival/yangjae');
-      expect(copiedText).toContain('9. 7. ~ 9. 11.');
+      expect(copiedText).toBe('https://portfolio-hchps.pages.dev/festival/yangjae');
     });
 
     it('falls back to document.execCommand in insecure HTTP or webview contexts without throwing', async () => {
@@ -256,8 +250,8 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       await waitFor(() => {
         expect(writeTextMock).toHaveBeenCalled();
         expect(promptMock).toHaveBeenCalledWith(
-          expect.stringContaining('아래 주간 추진실적 내용을 복사'),
-          expect.stringContaining('2026 양재천 걷자! 건강 페스티벌')
+          expect.stringContaining('아래 링크 주소를 복사'),
+          'https://portfolio-hchps.pages.dev/festival/yangjae'
         );
       });
 
@@ -287,9 +281,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
       const sharePayload = shareMock.mock.calls[0][0];
       expect(sharePayload.title).toContain('2026 양재천 걷자! 건강 페스티벌');
-      expect(sharePayload.title).toContain('주간 추진실적 보고');
-      // text already contains the target URL; url field should not be redundantly passed to avoid duplication
-      expect(sharePayload.text).toContain('https://portfolio-hchps.pages.dev/festival/yangjae');
+      expect(sharePayload.text).toBe('https://portfolio-hchps.pages.dev/festival/yangjae');
       expect(sharePayload.url).toBeUndefined();
     });
   });

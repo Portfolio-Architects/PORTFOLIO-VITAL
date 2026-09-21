@@ -88,7 +88,7 @@
           <span id="font-label">큰글씨</span>
         </button>
         <!-- Share Button -->
-        <button id="btn-share" type="button" class="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center gap-1 sm:gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all" title="카카오톡/문자 주간 추진실적 공유">
+        <button id="btn-share" type="button" class="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center gap-1 sm:gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all" title="대시보드 링크 공유">
           <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
           </svg>
@@ -143,7 +143,11 @@
 
   <!-- Toast Notification -->
   <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 border border-slate-700 hidden">
-    <div class="font-bold text-sm">주간 추진실적이 복사되었습니다!</div>
+    <svg class="w-5 h-5 text-emerald-400 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    <div>
+      <div class="font-bold text-sm">페스티벌 대시보드 링크가 복사되었습니다!</div>
+      <div class="text-xs text-slate-300">원하는 곳(카카오톡·문자 등)에 바로 붙여넣기(Ctrl+V) 하세요.</div>
+    </div>
   </div>
 
   <script>
@@ -330,7 +334,7 @@
           (m.status === 'in-progress'
             ? 'bg-amber-50/70 border-amber-400 ring-1 ring-amber-300'
             : m.status === 'done'
-            ? 'bg-white border-slate-300'
+            ? 'bg-emerald-50/35 border-emerald-300 ring-1 ring-emerald-200/60'
             : 'bg-white border-slate-200 text-slate-600');
 
         let detailsHtml = '';
@@ -419,16 +423,19 @@
         }
 
         const statusBadge = m.status === 'done'
-          ? '<span class="text-[11px] px-2 py-0.5 font-bold rounded border bg-slate-100 text-slate-700 border-slate-300 font-extrabold">✓ 완료</span>'
+          ? '<span class="text-[11px] px-2 py-0.5 font-bold rounded border bg-emerald-100 text-emerald-900 border-emerald-400 font-black shadow-3xs">✓ 완료</span>'
           : m.status === 'in-progress'
           ? '<span class="text-[11px] px-2 py-0.5 font-bold rounded border bg-amber-100 text-amber-900 border-amber-400 font-black">▶ 진행중</span>'
           : '<span class="text-[11px] px-2 py-0.5 font-bold rounded border bg-slate-50 text-slate-400 border-slate-200">○ 예정</span>';
 
+        const numColor = m.status === 'done' ? 'text-emerald-400' : 'text-amber-300';
+        const headerBorder = m.status === 'done' ? 'border-emerald-200/80' : 'border-slate-200';
+
         card.innerHTML =
-          '<div class="flex items-center justify-between pb-2 mb-1 border-b border-slate-200 gap-1.5 cursor-pointer" onclick="toggleTask(' + m.id + ')">' +
+          '<div class="flex items-center justify-between pb-2 mb-1 border-b ' + headerBorder + ' gap-1.5 cursor-pointer" onclick="toggleTask(' + m.id + ')">' +
             '<div class="flex items-center gap-2 flex-1 min-w-0">' +
               '<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white shadow-2xs max-w-full">' +
-                '<span class="font-black text-amber-300 text-[11px] shrink-0">' + m.number + '</span>' +
+                '<span class="font-black ' + numColor + ' text-[11px] shrink-0">' + m.number + '</span>' +
                 '<span class="w-[1px] h-3 bg-slate-600 shrink-0"></span>' +
                 '<span class="text-xs font-extrabold text-slate-50 tracking-tight truncate">' + m.title + '</span>' +
               '</div>' +
@@ -554,12 +561,16 @@
         return b.category === activeCategory;
       });
 
-      container.innerHTML = booths.map((b, idx) =>
-        '<div class="p-3.5 bg-white border-2 border-slate-300 rounded-xl shadow-2xs">' +
+      container.innerHTML = booths.map((b, idx) => {
+        const isHQ = b.category === '운영본부' || (b.name && b.name.includes('운영본부'));
+        const headerBadge = isHQ
+          ? '<span class="text-[11px] font-extrabold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 shadow-3xs">운영본부</span>'
+          : '<span class="text-[11px] font-mono font-black text-slate-700">No.' + (idx + 1) + '</span>';
+
+        return '<div class="p-3.5 bg-white border-2 border-slate-300 rounded-xl shadow-2xs">' +
           '<div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-200">' +
             '<div class="flex items-center gap-1.5">' +
-              '<span class="text-[11px] font-mono font-black text-slate-700">No.' + (idx + 1) + '</span>' +
-              '<span class="text-[11px] font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">' + b.category + '</span>' +
+              headerBadge +
             '</div>' +
             '<span class="text-[11px] px-2 py-0.5 font-bold rounded border ' + (b.status === '확정' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-amber-50 text-amber-800 border-amber-300') + '">' + b.status + '</span>' +
           '</div>' +
@@ -568,8 +579,8 @@
             '<span class="font-bold text-slate-600">내용: </span>' + b.program +
           '</div>' +
           '<div class="text-xs text-slate-600 font-medium">부스규모: <strong class="text-slate-900">' + b.scale + '</strong></div>' +
-        '</div>'
-      ).join('');
+        '</div>';
+      }).join('');
     }
 
     window.toggleTask = function(id) {
@@ -627,25 +638,15 @@
 
     document.getElementById('btn-share').onclick = function() {
       const title = appData.meta?.title || '2026 양재천 걷자! 건강 페스티벌';
-      const period = appData.weeklyReport?.period || '9. 7. ~ 9. 11.';
-      const weekTitle = appData.weeklyReport?.weekTitle || '주간 추진실적 보고';
-      const staffNote = appData.meta?.staffNote || '행사 참여 직원 대체휴무 시행 예정';
-      const report = (appData.weeklyReport?.items || []).join('\n');
       const targetUrl = window.location.origin + '/festival/yangjae';
-
-      const text = '[' + title + ' | ' + weekTitle + ']\n' +
-        '(추진기간: ' + period + ')\n\n' +
-        '**' + staffNote + '**\n\n' +
-        '■ 추진내역\n' + report + '\n\n' +
-        '※ 아래 링크 클릭하시면 전체 추진내역 열람이 가능합니다.\n' + targetUrl;
 
       let copied = false;
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => { copied = true; }).catch(() => {});
+        navigator.clipboard.writeText(targetUrl).then(() => { copied = true; }).catch(() => {});
       }
       if (!copied) {
         const ta = document.createElement('textarea');
-        ta.value = text;
+        ta.value = targetUrl;
         ta.style.position = 'fixed';
         ta.style.left = '-9999px';
         document.body.appendChild(ta);
@@ -657,7 +658,7 @@
 
       if (navigator.share) {
         try {
-          navigator.share({ title: '[' + title + ' | ' + weekTitle + ']', text: text });
+          navigator.share({ title: title, text: targetUrl, url: targetUrl });
         } catch(e) {}
       }
 

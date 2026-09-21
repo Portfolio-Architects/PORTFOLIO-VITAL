@@ -1596,50 +1596,17 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       : PUBLIC_SHARE_URL;
 
     const title = data?.meta?.title || '2026 양재천 걷자! 건강 페스티벌';
-    const period = data?.weeklyReport?.period || '9. 7. ~ 9. 11.';
-    const weekTitle = data?.weeklyReport?.weekTitle || '주간 추진실적 보고';
-    const staffNote = data?.meta?.staffNote || '행사 참여 직원 대체휴무 시행 예정';
 
-    const fallbackWeeklyItems = [
-      '1. [체육회/공동개최] 9. 7. 강남구체육회(걷기협회) 구청장배 걷기대회 공동 개최 협의 (과장님, 지영팀장님, 오창선)\n   - 내용: 당초 영동3교 분산 추진 건(체육회 11.21. 연기안)을 10. 31.(토) 우리 행사와 전격 통합·공동 개최 협의\n   - 효과: 체육회 참가 인원(200~250명) 합류로 총 1,000명 이상 대규모 축제 외연 확장 및 행사 시너지 극대화',
-      '2. [기획/방침] 공동 개최 연계에 따른 행사 기본계획 방침서 수정 및 식순 보완\n   - 내용: 체육회 공동 주관 명기, 개회식 식순 연계(내빈 의전 및 준비운동), 걷기 코스 및 참가자 통합 운영안 조율',
-      '3. [부스/의료] 12개 전문 건강체험 부스 최종 확정 및 협력 기관 세부 조율 완료\n   - 내용: 대학병원·의사회·민간 헬스케어 등 12개 부스(검진버스 2대 포함) 배치도 확정 및 기관별 체험 프로그램 조율',
-      '4. [홍보/접수] 행사 메인 포스터 최종 감수 및 대구민 사전접수 시스템 연계 준비\n   - 내용: 공동개최 기관 표기 포스터 최종 감수, 10. 1. 보건소 통합예약시스템(800명 선착순) 접수 페이지 등록 사전 점검',
-      '5. [현장/안전] 행사장 시설 사용 협조 및 1,000명 인파 대비 안전관리 대책 수립\n   - 내용: 수변문화센터 외부(치수과)·내부(문화도시과) 시설 사용 조율, 남부혈액원 주차 협조(5대) 및 응급 안전 동선 구축',
-    ];
-
-    const weeklyLines = data?.weeklyReport?.items && data.weeklyReport.items.length > 0
-      ? data.weeklyReport.items.join('\n')
-      : fallbackWeeklyItems.join('\n');
-
-    const suppliesText = `■ 부스 집기 수요 현황
-- 총 부스: ${boothMetrics.totalEntities}개 기관 (${boothMetrics.totalDong}동) ${boothMetrics.hqEntities > 0 ? `[운영본부 별도]` : ''}
-- 테이블: 총 ${boothMetrics.totalTables}개 (확정 ${boothMetrics.confirmedTables}개)
-- 의자: 총 ${boothMetrics.totalChairs}개 (확정 ${boothMetrics.confirmedChairs}개)`;
-
-    const text = `[${title} | ${weekTitle}]
-(추진기간: ${period})
-
-**${staffNote}**
-
-■ 추진내역
-${weeklyLines}
-
-${suppliesText}
-
-※ 아래 링크 클릭하시면 전체 추진내역 열람이 가능합니다.
-${targetUrl}`;
-
-    // 1. First attempt clipboard copy
-    const copiedSuccess = await copyToClipboardSafe(text);
+    // 1. First attempt clipboard copy of only the link URL
+    const copiedSuccess = await copyToClipboardSafe(targetUrl);
 
     // 2. Mobile/Tablet or Native Web Share support
     let sharedSuccess = false;
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
       try {
         const shareData = {
-          title: `[${title} | ${weekTitle}] (${period})`,
-          text: text,
+          title: title,
+          text: targetUrl,
         };
         if (!navigator.canShare || navigator.canShare(shareData)) {
           await navigator.share(shareData);
@@ -1657,9 +1624,9 @@ ${targetUrl}`;
       setCopied(true);
       setTimeout(() => setCopied(false), 3500);
     } else if (!sharedSuccess && typeof window !== 'undefined' && typeof window.prompt === 'function') {
-      window.prompt('아래 주간 추진실적 내용을 복사(Ctrl+C 또는 길게 터치)하세요:', text);
+      window.prompt('아래 링크 주소를 복사(Ctrl+C 또는 길게 터치)하세요:', targetUrl);
     }
-  }, [data, PUBLIC_SHARE_URL, boothMetrics]);
+  }, [PUBLIC_SHARE_URL, data?.meta?.title]);
 
   const filteredBooths = useMemo(() => {
     if (selectedCategory === '전체') return activeBooths || [];
@@ -1685,8 +1652,8 @@ ${targetUrl}`;
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 border border-slate-700">
           <Check className="w-5 h-5 text-emerald-400 stroke-[3]" />
           <div>
-            <div className="font-bold text-sm">금주({data?.weeklyReport?.period || '8. 31. ~ 9. 4.'}) 주간 추진실적이 복사되었습니다!</div>
-            <div className="text-xs text-slate-300">카카오톡 또는 문자에 바로 붙여넣기(Ctrl+V) 하세요.</div>
+            <div className="font-bold text-sm">페스티벌 대시보드 링크가 복사되었습니다!</div>
+            <div className="text-xs text-slate-300">원하는 곳(카카오톡·문자 등)에 바로 붙여넣기(Ctrl+V) 하세요.</div>
           </div>
         </div>
       )}
@@ -1737,7 +1704,7 @@ ${targetUrl}`;
               type="button"
               onClick={handleCopySummary}
               className="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center gap-1 sm:gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all whitespace-nowrap"
-              title="카카오톡/문자 주간 추진실적 공유"
+              title="대시보드 링크 공유"
             >
               <Share2 className="w-3.5 h-3.5 shrink-0" />
               <span>공유</span>

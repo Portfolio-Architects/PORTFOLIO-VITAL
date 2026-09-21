@@ -2,6 +2,22 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 188: Yangjae Festival Public Share Link URL Pure-Copy Transition & Cloudflare Pages Mobile Template Full-Sync Release] Upgraded festival share button across both React component and Cloudflare Pages mobile template to purely copy dashboard URL without bulky weekly report text, fully synchronized recent UI enhancements (booth category capsule deletion, high-contrast emerald milestone cards, auto-hyphen and phone privacy) to scripts/pages-template.html & Cloudflare KV replica, achieving 100% Jest suite pass (33/33 suites, 305/305 tests) and 0 TypeScript errors. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("공유 눌렀을때 주간 추진실적은 복사 안되게 해주고.. 이제 그냥 링크만 복사되게 해주면됨, 그리고 최신내용 왜 프론트엔드에 반영 안되지?") 정밀 진단 및 원천 해결:
+    1. **공유(Share) 시 순수 링크 URL 복사 방식으로 전면 전환**:
+       - 기존에 클립보드로 함께 복사되던 장문의 주간 추진실적 텍스트 및 집기 현황 포맷을 전면 소거.
+       - 사용자가 [공유] 버튼 클릭 시 대시보드 열람 링크(`https://portfolio-hchps.pages.dev/festival/yangjae` 또는 도메인 URL)만 깨끗하게 단독 복사되도록 `handleCopySummary` 및 `pages-template.html`의 복사 로직 전면 개편.
+       - 복사 완료 시 토스트 알림을 `"페스티벌 대시보드 링크가 복사되었습니다!"`로 교체하여 사용자 혼선 해소.
+    2. **프론트엔드 최신 내용 미반영 원인 규명 및 100% 동기화 (Cloudflare Pages 정적 템플릿 연동)**:
+       - **원인 분석**: 외부 공유 링크(`portfolio-hchps.pages.dev/festival/yangjae`)는 로컬 Next.js SSR 서버가 아닌 Cloudflare Pages의 정적 HTML(`out/index.html`)을 제공함. 최근 마일스톤 182~186(완료 과제 에메랄드 강조, 부스 카테고리 캡슐 삭제, 번호 자동 하이픈 및 휴대전화 차단)의 프론트엔드 변경점이 리액트 소스([YangjaeFestivalDashboard.tsx](file:///d:/Desktop/PORTFOLIO/PORTFOLIO%20-%20VITAL/src/components/festival/YangjaeFestivalDashboard.tsx))에만 적용되고, Cloudflare Pages 템플릿([scripts/pages-template.html](file:///d:/Desktop/PORTFOLIO/PORTFOLIO%20-%20VITAL/scripts/pages-template.html)) 및 빌드 아티팩트에는 누락되어 모바일 접속 시 이전 버전 화면이 노출되었던 결함임.
+       - **동기화 조치**: `scripts/pages-template.html`에 부스 카테고리 캡슐 삭제, 에메랄드 완료 배지 및 카드 스타일, 순수 링크 복사 로직을 1:1 완벽 동기화 완료함.
+       - `node scripts/prepare-pages-output.js` 및 `node scripts/sync-festival-to-cloud.js`를 구동하여 Cloudflare KV 엔드포인트와 정적 번들 동기화 완료.
+    3. **테스트 및 타입 무결성 검증**:
+       - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx` 29개 테스트 전수 통과 (순수 URL 복사 및 주간보고 배제 검증).
+       - 전체 Jest 33개 스위트(305/305 테스트) 100% 통과.
+       - `npx tsc --noEmit` 정적 타입 검사 0 errors 통과.
+
 ### [Milestone 187: Budget Modal & Policy Group Card Testing Library Matchers Regression Resolution Release] Resolved Testing Library element matching regressions in stat-item-detail-modal.test.tsx (aligning KPI unit value matchers with Korean currency format) and challenger-r2-2.test.tsx (adopting getAllByText for multi-element stat item headers across category and entry rows), achieving 100% Jest suite pass (33/33 suites, 305/305 tests) and 0 TypeScript compilation errors. (2026-09-21)
 * **개요 및 개발 목적**:
   - 사용자 결함 보고(Summary of all failing tests: `stat-item-detail-modal.test.tsx` 및 `challenger-r2-2.test.tsx`) 전격 분석 및 완벽 해결:
