@@ -2,6 +2,17 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 185: Yangjae Festival Booth Header Clutter Purge & Redundant Category Capsule Deletion Release] Completely eliminated redundant category capsule badge (`[운영본부]`, `[보건소 부서]`, `[민간]`) from the booth card header in view mode across all booths, leaving only pristine sequential position markers (`No.1`~`No.18` or `운영본부`) and action buttons, with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("이 캡슐이 꼭 필요한가? -> 승인") 전격 반영:
+    1. **부스 카드 헤더 중복 카테고리 캡슐 전면 삭제**:
+       - 1번 부스 카드의 `[운영본부]`(순번 마커) + `[운영본부]`(카테고리 캡슐) 중복 표출 및 일반 부스 카드의 `[No.X]` + `[보건소 부서]`(또는 `[민간]`) 캡슐 배지가 카드 타이틀의 부서/기관명과 중복되어 시각적 잡음(Clutter)을 유발하던 문제를 해소.
+       - 뷰 모드(`!isEditingThis`)에서 `{booth.category}` 캡슐 렌더링을 완전히 제거하여, 좌측에는 고유 순번 마커(`[운영본부]` 또는 `[No.X]`), 우측에는 상태 배지(`[확정]`) 및 액션 버튼(`[수정]`)만 남겨 직관적이고 군더더기 없는 공공 대시보드 인터페이스로 정돈함.
+    2. **편집 모드(`isEditingThis`) 카테고리 입력 제어 유지**:
+       - 부스 정보 수정 시 카테고리 변경이 필요한 관리자 실무를 보장하기 위해 인라인 편집 패널 내 `<input value={targetBooth.category} ... />`는 안전하게 유지함.
+    3. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
 ### [Milestone 184: Yangjae Festival Role-Based Private Mobile Contact Guard & Administrative Landline Exclusive Public Mode Release] Completely purged all personal mobile phone numbers from public/external frontend rendering, restricting contact strictly to administrative landlines (02-3423-XXXX) for general viewers, while implementing an exclusive Local-Admin-Only private view with an instant interactive toggle (showPrivateMobile) and Cloudflare edge replica API sanitization, with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
 * **개요 및 개발 목적**:
   - 사용자 지침("그럼 모든 핸드폰번호 프론트 엔드 출력은 삭제하고 행정번호인 경우에만 연락 가능하게 해줘, 혹시 나만 핸드폰 번호 보이게 설정할수는 없나?? 프론트 엔드에서") 전격 반영:

@@ -2661,7 +2661,7 @@ ${targetUrl}`;
                               No.{displayNo}
                             </span>
                           )}
-                          {isEditingThis ? (
+                          {isEditingThis && (
                             <input
                               type="text"
                               value={targetBooth.category}
@@ -2669,14 +2669,6 @@ ${targetUrl}`;
                               className="px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-bold w-24"
                               placeholder="카테고리"
                             />
-                          ) : (
-                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-bold ${
-                              isHQ
-                                ? 'text-amber-800 bg-amber-50 border-amber-200'
-                                : 'text-slate-800 bg-slate-100 border-slate-300'
-                            } px-1.5 py-0.5 rounded border`}>
-                              {booth.category}
-                            </span>
                           )}
                         </div>
 
