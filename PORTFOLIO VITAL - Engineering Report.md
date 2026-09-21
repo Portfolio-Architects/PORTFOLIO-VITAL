@@ -5179,12 +5179,24 @@ sequenceDiagram
     * 좌측 블랙 캡슐 내 과제 번호(`추진과제 1`, `추진과제 2`)를 `text-emerald-400`으로 연동하여 캡슐 자체에서도 완료 정체성을 선명히 전달.
     * Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 확보.
 
-- [x] **예산 통계목 모달 및 정책사업 카드 테스팅 라이브러리 매처 결함 전수 해결 릴리즈 (Milestone 187 - 2026-09-21)**
-  - 사용자 요구사항: "Summary of all failing tests" (stat-item-detail-modal.test.tsx 및 challenger-r2-2.test.tsx 실패 분석 및 해결)
+- [x] **양재천 페스티벌 클라우드플레어 Pages 단독 템플릿 4대 탭(행사식순·업무분장) 1:1 완벽 동기화 및 2번 과제 필터링 릴리즈 (Milestone 191 - 2026-09-21)**
+  - 사용자 요구사항: "엥.. 배포 완료 되어도 똑같은데" (Cloudflare Pages 모바일 화면 캡처: 기존 2개 탭만 노출되고 추진과제 1번 탭에 2번 과제 '행사 식순'이 중복 노출되는 현상 분석 및 해결)
+  - 원인 분석: Next.js React 컴포넌트(`YangjaeFestivalDashboard.tsx`)에는 4대 탭(추진과제, 부스현황, 행사식순, 업무분장)이 신설되고 2번 과제가 필터링되었으나, Cloudflare Pages 빌드 시 정적 서빙되는 단독 HTML 템플릿(`scripts/pages-template.html`)이 이전 2개 탭 구조에 머물러 있었음.
   - 주요 조치 및 엔지니어링 실적:
-    * `stat-item-detail-modal.test.tsx`: KPI 카드 수치 매칭 시 `₩` 접두사가 불필요하게 결합되어 발생하던 탐색 실패를 실측 렌더링 값(`17,339,000`, `13,185,000`, `12,285,000` 및 `/4,154,000/`, `/900,000/`) 매칭으로 교정 완료.
-    * `challenger-r2-2.test.tsx`: `PolicyGroupCard` 확장 시 카테고리 행과 지출 내역 행 양측에 소속 통계목(`통계목1`)이 동시 렌더링되는 정상 구조에 맞춰 `getByText`를 `getAllByText` 다중 검증 매처로 교정 완료.
-    * 전체 Jest 테스트 스위트 33개 전수 100% 통과 (`33/33 passed`, `305/305 passed`) 및 `npx tsc --noEmit` 0 errors 무결성 확보.
+    * **4대 탭 그리드 체계 동기화 (`scripts/pages-template.html`)**:
+      - 탭 버튼 컨테이너를 `grid-cols-2`에서 `grid-cols-2 sm:grid-cols-4`로 확장하고 `[3. 행사식순]`, `[4. 업무분장]` 버튼 추가.
+      - 4대 탭 전환 전용 함수 `setActiveTab(tab)`을 구현하여 탭 선택 시 실시간 렌더링 및 활성화 클래스 전환 지원.
+    * **1번 탭(추진과제) 2번 과제 필터링**:
+      - `renderMilestones()` 렌더링 루프 및 `btn-toggle-all-tasks`에서 `m.id === 2`를 제외하여 3번 탭(행사식순)과의 중복 표출 완전 차단.
+    * **3번 탭(행사식순) 전용 뷰 및 검색 완비**:
+      - 17개 세부 타임테이블 표(Table) 그리드, 단계별 필터 칩(`전체`, `식전·준비`, `공식행사`, `걷기대회`, `공연·폐회`), 대통령훈령 제438호 의전 안내 박스 및 실시간 검색 인풋 탑재.
+    * **4번 탭(업무분장) 전용 뷰 및 공공 프라이버시 필터링 완비**:
+      - 22개 부서·기관 배정 과업 표(Table) 그리드, 카테고리 필터 칩, 원클릭 유선 행정전화 발신 링크(`adminNo` 전용, 일반 모바일 010 번호는 공공 안전을 위해 미노출) 및 실시간 검색 인풋 탑재.
+    * **정적 빌드 및 Edge KV 동기화**:
+      - `node scripts/prepare-pages-output.js`를 통해 `out/` 빌드 아티팩트 및 `functions/api/festival/yangjae.ts` 폴백 데이터 전수 갱신.
+      - `node scripts/sync-festival-to-cloud.js` 실행으로 Cloudflare Edge 24/7 Replica 동기화 완료.
+    * **무결성 검증**:
+      - `npx tsc --noEmit` 0 errors, Jest 테스트 29개 전수(100%) 통과 완료.
 
 
 

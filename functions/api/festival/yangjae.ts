@@ -340,10 +340,10 @@ const FALLBACK_FESTIVAL_DATA = {
       "status": "확정",
       "tables": 2,
       "chairs": 6,
-      "manager": "김지영 팀장",
-      "phone": "02-3423-7031",
-      "adminPhone": "02-3423-7031",
-      "mobilePhone": ""
+      "manager": "심다영",
+      "phone": "02-3423-7018",
+      "adminPhone": "02-3423-7018",
+      "mobilePhone": "010-3912-3269"
     },
     {
       "id": 3,

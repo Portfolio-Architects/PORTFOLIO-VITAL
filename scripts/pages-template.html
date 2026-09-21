@@ -105,12 +105,18 @@
       </div>
 
       <!-- Section 2: Tab Buttons -->
-      <div class="grid grid-cols-2 gap-1.5 bg-slate-200 p-1.5 rounded-xl border border-slate-300">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-slate-200 p-1.5 rounded-xl border border-slate-300">
         <button id="tab-milestones" type="button" class="py-2.5 text-xs font-extrabold rounded-lg transition-all cursor-pointer text-center bg-slate-900 text-white shadow-xs">
           1. 추진과제
         </button>
         <button id="tab-booths" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
           2. 부스현황
+        </button>
+        <button id="tab-schedule" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
+          3. 행사식순
+        </button>
+        <button id="tab-duties" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
+          4. 업무분장
         </button>
       </div>
 
@@ -138,6 +144,98 @@
         <div id="booth-filter-pills" class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar"></div>
         <div id="booths-list" class="space-y-2.5"></div>
       </div>
+
+      <!-- Content 3: Schedule -->
+      <div id="content-schedule" class="space-y-3.5 hidden">
+        <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs font-black text-sm">
+                ⏱
+              </div>
+              <div>
+                <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                  <span>행사 식순</span>
+                  <span id="schedule-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">17개 식순</span>
+                </h3>
+                <p class="text-[11px] text-slate-500 font-medium">07:30 직원 출근부터 14:30 환경 정비까지 진행 순서 및 의전 규정</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+              <span>📅</span>
+              <span>2026. 10. 31.(토) 08:00~14:00</span>
+            </div>
+          </div>
+
+          <!-- Quick Phase Filter Pills -->
+          <div id="schedule-filter-pills" class="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar"></div>
+
+          <!-- Search Bar -->
+          <div class="relative">
+            <input
+              id="input-schedule-search"
+              type="text"
+              placeholder="식순명, 담당자, 내용 검색 (예: 국민의례, 걷기대회, 축하공연...)"
+              class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
+            />
+            <button
+              id="btn-clear-schedule-search"
+              type="button"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer hidden text-xs font-bold"
+            >✕</button>
+          </div>
+        </div>
+
+        <!-- Timetable Table Grid -->
+        <div id="schedule-table-container" class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs"></div>
+      </div>
+
+      <!-- Content 4: Duties -->
+      <div id="content-duties" class="space-y-3.5 hidden">
+        <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-2xs font-black text-sm">
+                🛡
+              </div>
+              <div>
+                <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                  <span>업무분장 및 비상연락망</span>
+                  <span id="duties-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">22개 부서·기관</span>
+                </h3>
+                <p class="text-[11px] text-slate-500 font-medium">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
+                <span>👥</span>
+                <span>행사 운영단</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div id="duty-filter-pills" class="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar"></div>
+
+          <!-- Search Bar -->
+          <div class="relative">
+            <input
+              id="input-duty-search"
+              type="text"
+              placeholder="부서명, 담당자, 전화번호, 과업 내용 검색 (예: 오창선, 체육회, 구급차, 제이민...)"
+              class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900"
+            />
+            <button
+              id="btn-clear-duty-search"
+              type="button"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer hidden text-xs font-bold"
+            >✕</button>
+          </div>
+        </div>
+
+        <!-- Roster Table Grid -->
+        <div id="duties-table-container" class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs"></div>
+      </div>
     </div>
   </div>
 
@@ -154,8 +252,34 @@
     let appData = __APP_DATA_JSON__;
     let activeTab = 'milestones';
     let activeCategory = '전체';
+    let activeSchedulePhase = '전체';
+    let scheduleSearchQuery = '';
+    let activeDutyCategory = '전체';
+    let dutySearchQuery = '';
     let expandedTasks = new Set();
     let isLargeFont = false;
+
+    const SCHEDULE_PHASES = ['전체', '식전·준비', '공식행사', '걷기대회', '공연·폐회'];
+    const DUTY_CATEGORIES = ['전체', '총괄기획', '체육회', '대행용역', '응급안전', '체험부스', '유관부서'];
+
+    function formatAutoHyphen(str) {
+      if (!str || typeof str !== 'string') return '';
+      const digits = str.replace(/[^0-9]/g, '');
+      if (!digits) return str;
+      if (digits.startsWith('02')) {
+        if (digits.length <= 2) return digits;
+        if (digits.length <= 5) return digits.slice(0, 2) + '-' + digits.slice(2);
+        if (digits.length <= 9) return digits.slice(0, 2) + '-' + digits.slice(2, 5) + '-' + digits.slice(5);
+        return digits.slice(0, 2) + '-' + digits.slice(2, 6) + '-' + digits.slice(6, 10);
+      }
+      if (digits.startsWith('01') || digits.startsWith('05') || digits.startsWith('07')) {
+        if (digits.length <= 3) return digits;
+        if (digits.length <= 7) return digits.slice(0, 3) + '-' + digits.slice(3);
+        if (digits.length <= 10) return digits.slice(0, 3) + '-' + digits.slice(3, 6) + '-' + digits.slice(6, 10);
+        return digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7, 11);
+      }
+      return str;
+    }
 
     const STAFF_PHONE_MAP = {
       '오창선': { ext: '7116', tel: '02-3423-7116' },
@@ -328,6 +452,8 @@
       container.innerHTML = '';
 
       (appData.milestones || []).forEach(m => {
+        // 과제 2(행사 식순)는 상단 [3. 행사식순] 전용 탭으로 승격되었으므로 1번 탭(추진과제)에서는 노출하지 않음
+        if (m.id === 2) return;
         const isExpanded = expandedTasks.has(m.id);
         const card = document.createElement('div');
         card.className = 'p-3.5 rounded-xl border-2 transition-all shadow-2xs ' +
@@ -594,26 +720,268 @@
       renderBooths();
     };
 
-    document.getElementById('tab-milestones').onclick = function() {
-      activeTab = 'milestones';
-      this.className = 'py-2.5 text-xs font-extrabold rounded-lg transition-all cursor-pointer text-center bg-slate-900 text-white shadow-xs';
-      document.getElementById('tab-booths').className = 'py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70';
-      document.getElementById('content-milestones').classList.remove('hidden');
-      document.getElementById('content-booths').classList.add('hidden');
-      renderMilestones();
+    function renderSchedule() {
+      const container = document.getElementById('schedule-table-container');
+      const pillsContainer = document.getElementById('schedule-filter-pills');
+      if (!container || !pillsContainer) return;
+
+      const schedule = appData.schedule || [];
+      const badge = document.getElementById('schedule-count-badge');
+      if (badge) badge.innerText = schedule.length + '개 식순';
+
+      pillsContainer.innerHTML = SCHEDULE_PHASES.map(ph => {
+        const count = ph === '전체' ? schedule.length : schedule.filter(s => s.phase === ph).length;
+        const isSelected = activeSchedulePhase === ph;
+        return '<button type="button" onclick="selectSchedulePhase(\'' + ph + '\')" class="px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ' +
+          (isSelected ? 'bg-blue-600 text-white shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200') + '">' +
+          '<span>' + ph + '</span>' +
+          '<span class="ml-1 text-[10.5px] px-1.5 py-0.2 rounded-full ' + (isSelected ? 'bg-blue-800 text-white' : 'bg-slate-200 text-slate-600') + '">' + count + '</span>' +
+        '</button>';
+      }).join('');
+
+      let filtered = schedule;
+      if (activeSchedulePhase !== '전체') {
+        filtered = filtered.filter(s => s.phase === activeSchedulePhase);
+      }
+      if (scheduleSearchQuery.trim()) {
+        const q = scheduleSearchQuery.trim().toLowerCase();
+        filtered = filtered.filter(s =>
+          (s.title && s.title.toLowerCase().includes(q)) ||
+          (s.lead && s.lead.toLowerCase().includes(q)) ||
+          (s.note && s.note.toLowerCase().includes(q)) ||
+          (s.time && s.time.toLowerCase().includes(q))
+        );
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="p-8 text-center text-xs text-slate-500 font-medium">검색 조건과 일치하는 행사 식순이 없습니다.</div>';
+        return;
+      }
+
+      const rowsHtml = filtered.map(item => {
+        const isCeremony = item.id === 7 || (item.title && item.title.includes('국민의례'));
+        const isWalkingStart = item.id === 14 || (item.title && item.title.includes('걷기'));
+        const isDone = item.status === '완료' || item.status === 'done';
+        const isInProgress = item.status === '진행중' || item.status === 'in-progress';
+
+        const rowBg = isCeremony ? 'bg-blue-50/50 hover:bg-blue-50/80' : (isWalkingStart ? 'bg-emerald-50/50 hover:bg-emerald-50/80' : 'hover:bg-slate-50/80');
+
+        let ceremonyBox = '';
+        if (isCeremony) {
+          ceremonyBox = '<div class="mt-2 p-2.5 bg-white/95 border border-blue-200 rounded-lg space-y-1 text-xs text-blue-950 shadow-3xs">' +
+            '<div class="flex items-center gap-1.5 font-bold text-blue-900 text-[11.5px]">' +
+              '<span>🛡</span><span>대통령훈령 제438호(국민의례 규정) 약식절차 1 준용</span>' +
+            '</div>' +
+            '<div class="space-y-0.5 text-[11px] text-slate-700 pl-5 leading-relaxed font-medium">' +
+              '<div>• <strong>국기에 대한 경례</strong>: 전주 없는 애국가 반주 1절에 맞춰 실시 (맹세문 미낭송)</div>' +
+              '<div>• <strong>순국선열과 호국영령에 대한 묵념</strong>: 묵념곡 10~15초 연주</div>' +
+              '<div class="text-red-600 font-bold bg-red-50 p-1.5 rounded border border-red-200 mt-1">' +
+                '※ 의전 금지 멘트 수칙: 사회자가 "애국가 제창 등 이하 생략하겠습니다" 멘트를 발언하는 것은 국가상징 품격을 저해하므로 규정상 엄격히 금지함.' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }
+
+        let walkingBox = '';
+        if (isWalkingStart) {
+          walkingBox = '<div class="mt-2 p-2 bg-white/95 border border-emerald-200 rounded-lg text-xs text-emerald-950 shadow-3xs flex items-center justify-between gap-2 flex-wrap">' +
+            '<div class="flex items-center gap-1.5 font-bold">' +
+              '<span>📍</span><span>코스: 수변문화쉼터 ↔ 영동4교 (2km 왕복 수변 산책로)</span>' +
+            '</div>' +
+            '<span class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">' +
+              '완주 인센티브 마감: 12:30' +
+            '</span>' +
+          '</div>';
+        }
+
+        const statusBadge = isDone
+          ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">✓ 완료</span>'
+          : (isInProgress
+            ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 animate-pulse">▶ 진행</span>'
+            : '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">○ 예정</span>');
+
+        return '<tr class="transition-colors align-top ' + rowBg + '">' +
+          '<td class="py-3 px-3 text-center font-mono text-xs font-extrabold text-slate-700">#' + item.id + '</td>' +
+          '<td class="py-3 px-3 text-center whitespace-nowrap">' +
+            '<div class="inline-flex items-center gap-1 font-mono text-xs font-bold text-slate-900">⏱ ' + item.time + '</div>' +
+            (item.duration ? '<div class="text-[11px] font-semibold text-blue-700 mt-0.5">' + item.duration + '</div>' : '') +
+          '</td>' +
+          '<td class="py-3 px-3 text-center whitespace-nowrap">' +
+            '<span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">' + item.phase + '</span>' +
+          '</td>' +
+          '<td class="py-3 px-3">' +
+            '<div class="space-y-1">' +
+              '<div class="text-sm font-extrabold text-slate-900 leading-snug">' + item.title + '</div>' +
+              (item.note ? '<p class="text-xs text-slate-600 font-medium leading-relaxed">' + item.note + '</p>' : '') +
+              ceremonyBox +
+              walkingBox +
+            '</div>' +
+          '</td>' +
+          '<td class="py-3 px-3 text-center whitespace-nowrap">' +
+            (item.lead ? '<span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-800 border border-slate-200">👤 ' + item.lead + '</span>' : '<span class="text-slate-400 text-xs">-</span>') +
+          '</td>' +
+          '<td class="py-3 px-3 text-center whitespace-nowrap">' + statusBadge + '</td>' +
+        '</tr>';
+      }).join('');
+
+      container.innerHTML = '<div class="overflow-x-auto">' +
+        '<table class="w-full text-left border-collapse min-w-[720px]">' +
+          '<thead>' +
+            '<tr class="bg-slate-100 border-b border-slate-300 text-slate-700 text-xs font-extrabold">' +
+              '<th class="py-2.5 px-3 text-center w-14 shrink-0">순번</th>' +
+              '<th class="py-2.5 px-3 text-center w-36 shrink-0">시간 (소요)</th>' +
+              '<th class="py-2.5 px-3 text-center w-24 shrink-0">구분</th>' +
+              '<th class="py-2.5 px-3 text-left">식순명 및 세부 내용</th>' +
+              '<th class="py-2.5 px-3 text-center w-36 shrink-0">주관 / 담당</th>' +
+              '<th class="py-2.5 px-3 text-center w-20 shrink-0">상태</th>' +
+            '</tr>' +
+          '</thead>' +
+          '<tbody class="divide-y divide-slate-200">' + rowsHtml + '</tbody>' +
+        '</table>' +
+      '</div>';
+    }
+
+    window.selectSchedulePhase = function(ph) {
+      activeSchedulePhase = ph;
+      renderSchedule();
     };
 
-    document.getElementById('tab-booths').onclick = function() {
-      activeTab = 'booths';
-      this.className = 'py-2.5 text-xs font-extrabold rounded-lg transition-all cursor-pointer text-center bg-slate-900 text-white shadow-xs';
-      document.getElementById('tab-milestones').className = 'py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70';
-      document.getElementById('content-booths').classList.remove('hidden');
-      document.getElementById('content-milestones').classList.add('hidden');
-      renderBooths();
+    function renderDuties() {
+      const container = document.getElementById('duties-table-container');
+      const pillsContainer = document.getElementById('duty-filter-pills');
+      if (!container || !pillsContainer) return;
+
+      const duties = appData.duties || [];
+      const badge = document.getElementById('duties-count-badge');
+      if (badge) badge.innerText = duties.length + '개 부서·기관';
+
+      pillsContainer.innerHTML = DUTY_CATEGORIES.map(cat => {
+        const count = cat === '전체' ? duties.length : duties.filter(d => d.category === cat).length;
+        const isSelected = activeDutyCategory === cat;
+        return '<button type="button" onclick="selectDutyCategory(\'' + cat + '\')" class="px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ' +
+          (isSelected ? 'bg-slate-900 text-white shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200') + '">' +
+          '<span>' + cat + '</span>' +
+          '<span class="ml-1 text-[10.5px] px-1.5 py-0.2 rounded-full ' + (isSelected ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-600') + '">' + count + '</span>' +
+        '</button>';
+      }).join('');
+
+      let filtered = duties;
+      if (activeDutyCategory !== '전체') {
+        filtered = filtered.filter(d => d.category === activeDutyCategory);
+      }
+      if (dutySearchQuery.trim()) {
+        const q = dutySearchQuery.trim().toLowerCase();
+        filtered = filtered.filter(d =>
+          (d.deptOrOrg && d.deptOrOrg.toLowerCase().includes(q)) ||
+          (d.role && d.role.toLowerCase().includes(q)) ||
+          (d.manager && d.manager.toLowerCase().includes(q)) ||
+          (d.phone && d.phone.toLowerCase().includes(q)) ||
+          (d.tasks && d.tasks.some(t => t.toLowerCase().includes(q)))
+        );
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="p-8 text-center text-xs text-slate-500 font-medium">검색 조건과 일치하는 업무분장 항목이 없습니다.</div>';
+        return;
+      }
+
+      const rowsHtml = filtered.map(duty => {
+        const isHQ = duty.category === '총괄기획';
+        const isSports = duty.category === '체육회';
+        const isSafety = duty.category === '응급안전';
+        const isAgency = duty.category === '대행용역';
+
+        const rowHover = isHQ ? 'hover:bg-blue-50/40' : (isSports ? 'hover:bg-indigo-50/40' : (isSafety ? 'hover:bg-red-50/40' : (isAgency ? 'hover:bg-amber-50/40' : 'hover:bg-slate-50/80')));
+
+        const catBadgeClass = isHQ ? 'bg-blue-100 text-blue-800 border-blue-200' : (isSports ? 'bg-indigo-100 text-indigo-800 border-indigo-200' : (isSafety ? 'bg-red-100 text-red-800 border-red-200' : (isAgency ? 'bg-amber-100 text-amber-900 border-amber-200' : 'bg-slate-100 text-slate-700 border-slate-200')));
+
+        const adminNo = formatAutoHyphen((duty.adminPhone || (!duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
+
+        let phoneHtml = '';
+        if (adminNo) {
+          phoneHtml = '<div>' +
+            '<a href="tel:' + adminNo.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 shadow-3xs transition-all active:scale-95 cursor-pointer" title="행정전화 걸기: ' + adminNo + '">' +
+              '<span class="text-[10.5px] font-extrabold text-blue-800">📞 행정:</span>' +
+              '<span class="font-mono">' + adminNo + '</span>' +
+            '</a>' +
+          '</div>';
+        }
+
+        const tasksHtml = (duty.tasks && duty.tasks.length > 0)
+          ? '<ul class="space-y-1">' +
+              duty.tasks.map(t => '<li class="flex items-start gap-1.5 text-xs text-slate-800 font-medium leading-relaxed break-keep"><span class="text-slate-400 font-bold shrink-0 text-xs select-none">•</span><span>' + t + '</span></li>').join('') +
+            '</ul>'
+          : '<span class="text-slate-400 text-xs">-</span>';
+
+        return '<tr class="transition-colors align-top ' + rowHover + '">' +
+          '<td class="py-3 px-3 text-center whitespace-nowrap">' +
+            '<span class="text-[11px] font-extrabold px-2 py-0.5 rounded border ' + catBadgeClass + '">' + duty.category + '</span>' +
+          '</td>' +
+          '<td class="py-3 px-3">' +
+            '<div class="font-extrabold text-xs text-slate-900 leading-snug">' + duty.deptOrOrg + '</div>' +
+          '</td>' +
+          '<td class="py-3 px-3">' +
+            '<div class="text-xs font-bold text-slate-800 leading-snug">' + duty.role + '</div>' +
+          '</td>' +
+          '<td class="py-3 px-3 whitespace-nowrap">' +
+            '<div class="space-y-1">' +
+              (duty.manager ? '<div class="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">👤 ' + duty.manager + '</div>' : '') +
+              phoneHtml +
+            '</div>' +
+          '</td>' +
+          '<td class="py-3 px-3">' + tasksHtml + '</td>' +
+        '</tr>';
+      }).join('');
+
+      container.innerHTML = '<div class="overflow-x-auto">' +
+        '<table class="w-full text-left border-collapse min-w-[780px]">' +
+          '<thead>' +
+            '<tr class="bg-slate-100 border-b border-slate-300 text-slate-700 text-xs font-extrabold">' +
+              '<th class="py-2.5 px-3 text-center w-24 shrink-0">구분</th>' +
+              '<th class="py-2.5 px-3 text-left w-44 shrink-0">부서·기관명</th>' +
+              '<th class="py-2.5 px-3 text-left w-48 shrink-0">담당 역할</th>' +
+              '<th class="py-2.5 px-3 text-left w-48 shrink-0">담당자 / 연락처</th>' +
+              '<th class="py-2.5 px-3 text-left">배정 과업</th>' +
+            '</tr>' +
+          '</thead>' +
+          '<tbody class="divide-y divide-slate-200">' + rowsHtml + '</tbody>' +
+        '</table>' +
+      '</div>';
+    }
+
+    window.selectDutyCategory = function(cat) {
+      activeDutyCategory = cat;
+      renderDuties();
     };
+
+    function setActiveTab(tab) {
+      activeTab = tab;
+      const tabs = ['milestones', 'booths', 'schedule', 'duties'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-' + t);
+        const content = document.getElementById('content-' + t);
+        if (t === tab) {
+          if (btn) btn.className = 'py-2.5 text-xs font-extrabold rounded-lg transition-all cursor-pointer text-center bg-slate-900 text-white shadow-xs';
+          if (content) content.classList.remove('hidden');
+        } else {
+          if (btn) btn.className = 'py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70';
+          if (content) content.classList.add('hidden');
+        }
+      });
+
+      if (tab === 'milestones') renderMilestones();
+      else if (tab === 'booths') renderBooths();
+      else if (tab === 'schedule') renderSchedule();
+      else if (tab === 'duties') renderDuties();
+    }
+
+    document.getElementById('tab-milestones').onclick = function() { setActiveTab('milestones'); };
+    document.getElementById('tab-booths').onclick = function() { setActiveTab('booths'); };
+    document.getElementById('tab-schedule').onclick = function() { setActiveTab('schedule'); };
+    document.getElementById('tab-duties').onclick = function() { setActiveTab('duties'); };
 
     document.getElementById('btn-toggle-all-tasks').onclick = function() {
-      const allIds = (appData.milestones || []).map(m => m.id);
+      const allIds = (appData.milestones || []).filter(m => m.id !== 2).map(m => m.id);
       if (expandedTasks.size === allIds.length) {
         expandedTasks.clear();
         document.getElementById('toggle-all-icon').innerText = '▼';
@@ -667,6 +1035,43 @@
       setTimeout(() => t.classList.add('hidden'), 3000);
     };
 
+    // Schedule & Duties Search Listeners
+    const schedInput = document.getElementById('input-schedule-search');
+    const schedClear = document.getElementById('btn-clear-schedule-search');
+    if (schedInput) {
+      schedInput.addEventListener('input', function(e) {
+        scheduleSearchQuery = e.target.value;
+        if (schedClear) schedClear.classList.toggle('hidden', !scheduleSearchQuery);
+        renderSchedule();
+      });
+    }
+    if (schedClear) {
+      schedClear.addEventListener('click', function() {
+        scheduleSearchQuery = '';
+        if (schedInput) schedInput.value = '';
+        schedClear.classList.add('hidden');
+        renderSchedule();
+      });
+    }
+
+    const dutyInput = document.getElementById('input-duty-search');
+    const dutyClear = document.getElementById('btn-clear-duty-search');
+    if (dutyInput) {
+      dutyInput.addEventListener('input', function(e) {
+        dutySearchQuery = e.target.value;
+        if (dutyClear) dutyClear.classList.toggle('hidden', !dutySearchQuery);
+        renderDuties();
+      });
+    }
+    if (dutyClear) {
+      dutyClear.addEventListener('click', function() {
+        dutySearchQuery = '';
+        if (dutyInput) dutyInput.value = '';
+        dutyClear.classList.add('hidden');
+        renderDuties();
+      });
+    }
+
     async function pollLatestData() {
       try {
         const res = await fetch('/api/festival/yangjae?t=' + Date.now());
@@ -684,7 +1089,9 @@
               appData = fresh;
               renderOverview();
               if (activeTab === 'milestones') renderMilestones();
-              else renderBooths();
+              else if (activeTab === 'booths') renderBooths();
+              else if (activeTab === 'schedule') renderSchedule();
+              else if (activeTab === 'duties') renderDuties();
             }
           }
         }
@@ -696,6 +1103,8 @@
     renderOverview();
     renderMilestones();
     renderBooths();
+    renderSchedule();
+    renderDuties();
   </script>
 </body>
 </html>
