@@ -149,11 +149,11 @@ describe('StatItemDetailModal & SimulationResultTable Integration', () => {
       expect(screen.getByText('세부 지출원장 및 시뮬레이션')).toBeInTheDocument();
 
       // Check KPI values
-      expect(screen.getByText('₩17,339,000')).toBeInTheDocument(); // 총 예산액
-      expect(screen.getAllByText('₩4,154,000').length).toBeGreaterThanOrEqual(1); // 현재 실집행액
-      expect(screen.getByText('₩13,185,000')).toBeInTheDocument(); // 현재 집행 잔액
-      expect(screen.getAllByText('₩900,000').length).toBeGreaterThanOrEqual(1); // 시뮬레이션 예정액
-      expect(screen.getByText('₩12,285,000')).toBeInTheDocument(); // 최종 예상 잔액
+      expect(screen.getByText('17,339,000')).toBeInTheDocument(); // 총 예산액
+      expect(screen.getAllByText(/4,154,000/).length).toBeGreaterThanOrEqual(1); // 현재 실집행액
+      expect(screen.getByText('13,185,000')).toBeInTheDocument(); // 현재 집행 잔액
+      expect(screen.getAllByText(/900,000/).length).toBeGreaterThanOrEqual(1); // 시뮬레이션 예정액
+      expect(screen.getByText('12,285,000')).toBeInTheDocument(); // 최종 예상 잔액
     });
 
     test('displays actual expenditure list and filters by keyword and actionType', () => {

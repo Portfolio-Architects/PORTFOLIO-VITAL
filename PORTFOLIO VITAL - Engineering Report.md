@@ -5126,4 +5126,12 @@ sequenceDiagram
     * 좌측 블랙 캡슐 내 과제 번호(`추진과제 1`, `추진과제 2`)를 `text-emerald-400`으로 연동하여 캡슐 자체에서도 완료 정체성을 선명히 전달.
     * Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 확보.
 
+- [x] **예산 통계목 모달 및 정책사업 카드 테스팅 라이브러리 매처 결함 전수 해결 릴리즈 (Milestone 187 - 2026-09-21)**
+  - 사용자 요구사항: "Summary of all failing tests" (stat-item-detail-modal.test.tsx 및 challenger-r2-2.test.tsx 실패 분석 및 해결)
+  - 주요 조치 및 엔지니어링 실적:
+    * `stat-item-detail-modal.test.tsx`: KPI 카드 수치 매칭 시 `₩` 접두사가 불필요하게 결합되어 발생하던 탐색 실패를 실측 렌더링 값(`17,339,000`, `13,185,000`, `12,285,000` 및 `/4,154,000/`, `/900,000/`) 매칭으로 교정 완료.
+    * `challenger-r2-2.test.tsx`: `PolicyGroupCard` 확장 시 카테고리 행과 지출 내역 행 양측에 소속 통계목(`통계목1`)이 동시 렌더링되는 정상 구조에 맞춰 `getByText`를 `getAllByText` 다중 검증 매처로 교정 완료.
+    * 전체 Jest 테스트 스위트 33개 전수 100% 통과 (`33/33 passed`, `305/305 passed`) 및 `npx tsc --noEmit` 0 errors 무결성 확보.
+
+
 

@@ -182,7 +182,7 @@ describe('Empirical Challenger M2-2 (R2 Virtualization & Category Card DOM Optim
 
       // Expand card
       fireEvent.click(header);
-      expect(screen.getByText('통계목1')).toBeInTheDocument();
+      expect(screen.getAllByText('통계목1').length).toBeGreaterThanOrEqual(1);
 
       // Collapse card
       fireEvent.click(header);

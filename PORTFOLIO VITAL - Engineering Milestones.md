@@ -2,6 +2,19 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 187: Budget Modal & Policy Group Card Testing Library Matchers Regression Resolution Release] Resolved Testing Library element matching regressions in stat-item-detail-modal.test.tsx (aligning KPI unit value matchers with Korean currency format) and challenger-r2-2.test.tsx (adopting getAllByText for multi-element stat item headers across category and entry rows), achieving 100% Jest suite pass (33/33 suites, 305/305 tests) and 0 TypeScript compilation errors. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 결함 보고(Summary of all failing tests: `stat-item-detail-modal.test.tsx` 및 `challenger-r2-2.test.tsx`) 전격 분석 및 완벽 해결:
+    1. **`stat-item-detail-modal.test.tsx` KPI 금액 단위 매칭 정합화**:
+       - `StatItemDetailModal.tsx` 상단 5대 KPI 카드(`총 예산액`, `현재 집행 잔액`, `최종 예상 잔액` 등)는 대한민국 공공 재정 규격에 따라 숫자 뒤 별도 `<span ...>원</span>` 배지를 분리 렌더링하고 있음.
+       - 테스트 케이스가 불필요하게 `₩` 접두사가 결합된 단일 문자열(`₩17,339,000`)을 엄격 탐색하여 발생하던 불일치를 교정, 실측 렌더링 값(`17,339,000`) 및 정규식 매칭으로 정합화 완료함.
+    2. **`challenger-r2-2.test.tsx` 다중 요소 탐색 매처 교정 (`getAllByText`)**:
+       - `PolicyGroupCard.tsx` 확장 시, 상단 카테고리 행(`<div data-cell-id="cat-1:statItem">통계목1</div>`)과 하단 최근 지출 내역 행(`<span ...>통계목1</span>`) 양측에 소속 통계목 명칭이 동시 노출되는 정상적인 UI 구조를 반영.
+       - 단일 요소를 전제하던 `getByText('통계목1')`를 Testing Library 표준 다중 요소 검증 매처인 `getAllByText('통계목1')`로 보정하여 결함 원천 해소.
+    3. **전체 테스트 스위트 100% 무결성 달성**:
+       - Jest 33개 테스트 스위트 전수 통과 (`33/33 passed`, `305/305 tests passed`).
+       - `npx tsc --noEmit` 0 errors 무결성 통과.
+
 ### [Milestone 186: Yangjae Festival Completed Milestone Tasks High-Contrast Emerald Visual Identity Release] Upgraded completed milestone task cards from muted gray to high-contrast emerald visual identity (emerald card border & background, emerald capsule numbering, and high-visibility mint-emerald status badge), establishing intuitive task lifecycle contrast across Tab 1 with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
 * **개요 및 개발 목적**:
   - 사용자 지침("완료 과제는 조금 더 눈에 띄는 색으로 표기하자" 및 스크린샷 `media_1789990806961.png`) 전격 반영:
