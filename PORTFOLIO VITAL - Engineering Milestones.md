@@ -2,6 +2,83 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 184: Yangjae Festival Role-Based Private Mobile Contact Guard & Administrative Landline Exclusive Public Mode Release] Completely purged all personal mobile phone numbers from public/external frontend rendering, restricting contact strictly to administrative landlines (02-3423-XXXX) for general viewers, while implementing an exclusive Local-Admin-Only private view with an instant interactive toggle (showPrivateMobile) and Cloudflare edge replica API sanitization, with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("그럼 모든 핸드폰번호 프론트 엔드 출력은 삭제하고 행정번호인 경우에만 연락 가능하게 해줘, 혹시 나만 핸드폰 번호 보이게 설정할수는 없나?? 프론트 엔드에서") 전격 반영:
+    1. **일반/외부 공개 뷰(Public View) 내 개인 휴대전화번호 전면 삭제**:
+       - 외부 방문자 및 모바일 공유 링크(`portfolio-hchps.pages.dev`, `isLocalAdmin === false`) 접속 시, DOM에서 모든 개인 휴대전화번호(`010-XXXX-XXXX`) 배지 렌더링을 100% 원천 차단.
+       - 외부 방문자는 오직 공식 행정 유선번호(`adminPhone`, `02-3423-XXXX`)만 조회 및 원클릭 통화 발신(`tel:`) 가능하도록 제한하여 개인정보 도용 및 스미싱/스팸 위험 영구 격리.
+    2. **로컬 관리자(나) 전용 인텔리전트 열람 가드 (`isLocalAdmin && showPrivateMobile`)**:
+       - 사용자 본인의 로컬 PC 환경(`localhost:3001` / `127.0.0.1` 등 `isLocalAdmin === true`)에서만 휴대전화번호 배지(`[폰: 010-XXXX-XXXX]`)가 선택적으로 표출되도록 권한 분기 구축.
+       - 부스 현황 탭 및 업무 분장 탭 상단에 **`[📱 폰번호 보임 / 폰번호 숨김]` 원클릭 보안 토글 스위치**를 신설하여, 회의실 빔프로젝터 투사 및 화면 공유 시에도 클릭 한 번으로 모든 010 번호를 즉각 숨길 수 있도록 실무 안전성 극대화.
+    3. **Cloudflare Pages 복제본 API (`functions/api/festival/yangjae.ts`) 엣지 데이터 정제**:
+       - 24시간 퍼블릭 엔드포인트(`onRequestGet`)에서 응답 직전 `sanitizePublicData` 필터를 통과시켜 `mobilePhone` 필드를 빈 문자열로 정제, 개발자도구(F12) 네트워크 탭을 통한 JSON 역추적까지 완벽 방어.
+    4. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
+### [Milestone 183: Yangjae Festival Booth Contact Badges Single-Row Flex-Nowrap Refinement Release] Upgraded booth card contact badges to a unified single-row horizontal layout (flex-nowrap, whitespace-nowrap, overflow-x-auto, no-scrollbar), eliminating multiline wrapping and streamlining manager, landline, and mobile badges with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("한 행으로 보이게 디자인 고도화") 및 전달 스크린샷(`media_1789989317841.png`, 2행 줄바꿈 현상) 전격 반영:
+    1. **단일 행(Single Row) 강제 컨테이너 규격 구축**:
+       - 줄바꿈을 유발하던 `flex-wrap`을 완전 제거하고 `flex-nowrap`, `whitespace-nowrap`, `overflow-x-auto`, `no-scrollbar` 가드를 전면 적용하여 모바일 및 협소 화면에서도 무조건 1행 정렬 보장.
+    2. **슬림 일체형 마이크로 캡슐 배지 고도화**:
+       - 불필요한 내부 중첩 알약(`bg-blue-100`, `bg-emerald-100`)을 걷어내고 폭을 슬림화하여 전체 배지 폭을 대폭 축소.
+       - 담당자(`User`), 행정번호(`Phone`), 폰번호(`Smartphone`) 3개 배지가 가로 1행 내에서 균형감 있게 단일 캡슐 라인으로 표시되도록 조치함.
+    3. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
+### [Milestone 182: Yangjae Festival Phone Number Auto-Hyphen Formatting & View-Layer Sanitization Release] Implemented comprehensive phone auto-hyphenation engine (formatAutoHyphen) handling mobile (010), Seoul landlines (02-XXX-XXXX and 02-XXXX-XXXX), regional codes, customer service lines, and internal extension preservation, binding real-time input formatting and reactive view normalization across Booths and Duties with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("자동 타이푼 기능 적용해줘" — 전화번호 자동 하이픈) 및 전달 스크린샷(`01022175298` 미포맷 상태) 전격 반영:
+    1. **대한민국 표준 전화번호 자동 하이픈 엔진 (`formatAutoHyphen`) 설계 및 탑재**:
+       - 서울 유선번호(02): 9자리(`02-XXX-XXXX`) 및 10자리(`02-XXXX-XXXX`) 정밀 구분 포맷팅.
+       - 휴대전화 및 전국 번호(010, 031, 051 등): 10자리(`01X-XXX-XXXX`) 및 11자리(`010-XXXX-XXXX`) 완벽 지원.
+       - 대표번호(1588, 1577 등 8자리) 및 원내 4자리 구내 내선번호(`7116`, `7031` 등) 훼손 없는 보존 지원.
+    2. **입력단 실시간 반응형 하이픈 자동 변환 (`onChange`)**:
+       - 단일 부스 편집(`SingleBoothEditPanel`) 및 일괄 부스 편집(`BoothsEditPanel`)의 행정번호/폰번호 입력창에서 사용자가 숫자만 연속 타이핑해도 실시간으로 하이픈이 자동 삽입되도록 바인딩.
+    3. **뷰(Display) 모드 및 저장 파이프라인 정규화 가드**:
+       - 데이터베이스 원본에 하이픈 없는 순수 숫자가 저장되어 있더라도 뷰 모드 배지(`[행정: ...]`, `[폰: ...]`) 및 업무분장 테이블에서 화면 렌더링 시 `formatAutoHyphen`을 통과하여 상시 규격화된 형태로 시각화.
+       - 단일 부스 저장(`handleSaveSingleBooth`) 및 일괄 부스 저장(`handleSaveBooths`) 실행 시 자동 하이픈 정규화 후 DB 영속화.
+    4. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
+### [Milestone 181: Yangjae Festival Booth Individual Inline Editing & Instant Reactive Persistence Release] Added independent single-booth editing mode with inline input controls, instant Save/Cancel triggers, active-edit emerald card accent, and seamless coexistence with bulk reorder controls, with 100% TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("부스는 개별적으로 수정 가능하게 업데이트 해줘 수정을 일괄 수정탭으로만 진입 가능하니까 불편하네") 전격 반영:
+    1. **단일 부스 전용 인라인 편집 모드 (`editingBoothId`, `editSingleBoothData`) 신설**:
+       - 19개 부스 전체를 일괄 편집 모드로 전환할 필요 없이, 수정하고자 하는 개별 부스 카드의 `[수정]`(`Edit3`) 버튼을 클릭하여 즉각 해당 카드만 단독 편집 모드로 진입하도록 구조 혁신.
+       - 개별 편집 진입 시 해당 카드 테두리를 `border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50/10`로 하이라이트하여 현재 편집 중인 대상을 직관적으로 식별.
+    2. **카드 헤더 전용 `[저장]` / `[취소]` 인라인 액션 그룹 배치**:
+       - 개별 편집 모드 진입 시 우측 상단에 상태 셀렉트(`확정`/`협의중`/`신청완료`)와 함께 전용 `[저장]`(`Save`) 및 `[취소]`(`X`) 버튼 배치.
+       - 저장 시 `handleSaveSingleBooth`가 동작하여 수치 정규화(테이블/의자, 담당자, 행정번호, 폰번호) 후 React Query 뮤테이션을 통해 로컬 디스크 SSOT에 즉시 영속화 및 `"[부스명] 부스 정보가 저장되었습니다!"` 토스트 알림 송출.
+    3. **상단 일괄 순서편집(`순서 변경 / 편집`)과의 매끄러운 공존**:
+       - 상단 `[순서 변경 / 편집]` 버튼 클릭 시 개별 편집 상태를 안전하게 초기화하고 전체 19개 부스 순서 변경(▲/▼) 모드로 자연스럽게 전환.
+       - 개별 편집 중 타 작업 충돌 원천 차단.
+    4. **무결성 검증**:
+       - `npx tsc --noEmit` 0 errors 무결성 컴파일 통과.
+
+### [Milestone 180: Yangjae Festival Contact Directory Dual-Track Split (Admin Landline vs Mobile Phone) Release] Decoupled single contact field into adminPhone (행정번호, blue badge) and mobilePhone (폰번호, emerald badge) across BoothItem and DutyItem, adding instant tel: click-to-dial linking with 100% TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("연락처를 행정번호와 폰번호로 구분해서 표기해줘") 전격 반영:
+    1. **연락처 듀얼 스키마 분리 (`adminPhone` vs `mobilePhone`)**:
+       - `BoothItem` 및 `DutyItem`에 구청/보건소 유선 행정전화(`adminPhone`)와 실무자 휴대전화(`mobilePhone`)를 분리 설계.
+       - 뷰 모드에서 각각 블루 배지(`[행정: 02-3423-XXXX]`)와 에메랄드 배지(`[폰: 010-XXXX-XXXX]`)로 명확히 시각 분리하고 원클릭 전화걸기(`tel:`) 지원.
+       - 편집 모드에서도 3단 그리드(`담당자` | `행정번호` | `폰번호`)로 각각 독립 편집 가능하도록 인터페이스 제공.
+    2. **무결성 검증**:
+       - `npx tsc --noEmit` 0 errors 무결성 컴파일 통과.
+
+### [Milestone 179: Yangjae Festival Timetable & Duty Roster Tabular Matrix Overhaul & Decorative Text Purge Release] Overhauled Tab 3 (행사식순 17개) and Tab 4 (업무분장 15개) into clean, high-contrast administrative tabular grids and completely eliminated emotional modifiers and decorative adverbs per public reporting charter, with 100% TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("행사식순과 업무 분장 행열정렬 고도화 해주고, 불필요한 텍스트 삭제해줘 꾸미거나 강조하는등의 부사") 전격 반영:
+    1. **행사식순(Tab 3) 및 업무분장(Tab 4) 표(Table) 형식 전면 개편**:
+       - 가독성이 떨어지던 카드형/아코디언 나열을 배제하고 관공서 표준 `w-full min-w-[720px]` 고대비 행렬 테이블 그리드로 전환.
+       - 행사식순: `순번` | `시간` | `소요` | `단계` | `식순 프로그램명` | `주요내용 및 세부연출`
+       - 업무분장: `순번` | `분야` | `담당주체` | `담당자 / 연락처` | `주요 담당업무 및 세부역할`
+    2. **불필요한 감정적 수식어 및 강조 부사 전면 박멸**:
+       - "더욱 다채롭게", "완벽하고 안전한", "품격 높은", "최선을 다해" 등 공문서에 부적합한 미사여구와 부사를 100% 소거하고 객관적 공공 행정 개조식 문체로 정제.
+    3. **무결성 검증**:
+       - `npx tsc --noEmit` 0 errors 무결성 컴파일 통과.
+
 ### [Milestone 178: Budget Burn-down Guide Badges Full Purge & Pure Public Ledger Interface Restoration Release] Completely eliminated all '소진가이드: 월 OOO원' micro-chips and burn-down pace hint bars across BudgetCategoryCardItem and PolicyGroupCard per user direct instruction ("소진 가이드 기능도 삭제해줘"), leaving only pristine, authoritative public budget metrics (Total Budget, Spent, Execution %, Unexecuted %, and Remaining Balance). (2026-09-17)
 * **개요 및 개발 목적**:
   - 사용자 지침("소진 가이드 기능도 삭제해줘") 및 첨부 화면에 따라:

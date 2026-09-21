@@ -1564,5 +1564,23 @@
     "id": "mu3vcieazmfz5yr0u",
     "createdAt": "2026-09-16T08:58:50.530Z",
     "updatedAt": "2026-09-16T08:58:50.530Z"
+  },
+  {
+    "name": "부서 결제카드",
+    "phone": "000",
+    "email": "",
+    "notes": "4518-4445-1560-9714 / 04/30 / 682 / 342370",
+    "id": "muaqje6wrrz74x1w2",
+    "createdAt": "2026-09-21T04:18:36.823Z",
+    "updatedAt": "2026-09-21T04:18:36.823Z"
+  },
+  {
+    "name": "유지혜",
+    "phone": "02-2133-7513",
+    "email": "jhyoo1013@seoul.go.kr",
+    "notes": "서울시청 시민건강국 스마트건강과 손목닥터 담당자",
+    "id": "muaqkin3q5ywbod74",
+    "createdAt": "2026-09-21T04:19:29.247Z",
+    "updatedAt": "2026-09-21T04:19:29.247Z"
   }
 ]

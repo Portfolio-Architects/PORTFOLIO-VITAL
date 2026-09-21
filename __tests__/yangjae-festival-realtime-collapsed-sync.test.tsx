@@ -76,9 +76,9 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
       // In collapsed state, task details should not be rendered
       expect(screen.queryByText(/수변문화쉼터.*검토/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/09:00~09:30/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/고려대학교척추측만증/i)).not.toBeInTheDocument();
 
-      // Click "전체 펼치기" -> all 6 tasks expand
+      // Click "전체 펼치기" -> all tasks expand
       fireEvent.click(toggleAllBtn);
 
       // Now "전체 접기" button should be shown
@@ -102,30 +102,30 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
       // Task 1 details should now be visible
       expect(await screen.findByText(/수변문화쉼터.*검토/i)).toBeInTheDocument();
-      // But Task 2 details should still remain collapsed
-      expect(screen.queryByText(/09:00~09:30/i)).not.toBeInTheDocument();
+      // But Task 3 details should still remain collapsed
+      expect(screen.queryByText(/고려대학교척추측만증/i)).not.toBeInTheDocument();
     });
 
     it('handles multiple individual task toggles independently and preserves O(1) state', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
       const task1Btn = await screen.findByRole('button', { name: /추진과제 1/i });
-      const task2Btn = screen.getByRole('button', { name: /추진과제 2/i });
+      const task3Btn = screen.getByRole('button', { name: /부스 운영/i });
 
       // Expand Task 1
       fireEvent.click(task1Btn);
       expect(screen.getByText(/수변문화쉼터.*검토/i)).toBeInTheDocument();
-      expect(screen.queryByText(/08:00~08:30/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/고려대학교척추측만증/i)).not.toBeInTheDocument();
 
-      // Expand Task 2
-      fireEvent.click(task2Btn);
+      // Expand Task 3
+      fireEvent.click(task3Btn);
       expect(screen.getByText(/수변문화쉼터.*검토/i)).toBeInTheDocument();
-      expect(screen.getByText(/08:00~08:30/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/고려대학교척추측만증/i).length).toBeGreaterThan(0);
 
       // Collapse Task 1 only
       fireEvent.click(task1Btn);
       expect(screen.queryByText(/수변문화쉼터.*검토/i)).not.toBeInTheDocument();
-      expect(screen.getByText(/08:00~08:30/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/고려대학교척추측만증/i).length).toBeGreaterThan(0);
     });
   });
 
@@ -694,16 +694,17 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(screen.getByText('자생한방병원')).toBeInTheDocument();
       expect(screen.getByText('케이스튜디오 (디아르스)')).toBeInTheDocument();
       expect(screen.getByText('한국신체정보(주)')).toBeInTheDocument();
-      expect(screen.getByText('금연·절주 영양 보건 사업 홍보')).toBeInTheDocument();
-      expect(screen.getByText('서울체력장 강남센터')).toBeInTheDocument();
+      expect(screen.getByText('보건행정과 건강증진팀')).toBeInTheDocument();
+      expect(screen.getByText('보건행정과 서울체력장 강남센터')).toBeInTheDocument();
 
-      // Verify sequential numbering exists
-      for (let i = 1; i <= YANGJAE_FALLBACK_DATA.booths.length; i++) {
+      // Verify sequential numbering exists for operating booths (excluding HQ)
+      const operatingCount = YANGJAE_FALLBACK_DATA.booths.filter(b => b.category !== '운영본부' && b.category !== '운영주체' && !(typeof b.name === 'string' && b.name.includes('보건행정팀'))).length;
+      for (let i = 1; i <= operatingCount; i++) {
         expect(screen.getByText(`No.${i}`)).toBeInTheDocument();
       }
 
       // Verify next sequential index beyond length no longer exists
-      expect(screen.queryByText(`No.${YANGJAE_FALLBACK_DATA.booths.length + 1}`)).toBeNull();
+      expect(screen.queryByText(`No.${operatingCount + 1}`)).toBeNull();
     });
 
     it('filters booths accurately by category without losing any booth items', async () => {
@@ -720,14 +721,14 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(screen.getByText('자생한방병원')).toBeInTheDocument();
       expect(screen.getByText('케이스튜디오 (디아르스)')).toBeInTheDocument();
       expect(screen.getByText('한국신체정보(주)')).toBeInTheDocument();
-      expect(screen.queryByText('금연·절주 영양 보건 사업 홍보')).toBeNull();
-      expect(screen.queryByText('서울체력장 강남센터')).toBeNull();
+      expect(screen.queryByText('보건행정과 건강증진팀')).toBeNull();
+      expect(screen.queryByText('보건행정과 서울체력장 강남센터')).toBeNull();
 
       // Click '보건소 부서' filter
       const publicFilter = screen.getByRole('button', { name: '보건소 부서' });
       fireEvent.click(publicFilter);
-      expect(screen.getByText('금연·절주 영양 보건 사업 홍보')).toBeInTheDocument();
-      expect(screen.getByText('서울체력장 강남센터')).toBeInTheDocument();
+      expect(screen.getByText('보건행정과 건강증진팀')).toBeInTheDocument();
+      expect(screen.getByText('보건행정과 서울체력장 강남센터')).toBeInTheDocument();
       expect(screen.queryByText('강남 차병원')).toBeNull();
       expect(screen.queryByText('한국신체정보(주)')).toBeNull();
     });
@@ -832,8 +833,9 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(await screen.findByText('총 부스 참여 주체')).toBeInTheDocument();
       expect(screen.getByText('총 필요 부스 규모')).toBeInTheDocument();
 
-      // Verify total entities count
-      expect(screen.getByText(new RegExp(`총 ${YANGJAE_FALLBACK_DATA.booths.length}개 기관`))).toBeInTheDocument();
+      // Verify total entities count (excluding HQ)
+      const operatingCount = YANGJAE_FALLBACK_DATA.booths.filter(b => b.category !== '운영본부' && b.category !== '운영주체' && !(typeof b.name === 'string' && b.name.includes('보건행정팀'))).length;
+      expect(screen.getByText(new RegExp(`총 ${operatingCount}개 기관`))).toBeInTheDocument();
 
       // Verify required booth scale dong count
       const totalExpectedDong = YANGJAE_FALLBACK_DATA.booths.reduce((acc, b) => acc + parseBoothScale(b.scale).dong, 0);

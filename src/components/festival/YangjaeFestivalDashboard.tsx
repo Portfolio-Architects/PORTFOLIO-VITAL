@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo, useSyncExternalStore, useCallback, useEffect } from 'react';
-import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, User, Building2, Tent, FolderInput, ArrowRightLeft } from 'lucide-react';
-import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem } from '@/hooks/useYangjaeFestival';
+import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, Smartphone, User, Users, Building2, Tent, FolderInput, ArrowRightLeft, Table, Armchair, ArrowRight, Clock, Calendar, Search, Shield, Activity, Award, AlertCircle, Sparkles, MapPin, Megaphone, HeartHandshake } from 'lucide-react';
+import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem, ScheduleItem, DutyItem } from '@/hooks/useYangjaeFestival';
 
 export interface DetailDraft {
   uid: string;
@@ -52,7 +52,7 @@ function fallbackCopy(text: string): boolean {
   }
 }
 
-const FESTIVAL_CATEGORIES = ['전체', '민간', '보건소 부서', '기타'];
+const FESTIVAL_CATEGORIES = ['전체', '보건소 부서', '민간', '운영본부'];
 const FESTIVAL_TARGET_TIMESTAMP = new Date("2026-10-31T09:00:00").getTime();
 
 const LARGE_FONT_STYLES = `
@@ -101,10 +101,73 @@ function safeClone<T>(data: T): T {
   return JSON.parse(JSON.stringify(data));
 }
 
-const YANGJAE_REPORT_TABS = [
-  { id: 'milestones' as const, label: '1. 추진과제' },
-  { id: 'booths' as const, label: '2. 부스현황' },
+/**
+ * 전화번호 및 휴대전화 자동 하이픈 포맷터 (Auto-Hyphen)
+ * - 02 서울 유선 (9~10자리): 02-XXX-XXXX (9자리) 또는 02-XXXX-XXXX (10자리)
+ * - 010 이동통신 (11자리): 010-XXXX-XXXX
+ * - 01X 기타 이동통신 및 031/051 등 지역번호, 070, 050: 0XX-XXX-XXXX 또는 0XX-XXXX-XXXX
+ * - 1588, 1544 등 전국대표번호 (8자리): 1588-XXXX
+ * - 4자리 원내 내선번호: 원형 보존
+ */
+export function formatAutoHyphen(value: string | undefined | null): string {
+  if (!value) return '';
+  const str = String(value).trim();
+  if (!str) return '';
+
+  const digits = str.replace(/[^0-9]/g, '');
+  if (!digits) return str;
+
+  // 4자리 내선번호 (예: 7116, 7031)
+  if (digits.length === 4) return digits;
+
+  // 1588 등 대표번호 8자리
+  if (digits.length === 8 && (digits.startsWith('15') || digits.startsWith('16') || digits.startsWith('18'))) {
+    return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  }
+
+  // 서울 02
+  if (digits.startsWith('02')) {
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 5) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    if (digits.length <= 6) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    if (digits.length <= 8) return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`;
+    if (digits.length === 9) {
+      return `${digits.slice(0, 2)}-${digits.slice(2, 5)}-${digits.slice(5)}`;
+    }
+    return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6, 10)}`;
+  }
+
+  // 이동통신 010 (11자리)
+  if (digits.startsWith('010')) {
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+  }
+
+  // 기타 이동통신(011 등) 및 지역번호(031, 051 등), 070, 050
+  if (digits.startsWith('0')) {
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    if (digits.length <= 10) {
+      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+    }
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+  }
+
+  return str;
+}
+
+export type YangjaeReportTab = 'milestones' | 'booths' | 'schedule' | 'duties';
+
+const YANGJAE_REPORT_TABS: { id: YangjaeReportTab; label: string }[] = [
+  { id: 'milestones', label: '1. 추진과제' },
+  { id: 'booths', label: '2. 부스현황' },
+  { id: 'schedule', label: '3. 행사식순' },
+  { id: 'duties', label: '4. 업무분장' },
 ];
+
+const SCHEDULE_PHASES = ['전체', '식전·준비', '공식행사', '걷기대회', '공연·폐회'];
+const DUTY_CATEGORIES = ['전체', '총괄기획', '체육회', '대행용역', '응급안전', '체험부스', '유관부서'];
 
 export interface BoothScaleParsed {
   dong: number;
@@ -236,6 +299,60 @@ export function formatDetail(item: ParsedDetail): string {
   return item.text !== undefined && item.text !== '' ? `${prefix} ${item.text}` : prefix;
 }
 
+export function getDetailSortKey(raw: string): number {
+  if (!raw) return Infinity;
+  const parsed = parseDetail(raw);
+  const dateStr = parsed.date ? parsed.date.trim() : '';
+  if (!dateStr) return Infinity;
+
+  // 1. 당일 시간 형식 (식순): "07:30~08:00" 또는 "07:30" (2026-10-31 행사 당일 시간 매핑)
+  const timeMatch = dateStr.match(/^(\d{1,2}):(\d{2})/);
+  if (timeMatch) {
+    const hours = parseInt(timeMatch[1], 10);
+    const minutes = parseInt(timeMatch[2], 10);
+    return new Date(2026, 9, 31, hours, minutes).getTime();
+  }
+
+  // 2. 연도 포함 날짜: "26.7.29." 또는 "2026.7.29." 또는 "26.9.10"
+  const fullDateMatch = dateStr.match(/^(?:20)?(\d{2})\.(\d{1,2})\.(\d{1,2})\.?/);
+  if (fullDateMatch) {
+    const year = 2000 + parseInt(fullDateMatch[1], 10);
+    const month = parseInt(fullDateMatch[2], 10) - 1;
+    const day = parseInt(fullDateMatch[3], 10);
+    return new Date(year, month, day).getTime();
+  }
+
+  // 3. 월.일 단독 형식: "9.3." 또는 "9.3" 또는 "09.03"
+  const mdMatch = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.?/);
+  if (mdMatch) {
+    const month = parseInt(mdMatch[1], 10) - 1;
+    const day = parseInt(mdMatch[2], 10);
+    return new Date(2026, month, day).getTime();
+  }
+
+  // 4. 월 주차 등 텍스트: "9월 1주", "7월 말"
+  const monthWordMatch = dateStr.match(/^(\d{1,2})월/);
+  if (monthWordMatch) {
+    const month = parseInt(monthWordMatch[1], 10) - 1;
+    return new Date(2026, month, 1).getTime();
+  }
+
+  return Infinity;
+}
+
+export function sortDetailsAscending(details: string[]): string[] {
+  if (!Array.isArray(details)) return [];
+  return details
+    .map((detail, index) => ({ detail, index, sortKey: getDetailSortKey(detail) }))
+    .sort((a, b) => {
+      if (a.sortKey !== b.sortKey) {
+        return a.sortKey - b.sortKey;
+      }
+      return a.index - b.index;
+    })
+    .map((item) => item.detail);
+}
+
 // 보건소 핵심 담당자 행정 직통번호(내선) 매핑 테이블
 export const STAFF_PHONE_MAP: Record<string, { ext: string; full: string; role: string }> = {
   '오창선': { ext: '7116', full: '02-3423-7116', role: '주무관' },
@@ -328,6 +445,29 @@ export const STAFF_PHONE_MAP: Record<string, { ext: string; full: string; role: 
   '김다희 팀장': { ext: '0544', full: '010-8494-0544', role: '대행사 팀장' },
   '김다희팀장님': { ext: '0544', full: '010-8494-0544', role: '대행사 팀장' },
   '김다희 팀장님': { ext: '0544', full: '010-8494-0544', role: '대행사 팀장' },
+  // 강남구체육회 (02-3462-7330 / 7330)
+  '강남구체육회': { ext: '7330', full: '02-3462-7330', role: '공동주관' },
+  '강남구 체육회': { ext: '7330', full: '02-3462-7330', role: '공동주관' },
+  '체육회': { ext: '7330', full: '02-3462-7330', role: '공동주관' },
+  '체육회(걷기협회)': { ext: '7330', full: '02-3462-7330', role: '공동주관' },
+  '강남구체육회(걷기협회)': { ext: '7330', full: '02-3462-7330', role: '공동주관' },
+  '이무상': { ext: '7330', full: '02-3462-7330', role: '강남구체육회 지도사' },
+  '이무상지도사': { ext: '7330', full: '02-3462-7330', role: '강남구체육회 지도사' },
+  '이무상 지도사': { ext: '7330', full: '02-3462-7330', role: '강남구체육회 지도사' },
+  '채희경': { ext: '7397', full: '010-7137-7397', role: '강남구체육회 팀장' },
+  '채희경팀장': { ext: '7397', full: '010-7137-7397', role: '강남구체육회 팀장' },
+  '채희경 팀장': { ext: '7397', full: '010-7137-7397', role: '강남구체육회 팀장' },
+  '채희경팀장님': { ext: '7397', full: '010-7137-7397', role: '강남구체육회 팀장' },
+  '채희경 팀장님': { ext: '7397', full: '010-7137-7397', role: '강남구체육회 팀장' },
+  // 강남구 걷기협회 (010-8762-8260 / 진우복 회장님)
+  '강남구 걷기협회': { ext: '8260', full: '010-8762-8260', role: '걷기협회' },
+  '강남구걷기협회': { ext: '8260', full: '010-8762-8260', role: '걷기협회' },
+  '걷기협회': { ext: '8260', full: '010-8762-8260', role: '걷기협회' },
+  '진우복': { ext: '8260', full: '010-8762-8260', role: '걷기협회 회장' },
+  '진우복회장': { ext: '8260', full: '010-8762-8260', role: '걷기협회 회장' },
+  '진우복 회장': { ext: '8260', full: '010-8762-8260', role: '걷기협회 회장' },
+  '진우복회장님': { ext: '8260', full: '010-8762-8260', role: '걷기협회 회장' },
+  '진우복 회장님': { ext: '8260', full: '010-8762-8260', role: '걷기협회 회장' },
 };
 
 const STAFF_PHONE_ENTRIES = Object.entries(STAFF_PHONE_MAP);
@@ -361,6 +501,16 @@ export function getStaffInfo(name: string): { ext: string; full: string; role: s
     result = STAFF_PHONE_MAP['제이민'];
   } else if (clean.includes('과장')) {
     result = STAFF_PHONE_MAP['과장님'];
+  } else if (clean.includes('체육회')) {
+    result = STAFF_PHONE_MAP['강남구체육회'];
+  } else if (clean.includes('걷기협회')) {
+    result = STAFF_PHONE_MAP['강남구 걷기협회'];
+  } else if (clean.includes('이무상')) {
+    result = STAFF_PHONE_MAP['이무상'];
+  } else if (clean.includes('채희경')) {
+    result = STAFF_PHONE_MAP['채희경'];
+  } else if (clean.includes('진우복')) {
+    result = STAFF_PHONE_MAP['진우복'];
   } else {
     for (let i = 0; i < STAFF_PHONE_ENTRIES.length; i++) {
       const [key, val] = STAFF_PHONE_ENTRIES[i];
@@ -755,9 +905,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
   const [editingBooths, setEditingBooths] = useState<boolean>(false);
   const [editBoothsData, setEditBoothsData] = useState<BoothItem[]>(() => data?.booths || YANGJAE_FALLBACK_DATA.booths || []);
+  const [editingBoothId, setEditingBoothId] = useState<number | null>(null);
+  const [editSingleBoothData, setEditSingleBoothData] = useState<BoothItem | null>(null);
 
   const [saveToast, setSaveToast] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>('수정 사항이 저장되었습니다!');
+  const [showPrivateMobile, setShowPrivateMobile] = useState<boolean>(true);
 
   // 세부 과업 다른 추진과제 카테고리로 이동(Transfer) 상태
   const [transferTarget, setTransferTarget] = useState<{
@@ -768,12 +921,18 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   const [selectedTargetMilestoneId, setSelectedTargetMilestoneId] = useState<number | null>(null);
   const [isTransferring, setIsTransferring] = useState<boolean>(false);
 
-  const [selectedTab, setSelectedTab] = useState<'milestones' | 'booths'>('milestones');
-  const [visitedFestivalTabs, setVisitedFestivalTabs] = useState<Record<string, boolean>>({
+  const [selectedTab, setSelectedTab] = useState<YangjaeReportTab>('milestones');
+  const [visitedFestivalTabs, setVisitedFestivalTabs] = useState<Record<YangjaeReportTab, boolean>>({
     milestones: true,
     booths: false,
+    schedule: false,
+    duties: false,
   });
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
+  const [selectedSchedulePhase, setSelectedSchedulePhase] = useState<string>('전체');
+  const [scheduleSearchQuery, setScheduleSearchQuery] = useState<string>('');
+  const [selectedDutyCategory, setSelectedDutyCategory] = useState<string>('전체');
+  const [dutySearchQuery, setDutySearchQuery] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [isLargeFont, setIsLargeFont] = useState<boolean>(false);
 
@@ -838,7 +997,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     const list = data?.milestones || [];
     const ids = new Set<number>();
     for (let i = 0; i < list.length; i++) {
-      if (list[i]?.id !== undefined) {
+      if (list[i]?.id !== undefined && list[i].id !== 2) {
         ids.add(list[i].id);
       }
     }
@@ -877,23 +1036,38 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
   const boothMetrics = useMemo(() => {
     const list = activeBooths || [];
+    let operatingEntitiesCount = 0;
     let confirmedEntities = 0;
     let pendingEntities = 0;
+    let hqEntities = 0;
     let totalDong = 0;
     let confirmedDong = 0;
     let pendingDong = 0;
     let totalBus = 0;
     let confirmedBus = 0;
+    let totalTables = 0;
+    let confirmedTables = 0;
+    let totalChairs = 0;
+    let confirmedChairs = 0;
 
     for (let i = 0; i < list.length; i++) {
       const b = list[i];
       if (!b) continue;
+
+      const isHQ = b.category === '운영본부' || b.category === '운영주체' || (typeof b.name === 'string' && b.name.includes('보건행정팀'));
       const isConfirmed = b.status === '확정';
-      if (isConfirmed) {
-        confirmedEntities++;
+
+      if (isHQ) {
+        hqEntities++;
       } else {
-        pendingEntities++;
+        operatingEntitiesCount++;
+        if (isConfirmed) {
+          confirmedEntities++;
+        } else {
+          pendingEntities++;
+        }
       }
+
       const parsed = parseBoothScale(b.scale);
       totalDong += parsed.dong;
       totalBus += parsed.bus;
@@ -903,17 +1077,32 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       } else {
         pendingDong += parsed.dong;
       }
+
+      const tablesCount = typeof b.tables === 'number' ? b.tables : (Number(b.tables) || 0);
+      const chairsCount = typeof b.chairs === 'number' ? b.chairs : (Number(b.chairs) || 0);
+
+      totalTables += tablesCount;
+      totalChairs += chairsCount;
+      if (isConfirmed) {
+        confirmedTables += tablesCount;
+        confirmedChairs += chairsCount;
+      }
     }
 
     return {
-      totalEntities: list.length,
+      totalEntities: operatingEntitiesCount,
       confirmedEntities,
       pendingEntities,
+      hqEntities,
       totalDong,
       confirmedDong,
       pendingDong,
       totalBus,
       confirmedBus,
+      totalTables,
+      confirmedTables,
+      totalChairs,
+      confirmedChairs,
     };
   }, [activeBooths]);
 
@@ -946,14 +1135,66 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
           if (alias !== cat) map.get(alias)!.push(b);
         }
       }
+
+      // Alias support for '운영본부' and '운영주체'
+      if (cat === '운영본부' || cat === '운영주체' || cat === '본부') {
+        const hqAliases = ['운영본부', '운영주체', '본부'];
+        for (const alias of hqAliases) {
+          if (!map.has(alias)) map.set(alias, []);
+          if (alias !== cat) map.get(alias)!.push(b);
+        }
+      }
     }
     return map;
   }, [activeBooths]);
 
-  const handleSelectTab = useCallback((tabId: 'milestones' | 'booths') => {
+  const handleSelectTab = useCallback((tabId: YangjaeReportTab) => {
     setVisitedFestivalTabs((prev) => (prev[tabId] ? prev : { ...prev, [tabId]: true }));
     setSelectedTab(tabId);
   }, []);
+
+  const activeSchedule = useMemo(() => {
+    return (data?.schedule || YANGJAE_FALLBACK_DATA.schedule || []) as ScheduleItem[];
+  }, [data?.schedule]);
+
+  const filteredSchedule = useMemo(() => {
+    let list = activeSchedule;
+    if (selectedSchedulePhase !== '전체') {
+      list = list.filter((item) => item.phase === selectedSchedulePhase);
+    }
+    if (scheduleSearchQuery.trim()) {
+      const q = scheduleSearchQuery.trim().toLowerCase();
+      list = list.filter((item) =>
+        item.title.toLowerCase().includes(q) ||
+        (item.lead && item.lead.toLowerCase().includes(q)) ||
+        (item.note && item.note.toLowerCase().includes(q)) ||
+        (item.time && item.time.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [activeSchedule, selectedSchedulePhase, scheduleSearchQuery]);
+
+  const activeDuties = useMemo(() => {
+    return (data?.duties || YANGJAE_FALLBACK_DATA.duties || []) as DutyItem[];
+  }, [data?.duties]);
+
+  const filteredDuties = useMemo(() => {
+    let list = activeDuties;
+    if (selectedDutyCategory !== '전체') {
+      list = list.filter((d) => d.category === selectedDutyCategory);
+    }
+    if (dutySearchQuery.trim()) {
+      const q = dutySearchQuery.trim().toLowerCase();
+      list = list.filter((d) =>
+        d.deptOrOrg.toLowerCase().includes(q) ||
+        d.role.toLowerCase().includes(q) ||
+        d.manager.toLowerCase().includes(q) ||
+        d.phone.toLowerCase().includes(q) ||
+        d.tasks.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [activeDuties, selectedDutyCategory, dutySearchQuery]);
 
   const handleSelectCategory = useCallback((cat: string) => {
     setSelectedCategory(cat);
@@ -986,10 +1227,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
   // 2. 개별 추진과제 독립 편집 핸들러
   const handleStartEditMilestone = (m: MilestoneItem) => {
-    setEditMilestoneData(safeClone(m));
+    const sortedDetails = sortDetailsAscending(m.details || []);
+    const sortedMilestone = { ...safeClone(m), details: sortedDetails };
+    setEditMilestoneData(sortedMilestone);
     setEditingMilestoneId(m.id);
     setExpandedTaskIds((prev) => new Set([...prev, m.id]));
-    const drafts: DetailDraft[] = (m.details || []).map((detail, idx) => ({
+    const drafts: DetailDraft[] = sortedDetails.map((detail, idx) => ({
       uid: `m-${m.id}-detail-${idx}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       raw: detail,
     }));
@@ -1003,9 +1246,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   const handleSaveMilestone = async () => {
     if (!editMilestoneData || editingMilestoneId === null) return;
     try {
-      const finalDetails = detailDrafts.length > 0
+      const rawDetails = detailDrafts.length > 0
         ? detailDrafts.map((d) => d.raw)
         : (editMilestoneData.details || []);
+      const finalDetails = sortDetailsAscending(rawDetails);
       const updatedMilestone: MilestoneItem = {
         ...editMilestoneData,
         details: finalDetails,
@@ -1131,13 +1375,13 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
           }
           return {
             ...m,
-            details: nextDetails,
+            details: sortDetailsAscending(nextDetails),
           };
         }
         if (m.id === selectedTargetMilestoneId) {
           return {
             ...m,
-            details: [...(m.details || []), detailRaw],
+            details: sortDetailsAscending([...(m.details || []), detailRaw]),
           };
         }
         return m;
@@ -1155,20 +1399,20 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
           if (!prev) return null;
           const nextDetails = [...(prev.details || [])];
           nextDetails.splice(detailIndex, 1);
-          return { ...prev, details: nextDetails };
+          return { ...prev, details: sortDetailsAscending(nextDetails) };
         });
       }
 
-      // 대상 과제를 편집 중이었던 경우 드래프트 목록에 추가
+      // 대상 과제를 편집 중이었던 경우 드래프트 목록에 추가 및 오름차순 정렬 반영
       if (editingMilestoneId === selectedTargetMilestoneId) {
-        const newDraft: DetailDraft = {
-          uid: `m-${selectedTargetMilestoneId}-detail-transferred-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-          raw: detailRaw,
-        };
-        setDetailDrafts((prev) => [...prev, newDraft]);
+        const sortedTargetDetails = sortDetailsAscending([...(editMilestoneData?.details || []), detailRaw]);
+        setDetailDrafts(sortedTargetDetails.map((detail, idx) => ({
+          uid: `m-${selectedTargetMilestoneId}-detail-${idx}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          raw: detail,
+        })));
         setEditMilestoneData((prev) => {
           if (!prev) return null;
-          return { ...prev, details: [...(prev.details || []), detailRaw] };
+          return { ...prev, details: sortedTargetDetails };
         });
       }
 
@@ -1189,12 +1433,60 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
   // 3. 부스 현황 독립 편집 핸들러
   const handleStartEditBooths = () => {
+    setEditingBoothId(null);
+    setEditSingleBoothData(null);
     setEditBoothsData(safeClone(data.booths || []));
     setEditingBooths(true);
   };
   const handleCancelEditBooths = () => {
     setEditBoothsData(safeClone(data.booths || []));
     setEditingBooths(false);
+  };
+
+  // 단일 부스 개별 편집 핸들러
+  const handleStartEditSingleBooth = (booth: BoothItem) => {
+    if (editingBooths) {
+      setEditingBooths(false);
+    }
+    setEditingBoothId(booth.id);
+    setEditSingleBoothData(safeClone(booth));
+  };
+
+  const handleCancelEditSingleBooth = () => {
+    setEditingBoothId(null);
+    setEditSingleBoothData(null);
+  };
+
+  const handleSaveSingleBooth = async () => {
+    if (!editSingleBoothData || editingBoothId === null) return;
+    try {
+      const adminFormatted = formatAutoHyphen((editSingleBoothData.adminPhone || '').trim());
+      const mobileFormatted = formatAutoHyphen((editSingleBoothData.mobilePhone || '').trim());
+      const phoneFormatted = formatAutoHyphen(adminFormatted || mobileFormatted || (editSingleBoothData.phone || '').trim());
+
+      const updatedBooth: BoothItem = {
+        ...editSingleBoothData,
+        tables: Math.max(0, Number(editSingleBoothData.tables) || 0),
+        chairs: Math.max(0, Number(editSingleBoothData.chairs) || 0),
+        manager: (editSingleBoothData.manager || '').trim(),
+        adminPhone: adminFormatted,
+        mobilePhone: mobileFormatted,
+        phone: phoneFormatted,
+      };
+      const currentBooths = data?.booths || YANGJAE_FALLBACK_DATA.booths || [];
+      const nextBooths = currentBooths.map((b) => (b.id === editingBoothId ? updatedBooth : b));
+      await saveMutation.mutateAsync({
+        ...data,
+        booths: nextBooths,
+      });
+      setEditingBoothId(null);
+      setEditSingleBoothData(null);
+      setToastMessage(`[${updatedBooth.name}] 부스 정보가 저장되었습니다!`);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 3000);
+    } catch {
+      alert('부스 정보 저장에 실패했습니다.');
+    }
   };
 
   // 부스 순서 변경 핸들러 (위로 이동)
@@ -1269,11 +1561,22 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
   const handleSaveBooths = async () => {
     try {
-      // 변경된 순서에 맞춰 No.1~No.N ID 순차 정규화 후 저장
-      const normalizedBooths = editBoothsData.map((b, idx) => ({
-        ...b,
-        id: idx + 1,
-      }));
+      // 변경된 순서에 맞춰 No.1~No.N ID 순차 정규화 및 테이블/의자 수치 보정 후 저장
+      const normalizedBooths = editBoothsData.map((b, idx) => {
+        const adminFormatted = formatAutoHyphen((b.adminPhone || '').trim());
+        const mobileFormatted = formatAutoHyphen((b.mobilePhone || '').trim());
+        const phoneFormatted = formatAutoHyphen(adminFormatted || mobileFormatted || (b.phone || '').trim());
+        return {
+          ...b,
+          id: idx + 1,
+          tables: Math.max(0, Number(b.tables) || 0),
+          chairs: Math.max(0, Number(b.chairs) || 0),
+          manager: (b.manager || '').trim(),
+          adminPhone: adminFormatted,
+          mobilePhone: mobileFormatted,
+          phone: phoneFormatted,
+        };
+      });
       await saveMutation.mutateAsync({
         ...data,
         booths: normalizedBooths,
@@ -1309,6 +1612,11 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       ? data.weeklyReport.items.join('\n')
       : fallbackWeeklyItems.join('\n');
 
+    const suppliesText = `■ 부스 집기 수요 현황
+- 총 부스: ${boothMetrics.totalEntities}개 기관 (${boothMetrics.totalDong}동) ${boothMetrics.hqEntities > 0 ? `[운영본부 별도]` : ''}
+- 테이블: 총 ${boothMetrics.totalTables}개 (확정 ${boothMetrics.confirmedTables}개)
+- 의자: 총 ${boothMetrics.totalChairs}개 (확정 ${boothMetrics.confirmedChairs}개)`;
+
     const text = `[${title} | ${weekTitle}]
 (추진기간: ${period})
 
@@ -1316,6 +1624,8 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
 ■ 추진내역
 ${weeklyLines}
+
+${suppliesText}
 
 ※ 아래 링크 클릭하시면 전체 추진내역 열람이 가능합니다.
 ${targetUrl}`;
@@ -1349,7 +1659,7 @@ ${targetUrl}`;
     } else if (!sharedSuccess && typeof window !== 'undefined' && typeof window.prompt === 'function') {
       window.prompt('아래 주간 추진실적 내용을 복사(Ctrl+C 또는 길게 터치)하세요:', text);
     }
-  }, [data, PUBLIC_SHARE_URL]);
+  }, [data, PUBLIC_SHARE_URL, boothMetrics]);
 
   const filteredBooths = useMemo(() => {
     if (selectedCategory === '전체') return activeBooths || [];
@@ -1682,8 +1992,8 @@ ${targetUrl}`;
             </div>
           </div>
 
-          {/* Section 2: Tab Navigation (Clean Public Report Tabs - 2 Cols) */}
-          <div className="grid grid-cols-2 gap-1.5 bg-slate-200 p-1.5 rounded-xl border border-slate-300">
+          {/* Section 2: Tab Navigation (Clean Public Report Tabs - 4 Cols) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-slate-200 p-1.5 rounded-xl border border-slate-300">
             {YANGJAE_REPORT_TABS.map((tab) => (
               <button
                 key={tab.id}
@@ -1741,6 +2051,9 @@ ${targetUrl}`;
                 const targetItem = (isEditingThis ? editMilestoneData : item) || item;
                 if (!targetItem) return null;
                 const isExpanded = expandedTaskIds.has(item.id) || isEditingThis;
+
+                // 과제 2(행사 식순)는 상단 [3. 행사식순] 전용 탭으로 승격되었으므로 1번 탭(추진과제)에서는 노출하지 않음
+                if (item.id === 2) return null;
 
                 return (
                   <div 
@@ -1910,7 +2223,12 @@ ${targetUrl}`;
                           {isEditingThis ? (
                             <div className="space-y-2 p-2 bg-slate-100/70 rounded-xl border border-slate-300">
                               <div className="text-[11px] font-bold text-slate-600 mb-1 flex items-center justify-between">
-                                <span>세부 실행 과업 (날짜 / 상태 / 참여자 / 내용)</span>
+                                <span className="flex items-center gap-1.5 text-amber-900 font-extrabold">
+                                  <span>세부 실행 과업</span>
+                                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300/80">
+                                    날짜 오름차순 자동 정렬
+                                  </span>
+                                </span>
                                 <span className="text-[10px] text-slate-500 font-normal">▲▼ 버튼으로 순서 이동 가능</span>
                               </div>
                               {(() => {
@@ -1960,7 +2278,7 @@ ${targetUrl}`;
                             </div>
                           ) : (
                               <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-200/90 shadow-2xs">
-                                {item.details.map((detail: string, dIdx: number) => {
+                                {sortDetailsAscending(item.details || []).map((detail: string, dIdx: number) => {
                                   const parsed = parseDetail(detail);
                                   const isCoopTask = parsed.text.includes('[협조') || detail.includes('[협조');
                                   const displayDate = parsed.date ? parsed.date.replace(/\.$/, '') : '상시';
@@ -2103,6 +2421,10 @@ ${targetUrl}`;
                             scale: '1동',
                             program: '체험 프로그램 내용',
                             status: '확정',
+                            tables: 2,
+                            chairs: 4,
+                            manager: '',
+                            phone: '',
                           }
                         ]);
                       }}
@@ -2132,20 +2454,35 @@ ${targetUrl}`;
                     </button>
                   </div>
                 ) : isLocalAdmin ? (
-                  <button
-                    type="button"
-                    onClick={handleStartEditBooths}
-                    className="px-2.5 py-1 text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-lg border border-amber-300 flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap shrink-0 ml-auto"
-                    title="부스 순서 변경 및 현황 수정"
-                  >
-                    <ArrowUpDown className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                    <span>순서 변경 / 편집</span>
-                  </button>
+                  <div className="flex items-center gap-1.5 ml-auto shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setShowPrivateMobile((prev) => !prev)}
+                      className={`px-2 py-1 text-xs font-bold rounded-lg border flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap ${
+                        showPrivateMobile
+                          ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-300'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-300'
+                      }`}
+                      title={showPrivateMobile ? "휴대전화 번호 숨기기 (공공/화면공유 모드)" : "휴대전화 번호 표시 (관리자 전용)"}
+                    >
+                      <Smartphone className={`w-3.5 h-3.5 ${showPrivateMobile ? 'text-emerald-700' : 'text-slate-400'}`} />
+                      <span>{showPrivateMobile ? '폰번호 보임' : '폰번호 숨김'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleStartEditBooths}
+                      className="px-2.5 py-1 text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-lg border border-amber-300 flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap shrink-0"
+                      title="부스 순서 변경 및 현황 수정"
+                    >
+                      <ArrowUpDown className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                      <span>순서 변경 / 편집</span>
+                    </button>
+                  </div>
                 ) : null}
               </div>
 
               {/* Booth Summary Metrics Card (행렬 정렬 & 프리미엄 다크 카드) */}
-              <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-950 text-white rounded-xl shadow-xs border border-slate-700 p-3 sm:p-3.5">
+              <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-950 text-white rounded-xl shadow-xs border border-slate-700 p-3 sm:p-3.5 space-y-3">
                 <div className="grid grid-cols-2 divide-x divide-slate-800 gap-x-3 sm:gap-x-4">
                   {/* Col 1: 총 부스 참여 주체 */}
                   <div className="flex flex-col justify-between pr-1">
@@ -2171,9 +2508,16 @@ ${targetUrl}`;
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-indigo-950/80 text-indigo-300 border border-indigo-700/60 whitespace-nowrap">
                         확정 {boothMetrics.confirmedEntities}
                       </span>
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-800/90 text-slate-300 border border-slate-700 whitespace-nowrap">
-                        협의 {boothMetrics.pendingEntities}
-                      </span>
+                      {boothMetrics.pendingEntities > 0 && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-800/90 text-slate-300 border border-slate-700 whitespace-nowrap">
+                          협의 {boothMetrics.pendingEntities}
+                        </span>
+                      )}
+                      {boothMetrics.hqEntities > 0 && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-amber-950/80 text-amber-300 border border-amber-700/60 whitespace-nowrap" title="보건행정팀 운영본부 1개소">
+                          본부 {boothMetrics.hqEntities}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -2246,46 +2590,129 @@ ${targetUrl}`;
               {/* Booths Cards List */}
               <div className="space-y-2.5">
                 {filteredBooths.map((booth, fIdx) => {
-                  const overallIdx = activeBooths.findIndex((b) => b.id === booth.id);
-                  const displayNo = overallIdx !== -1 ? overallIdx + 1 : booth.id;
+                  const isHQ = booth.category === '운영본부' || booth.category === '운영주체' || (typeof booth.name === 'string' && booth.name.includes('보건행정팀'));
+                  const operatingBooths = activeBooths.filter(
+                    (b) => b.category !== '운영본부' && b.category !== '운영주체' && !(typeof b.name === 'string' && b.name.includes('보건행정팀'))
+                  );
+                  const opIdx = operatingBooths.findIndex((b) => b.id === booth.id);
+                  const displayNo = opIdx !== -1 ? opIdx + 1 : booth.id;
                   const canMoveUp = fIdx > 0;
                   const canMoveDown = fIdx < filteredBooths.length - 1;
+
+                  const isEditingSingle = editingBoothId === booth.id;
+                  const isEditingThis = editingBooths || isEditingSingle;
+                  const targetBooth = (isEditingSingle ? editSingleBoothData : (editingBooths ? editBoothsData.find((b) => b.id === booth.id) : booth)) || booth;
+
+                  const updateBoothField = <K extends keyof BoothItem>(field: K, value: BoothItem[K]) => {
+                    const formattedVal = (field === 'adminPhone' || field === 'mobilePhone' || field === 'phone') && typeof value === 'string'
+                      ? (formatAutoHyphen(value) as BoothItem[K])
+                      : value;
+
+                    if (isEditingSingle) {
+                      setEditSingleBoothData((prev) => {
+                        if (!prev) return prev;
+                        const updated = { ...prev, [field]: formattedVal };
+                        if (field === 'adminPhone' && !prev.mobilePhone) {
+                          updated.phone = String(formattedVal);
+                        } else if (field === 'mobilePhone' && !prev.adminPhone) {
+                          updated.phone = String(formattedVal);
+                        }
+                        return updated;
+                      });
+                    } else if (editingBooths) {
+                      setEditBoothsData((prev) => {
+                        const next = [...prev];
+                        const targetIdx = next.findIndex((b) => b.id === booth.id);
+                        if (targetIdx !== -1) {
+                          const updated = { ...next[targetIdx], [field]: formattedVal };
+                          if (field === 'adminPhone' && !next[targetIdx].mobilePhone) {
+                            updated.phone = String(formattedVal);
+                          } else if (field === 'mobilePhone' && !next[targetIdx].adminPhone) {
+                            updated.phone = String(formattedVal);
+                          }
+                          next[targetIdx] = updated;
+                        }
+                        return next;
+                      });
+                    }
+                  };
 
                   return (
                     <div 
                       key={`booth-card-${booth.id}`}
-                      className={`p-3.5 bg-white border-2 rounded-xl shadow-2xs transition-all ${
-                        editingBooths ? 'border-amber-300 ring-1 ring-amber-200' : 'border-slate-300'
+                      className={`p-3.5 bg-white border-2 rounded-xl transition-all ${
+                        isHQ
+                          ? 'border-amber-400 bg-amber-50/20'
+                          : isEditingSingle
+                          ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50/10 shadow-md'
+                          : editingBooths
+                          ? 'border-amber-300 ring-1 ring-amber-200 shadow-2xs'
+                          : 'border-slate-300 shadow-2xs'
                       }`}
                     >
                       <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-200">
                         <div className="flex items-center gap-1.5">
-                          <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-mono font-black text-slate-700`}>
-                            No.{displayNo}
-                          </span>
-                          {editingBooths ? (
+                          {isHQ ? (
+                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-extrabold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 shadow-3xs`}>
+                              운영본부
+                            </span>
+                          ) : (
+                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-mono font-black text-slate-700`}>
+                              No.{displayNo}
+                            </span>
+                          )}
+                          {isEditingThis ? (
                             <input
                               type="text"
-                              value={booth.category}
-                              onChange={(e) => {
-                                const next = [...editBoothsData];
-                                const targetIdx = next.findIndex((b) => b.id === booth.id);
-                                if (targetIdx !== -1) {
-                                  next[targetIdx].category = e.target.value;
-                                  setEditBoothsData(next);
-                                }
-                              }}
+                              value={targetBooth.category}
+                              onChange={(e) => updateBoothField('category', e.target.value)}
                               className="px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-bold w-24"
+                              placeholder="카테고리"
                             />
                           ) : (
-                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300`}>
+                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-bold ${
+                              isHQ
+                                ? 'text-amber-800 bg-amber-50 border-amber-200'
+                                : 'text-slate-800 bg-slate-100 border-slate-300'
+                            } px-1.5 py-0.5 rounded border`}>
                               {booth.category}
                             </span>
                           )}
                         </div>
 
-                        <div className="flex items-center gap-1">
-                          {editingBooths ? (
+                        <div className="flex items-center gap-1.5">
+                          {isEditingSingle ? (
+                            <div className="flex items-center gap-1">
+                              <select
+                                value={targetBooth.status}
+                                onChange={(e) => updateBoothField('status', e.target.value)}
+                                className="px-1.5 py-0.5 text-xs font-bold border border-emerald-400 rounded bg-white cursor-pointer"
+                              >
+                                <option value="확정">확정</option>
+                                <option value="협의중">협의중</option>
+                                <option value="신청완료">신청완료</option>
+                              </select>
+                              <button
+                                type="button"
+                                onClick={handleSaveSingleBooth}
+                                disabled={saveMutation.isPending}
+                                className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                title="부스 저장"
+                              >
+                                {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                <span>저장</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelEditSingleBooth}
+                                className="px-1.5 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                title="취소"
+                              >
+                                <X className="w-3 h-3" />
+                                <span>취소</span>
+                              </button>
+                            </div>
+                          ) : editingBooths ? (
                             <div className="flex items-center gap-1">
                               {/* 순서 변경 버튼 그룹 (▲ 위로 / ▼ 아래로) */}
                               <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-md border border-slate-200">
@@ -2320,16 +2747,9 @@ ${targetUrl}`;
                               </div>
 
                               <select
-                                value={booth.status}
-                                onChange={(e) => {
-                                  const next = [...editBoothsData];
-                                  const targetIdx = next.findIndex((b) => b.id === booth.id);
-                                  if (targetIdx !== -1) {
-                                    next[targetIdx].status = e.target.value;
-                                    setEditBoothsData(next);
-                                  }
-                                }}
-                                className="px-1.5 py-0.5 text-xs font-bold border border-amber-400 rounded bg-white"
+                                value={targetBooth.status}
+                                onChange={(e) => updateBoothField('status', e.target.value)}
+                                className="px-1.5 py-0.5 text-xs font-bold border border-amber-400 rounded bg-white cursor-pointer"
                               >
                                 <option value="확정">확정</option>
                                 <option value="협의중">협의중</option>
@@ -2348,51 +2768,143 @@ ${targetUrl}`;
                               </button>
                             </div>
                           ) : (
-                            <span className={`${isLargeFont ? 'text-xs px-2.5 py-1' : 'text-[11px] px-2 py-0.5'} font-bold rounded border ${
-                              booth.status === '확정'
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                                : 'bg-amber-50 text-amber-800 border-amber-300'
-                            }`}>
-                              {booth.status}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className={`${isLargeFont ? 'text-xs px-2.5 py-1' : 'text-[11px] px-2 py-0.5'} font-bold rounded border ${
+                                booth.status === '확정'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                  : 'bg-amber-50 text-amber-800 border-amber-300'
+                              }`}>
+                                {booth.status}
+                              </span>
+                              {isLocalAdmin && !editingBooths && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditSingleBooth(booth)}
+                                  className="px-2 py-0.5 text-xs font-bold bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-900 border border-slate-300 hover:border-amber-300 rounded-md flex items-center gap-1 cursor-pointer transition-colors shadow-3xs"
+                                  title="부스 정보 수정"
+                                >
+                                  <Edit3 className="w-3 h-3 text-slate-600" />
+                                  <span>수정</span>
+                                </button>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
 
-                    {editingBooths ? (
-                      <input
-                        type="text"
-                        value={booth.name}
-                        onChange={(e) => {
-                          const next = [...editBoothsData];
-                          const targetIdx = next.findIndex((b) => b.id === booth.id);
-                          if (targetIdx !== -1) {
-                            next[targetIdx].name = e.target.value;
-                            setEditBoothsData(next);
-                          }
-                        }}
-                        className="w-full px-2 py-1 border border-amber-400 rounded bg-white text-sm font-extrabold mb-1.5"
-                        placeholder="부스 이름"
-                      />
+                    {isEditingThis ? (
+                      <>
+                        <input
+                          type="text"
+                          value={targetBooth.name}
+                          onChange={(e) => updateBoothField('name', e.target.value)}
+                          className="w-full px-2 py-1 border border-amber-400 rounded bg-white text-sm font-extrabold mb-1.5"
+                          placeholder="부스 이름"
+                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 bg-amber-50/60 p-2 rounded-lg border border-amber-200/80 mb-2">
+                          {/* 1. 담당자 */}
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <User className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                            <span className="text-xs font-bold text-slate-700 whitespace-nowrap shrink-0">담당자:</span>
+                            <input
+                              type="text"
+                              value={targetBooth.manager ?? ''}
+                              onChange={(e) => updateBoothField('manager', e.target.value)}
+                              className="px-2 py-0.5 border border-amber-400 rounded bg-white text-xs flex-1 font-bold text-slate-900 min-w-0"
+                              placeholder="예: 오창선 주무관"
+                            />
+                          </div>
+
+                          {/* 2. 행정번호 (유선) */}
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <Phone className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                            <span className="text-xs font-bold text-blue-900 whitespace-nowrap shrink-0">행정번호:</span>
+                            <input
+                              type="text"
+                              value={targetBooth.adminPhone ?? (!targetBooth.phone?.startsWith('010') ? targetBooth.phone : '') ?? ''}
+                              onChange={(e) => updateBoothField('adminPhone', e.target.value)}
+                              className="px-2 py-0.5 border border-amber-400 rounded bg-white text-xs flex-1 font-mono font-bold text-slate-900 min-w-0"
+                              placeholder="예: 02-3423-7116"
+                            />
+                          </div>
+
+                          {/* 3. 폰번호 (휴대전화) */}
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <Smartphone className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                            <span className="text-xs font-bold text-emerald-900 whitespace-nowrap shrink-0">폰번호:</span>
+                            <input
+                              type="text"
+                              value={targetBooth.mobilePhone ?? (targetBooth.phone?.startsWith('010') ? targetBooth.phone : '') ?? ''}
+                              onChange={(e) => updateBoothField('mobilePhone', e.target.value)}
+                              className="px-2 py-0.5 border border-amber-400 rounded bg-white text-xs flex-1 font-mono font-bold text-slate-900 min-w-0"
+                              placeholder="예: 010-8494-0544"
+                            />
+                          </div>
+                        </div>
+                      </>
                     ) : (
-                      <div className={`${isLargeFont ? 'text-base' : 'text-sm'} font-extrabold text-slate-900 mb-1.5`}>
-                        {booth.name}
-                      </div>
+                      <>
+                        <div className={`${isLargeFont ? 'text-base' : 'text-sm'} font-extrabold text-slate-900 mb-1`}>
+                          {booth.name}
+                        </div>
+                        {(() => {
+                          const adminNo = formatAutoHyphen((booth.adminPhone || (!booth.phone?.startsWith('010') ? booth.phone : '') || '').trim());
+                          const mobileNo = formatAutoHyphen((booth.mobilePhone || (booth.phone?.startsWith('010') ? booth.phone : '') || '').trim());
+
+                          const isMobileVisible = isLocalAdmin && showPrivateMobile && !!mobileNo;
+                          if (!booth.manager && !adminNo && !isMobileVisible) return null;
+
+                          return (
+                            <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap overflow-x-auto no-scrollbar mb-2 whitespace-nowrap py-0.5">
+                              {/* 담당자 뱃지 */}
+                              {booth.manager && (
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold shrink-0 shadow-3xs`}>
+                                  <User className="w-3 h-3 text-slate-500 shrink-0" />
+                                  <span>담당: {booth.manager}</span>
+                                </span>
+                              )}
+
+                              {/* 행정번호 뱃지 (유선) */}
+                              {adminNo && (
+                                <a
+                                  href={`tel:${adminNo.replace(/[^0-9]/g, '')}`}
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold bg-blue-50 hover:bg-blue-100 text-blue-950 border border-blue-200 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0`}
+                                  title={`행정전화 걸기: ${adminNo}`}
+                                >
+                                  <Phone className="w-2.5 h-2.5 text-blue-700 shrink-0" />
+                                  <span className="font-extrabold text-blue-900">행정:</span>
+                                  <span className="font-mono font-bold tracking-tight text-blue-950">
+                                    {adminNo}
+                                  </span>
+                                </a>
+                              )}
+
+                              {/* 폰번호 뱃지 (휴대전화 - 오직 관리자(나)에게만 표출) */}
+                              {isMobileVisible && (
+                                <a
+                                  href={`tel:${mobileNo.replace(/[^0-9]/g, '')}`}
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0`}
+                                  title={`휴대전화 걸기: ${mobileNo}`}
+                                >
+                                  <Smartphone className="w-2.5 h-2.5 text-emerald-700 shrink-0" />
+                                  <span className="font-extrabold text-emerald-900">폰:</span>
+                                  <span className="font-mono font-bold tracking-tight text-emerald-950">
+                                    {mobileNo}
+                                  </span>
+                                </a>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </>
                     )}
 
-                    {editingBooths ? (
+                    {isEditingThis ? (
                       <div className="space-y-1 bg-slate-50 p-2.5 rounded border border-slate-200 mb-1.5">
                         <span className="font-bold text-xs text-slate-600">내용:</span>
                         <textarea
-                          value={booth.program}
-                          onChange={(e) => {
-                            const next = [...editBoothsData];
-                            const targetIdx = next.findIndex((b) => b.id === booth.id);
-                            if (targetIdx !== -1) {
-                              next[targetIdx].program = e.target.value;
-                              setEditBoothsData(next);
-                            }
-                          }}
+                          value={targetBooth.program}
+                          onChange={(e) => updateBoothField('program', e.target.value)}
                           className="w-full px-2 py-1 border border-amber-400 rounded bg-white text-xs leading-relaxed"
                           rows={2}
                         />
@@ -2403,30 +2915,511 @@ ${targetUrl}`;
                       </div>
                     )}
 
-                    <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-600 font-medium flex items-center justify-between`}>
-                      {editingBooths ? (
-                        <div className="flex items-center gap-1 w-full">
-                          <span>부스규모:</span>
+                    {isEditingThis ? (
+                      <div className="space-y-2 pt-1.5 border-t border-dashed border-amber-200">
+                        <div className="flex items-center gap-1.5 w-full">
+                          <span className="text-xs font-bold text-slate-700 whitespace-nowrap shrink-0">부스규모:</span>
                           <input
                             type="text"
-                            value={booth.scale}
-                            onChange={(e) => {
-                              const next = [...editBoothsData];
-                              const targetIdx = next.findIndex((b) => b.id === booth.id);
-                              if (targetIdx !== -1) {
-                                next[targetIdx].scale = e.target.value;
-                                setEditBoothsData(next);
-                              }
-                            }}
-                            className="px-2 py-0.5 border border-amber-400 rounded bg-white text-xs flex-1"
+                            value={targetBooth.scale}
+                            onChange={(e) => updateBoothField('scale', e.target.value)}
+                            className="px-2 py-0.5 border border-amber-400 rounded bg-white text-xs flex-1 font-bold"
+                            placeholder="예: 2동, 1동 + 검진버스"
                           />
                         </div>
-                      ) : (
-                        <span>부스규모: <strong className="text-slate-900">{booth.scale}</strong></span>
-                      )}
-                    </div>
+                        <div className="grid grid-cols-2 gap-2 bg-amber-50/70 p-2 rounded-lg border border-amber-300/80">
+                          <div className="flex items-center gap-1.5">
+                            <Table className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+                            <span className="text-xs font-bold text-slate-800 whitespace-nowrap shrink-0">테이블:</span>
+                            <input
+                              type="number"
+                              min="0"
+                              max="99"
+                              value={targetBooth.tables ?? 0}
+                              onChange={(e) => updateBoothField('tables', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                              className="w-16 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-amber-950 text-right"
+                            />
+                            <span className="text-xs font-bold text-slate-600">개</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Armchair className="w-3.5 h-3.5 text-sky-800 shrink-0" />
+                            <span className="text-xs font-bold text-slate-800 whitespace-nowrap shrink-0">의자:</span>
+                            <input
+                              type="number"
+                              min="0"
+                              max="99"
+                              value={targetBooth.chairs ?? 0}
+                              onChange={(e) => updateBoothField('chairs', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                              className="w-16 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-sky-950 text-right"
+                            />
+                            <span className="text-xs font-bold text-slate-600">개</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-600 font-medium flex flex-wrap items-center justify-between gap-y-1.5 gap-x-2 pt-1 border-t border-slate-100`}>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span>부스규모: <strong className="text-slate-900">{booth.scale}</strong></span>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] sm:text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/90 shadow-3xs">
+                            <Table className="w-3 h-3 text-amber-700 shrink-0" />
+                            <span>테이블 <strong>{booth.tables ?? 0}</strong>개</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] sm:text-xs font-bold bg-sky-50 text-sky-900 border border-sky-200/90 shadow-3xs">
+                            <Armchair className="w-3 h-3 text-sky-700 shrink-0" />
+                            <span>의자 <strong>{booth.chairs ?? 0}</strong>개</span>
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )})}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: 행사식순 (당일 17개 세부 타임테이블) */}
+          {visitedFestivalTabs.schedule && (
+            <div className={selectedTab === 'schedule' ? 'block space-y-3.5' : 'hidden'}>
+              {/* Header Stats Bar */}
+              <div className="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 flex items-center gap-1.5`}>
+                        <span>행사 식순</span>
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">17개 식순</span>
+                      </h3>
+                      <p className="text-[11px] text-slate-500 font-medium">07:30 직원 출근부터 14:30 환경 정비까지 진행 순서 및 의전 규정</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+                    <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                    <span>2026. 10. 31.(토) 08:00~14:00</span>
+                  </div>
+                </div>
+
+                {/* Quick Phase Filter Pills */}
+                <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin">
+                  {SCHEDULE_PHASES.map((ph) => {
+                    const count = ph === '전체' 
+                      ? activeSchedule.length 
+                      : activeSchedule.filter((s) => s.phase === ph).length;
+                    const isSelected = selectedSchedulePhase === ph;
+                    return (
+                      <button
+                        key={`phase-pill-${ph}`}
+                        type="button"
+                        onClick={() => setSelectedSchedulePhase(ph)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-600 text-white shadow-2xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        <span>{ph}</span>
+                        <span className={`ml-1 text-[10.5px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-blue-800 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={scheduleSearchQuery}
+                    onChange={(e) => setScheduleSearchQuery(e.target.value)}
+                    placeholder="식순명, 담당자, 내용 검색 (예: 국민의례, 걷기대회, 축하공연...)"
+                    className="w-full pl-9 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
+                  />
+                  {scheduleSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setScheduleSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Timetable Table Grid (칼정렬 행열 고도화) */}
+              <div className="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs">
+                {filteredSchedule.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-slate-500 font-medium">
+                    검색 조건과 일치하는 행사 식순이 없습니다.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[720px]">
+                      <thead>
+                        <tr className="bg-slate-100 border-b border-slate-300 text-slate-700 text-xs font-extrabold">
+                          <th className="py-2.5 px-3 text-center w-14 shrink-0">순번</th>
+                          <th className="py-2.5 px-3 text-center w-36 shrink-0">시간 (소요)</th>
+                          <th className="py-2.5 px-3 text-center w-24 shrink-0">구분</th>
+                          <th className="py-2.5 px-3 text-left">식순명 및 세부 내용</th>
+                          <th className="py-2.5 px-3 text-center w-36 shrink-0">주관 / 담당</th>
+                          <th className="py-2.5 px-3 text-center w-20 shrink-0">상태</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {filteredSchedule.map((item) => {
+                          const isCeremony = item.id === 7 || item.title.includes('국민의례');
+                          const isWalkingStart = item.id === 14 || item.title.includes('걷기');
+                          const isDone = item.status === '완료' || item.status === 'done';
+                          const isInProgress = item.status === '진행중' || item.status === 'in-progress';
+
+                          return (
+                            <tr
+                              key={`schedule-row-${item.id}`}
+                              className={`transition-colors align-top ${
+                                isCeremony
+                                  ? 'bg-blue-50/50 hover:bg-blue-50/80'
+                                  : isWalkingStart
+                                  ? 'bg-emerald-50/50 hover:bg-emerald-50/80'
+                                  : 'hover:bg-slate-50/80'
+                              }`}
+                            >
+                              {/* 순번 */}
+                              <td className="py-3 px-3 text-center font-mono text-xs font-extrabold text-slate-700">
+                                #{item.id}
+                              </td>
+
+                              {/* 시간 및 소요 */}
+                              <td className="py-3 px-3 text-center whitespace-nowrap">
+                                <div className="inline-flex items-center gap-1 font-mono text-xs font-bold text-slate-900">
+                                  <Clock className="w-3 h-3 text-slate-500 shrink-0" />
+                                  <span>{item.time}</span>
+                                </div>
+                                {item.duration && (
+                                  <div className="text-[11px] font-semibold text-blue-700 mt-0.5">
+                                    {item.duration}
+                                  </div>
+                                )}
+                              </td>
+
+                              {/* 구분 */}
+                              <td className="py-3 px-3 text-center whitespace-nowrap">
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                                  {item.phase}
+                                </span>
+                              </td>
+
+                              {/* 식순명 및 세부 내용 */}
+                              <td className="py-3 px-3">
+                                <div className="space-y-1">
+                                  <div className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 leading-snug`}>
+                                    {item.title}
+                                  </div>
+                                  {item.note && (
+                                    <p className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-600 font-medium leading-relaxed`}>
+                                      {item.note}
+                                    </p>
+                                  )}
+                                  {/* 국민의례 의전 규정 안내 */}
+                                  {isCeremony && (
+                                    <div className="mt-2 p-2.5 bg-white/95 border border-blue-200 rounded-lg space-y-1 text-xs text-blue-950 shadow-3xs">
+                                      <div className="flex items-center gap-1.5 font-bold text-blue-900 text-[11.5px]">
+                                        <Shield className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                                        <span>대통령훈령 제438호(국민의례 규정) 약식절차 1 준용</span>
+                                      </div>
+                                      <div className="space-y-0.5 text-[11px] text-slate-700 pl-5 leading-relaxed font-medium">
+                                        <div>• <strong>국기에 대한 경례</strong>: 전주 없는 애국가 반주 1절에 맞춰 실시 (맹세문 미낭송)</div>
+                                        <div>• <strong>순국선열과 호국영령에 대한 묵념</strong>: 묵념곡 10~15초 연주</div>
+                                        <div className="text-red-600 font-bold bg-red-50 p-1.5 rounded border border-red-200 mt-1">
+                                          ※ 의전 금지 멘트 수칙: 사회자가 &ldquo;애국가 제창 등 이하 생략하겠습니다&rdquo; 멘트를 발언하는 것은 국가상징 품격을 저해하므로 규정상 엄격히 금지함.
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {/* 걷기대회 코스 안내 */}
+                                  {isWalkingStart && (
+                                    <div className="mt-2 p-2 bg-white/95 border border-emerald-200 rounded-lg text-xs text-emerald-950 shadow-3xs flex items-center justify-between gap-2 flex-wrap">
+                                      <div className="flex items-center gap-1.5 font-bold">
+                                        <MapPin className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                                        <span>코스: 수변문화쉼터 ↔ 영동4교 (2km 왕복 수변 산책로)</span>
+                                      </div>
+                                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
+                                        완주 인센티브 마감: 12:30
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+
+                              {/* 주관 / 담당 */}
+                              <td className="py-3 px-3 text-center whitespace-nowrap">
+                                {item.lead ? (
+                                  <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-800 border border-slate-200">
+                                    <User className="w-3 h-3 text-slate-500 shrink-0" />
+                                    <span>{item.lead}</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-400 text-xs">-</span>
+                                )}
+                              </td>
+
+                              {/* 상태 */}
+                              <td className="py-3 px-3 text-center whitespace-nowrap">
+                                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                                  isDone
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : isInProgress
+                                    ? 'bg-amber-100 text-amber-900 animate-pulse'
+                                    : 'bg-slate-100 text-slate-700'
+                                }`}>
+                                  {isDone ? '✓ 완료' : isInProgress ? '▶ 진행' : '○ 예정'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: 업무분장 (실무 과업 및 비상연락망) */}
+          {visitedFestivalTabs.duties && (
+            <div className={selectedTab === 'duties' ? 'block space-y-3.5' : 'hidden'}>
+              {/* Header Stats Bar */}
+              <div className="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                      <Shield className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 flex items-center gap-1.5`}>
+                        <span>업무분장 및 비상연락망</span>
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">22개 부서·기관</span>
+                      </h3>
+                      <p className="text-[11px] text-slate-500 font-medium">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {isLocalAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => setShowPrivateMobile((prev) => !prev)}
+                        className={`px-2 py-1 text-xs font-bold rounded-lg border flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap ${
+                          showPrivateMobile
+                            ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-300'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-300'
+                        }`}
+                        title={showPrivateMobile ? "휴대전화 번호 숨기기 (공공/화면공유 모드)" : "휴대전화 번호 표시 (관리자 전용)"}
+                      >
+                        <Smartphone className={`w-3.5 h-3.5 ${showPrivateMobile ? 'text-emerald-700' : 'text-slate-400'}`} />
+                        <span>{showPrivateMobile ? '폰번호 보임' : '폰번호 숨김'}</span>
+                      </button>
+                    )}
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
+                      <Users className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>행사 운영단</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Category Filter Pills */}
+                <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin">
+                  {DUTY_CATEGORIES.map((cat) => {
+                    const count = cat === '전체'
+                      ? activeDuties.length
+                      : activeDuties.filter((d) => d.category === cat).length;
+                    const isSelected = selectedDutyCategory === cat;
+                    return (
+                      <button
+                        key={`duty-cat-${cat}`}
+                        type="button"
+                        onClick={() => setSelectedDutyCategory(cat)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-slate-900 text-white shadow-2xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        <span>{cat}</span>
+                        <span className={`ml-1 text-[10.5px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={dutySearchQuery}
+                    onChange={(e) => setDutySearchQuery(e.target.value)}
+                    placeholder="부서명, 담당자, 전화번호, 과업 내용 검색 (예: 오창선, 체육회, 구급차, 제이민...)"
+                    className="w-full pl-9 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900"
+                  />
+                  {dutySearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setDutySearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Roster Table Grid (칼정렬 행열 고도화) */}
+              <div className="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs">
+                {filteredDuties.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-slate-500 font-medium">
+                    검색 조건과 일치하는 업무분장 항목이 없습니다.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[780px]">
+                      <thead>
+                        <tr className="bg-slate-100 border-b border-slate-300 text-slate-700 text-xs font-extrabold">
+                          <th className="py-2.5 px-3 text-center w-24 shrink-0">구분</th>
+                          <th className="py-2.5 px-3 text-left w-44 shrink-0">부서·기관명</th>
+                          <th className="py-2.5 px-3 text-left w-48 shrink-0">담당 역할</th>
+                          <th className="py-2.5 px-3 text-left w-48 shrink-0">담당자 / 연락처</th>
+                          <th className="py-2.5 px-3 text-left">배정 과업</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {filteredDuties.map((duty) => {
+                          const isHQ = duty.category === '총괄기획';
+                          const isSports = duty.category === '체육회';
+                          const isSafety = duty.category === '응급안전';
+                          const isAgency = duty.category === '대행용역';
+
+                          return (
+                            <tr
+                              key={`duty-row-${duty.id}`}
+                              className={`transition-colors align-top ${
+                                isHQ
+                                  ? 'hover:bg-blue-50/40'
+                                  : isSports
+                                  ? 'hover:bg-indigo-50/40'
+                                  : isSafety
+                                  ? 'hover:bg-red-50/40'
+                                  : isAgency
+                                  ? 'hover:bg-amber-50/40'
+                                  : 'hover:bg-slate-50/80'
+                              }`}
+                            >
+                              {/* 구분 */}
+                              <td className="py-3 px-3 text-center whitespace-nowrap">
+                                <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded ${
+                                  isHQ
+                                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                    : isSports
+                                    ? 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                                    : isSafety
+                                    ? 'bg-red-100 text-red-800 border border-red-200'
+                                    : isAgency
+                                    ? 'bg-amber-100 text-amber-900 border border-amber-200'
+                                    : 'bg-slate-100 text-slate-700 border border-slate-200'
+                                }`}>
+                                  {duty.category}
+                                </span>
+                              </td>
+
+                              {/* 부서·기관명 */}
+                              <td className="py-3 px-3">
+                                <div className="font-extrabold text-xs text-slate-900 leading-snug">
+                                  {duty.deptOrOrg}
+                                </div>
+                              </td>
+
+                              {/* 담당 역할 */}
+                              <td className="py-3 px-3">
+                                <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} font-bold text-slate-800 leading-snug`}>
+                                  {duty.role}
+                                </div>
+                              </td>
+
+                              {/* 담당자 / 연락처 (행정번호 & 폰번호 구분) */}
+                              <td className="py-3 px-3 whitespace-nowrap">
+                                <div className="space-y-1">
+                                  {duty.manager && (
+                                    <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                      <User className="w-3 h-3 text-slate-500 shrink-0" />
+                                      <span>{duty.manager}</span>
+                                    </div>
+                                  )}
+                                  {(() => {
+                                    const adminNo = formatAutoHyphen((duty.adminPhone || (!duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
+                                    const mobileNo = formatAutoHyphen((duty.mobilePhone || (duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
+
+                                    return (
+                                      <div className="flex flex-col gap-1">
+                                        {adminNo && (
+                                          <div>
+                                            <a
+                                              href={`tel:${adminNo.replace(/[^0-9]/g, '')}`}
+                                              className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 shadow-3xs transition-all active:scale-95 cursor-pointer"
+                                              title={`행정전화 걸기: ${adminNo}`}
+                                            >
+                                              <Phone className="w-3 h-3 text-blue-700 shrink-0" />
+                                              <span className="text-[10.5px] font-extrabold text-blue-800">행정:</span>
+                                              <span className="font-mono">{adminNo}</span>
+                                            </a>
+                                          </div>
+                                        )}
+                                        {isLocalAdmin && showPrivateMobile && mobileNo && (
+                                          <div>
+                                            <a
+                                              href={`tel:${mobileNo.replace(/[^0-9]/g, '')}`}
+                                              className="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 shadow-3xs transition-all active:scale-95 cursor-pointer"
+                                              title={`휴대전화 걸기: ${mobileNo}`}
+                                            >
+                                              <Smartphone className="w-3 h-3 text-emerald-700 shrink-0" />
+                                              <span className="text-[10.5px] font-extrabold text-emerald-800">폰:</span>
+                                              <span className="font-mono">{mobileNo}</span>
+                                            </a>
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              </td>
+
+                              {/* 배정 과업 */}
+                              <td className="py-3 px-3">
+                                <ul className="space-y-1">
+                                  {duty.tasks.map((task, tIdx) => (
+                                    <li
+                                      key={`duty-${duty.id}-task-${tIdx}`}
+                                      className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-700 font-medium flex items-start gap-1.5 leading-relaxed`}
+                                    >
+                                      <span className="text-slate-400 font-bold select-none shrink-0">•</span>
+                                      <span>{task}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           )}

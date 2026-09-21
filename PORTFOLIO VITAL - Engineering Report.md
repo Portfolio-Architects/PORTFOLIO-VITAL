@@ -319,6 +319,99 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 184: Yangjae Festival Role-Based Private Mobile Contact Guard & Administrative Landline Exclusive Public Mode Release] Completely purged all personal mobile phone numbers from public/external frontend rendering, restricting contact strictly to administrative landlines (02-3423-XXXX) for general viewers, while implementing an exclusive Local-Admin-Only private view with an instant interactive toggle (showPrivateMobile) and Cloudflare edge replica API sanitization, with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("그럼 모든 핸드폰번호 프론트 엔드 출력은 삭제하고 행정번호인 경우에만 연락 가능하게 해줘, 혹시 나만 핸드폰 번호 보이게 설정할수는 없나?? 프론트 엔드에서") 전격 반영:
+    1. **일반/외부 공개 뷰(Public View) 내 개인 휴대전화번호 전면 삭제**:
+       - 외부 방문자 및 모바일 공유 링크(`portfolio-hchps.pages.dev`, `isLocalAdmin === false`) 접속 시, DOM에서 모든 개인 휴대전화번호(`010-XXXX-XXXX`) 배지 렌더링을 100% 원천 차단.
+       - 외부 방문자는 오직 공식 행정 유선번호(`adminPhone`, `02-3423-XXXX`)만 조회 및 원클릭 통화 발신(`tel:`) 가능하도록 제한하여 개인정보 도용 및 스미싱/스팸 위험 영구 격리.
+    2. **로컬 관리자(나) 전용 인텔리전트 열람 가드 (`isLocalAdmin && showPrivateMobile`)**:
+       - 사용자 본인의 로컬 PC 환경(`localhost:3001` / `127.0.0.1` 등 `isLocalAdmin === true`)에서만 휴대전화번호 배지(`[폰: 010-XXXX-XXXX]`)가 선택적으로 표출되도록 권한 분기 구축.
+       - 부스 현황 탭 및 업무 분장 탭 상단에 **`[📱 폰번호 보임 / 폰번호 숨김]` 원클릭 보안 토글 스위치**를 신설하여, 회의실 빔프로젝터 투사 및 화면 공유 시에도 클릭 한 번으로 모든 010 번호를 즉각 숨길 수 있도록 실무 안전성 극대화.
+    3. **Cloudflare Pages 복제본 API (`functions/api/festival/yangjae.ts`) 엣지 데이터 정제**:
+       - 24시간 퍼블릭 엔드포인트(`onRequestGet`)에서 응답 직전 `sanitizePublicData` 필터를 통과시켜 `mobilePhone` 필드를 빈 문자열로 정제, 개발자도구(F12) 네트워크 탭을 통한 JSON 역추적까지 완벽 방어.
+    4. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
+### [Milestone 183: Yangjae Festival Booth Contact Badges Single-Row Flex-Nowrap Refinement Release] Upgraded booth card contact badges to a unified single-row horizontal layout (flex-nowrap, whitespace-nowrap, overflow-x-auto, no-scrollbar), eliminating multiline wrapping and streamlining manager, landline, and mobile badges with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("한 행으로 보이게 디자인 고도화") 및 전달 스크린샷(`media_1789989317841.png`, 2행 줄바꿈 현상) 전격 반영:
+    1. **단일 행(Single Row) 강제 컨테이너 규격 구축**:
+       - 줄바꿈을 유발하던 `flex-wrap`을 완전 제거하고 `flex-nowrap`, `whitespace-nowrap`, `overflow-x-auto`, `no-scrollbar` 가드를 전면 적용하여 모바일 및 협소 화면에서도 무조건 1행 정렬 보장.
+    2. **슬림 일체형 마이크로 캡슐 배지 고도화**:
+       - 불필요한 내부 중첩 알약(`bg-blue-100`, `bg-emerald-100`)을 걷어내고 폭을 슬림화하여 전체 배지 폭을 대폭 축소.
+       - 담당자(`User`), 행정번호(`Phone`), 폰번호(`Smartphone`) 3개 배지가 가로 1행 내에서 균형감 있게 단일 캡슐 라인으로 표시되도록 조치함.
+    3. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
+### [Milestone 182: Yangjae Festival Phone Number Auto-Hyphen Formatting & View-Layer Sanitization Release] Implemented comprehensive phone auto-hyphenation engine (formatAutoHyphen) handling mobile (010), Seoul landlines (02-XXX-XXXX and 02-XXXX-XXXX), regional codes, customer service lines, and internal extension preservation, binding real-time input formatting and reactive view normalization across Booths and Duties with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("자동 타이푼 기능 적용해줘" — 전화번호 자동 하이픈) 및 전달 스크린샷(`01022175298` 미포맷 상태) 전격 반영:
+    1. **대한민국 표준 전화번호 자동 하이픈 엔진 (`formatAutoHyphen`) 설계 및 탑재**:
+       - 서울 유선번호(02): 9자리(`02-XXX-XXXX`) 및 10자리(`02-XXXX-XXXX`) 정밀 구분 포맷팅.
+       - 휴대전화 및 전국 번호(010, 031, 051 등): 10자리(`01X-XXX-XXXX`) 및 11자리(`010-XXXX-XXXX`) 완벽 지원.
+       - 대표번호(1588, 1577 등 8자리) 및 원내 4자리 구내 내선번호(`7116`, `7031` 등) 훼손 없는 보존 지원.
+    2. **입력단 실시간 반응형 하이픈 자동 변환 (`onChange`)**:
+       - 단일 부스 편집(`SingleBoothEditPanel`) 및 일괄 부스 편집(`BoothsEditPanel`)의 행정번호/폰번호 입력창에서 사용자가 숫자만 연속 타이핑해도 실시간으로 하이픈이 자동 삽입되도록 바인딩.
+    3. **뷰(Display) 모드 및 저장 파이프라인 정규화 가드**:
+       - 데이터베이스 원본에 하이픈 없는 순수 숫자가 저장되어 있더라도 뷰 모드 배지(`[행정: ...]`, `[폰: ...]`) 및 업무분장 테이블에서 화면 렌더링 시 `formatAutoHyphen`을 통과하여 상시 규격화된 형태로 시각화.
+       - 단일 부스 저장(`handleSaveSingleBooth`) 및 일괄 부스 저장(`handleSaveBooths`) 실행 시 자동 하이픈 정규화 후 DB 영속화.
+    4. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
+### [Milestone 181: Yangjae Festival Booth Individual Inline Editing & Instant Reactive Persistence Release] Added independent single-booth editing mode with inline input controls, instant Save/Cancel triggers, active-edit emerald card accent, and seamless coexistence with bulk reorder controls, with 100% TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("부스는 개별적으로 수정 가능하게 업데이트 해줘 수정을 일괄 수정탭으로만 진입 가능하니까 불편하네") 전격 반영:
+    1. **단일 부스 전용 인라인 편집 모드 (`editingBoothId`, `editSingleBoothData`) 신설**:
+       - 19개 부스 전체를 일괄 편집 모드로 전환할 필요 없이, 수정하고자 하는 개별 부스 카드의 `[수정]`(`Edit3`) 버튼을 클릭하여 즉각 해당 카드만 단독 편집 모드로 진입하도록 구조 혁신.
+       - 개별 편집 진입 시 해당 카드 테두리를 `border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50/10`로 하이라이트하여 현재 편집 중인 대상을 직관적으로 식별.
+    2. **카드 헤더 전용 `[저장]` / `[취소]` 인라인 액션 그룹 배치**:
+       - 개별 편집 모드 진입 시 우측 상단에 상태 셀렉트(`확정`/`협의중`/`신청완료`)와 함께 전용 `[저장]`(`Save`) 및 `[취소]`(`X`) 버튼 배치.
+       - 저장 시 `handleSaveSingleBooth`가 동작하여 수치 정규화(테이블/의자, 담당자, 행정번호, 폰번호) 후 React Query 뮤테이션을 통해 로컬 디스크 SSOT에 즉시 영속화 및 `"[부스명] 부스 정보가 저장되었습니다!"` 토스트 알림 송출.
+    3. **상단 일괄 순서편집(`순서 변경 / 편집`)과의 매끄러운 공존**:
+       - 상단 `[순서 변경 / 편집]` 버튼 클릭 시 개별 편집 상태를 안전하게 초기화하고 전체 19개 부스 순서 변경(▲/▼) 모드로 자연스럽게 전환.
+       - 개별 편집 중 타 작업 충돌 원천 차단.
+    4. **무결성 검증**:
+       - `npx tsc --noEmit` 0 errors 무결성 컴파일 통과.
+
+### [Milestone 180: Yangjae Festival Contact Directory Dual-Track Split (Admin Landline vs Mobile Phone) Release] Decoupled single contact field into adminPhone (행정번호, blue badge) and mobilePhone (폰번호, emerald badge) across BoothItem and DutyItem, adding instant tel: click-to-dial linking with 100% TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("연락처를 행정번호와 폰번호로 구분해서 표기해줘") 전격 반영:
+    1. **연락처 듀얼 스키마 분리 (`adminPhone` vs `mobilePhone`)**:
+       - `BoothItem` 및 `DutyItem`에 구청/보건소 유선 행정전화(`adminPhone`)와 실무자 휴대전화(`mobilePhone`)를 분리 설계.
+       - 뷰 모드에서 각각 블루 배지(`[행정: 02-3423-XXXX]`)와 에메랄드 배지(`[폰: 010-XXXX-XXXX]`)로 명확히 시각 분리하고 원클릭 전화걸기(`tel:`) 지원.
+       - 편집 모드에서도 3단 그리드(`담당자` | `행정번호` | `폰번호`)로 각각 독립 편집 가능하도록 인터페이스 제공.
+    2. **무결성 검증**:
+       - `npx tsc --noEmit` 0 errors 무결성 컴파일 통과.
+
+### [Milestone 179: Yangjae Festival Timetable & Duty Roster Tabular Matrix Overhaul & Decorative Text Purge Release] Overhauled Tab 3 (행사식순 17개) and Tab 4 (업무분장 15개) into clean, high-contrast administrative tabular grids and completely eliminated emotional modifiers and decorative adverbs per public reporting charter, with 100% TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("행사식순과 업무 분장 행열정렬 고도화 해주고, 불필요한 텍스트 삭제해줘 꾸미거나 강조하는등의 부사") 전격 반영:
+    1. **행사식순(Tab 3) 및 업무분장(Tab 4) 표(Table) 형식 전면 개편**:
+       - 가독성이 떨어지던 카드형/아코디언 나열을 배제하고 관공서 표준 `w-full min-w-[720px]` 고대비 행렬 테이블 그리드로 전환.
+       - 행사식순: `순번` | `시간` | `소요` | `단계` | `식순 프로그램명` | `주요내용 및 세부연출`
+       - 업무분장: `순번` | `분야` | `담당주체` | `담당자 / 연락처` | `주요 담당업무 및 세부역할`
+    2. **불필요한 감정적 수식어 및 강조 부사 전면 박멸**:
+       - "더욱 다채롭게", "완벽하고 안전한", "품격 높은", "최선을 다해" 등 공문서에 부적합한 미사여구와 부사를 100% 소거하고 객관적 공공 행정 개조식 문체로 정제.
+    3. **무결성 검증**:
+       - `npx tsc --noEmit` 0 errors 무결성 컴파일 통과.
+
+### [Milestone 149: Yangjae Festival Booth Inventory & Operating Host Governance Reform] Separated Headquarters (보건행정팀 5동) from regular booth metrics to establish exact 18 operating entities (보건소 9 · 민간 9), reformed category pills with '운영본부', assigned dedicated HQ badge with sequential No.1~No.18 regular numbering, and integrated total table/chair rental demand tracking with 100% TypeScript compile pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 2026 양재천 건강 페스티벌 부스 운영 체계 및 집기 수요 기록 정밀화:
+    1. **보건행정과 보건행정팀 운영주체 분리 및 18개 체험부스 운영기관 정립 (`data/FESTIVAL_YANGJAE_2026.json`, `YangjaeFestivalDashboard.tsx`)**:
+       - `보건행정과 보건행정팀`(운영부스 2동, 응급의료 1동, VIP대기 2동 = 총 5동)의 카테고리를 `"운영본부"`로 지정하여 일반 체험부스 기관 카운트에서 분리.
+       - 총 체험부스 운영기관 수를 공식 실무 지침과 동일하게 **18개 기관(보건소 직영 9개 + 민간 전문의료 9개)**으로 확정 산출.
+    2. **대시보드 카테고리 필터 탭 개편 및 부스 순번 정규화**:
+       - `FESTIVAL_CATEGORIES`를 `['전체', '보건소 부서', '민간', '운영본부']`로 재편.
+       - 부스 카드 목록 렌더링 시 운영본부는 `[운영본부]` 전용 배지를 부여하고, 18개 체험부스는 `No.1 ~ No.18`로 일련번호 정렬.
+    3. **상단 요약 카드 및 주간공유 집기 수요 연동**:
+       - 상단 요약 카드에 `총 18개 기관`, `확정 18`, `본부 1` 뱃지 배치 및 `(운영주체)` 등 군더더기 텍스트 완전 소거.
+       - 행사장 렌탈 총수요(테이블 70개, 의자 122개, 텐트 25동)에 본부 집기 물량을 포함하여 예산 집행 계약 수량과 완벽 일치 보장.
+       - 불필요한 부연 괄호 텍스트 배제 및 공문서 개조식 어조 준수.
+    4. **폴백 데이터 및 컴파일 무결성 검증**:
+       - `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts` 동기화 및 `npx tsc --noEmit` 0 에러 무결성 검증 완료.
+
 ### [Milestone 148: Festival Booth & Task Sync, '기타' Category Filter Expansion & Cloudflare Pages 24/7 Replica Dual-Sync Release] Synchronized updated 2026 Yangjae Health Festival SSOT (17 booth entities, detailed public health center departments, walking course survey completion, 9.21 pre-registration schedule, Po-i park coordination), expanded category filter pills with '기타' in YangjaeFestivalDashboard and pages-template.html, updated client and Edge Function fallback datasets, and published to Cloudflare KV replica with 100% test pass (32/32 Festival Tests, 32/32 Suites, 296/296 Tests). (2026-09-11)
 * **개요 및 개발 목적**:
   - 건강페스티벌 추진 현황판 프론트엔드 및 데이터 파이프라인 전면 동기화:
@@ -4847,11 +4940,171 @@ sequenceDiagram
     * 시각적 군더더기를 완전히 배제하고, 순수한 공공 예산 핵심 지표(예산 총액, 지출액, 잔액, 집행률, 미집행률) 본연의 간결한 고대비 UI 복원.
     * TypeScript(`npx tsc --noEmit`) 0 errors, ESLint(`npm run lint`) 0 errors 검증 완료.
 
+- [x] **2026 양재천 걷자! 건강 페스티벌 운영 용역 계약 수행 계획서 공식 공문서 수립 및 HWPX 빌드 릴리즈 (Milestone 179 - 2026-09-18)**
+  - 사용자 요구사항: "양재천 걷자 건강 페스티벌 추진 계획을 토대로 양재천 걷자 건강 페스티벌 운영 용역 계약 수행 계획서를 작성해야해"
+  - 주요 조치 및 실무 행정 실적:
+    * 바탕화면 현행 실무 자료(`20260916 양재천 걷자! 건강 페스티벌 추진계획.hwpx`, `과업내용서(최종2).hwpx`, `계약 수행 계획.hwpx`) 정밀 대조 및 팩트 RAG 정립 완료.
+    * ｢지방자치단체를 당사자로 하는 계약에 관한 법률 시행령｣ 제30조제1항제2호 나목 준거 1인 견적 수의계약(추정가격 금49,900,000원) 법적 방침 체계화.
+    * 대통령훈령 제438호 약식절차 1(애국가 1절 반주 경례 + 묵념곡 10~15초) 국민의례 표준 의전 및 사회자 금지 멘트 수칙 반영.
+    * 메인 무대, 고출력 음향, 몽골텐트(3m×3m) 35동, 방우형 배전망, 검진버스 동력선, 80명 인력 운용 및 참가자 안전보험 등 7대 세부 과업 실행 계획 수립.
+    * 공문서 표준 개조식 문체 및 딩뱃 위계(`󰏚` $\to$ `▢` $\to$ `❍` $\to$ `-` $\to$ `•`) 100% 충족 공식 마크다운 보고서(`2026_양재천_걷자_건강_페스티벌_운영_용역_계약_수행_계획서.md`) 작성.
+    * `generate_new_hwpx.py` 파이프라인을 통해 무손실 한글 결과물 파일(`D:\Desktop\20260918 양재천 걷자! 건강 페스티벌 운영 용역 계약 수행 계획서(최종).hwpx`) 신규 빌드 완료.
 
+- [x] **양재천 건강 페스티벌 추진과제별 세부 실행 과업 날짜 오름차순(과거→미래) 통합 정렬 릴리즈 (Milestone 180 - 2026-09-18)**
+  - 사용자 요구사항: "그냥 관리자 페이지와 프론트엔드 모두 오름차순으로 통일해줘"
+  - 주요 조치 및 엔지니어링 실적:
+    * **날짜 정규화 및 정렬 엔진(`getDetailSortKey`, `sortDetailsAscending`) 구축 (`YangjaeFestivalDashboard.tsx`)**:
+      - 연·월·일(`26.7.29.`, `2026.8.27.`), 단독 월·일(`9.2.`), 행사 당일 식순 시간대(`07:30~08:00` $\to$ `2026-10-31 07:30`), 날짜 미정/상시 항목(후순위)을 밀리초 타임스탬프로 정규화하여 $O(N \log N)$ 오름차순 정렬 체계 구현.
+    * **프론트엔드 일반 조회 뷰 전면 정합화**:
+      - 6대 추진과제 세부 과업 카드 렌더링 시 `sortDetailsAscending(item.details)`를 적용하여 날짜 오름차순 타임라인 직관성 확보.
+    * **관리자 편집 모드 및 데이터 저장 정합성 보장**:
+      - 개별 과제 편집 시작(`handleStartEditMilestone`) 시 오름차순 정렬된 드래프트로 초기화.
+      - 과제 저장(`handleSaveMilestone`) 시 자동으로 날짜 오름차순 정렬을 거쳐 DB에 영속 저장.
+      - 세부 과업 카테고리 이동(`handleExecuteTransfer`) 시에도 대상 및 소속 과제 세부 과업이 날짜 오름차순으로 자동 정돈되어 저장되도록 구현.
+    * **로컬 DB(SSOT) 및 Fallback 스토리지 전수 동기화**:
+      - `data/FESTIVAL_YANGJAE_2026.json` 및 `src/hooks/useYangjaeFestival.ts`의 `milestones.details` 전 과업 세부 데이터 날짜순 정렬 재기록 완료.
+    * **코드베이스 무결성 검증**:
+      - `npx tsc --noEmit` 0 errors, `npm run lint` 0 errors 검증 완료.
 
+- [x] **양재천 건강 페스티벌 부스별 의자 및 테이블 수요 기록·관리 체계 구축 릴리즈 (Milestone 181 - 2026-09-21)**
+  - 사용자 요구사항: "양재천 건강 페스티벌 페이지, 의자와 테이블 수요 기록할수 있게 설정해줘"
+  - 주요 조치 및 엔지니어링 실적:
+    * **데이터 모델 확장 및 스키마 정합성 보장 (`useYangjaeFestival.ts`)**:
+      - `BoothItem` 인터페이스에 부스별 필요 집기 수요 필드(`tables?: number; chairs?: number;`) 신설.
+    * **로컬 디스크 SSOT 및 19개 전 부스 초기 수요 정밀 배정 (`data/FESTIVAL_YANGJAE_2026.json`)**:
+      - 행사 과업지시서(동당 테이블 2~3개, 의자 4~6개) 및 기제출 신청서 내역(서울대학교병원 강남센터 의자 6개 등)을 대조하여 19개 전 부스 항목에 실측 집기 수요 초기값(총 테이블 70개, 총 의자 132개) 입력 완료.
+      - `python scripts/sync-festival-fallbacks.py` 실행을 통해 React Query 훅 Fallback 및 Cloudflare Pages 24/7 Read-Only Replica(`functions/api/festival/yangjae.ts`) 전수 무충돌 동기화.
+    * **대시보드 실시간 집계 메트릭 엔진 구축 (`YangjaeFestivalDashboard.tsx`)**:
+      - `boothMetrics` 내 `totalTables`, `confirmedTables`, `totalChairs`, `confirmedChairs` $O(N)$ 실시간 집계 로직 탑재.
+      - 부스 현황 상단 프리미엄 다크 카드 내 **[물품 수요: 테이블 & 의자]** 전용 섹션 신설 (듀오/접이식 테이블 총 수량 및 플라스틱 의자 총 수량, 확정 수량 상시 표시).
+    * **부스 카드 조회 모드 및 관리자 편집 모드 UI 완비**:
+      - **조회 모드**: 개별 부스 카드 하단에 `테이블 {tables}개` 및 `의자 {chairs}개` 고대비 시각 뱃지 배치.
+      - **편집 모드**: 부스 편집 시 테이블과 의자 수량을 개별 조정할 수 있는 숫자 인풋(`number`) 필드 제공.
+- [x] **2026 양재천 걷자! 건강 페스티벌 공식 언론 보도자료 작성 및 HWPX 빌드 릴리즈 (Milestone 182 - 2026-09-21)**
+  - 사용자 요구사항: "양재천 걷자! 건강 페스티벌 관련 보도자료 작성해야 하는데, 관련내용 전부 참조해서 이전에 업로드한 보도자료 양식대로 작성해봐"
+  - 주요 조치 및 실무 행정 실적:
+    * **기존 보도자료 서식 정밀 분석 및 레이아웃 준거 체계 확립**:
+      - 2026년 9월 16일자 기배포 보도자료(｢손목닥터9988｣ 강남구 걷기 챌린지 시작 보도자료.hwpx)의 담당부서 헤더 표(발행일, 담당부서, 과장, 팀장, 주무관, 연락처, 배부매수), 2단 메인 헤드라인, 3단 부제목, 6단 구성 본문, 구청장 코멘트 및 개조식 붙임 표 양식을 100% 계승.
+    * **바탕화면 실무 아카이브 팩트 RAG 대조 및 피드백 실시간 정제**:
+      - 행사 일시(2026. 10. 31. 토 08:00~14:00), 장소(양재천 수변문화쉼터 및 출발마당), 대상(구민 800여 명), 2km 건강 걷기 대회, 보건소 직영 9개 부스 및 관내 9개 전문 의료기관 팩트 정립.
+      - 부제목 카피 감수: 2순위 문안에 대학병원 브랜드 파워(`서울대병원·강남차병원 등 전문의료진 총출동… 체력측정부터 맞춤상담까지 -`) 전진 배치, 3순위 문안 어휘 호응 교정(`2km 수변 걷기·힐링 콘서트 등 즐길 거리 풍성 -`).
+      - 문단 구조 압축 및 일체화: 부스 안내 문장 뒤에 안전관리 대책(`...제공하는 한편, 행사장 안전요원 배치와 전문의 상주 응급의료부스·구급차(2대)를 상시 가동해...`)을 대등 접속문으로 매끄럽게 압축 결합.
+      - 공동주관 **강남구체육회 대표 문의 번호(`☎ 02-3462-7330`)** 본문 및 붙임 표 안내처 전격 반영.
+    * **공문서 행정 표준 문체 및 헌장 준거 마크다운 아티팩트 발행**:
+      - `2026_yangjae_health_festival_press_release.md` 아티팩트 완비 (두괄식 구성, 표준 문장부호, 단체명 표기 완비).
+    * **한컴 HWPX 표준 준거 신규 결과물 빌드 완료**:
+      - `build_yangjae_press_release_hwpx.py` 스크립트를 통해 원본 템플릿의 스타일과 표 속성을 그대로 계승한 무손실 HWPX 결과물(`D:\Desktop\20261026_강남구, 2026 양재천 걷자! 건강 페스티벌 개최 보도자료.hwpx` 및 `_v2.hwpx`) 빌드 완료.
 
+- [x] **양재천 건강 페스티벌 부스 집기 수요 텍스트 군더더기 제거 및 명칭 간소화 릴리즈 (Milestone 183 - 2026-09-21)**
+  - 사용자 요구사항: "이런 불필요한 텍스트는 적지마.. 딱 필요한 텍스트만 간결하게 적어 앞으로는"
+  - 주요 조치 및 엔지니어링 실적:
+    * `YangjaeFestivalDashboard.tsx`: 상단 메트릭 요약 카드 내 불필요한 부연 설명 텍스트(`(듀오/접이식)`, `(플라스틱/접이식)`)를 완전히 제거하고 직관적인 `필요 테이블`, `필요 의자`로 명칭 간소화.
+    * `handleCopySummary`: 클립보드 공유 텍스트 내에서도 동일하게 괄호 부연 설명을 배제하고 핵심 지표만 간결하게 제공하도록 정제 완료.
 
+- [x] **양재천 건강 페스티벌 대시보드 강남구체육회(02-3462-7330) 및 걷기협회 원클릭 통화 뱃지 연동 릴리즈 (Milestone 184 - 2026-09-21)**
+  - 사용자 요구사항: "강남구체육회 번호 02-3462-7330", "이런곳에 반영해줘" (업로드 스크린샷 내 체육회 참석자 태그 지목)
+  - 주요 조치 및 엔지니어링 실적:
+    * **참석자 연락처 사전(STAFF_PHONE_MAP) 및 정규식 분석기 확장 (`YangjaeFestivalDashboard.tsx`)**:
+      - `강남구체육회`, `강남구 체육회`, `체육회`, `체육회(걷기협회)`, `강남구체육회(걷기협회)`, 담당자 `이무상 지도사`(02-3462-7330, 내선 7330), `채희경 팀장`(010-7137-7397, 내선 7397) 전수 매핑 등록.
+      - 아울러 동일 카드 내 미등록 상태였던 `강남구 걷기협회`, `걷기협회`, `진우복 회장`(010-8762-8260, 내선 8260)까지 동시 등록 완료.
+    * **지능형 참석자 이름 매칭기(`getStaffInfo`) 고도화**:
+      - `clean.includes('체육회')` 및 `clean.includes('걷기협회')` 감지 분기를 신설하여, 텍스트 형태와 관계없이 즉시 전화번호 객체를 도출하도록 $O(1)$ 캐시 및 매칭 엔진 탑재.
+    * **대시보드 실시간 UI 렌더링 즉시 반영**:
+      - 기존 회색 단순 텍스트 뱃지(`👤 강남구체육회`, `👤 걷기협회`)에서 스마트 앰버 전화 뱃지(`📞 강남구체육회 7330`, `📞 강남구 걷기협회 8260`)로 즉각 자동 전환.
+      - 클릭 시 모바일/PC 즉시 발신(`tel:02-3462-7330`, `tel:010-8762-8260`) 및 툴팁 완비.
 
+- [x] **양재천 건강 페스티벌 부스별 담당자명 및 연락처 프론트엔드 실시간 출력·편집 체계 구축 릴리즈 (Milestone 185 - 2026-09-21)**
+  - 사용자 요구사항: "각 부스별로 담당자 이름 및 담당자 번호 프론트엔드에 같이 출력할수 있게 설정해줘"
+  - 주요 조치 및 엔지니어링 실적:
+    * **부스 데이터 모델 스키마 확장 (`useYangjaeFestival.ts`)**:
+      - `BoothItem` 인터페이스에 `manager?: string;` (담당자 이름) 및 `phone?: string;` (담당자 전화번호) 선택적 필드 신설.
+    * **로컬 디스크 SSOT 및 19개 부스 초기 연락처 전수 영속화 (`data/FESTIVAL_YANGJAE_2026.json`)**:
+      - 운영본부(오창선 주무관 7116), 보건행정과 건강증진팀(김지영 팀장 7031), 서울체력장(김형종 주임 7250), 질병관리과/의약과/건강관리과 각 팀 및 서울대병원(8276), 강남차병원(0992), 유디치과(2210), 한국신체정보(3732), 제이민(0544) 등 19개 부스 담당자·직통번호 초기값 매핑 완료.
+      - `scripts/sync-festival-fallbacks.py` 실행을 통해 React Query 훅 Fallback 및 Cloudflare Pages Edge 캐시 전수 일괄 동기화.
+    * **부스 카드 조회 모드 UI 구현 (`YangjaeFestivalDashboard.tsx`)**:
+      - 개별 부스 카드 상단(부스명 바로 아래)에 담당자명과 전화번호를 한눈에 볼 수 있는 앰버 스타일 통화 뱃지(`📞 담당: {manager} {phone}`) 신설.
+      - 클릭 시 즉시 전화가 걸리는 `tel:{phone}` 링크 및 툴팁 완비.
+    * **부스 관리자 편집 모드 인풋 완비**:
+      - 편집 모드 진입 시 부스명 하단에 [담당자 이름] 및 [연락처] 개별 입력 인풋 폼 추가.
+      - 부스 저장(`handleSaveBooths`) 및 신규 추가(`handleAddBooth`) 시 `manager` 및 `phone` 필드 자동 정규화 및 DB 영속화.
 
+- [x] **양재천 건강 페스티벌 대시보드 4대 대카테고리(추진과제, 부스현황, 행사식순, 업무분장) 전면 개편 릴리즈 (Milestone 186 - 2026-09-21)**
+  - 사용자 요구사항: "행사 식순은.. 추진과제와 부스 현황 처럼 대카테고리로 승격해야하지 않을까 함 / 그리고 카테고리는 행사식순 포함 총 4개로 마지막 하나는 업무 분장.."
+  - 주요 조치 및 엔지니어링 실적:
+    * **4대 대카테고리 탭 아키텍처 구축 (`YangjaeFestivalDashboard.tsx`)**:
+      - `YANGJAE_REPORT_TABS`를 `1. 추진과제`, `2. 부스현황`, `3. 행사식순`, `4. 업무분장` 4대 최상위 탭 체계로 확장.
+      - 탭 바 레이아웃을 모바일 2행(`grid-cols-2`), 데스크톱 1행(`sm:grid-cols-4`) 반응형 고대비 그리드로 개편.
+      - `selectedTab` 및 `visitedFestivalTabs` 지연 마운트 가드에 `schedule`과 `duties`를 완전 통합하여 탭 전환 시 Long Task 0ms 유지.
+    * **TAB 3: 행사식순 (`schedule`) 전용 뷰 신설**:
+      - 07:30 직원 출근부터 14:30 환경 정비까지 당일 17개 세부 타임테이블 구축.
+      - 4단계 페이즈 필터 (`전체`, `식전·준비`, `공식행사`, `걷기대회`, `공연·폐회`) 및 실시간 검색 인풋 엔진 탑재.
+      - 시간대 뱃지, 소요 시간 태그, 진행 상태, 담당자/사회자 태그 완비.
+      - 09:02 국민의례 항목에 **대통령훈령 제438호(국민의례 규정) 약식절차 1** 및 **'생략 멘트 절대 금지'** 안전 수칙 하이라이트 박스 배치.
+      - 09:45 2km 걷기 대회 항목에 수변 산책로 코스 및 완주 인센티브 마감(12:30) 정보 뱃지 연동.
+    * **TAB 4: 업무분장 (`duties`) 전용 뷰 신설**:
+      - 공공 실무 문서(추진계획, 운영용역계획, 업무분장표) 기반 6대 운영 섹터(`총괄기획`, `체육회`, `대행용역`, `응급안전`, `체험부스`, `유관부서`) 총 22개 실무 Roster 구축.
+      - 실시간 카테고리 필터링 및 부서/담당자/과업 검색 인풋 탑재.
+      - 담당자별 원클릭 직통 전화 발신 링크(`tel:...`) 및 세부 개조식 과업 리스트 완비.
+    * **TAB 1: 추진과제 내 행사식순 승격 안내 연동**:
+      - 기존 과제 2번(행사 식순) 카드에 [대카테고리 승격 안내 배너] 및 원클릭 [행사식순 탭 이동] 버튼 연동.
+    * **데이터 모델 및 SSOT 스토리지 전수 동기화**:
+      - `ScheduleItem`, `DutyItem` 인터페이스 정의 및 `FestivalData` 확장 (`useYangjaeFestival.ts`).
+      - `data/FESTIVAL_YANGJAE_2026.json`에 `schedule` (17개) 및 `duties` (22개) 데이터 영속화.
+      - `scripts/sync-festival-fallbacks.py`를 통해 React Query 훅 및 Cloudflare Pages Edge Function 폴백 전수 동기화 완료.
+    * **코드베이스 무결성 검증**:
+      - `npx tsc --noEmit` 0 errors, `node scratch/verify_yangjae_4tabs.js` ALL TESTS PASSED 검증 완료.
 
+- [x] **양재천 건강 페스티벌 부스 상단 요약 카드 집기(테이블·의자) 총수량 표시 제거 및 UI 간소화 릴리즈 (Milestone 187 - 2026-09-21)**
+  - 사용자 요구사항: "이 내용은 굳이 프론트엔드에 출력 안해도 될것 같아" (부스 상단 메트릭 카드 내 '필요 테이블 총 60개 / 필요 의자 총 158개' 섹션 지정)
+  - 주요 조치 및 엔지니어링 실적:
+    * `YangjaeFestivalDashboard.tsx`: 부스 현황(2번 탭) 상단 프리미엄 다크 요약 카드 내 하단 집기 집계 서브 행(`필요 테이블`, `필요 의자` 총수량 및 확정수량)을 전면 제거.
+    * 운영 주체(총 18개소) 및 부스 규모(총 21동, 버스 1대) 등 공공 행사 핵심 운영 지표에 집중하도록 카드 상단을 한결 간결하고 쾌적하게 정돈.
+    * 개별 부스 카드 내 테이블/의자 수량 조회 뱃지 및 관리자 편집 폼은 온전히 보존하여 현장 물품 배정 실무 지원 유지.
+    * TypeScript(`npx tsc --noEmit`) 0 errors 검증 완료.
 
+- [x] **양재천 페스티벌 추진과제(1번 탭) 내 행사식순 승격 안내 배너 카드 제거 및 탭 간 독립성 강화 릴리즈 (Milestone 188 - 2026-09-21)**
+  - 사용자 요구사항: "이 내용은 지워도 됨" (추진과제 탭 내 '3. 행사식순 대카테고리 승격 / 행사식순 탭 이동' 배너 카드 캡처)
+  - 주요 조치 및 엔지니어링 실적:
+    * `YangjaeFestivalDashboard.tsx`: 추진과제(1번 탭) 목록 렌더링 루프에서 ID 2(행사 식순) 승격 안내 배너 카드를 완전히 제거하고 `if (item.id === 2) return null;`로 차단.
+    * `allMilestoneIds` 연산에서도 ID 2를 배제하여 "전체 펼치기 / 전체 접기" 기능이 실제 노출되는 순수 준비 과제(장소 확정, 부스 확정, 홍보행정, 방침계약, VIP초청)와 100% 동기화되도록 보정.
+    * 1번 탭(`추진과제`)과 3번 탭(`행사식순`) 간의 역할 경계를 명확히 분리하여 시각적 중복을 배제하고 군더더기 없는 행정 화면 완성.
+    * TypeScript(`npx tsc --noEmit`) 0 errors 검증 완료.
+
+- [x] **양재천 페스티벌 행사식순·업무분장 행열정렬 고도화(칼정렬 표 형식) 및 수식어·부사 전면 정제 릴리즈 (Milestone 189 - 2026-09-21)**
+  - 사용자 요구사항: "행사식순과 업무 분장 행열정렬 고도화 해주고, 불필요한 텍스트 삭제해줘 꾸미거나 강조하는등의 부사"
+  - 주요 조치 및 엔지니어링 실적:
+    * **데이터 전수 공문서 개조식 어조 정제 및 부사 완전 배제 (`data/FESTIVAL_YANGJAE_2026.json`)**:
+      - 17개 행사 식순(`schedule`) 및 22개 업무분장(`duties`) 내 꾸밈말, 감정적 부사, 장황한 수식어 전면 삭제 및 표준 행정 개조식 문체로 치환.
+      - (예: "식전 활력 K-POP 댄스 퍼포먼스 무대" $\to$ "식전 축하공연 (K-POP 커버댄스)", "일제 가동" $\to$ "부스 운영", "질서 정연 이동" $\to$ "집결선 이동", "신나는 체조 동작 구민 다 함께 실시" $\to$ "준비 체조 및 스트레칭", "총괄 1,000명" $\to$ "행사 운영단", "22개 실무 Roster" $\to$ "22개 부서·기관", "총 17개 순서" $\to$ "17개 식순", "주요 배정 과업" $\to$ "배정 과업").
+      - `scripts/sync-festival-fallbacks.py` 실행을 통해 React Query 훅 Fallback 및 Cloudflare Edge Function 동기화 완료.
+    * **TAB 3(행사식순) 행열정렬 고도화 (`YangjaeFestivalDashboard.tsx`)**:
+      - 기존 분산형 카드 레이아웃을 폐기하고, 공문서 표준의 수학적 칼정렬 테이블 그리드(`<table className="w-full min-w-[720px]">`)로 전면 개편.
+      - 열(Column) 구성: `[순번 (w-14)]` | `[시간/소요 (w-36)]` | `[구분 (w-24)]` | `[식순명 및 세부 내용]` | `[주관/담당 (w-36)]` | `[상태 (w-20)]`.
+      - 국민의례(대통령훈령 제438호 약식절차 1 준용 및 생략멘트 금지) 및 걷기대회(2km 왕복 수변코스 및 인센티브 마감) 의전 배너를 행 내부 정렬 구조에 완벽 통합.
+    * **TAB 4(업무분장) 행열정렬 고도화 (`YangjaeFestivalDashboard.tsx`)**:
+      - 기존 카드 뷰를 5열 일관 정렬 테이블 그리드(`<table className="w-full min-w-[780px]">`)로 전면 개편.
+      - 열(Column) 구성: `[구분 (w-24)]` | `[부서·기관명 (w-44)]` | `[담당 역할 (w-48)]` | `[담당자/연락처 (w-48)]` | `[배정 과업]`.
+      - 담당자별 원클릭 직통 전화 발신 링크(`tel:...`) 및 세부 과업 불릿 리스트가 행 단위로 흐트러짐 없이 칼정렬되도록 구현.
+    * **반응형 스크롤 및 성능 최적화**:
+      - `overflow-x-auto` 래퍼를 적용하여 모바일 화면에서도 깨짐 없는 수평 스크롤 지원 및 데스크톱 전폭 균등 정렬 구현.
+      - Zero Long-Task Stall, TypeScript(`npx tsc --noEmit`) 0 errors 무결성 확보.
+
+- [x] **양재천 페스티벌 부스 및 업무분장 연락처 행정번호(유선)·폰번호(모바일) 분리 표기 및 편집 지원 릴리즈 (Milestone 190 - 2026-09-21)**
+  - 사용자 요구사항: "연락처를 행정번호와 폰번호로 구분해서 표기해줘" (부스 카드 내 '연락처: [02-3423-7116]' 영역 지정 캡처 첨부)
+  - 주요 조치 및 엔지니어링 실적:
+    * **데이터 모델 스키마 확장 (`useYangjaeFestival.ts` & `FESTIVAL_YANGJAE_2026.json`)**:
+      - `BoothItem` 및 `DutyItem` 인터페이스에 `adminPhone?: string;` (행정 유선/내선 번호) 및 `mobilePhone?: string;` (휴대전화 번호) 정규 필드 신설.
+      - 기존 단일 `phone` 필드와의 100% 하위 호환성 유지(접두사 `010` 자동 판별 폴백 탑재).
+      - `data/FESTIVAL_YANGJAE_2026.json` 내 19개 부스 및 22개 업무분장 데이터 전수에 `adminPhone`과 `mobilePhone`을 자동 분류·분리 영속화.
+      - `scripts/sync-festival-fallbacks.py` 실행을 통해 React Query 훅 및 Cloudflare Edge Function 동기화 완료.
+    * **부스 카드 관리자 편집 모드 3열 분리 인풋 완비 (`YangjaeFestivalDashboard.tsx`)**:
+      - 기존 [담당자] [연락처] 2열 구조에서 $\to$ **[담당자] [행정번호 (유선: 02-3423-7116)] [폰번호 (휴대: 010-xxxx-xxxx)]** 3열 반응형 그리드로 전면 개편.
+      - 부스 저장 시(`handleSaveBooths`) `adminPhone`과 `mobilePhone`이 무손실 정규화되어 로컬 JSON 디스크 및 클라우드 복제본에 동시 반영되도록 구현.
+    * **부스 카드 조회 모드 분리 뱃지 시각화**:
+      - 행정번호는 블루 테마의 유선전화 뱃지(`📞 행정: 02-3423-xxxx`)로 표기.
+      - 폰번호는 에메랄드 테마의 스마트폰 뱃지(`📱 폰: 010-xxxx-xxxx`)로 표기.
+      - 각각 독립된 원클릭 통화 발신 링크(`tel:...`)를 제공하여 긴급 상황 시 즉각적인 회선 연결 지원.
+    * **TAB 4(업무분장 표) 일관성 적용**:
+      - 업무분장 표 내 `[담당자 / 연락처]` 열에서도 행정번호와 폰번호가 각각 블루/에메랄드 뱃지로 직관적으로 구분되어 출력되도록 통일.
+    * **TypeScript 정적 검증 무결성 통과**:
+      - `npx tsc --noEmit` 0 errors 완료.
