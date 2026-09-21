@@ -2,6 +2,19 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 186: Yangjae Festival Completed Milestone Tasks High-Contrast Emerald Visual Identity Release] Upgraded completed milestone task cards from muted gray to high-contrast emerald visual identity (emerald card border & background, emerald capsule numbering, and high-visibility mint-emerald status badge), establishing intuitive task lifecycle contrast across Tab 1 with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
+* **개요 및 개발 목적**:
+  - 사용자 지침("완료 과제는 조금 더 눈에 띄는 색으로 표기하자" 및 스크린샷 `media_1789990806961.png`) 전격 반영:
+    1. **완료 상태 배지(`[✓ 완료]`) 시각적 가독성 대폭 강화**:
+       - 기존의 밋밋하고 비활성 버튼처럼 보이던 회색조 배지(`bg-slate-100 text-slate-700 border-slate-300`)를 완전히 탈피.
+       - 선명하고 신뢰감 높은 에메랄드 테마(`bg-emerald-100 text-emerald-900 border-emerald-400 font-black shadow-3xs`)로 전면 개편하여 완료 상태를 0.1초 내 직관적으로 식별 가능하도록 조치함.
+    2. **추진과제 캡슐 번호(`{item.number}`) 에메랄드 하이라이트 연동**:
+       - 완료된 과제의 경우 좌측 블랙 캡슐 내 과제 번호(`추진과제 1`, `추진과제 2` 등) 폰트 색상을 `text-emerald-400`으로 전환하여 캡슐 자체에서도 완료 정체성을 선명히 각인.
+    3. **완료 카드 컨테이너(`milestone-card`) 에메랄드 테두리 및 은은한 배경 강조**:
+       - 완료 과제 카드에 `bg-emerald-50/35 border-emerald-300 ring-1 ring-emerald-200/60` 및 상단 헤더 구분선 `border-emerald-200/80`을 적용하여, 진행중(`amber`), 완료(`emerald`), 예정(`slate`) 3대 과제 라이프사이클의 시각적 위계를 완벽히 확립.
+    4. **무결성 검증**:
+       - Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 통과.
+
 ### [Milestone 185: Yangjae Festival Booth Header Clutter Purge & Redundant Category Capsule Deletion Release] Completely eliminated redundant category capsule badge (`[운영본부]`, `[보건소 부서]`, `[민간]`) from the booth card header in view mode across all booths, leaving only pristine sequential position markers (`No.1`~`No.18` or `운영본부`) and action buttons, with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
 * **개요 및 개발 목적**:
   - 사용자 지침("이 캡슐이 꼭 필요한가? -> 승인") 전격 반영:

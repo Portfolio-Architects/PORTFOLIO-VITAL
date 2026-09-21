@@ -2062,12 +2062,14 @@ ${targetUrl}`;
                       targetItem.status === 'in-progress'
                         ? 'bg-amber-50/70 border-amber-400 ring-1 ring-amber-300'
                         : targetItem.status === 'done'
-                        ? 'bg-white border-slate-300'
+                        ? 'bg-emerald-50/35 border-emerald-300 ring-1 ring-emerald-200/60'
                         : 'bg-white border-slate-200 text-slate-600'
                     }`}
                   >
                     {/* Milestone Card Top: Number, Title, Status, Edit Buttons, Accordion Toggle */}
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 gap-1.5">
+                    <div className={`flex items-center justify-between pb-2 mb-2 border-b gap-1.5 ${
+                      targetItem.status === 'done' ? 'border-emerald-200/80' : 'border-slate-200'
+                    }`}>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         {isEditingThis ? (
                           <div className="flex items-center gap-1.5 flex-1 min-w-0">
@@ -2092,7 +2094,9 @@ ${targetUrl}`;
                             className="flex items-center text-left cursor-pointer flex-1 min-w-0 group"
                           >
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white shadow-2xs group-hover:bg-slate-800 transition-colors max-w-full">
-                              <span className="font-black text-amber-300 text-[11px] shrink-0">
+                              <span className={`font-black text-[11px] shrink-0 ${
+                                item.status === 'done' ? 'text-emerald-400' : 'text-amber-300'
+                              }`}>
                                 {item?.number || ''}
                               </span>
                               <span className="w-[1px] h-3 bg-slate-600 shrink-0" />
@@ -2116,9 +2120,9 @@ ${targetUrl}`;
                               }))}
                               className="px-1.5 py-0.5 text-xs font-bold border border-amber-400 rounded bg-white"
                             >
-                              <option value="done">완료</option>
-                              <option value="in-progress">진행중</option>
-                              <option value="todo">예정</option>
+                              <option value="done">✓ 완료</option>
+                              <option value="in-progress">▶ 진행중</option>
+                              <option value="todo">○ 예정</option>
                             </select>
                             <button
                               type="button"
@@ -2151,7 +2155,7 @@ ${targetUrl}`;
                           <>
                             <span className={`${isLargeFont ? 'text-xs px-2.5 py-1' : 'text-[11px] px-2 py-0.5'} font-bold rounded border ${
                               item.status === 'done'
-                                ? 'bg-slate-100 text-slate-700 border-slate-300 font-extrabold'
+                                ? 'bg-emerald-100 text-emerald-900 border-emerald-400 font-black shadow-3xs'
                                 : item.status === 'in-progress'
                                 ? 'bg-amber-100 text-amber-900 border-amber-400 font-black'
                                 : 'bg-slate-50 text-slate-400 border-slate-200'

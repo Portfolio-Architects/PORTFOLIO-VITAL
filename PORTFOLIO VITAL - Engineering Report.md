@@ -5118,3 +5118,12 @@ sequenceDiagram
     * 부스 정보 편집 모드(`isEditingThis`) 내 `<input value={targetBooth.category} ... />`는 안전하게 유지하여 관리자 카테고리 수정 권한 보존.
     * Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 확보.
 
+- [x] **양재천 페스티벌 완료 추진과제 고대비 에메랄드 비주얼 아이덴티티 및 가독성 고도화 릴리즈 (Milestone 186 - 2026-09-21)**
+  - 사용자 요구사항: "완료 과제는 조금 더 눈에 띄는 색으로 표기하자" (추진과제 1, 2 완료 카드 캡처 첨부)
+  - 주요 조치 및 엔지니어링 실적:
+    * `YangjaeFestivalDashboard.tsx`: 완료 상태 배지(`[✓ 완료]`)를 기존의 밋밋한 회색조(`bg-slate-100 text-slate-700 border-slate-300`)에서 고대비 에메랄드 테마(`bg-emerald-100 text-emerald-900 border-emerald-400 font-black shadow-3xs`)로 전면 개편.
+    * 완료 과제 카드(`status === 'done'`) 컨테이너에 `bg-emerald-50/35 border-emerald-300 ring-1 ring-emerald-200/60` 및 헤더 구분선 `border-emerald-200/80`을 적용하여 시각적 존재감과 생동감 대폭 강화.
+    * 좌측 블랙 캡슐 내 과제 번호(`추진과제 1`, `추진과제 2`)를 `text-emerald-400`으로 연동하여 캡슐 자체에서도 완료 정체성을 선명히 전달.
+    * Jest 테스트 29개 전 항목(100%) 통과 및 `npx tsc --noEmit` 0 errors 무결성 확보.
+
+
