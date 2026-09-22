@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { PieChart, Pie, Cell, Line, Bar, ReferenceLine, XAxis, YAxis, Tooltip as RechartsTooltip, Area, CartesianGrid, ComposedChart, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Line, ReferenceLine, XAxis, YAxis, Tooltip as RechartsTooltip, Area, CartesianGrid, ComposedChart, ResponsiveContainer } from 'recharts';
 import { Task, BudgetCategory, BudgetEntry } from '@/types';
 import { usePortfolioAnalytics } from '@/hooks/usePortfolioAnalytics';
 import dynamic from 'next/dynamic';
@@ -74,25 +74,56 @@ const CustomPieTooltip = React.memo(({ active, payload }: any) => {
 });
 CustomPieTooltip.displayName = 'CustomPieTooltip';
 
-const CustomComposedTooltip = React.memo(({ active, payload, label, chartType, isHchps }: any) => {
+const CustomComposedTooltip = React.memo(({ active, payload, label, isHchps }: any) => {
   if (active && payload && payload.length) {
+    const itemData = payload[0]?.payload;
+    const hasData = itemData && itemData.cumulativeRate !== undefined;
+
     return (
-      <div className="glass-panel dark:glass-panel-dark p-3.5 rounded-xl shadow-xl border border-white/20 dark:border-slate-800 flex flex-col gap-1.5 text-[11px] min-w-[180px]">
-        <div className="font-bold text-slate-400 dark:text-slate-300 border-b border-slate-200/40 dark:border-slate-800 pb-1.5 mb-1 text-[10px] uppercase tracking-wider">{label}월 집행 정보</div>
-        <div className="flex flex-col gap-1">
-          {payload.map((p: any, idx: number) => {
-            const isTarget = p.dataKey === 'targetCumulative';
-            const nameText = isTarget ? '11월 소진 목표' : chartType === 'cumulative' ? '누적 집행액' : '월별 집행액';
-            const colorClass = isTarget ? 'text-slate-400 dark:text-slate-500' : isHchps ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400';
-            return (
-              <div key={idx} className="flex justify-between items-center gap-3">
-                <span className="font-semibold text-slate-500 dark:text-slate-400">{nameText}:</span>
-                <span className={`font-bold font-mono ${colorClass}`}>
-                  {Number(p.value).toLocaleString()}원
+      <div className="glass-panel dark:glass-panel-dark p-3.5 rounded-xl shadow-xl border border-white/20 dark:border-slate-800 flex flex-col gap-2 text-[11px] min-w-[200px]">
+        <div className="flex justify-between items-center border-b border-slate-200/40 dark:border-slate-800 pb-1.5 mb-0.5">
+          <span className="font-bold text-slate-500 dark:text-slate-300 text-[11px] uppercase tracking-wider">{label}월 집행 분석</span>
+          {hasData ? (
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isHchps ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'}`}>
+              실적 반영
+            </span>
+          ) : (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-400">
+              미집행
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          {hasData ? (
+            <>
+              <div className="flex justify-between items-center gap-3">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">누적 소진율:</span>
+                <span className={`font-bold font-mono text-xs ${isHchps ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                  {itemData.cumulativeRate}%
                 </span>
               </div>
-            );
-          })}
+              <div className="flex justify-between items-center gap-3">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">당월 집행액:</span>
+                <span className="font-bold font-mono text-slate-700 dark:text-slate-300">
+                  {Number(itemData.monthly || 0).toLocaleString()}원
+                </span>
+              </div>
+              <div className="flex justify-between items-center gap-3">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">누적 집행액:</span>
+                <span className="font-bold font-mono text-slate-700 dark:text-slate-300">
+                  {Number(itemData.cumulative || 0).toLocaleString()}원
+                </span>
+              </div>
+            </>
+          ) : null}
+
+          <div className="flex justify-between items-center gap-3 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+            <span className="font-semibold text-slate-400 dark:text-slate-500">11월 목표 소진율:</span>
+            <span className="font-bold font-mono text-slate-500 dark:text-slate-400">
+              {itemData?.targetRate}%
+            </span>
+          </div>
         </div>
       </div>
     );
@@ -105,8 +136,6 @@ const HCHPS_THEME_COLORS = ['#059669', '#064e3b', '#34d399', '#047857', '#6ee7b7
 const VITAL_THEME_COLORS = ['#3B82F6', '#1E3A8A', '#93C5FD', '#1D4ED8', '#60A5FA', '#DBEAFE'];
 
 function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appMode = 'VITAL' }: DashboardProps) {
-  const [chartType, setChartType] = useState<'monthly' | 'cumulative'>('monthly');
-
   const renderContacts = useIdleMount();
   const renderCharts = useDeferredChartMount();
 
@@ -128,8 +157,6 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
   const isHchps = appMode === 'HCHPS';
   const themeColors = isHchps ? HCHPS_THEME_COLORS : VITAL_THEME_COLORS;
 
-  const handleSetMonthly = useCallback(() => setChartType('monthly'), []);
-  const handleSetCumulative = useCallback(() => setChartType('cumulative'), []);
   const handleSelectProject = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedProject(e.target.value);
   }, [setSelectedProject]);
@@ -289,23 +316,15 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                   Monthly Budget Execution
                 </h2>
-                <p className="text-[13px] font-bold text-slate-400 dark:text-slate-500 mt-1">Monthly breakdown and cumulative execution trend</p>
+                <p className="text-[13px] font-bold text-slate-400 dark:text-slate-500 mt-1">Cumulative budget execution rate (0–100% Target Burn-up)</p>
               </div>
 
-              {/* Chart Type Toggle Switch */}
-              <div className="flex p-1 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/60 dark:border-slate-700 shadow-inner shrink-0">
-                <button 
-                  onClick={handleSetMonthly} 
-                  className={`px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${chartType === 'monthly' ? `bg-white dark:bg-slate-700 ${isHchps ? 'text-emerald-600 dark:text-emerald-300' : 'text-blue-600 dark:text-blue-300'} shadow-sm border border-slate-200/50 dark:border-slate-850/40` : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 border border-transparent'}`}
-                >
-                  월별 집행액
-                </button>
-                <button 
-                  onClick={handleSetCumulative} 
-                  className={`px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${chartType === 'cumulative' ? `bg-white dark:bg-slate-700 ${isHchps ? 'text-emerald-600 dark:text-emerald-300' : 'text-blue-600 dark:text-blue-300'} shadow-sm border border-slate-200/50 dark:border-slate-850/40` : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 border border-transparent'}`}
-                >
-                  누적 집행액
-                </button>
+              {/* Cumulative Burn-up Status Badge */}
+              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200/60 dark:border-slate-700 shadow-2xs shrink-0">
+                <span className={`w-2 h-2 rounded-full ${isHchps ? 'bg-emerald-500' : 'bg-blue-500'} animate-pulse`} />
+                <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                  현재 누적 소진율: <span className={`font-mono text-xs font-bold ${isHchps ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}`}>{executionRate.toFixed(1)}%</span>
+                </span>
               </div>
             </div>
 
@@ -334,43 +353,40 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
               </div>
             </div>
 
-            {/* Monthly Trend Chart */}
+            {/* Monthly Trend Chart (0-100% Rate) */}
             <div className="flex-1 mt-4 sm:mt-5 relative w-full min-h-[365px] h-[365px]">
               {renderCharts && (
                 <ResponsiveContainer width="100%" height={365}>
-                  <ComposedChart data={monthlyExecutionData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
+                  <ComposedChart data={monthlyExecutionData} margin={{ top: 25, right: 15, left: -10, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
+                      <linearGradient id="colorCumulativeRate" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={isHchps ? '#10B981' : '#3B82F6'} stopOpacity={0.25}/>
                         <stop offset="95%" stopColor={isHchps ? '#10B981' : '#3B82F6'} stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={isHchps ? '#34D399' : '#60A5FA'} stopOpacity={1}/>
-                        <stop offset="100%" stopColor={isHchps ? '#059669' : '#3B82F6'} stopOpacity={0.85}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} dy={10} />
                     <YAxis 
+                      domain={[0, 100]}
+                      ticks={[0, 20, 40, 60, 80, 100]}
                       axisLine={false} 
                       tickLine={false} 
                       tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} 
-                      tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`} 
+                      tickFormatter={(val) => `${val}%`} 
                     />
-                    <RechartsTooltip content={<CustomComposedTooltip chartType={chartType} isHchps={isHchps} />} />
+                    <RechartsTooltip content={<CustomComposedTooltip isHchps={isHchps} />} />
                     
+                    {/* 100% 목표 상한 가이드 기준선 */}
+                    <ReferenceLine y={100} stroke="#cbd5e1" strokeDasharray="3 3" strokeWidth={1} />
+
                     {/* 11월 100% 소진 마감일 세로 가이드라인 - insideTop과 offset 조정으로 텍스트 잘림 방지 */}
-                    <ReferenceLine x="Nov" stroke="#ef4444" strokeDasharray="4 4" strokeWidth={2} label={{ value: "11월 예산 마감", fill: "#ef4444", fontSize: 9, fontWeight: 'bold', position: 'insideTop', offset: 15 }} />
+                    <ReferenceLine x="Nov" stroke="#ef4444" strokeDasharray="4 4" strokeWidth={2} label={{ value: "11월 예산 마감 (100%)", fill: "#ef4444", fontSize: 9, fontWeight: 'bold', position: 'insideTop', offset: 15 }} />
                     
-                    {chartType === 'monthly' ? (
-                      <Bar dataKey="monthly" fill="url(#colorBar)" radius={[4, 4, 0, 0]} barSize={16} />
-                    ) : (
-                      <>
-                        {/* 선형 100% 소진 가이드 점선 */}
-                        <Line type="monotone" dataKey="targetCumulative" stroke="#cbd5e1" strokeWidth={1.5} strokeDasharray="5 5" dot={false} activeDot={false} />
-                        <Area type="monotone" dataKey="cumulative" stroke={isHchps ? '#10B981' : '#3B82F6'} strokeWidth={3} fillOpacity={1} fill="url(#colorCumulative)" activeDot={{ r: 5, fill: isHchps ? '#10B981' : '#3B82F6', stroke: '#fff', strokeWidth: 2 }} />
-                      </>
-                    )}
+                    {/* 선형 100% 소진 가이드 점선 */}
+                    <Line type="monotone" dataKey="targetRate" stroke="#cbd5e1" strokeWidth={1.5} strokeDasharray="5 5" dot={false} activeDot={false} name="11월 소진 목표" />
+                    
+                    {/* 실제 누적 소진율 곡선 및 영역 */}
+                    <Area type="monotone" dataKey="cumulativeRate" stroke={isHchps ? '#10B981' : '#3B82F6'} strokeWidth={3} fillOpacity={1} fill="url(#colorCumulativeRate)" activeDot={{ r: 5, fill: isHchps ? '#10B981' : '#3B82F6', stroke: '#fff', strokeWidth: 2 }} name="누적 소진율" />
                   </ComposedChart>
                 </ResponsiveContainer>
               )}

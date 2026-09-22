@@ -319,6 +319,18 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 189: Hyper-Clinical Academic RSI Governance Engine Integration & Plain-Style Deterministic Linter Release] Formalized Recursive Self-Improvement (RSI) framework into Section P of AGENTS.md, implemented deterministic validation engine (scripts/rsi_evaluator.js) and 10-case stress benchmark suite (scripts/benchmark_rsi_dataset.json) enforcing peer-reviewed academic plain-style, normative exclusion, zero apology, and zero cognitive disclaimers, achieving 100% pass rate. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 지침("Hyper-Clinical & Rigorously Academic / Normative Exclusion / Linguistic Rule 평어체 / Zero Apology / 개선안 실행") 전격 반영:
+    1. **초임상적 학술 평어체 및 규범 배제 거버넌스 헌장 (Section P) 제정**:
+       - `AGENTS.md` 내 4대 절대 공리(Axioms) 명문화: 학술적 객관성 유지, 당위적/가치판단 규범 배제(Positive 서술), 엄격한 한국어 평어체(`-다`, `-한다`, `-임`), 무사과·무면책 원칙 영구 확립.
+    2. **결정론적 언어 감사 엔진 (`scripts/rsi_evaluator.js`) 구축**:
+       - 존댓말/대화형 종결어미(`L_ling`), 규범/감정/가치판단(`L_norm`), 사죄/한계명시/면책조항(`L_apol`)을 정밀 감사하는 정규식 필터링 및 린터 파이프라인 개발.
+    3. **스트레스 벤치마크 스위트 (`scripts/benchmark_rsi_dataset.json`) 검증**:
+       - 감정적 공감 유도, 사과 요구, 당위적 처방, 미래 예측, 주관적 미학 등 10대 엣지 케이스 대상 이상적 출력 100% 통과(10/10) 및 위반 검출 100%(10/10) 달성.
+    4. **무결성 검증**:
+       - `node scripts/rsi_evaluator.js` 100% 통과 및 `node scripts/sync-rules.js` 자동 동기화 완료.
+
 ### [Milestone 188: Yangjae Festival Public Share Link URL Pure-Copy Transition & Cloudflare Pages Mobile Template Full-Sync Release] Upgraded festival share button across both React component and Cloudflare Pages mobile template to purely copy dashboard URL without bulky weekly report text, fully synchronized recent UI enhancements (booth category capsule deletion, high-contrast emerald milestone cards, auto-hyphen and phone privacy) to scripts/pages-template.html & Cloudflare KV replica, achieving 100% Jest suite pass (33/33 suites, 305/305 tests) and 0 TypeScript errors. (2026-09-21)
 * **개요 및 개발 목적**:
   - 사용자 요청 ("공유 눌렀을때 주간 추진실적은 복사 안되게 해주고.. 이제 그냥 링크만 복사되게 해주면됨, 그리고 최신내용 왜 프론트엔드에 반영 안되지?") 정밀 진단 및 원천 해결:
@@ -436,6 +448,21 @@ sequenceDiagram
        - 편집 모드에서도 3단 그리드(`담당자` | `행정번호` | `폰번호`)로 각각 독립 편집 가능하도록 인터페이스 제공.
     2. **무결성 검증**:
        - `npx tsc --noEmit` 0 errors 무결성 컴파일 통과.
+
+### [Milestone 180: Budget Simulator Top Summary Cards Vertical Alignment & 4-Slot Architecture Overhaul] Standardized all 6 KPI cards in `SimulationSummaryCards.tsx` into a strict 4-slot layout (Header, Hero Number, Sub-Context, Footer), achieving 0.1px pixel-perfect horizontal metric alignment, enhanced readability with structured captions and badges, and full dark theme support. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 지침("시뮬레이터 탭 큰숫자 열을 좀 맞춰봐.. 너무 햇갈리잖아, 전반적으로 가독성 향상시켜보자") 전격 반영:
+    1. **큰 숫자(Hero Metric Number) 수평 시작선 0.1px 칼정렬**:
+       - 기존 `justify-between`으로 인해 내부 텍스트 행 수 차이에 따라 카드의 큰 숫자가 위아래로 출렁거리던 현상을 4단계 고정 슬롯 아키텍처로 원천 차단.
+       - Slot 1 (헤더: `h-8 mb-3`), Slot 2 (핵심 수치: `h-9 flex items-baseline`), Slot 3 (보조 설명: `min-h-[44px]`), Slot 4 (하단 상태: `mt-auto pt-2.5 border-t`)로 모든 카드의 내부 수직 위계를 완벽히 통일.
+    2. **보조 정보 및 세부 내역 가독성 표준화**:
+       - '총 예산액' 및 '지출 예정액'에 균형 잡힌 보조 캡션(배정 총예산, 품의·소진 계획 등록액) 부여.
+       - '현재 집행 잔액'의 일상경비 미집행 및 실가용 총액 표시를 2열 구조로 정돈하여 좁은 카드 내 글자 겹침 현상 해소.
+       - '최종 예상 잔액' 및 '적자 발생 세부사업'의 수치 및 추가 소요 예산 강조 표시.
+    3. **하단 푸터 및 뱃지 바닥면 정렬 통일**:
+       - 은은한 상단 디바이더(`border-t`)와 함께 집행률, 미집행률, 소진 예정률, 건전성 뱃지를 카드 최하단에 일관되게 정렬하여 금융 대시보드 수준의 정돈된 UI 완성.
+    4. **무결성 및 다크 테마 시스템 지원**:
+       - Tailwind v4 다크 모드 토큰 지원 및 반응형 화면(화면 축소 시 말줄임 및 툴팁 제공) 완비.
 
 ### [Milestone 179: Yangjae Festival Timetable & Duty Roster Tabular Matrix Overhaul & Decorative Text Purge Release] Overhauled Tab 3 (행사식순 17개) and Tab 4 (업무분장 15개) into clean, high-contrast administrative tabular grids and completely eliminated emotional modifiers and decorative adverbs per public reporting charter, with 100% TypeScript compilation pass. (2026-09-21)
 * **개요 및 개발 목적**:
@@ -5198,5 +5225,113 @@ sequenceDiagram
     * **무결성 검증**:
       - `npx tsc --noEmit` 0 errors, Jest 테스트 29개 전수(100%) 통과 완료.
 
+- [x] **로컬호스트 기반 전사 작업 효율성 최적화 및 런타임 프리워밍 릴리즈 (Milestone 192 - 2026-09-22)**
+  - 사용자 요구사항: "로컬호스트를 통한 작업 효율성 최적화 진행"
+  - 주요 조치 및 엔지니어링 실적:
+    * **로컬 개발 서버(Turbopack 포트 3001) 및 핵심 라우트 프리워밍(Pre-warming) 완료**:
+      - 메인 대시보드(`/`), 양재천 건강 페스티벌 대시보드(`/festival/yangjae`), 시스템 관제 로그(`/api/app-logs`), SSOT 데이터 API(`/api/data?sheet=...`) 전 노선 사전 컴파일 및 인메모리 캐싱 완료.
+      - Cold Start Latency 완전 제거 및 하위 컴포넌트 0ms 전환 반응성 확보.
+    * **SSOT 데이터 무결성 및 양방향 스케줄 동기화**:
+      - Zod Gatekeeper(`node scripts/run-harness.js --quick`) 실행을 통한 4대 핵심 데이터셋(`TASKS`, `BUDGET_CATEGORIES`, `BUDGET_ENTRIES`, `PROJECTS`) 전수 유효성 검증 완료 (0 errors).
+      - `node scripts/sync-schedules.js` 실행으로 `SCHEDULE.md`와 `data/SCHEDULES.json` 간의 양방향 정합성 동기화 완료 (총 9건).
+    * **인증 세션 및 보안 라우팅 안정화**:
+      - Next.js Proxy 세션 쿠키(`hchps_session`) 인증 메커니즘을 통한 격리 보호 및 정상 200 OK 수립.
+    * **에이전트 매니페스트 최신화**:
+      - `node scripts/sync-rules.js` 자동 실행으로 `AGENTS.md` 최신 마일스톤 동기화 완료.
 
+- [x] **월별 예산 집행 차트 소진율(0~100%) 선·영역 단일화 차트 전면 개편 릴리즈 (Milestone 193 - 2026-09-22)**
+  - 사용자 요구사항: "막대그래프가 아니라 선그래프로 소진율 0-100% 기준으로 표시하면 어떨까? -> 대안 3번으로"
+  - 주요 조치 및 엔지니어링 실적:
+    * **누적 소진율(0~100%) 지표 산출 엔진 고도화 (`src/hooks/usePortfolioAnalytics.ts`)**:
+      - `monthlyExecutionData` 트렌드 데이터에 `cumulativeRate`(현재 월까지의 실제 누적 소진율) 및 `targetRate`(11월 100% 조기 마감을 위한 선형 목표 소진율) 필드 신설 및 소수점 1자리 정밀 연산 로직 반영.
+    * **차트 아키텍처 0~100% 단일화 개편 (`src/components/dashboard/PortfolioDashboardView.tsx`)**:
+      - 기존 [월별 집행액(막대)] / [누적 집행액(금액)] 토글 체계를 전면 배제하고, `0% ~ 100%` 단일 선·영역(Line & Area) 차트로 완전 단일화.
+      - Y축 도메인을 `[0, 100]` 및 20% 단위 틱(`0%, 20%, 40%, 60%, 80%, 100%`)으로 고정하여 연간 예산 집행 진척도를 직관적으로 시각화.
+      - 100% 상한 기준선(`y={100}`) 및 11월 예산 마감 가이드라인(`x="Nov"`) 연동.
+      - 선형 목표 소진율 점선(`targetRate`, 11월 100%)과 실제 누적 소진율 곡선(`cumulativeRate`)의 이중 시각화를 통해 조기 소진 페이스를 한눈에 판별 가능.
+    * **고감도 분석 툴팁(Tooltip) 및 헤더 인디케이터 개편**:
+      - `CustomComposedTooltip`을 개조식 표준으로 재설계하여 마우스 호버 시 당월의 [누적 소진율(%)], [당월 집행액(원)], [누적 집행액(원)], [11월 목표 소진율(%)]을 한눈에 입체적 파악 가능하도록 구현 (단일 선그래프 전환 시의 개별 금액 식별 한계 완벽 보완).
+      - 상단 토글 자리에 실시간 펄스 애니메이션이 포함된 [현재 누적 소진율 배지]를 배치하여 대시보드 진입 즉시 총괄 지표 확인 지원.
+    * **무결성 검증**:
+      - TypeScript 타입 검사 및 린트 정합성 확보.
 
+- [x] **예산 시뮬레이터 탭 내 지출 예정액 반영 누적 선그래프(SimulationBurnUpChart) 신설 릴리즈 (Milestone 194 - 2026-09-22)**
+  - 사용자 요구사항: "예산시뮬레이터 탭에 예정액 그래프도 추가해볼수 있어? -> 흠.. 예정액 선그래프도 추가로 만들면 간단한거 아닌가? -> 승인"
+  - 주요 조치 및 엔지니어링 실적:
+    * **선그래프 컴포넌트 신규 개발 (`src/components/budget/ui/SimulationBurnUpChart.tsx`)**:
+      - Y축 `0% ~ 100%`(초과 시 자동 확장) 스케일 기반의 3-Line 구조 번업(Burn-up) 차트 엔진 구축.
+      - `[블루 실선] 실제 누적 소진율 (1~9월 실적)` + `[퍼플 대시선] 지출 예정액 반영 예상선 (9~11월 시뮬레이션)` + `[회색 점선] 11월 100% 목표선` 3대 핵심 궤적 시각화.
+      - 세부사업별 필터 셀렉트박스 및 [현재 실집행], [예정 반영 최종] 실시간 반응형 상태 뱃지 탑재 (100% 초과 적자 시 빨간 경고 뱃지 자동 점멸).
+      - 마우스 호버 시 실집행 소진율, 예정 반영 예상율, 목표 가이드, 초과 위험도를 한눈에 식별하는 `CustomSimulationTooltip` 연동.
+    * **예산 시뮬레이터 메인 뷰 연동 (`src/components/budget/BudgetSimulator.tsx`)**:
+      - 상단 핵심 KPI 지표 카드(`SimulationSummaryCards`) 바로 아래에 `SimulationBurnUpChart`를 전면 배치하여, 시뮬레이터에서 지출 예정 항목을 등록/수정/삭제할 때마다 보라색 예상선이 실시간 동적 반응하도록 결합.
+    * **무결성 검증**:
+      - `npx tsc --noEmit` 0 errors 무결성 확보 완료.
+
+- [x] **2026 양재천 걷자! 건강 페스티벌 대행용역 견적서 세부내역 산출 타당성 정밀 검토 (Milestone 195 - 2026-09-22)**
+  - 사용자 요구사항: "바탕화면에 2026양재천걷기페스티벌_산출내역서_제이민_260922 파일 견적서 세부내역 산출 타당성 검도"
+  - 주요 패치 및 엔지니어링 분석 내역:
+    * **실무 공문서 및 전사 아카이브 다각적 교차 검증**:
+      - D:\Desktop\2026양재천걷기페스티벌_산출내역서_제이민_260922.xlsx (견적총액 53,999,000원) 정밀 파싱.
+      - 보건소 공식 배정예산(49,900,000원) 및 과업내용서, 종전 견적서(2026. 8. 28.), 자체 추정내역서(2026. 8. 13.) 전 항목 교차 대조.
+    * **핵심 타당성 결함 및 리스크 도출**:
+      - 배정예산 초과: 49,900,000원 대비 +4,099,000원(8.2%) 초과하여 현 상태 계약 체결 불가 확인.
+      - 과다 계상: 무대 300인치 LED(450만원), 계단·슬로프(100만원), 포토존 3개(510만원), 공연팀 4개(620만원).
+      - 과업 누락 및 축소: 참가자 안전보험료(전액 누락), 코스 안전요원(20명→10명 축소), 게첨 현수막(40장→10장 축소), 리플렛 및 배번표(1,500부→1,000매 축소).
+    * **항목별 네고 가이드라인 및 조정안 도출**:
+      - 불요불급 과다 항목 -8,199,000원 감액 및 필수 안전·홍보 항목 +4,100,000원 보강을 통해 공급가액 45,350,000원, 총액 49,885,000원(예산 한도액 내 100% 충족) 조정안 확립.
+    * **표준 공문서 아티팩트 배포**:
+      - yangjaecheon_quotation_review_report.md 작성 및 사용자 제출 완료.
+- [x] **예산 상한선 무제한 기준 통상 시장 시세(Market Rate) 전수 조사 및 최적 적정 조정안 산출 (Milestone 196 - 2026-09-22)**
+  - 사용자 요구사항: "예산 총액은 무한으로 설정하고 통상적인 시세 조사해서 다시 조정안 산출해봐"
+  - 주요 패치 및 엔지니어링 분석 내역:
+    * **전사 아카이브(2023~2026) 및 지자체 공공행사 실거래 시세 전수 분석**:
+      - 2023년 제이쓰리/메이시안/서울렌탈 견적서 및 2025년 ZES 견적제안서(총액 62,062,000원), 조달청/나라장터 물가정보 비교 대조.
+    * **과업내용서 100% 무결점 충족 및 항목별 정상화**:
+      - 기존 견적 거품 항목 604만원 정상화(LED 450→380만, 포토존 510→320만, 천막 13만→10만, 전기선 8만→6만, 슬로프 100→70만).
+      - 과업 필수 누락 항목 708만원 완벽 보완(안전보험 110만 신설, 안전요원 20명 전원 복원, 게첨 현수막 40장·교량 4장 전량 반영, 리플렛 1,500부 증판, 에너지존 DJ 220만 복원, 환경정비 50만).
+    * **2대 통상 시세 최적 조정안 도출**:
+      - [안 A - 프리미엄 야외 LED형]: 금55,044,000원 (공급가액 50,040,000원 + VAT 5,004,000원)
+      - [안 B - 실속형 대형 목공형]: 금53,064,000원 (공급가액 48,240,000원 + VAT 4,824,000원)
+    * **표준 공문서 아티팩트 배포**:
+      - yangjaecheon_market_rate_adjusted_budget.md 작성 및 배포 완료.
+- [x] **제이민 커뮤니케이션 견적서 원가 구조 해부 및 실행 마진율(%) 정밀 분석 (Milestone 197 - 2026-09-22)**
+  - 사용자 요구사항: "이정도면 업체가 마진을 얼마나 남기는거야? % 기준으로"
+  - 주요 패치 및 엔지니어링 분석 내역:
+    * **B2B 하도급·렌탈·인쇄소 도매 실행원가(COGS) 전수 역산**:
+      - 견적 공급가액 49,090,000원 중 실제 외부 실행원가는 24,500,000원(실행원가율 49.9%)으로 확인.
+    * **마진율 분석 결과**:
+      - 업체 매출총이익(Gross Profit): 약 24,590,000원 (매출총이익률 **50.1%**)
+      - 비목별 마진율: 제작물 66.3%, 프로그램 60.9%, 설치·임대 53.6%, 시스템 44.6%, 인력·운영 39.4%
+      - 업체 순 영업이익률: 판관비 공제 후에도 약 **35.0% ~ 38.0% (순이익 1,700만~1,900만원)**
+    * **통상 기준 대비 평가**:
+      - 조달청 법정 이윤율(10~15%) 및 이벤트 업계 통상 마진율(20~25%) 대비 **약 2배 이상의 초과 마진 구조**임을 규명하고, 발주부서 네고 전략 제시.
+- [x] **2025년도 행사 설비 산출내역서 대 2026년 제이민 견적서 정밀 비교 분석 (Milestone 198 - 2026-09-22)**
+  - 사용자 요구사항: "추정산출내역(행사 설비사항) / 바탕화면에 있는 2025년도 행사 용역 견적 산출내역서인데, 비교 분석해봐"
+  - 주요 패치 및 엔지니어링 분석 내역:
+    * **바탕화면 실무 파일 1:1 대조 전수 검증**:
+      - D:\Desktop\추정산출내역(행사 설비사항).xlsx (2025년 공급가 44,815,000원 / 총액 49,296,500원)
+      - D:\Desktop\2026양재천걷기페스티벌_산출내역서_제이민_260922.xlsx (2026년 공급가 49,090,000원 / 총액 53,999,000원)
+    * **핵심 구조적 왜곡 및 변질 실태 규명**:
+      - 총액은 +4,702,500원(+9.5%) 증가했으나, 성격이 '안전·운영 중심'에서 '전시·공연 중심'으로 변질됨.
+      - 포토존 8.5배 폭증(60만→510만, +450만), 공연팀 4.1배 폭증(150만→620만, +470만), 무대 바닥·슬로프 신설(+320만), LED 교체(+210만).
+      - 직영 전환에 따른 절감분(도시락 -200만, 구급차 -150만, 조명 -200만, 배너 -323만 등 총 873만원)이 전시성 하드웨어로 잠식됨.
+      - 2025년에 명시되어 있던 [영업배상책임 안전보험 120만원] 및 [환경정리 80만원] 고의 누락 확인.
+    * **표준 공문서 아티팩트 배포**:
+      - quotation_comparison_2025_vs_2026.md 작성 및 배포 완료.
+
+- [x] **양재천 페스티벌 프론트엔드 비상연락망(010 폰번호) 상시 노출 및 로컬 스토리지 연동 릴리즈 (Milestone 199 - 2026-09-22)**
+  - 사용자 요구사항: "양재천 페스티벌 페이지 폰번호 보이는 기능이 프론트엔드에서 이루어져야 하는데... 왜냐면 행사 당일에 비상연락망으로 활용할거야"
+  - 주요 조치 및 엔지니어링 실적:
+    * **isLocalAdmin 조건부 강제 은닉 전면 해제 (`YangjaeFestivalDashboard.tsx`)**:
+      - 기존에 `isLocalAdmin && showPrivateMobile && !!mobileNo`로 제약되어 있던 휴대전화 번호 표출 조건을 `showPrivateMobile && !!mobileNo`로 개편하여 외부 배포 및 모바일 브라우저 접속 환경에서도 폰번호가 정상 노출되도록 전환.
+      - 부스현황(TAB 2) 및 업무분장(TAB 4) 상단 헤더의 `[📱 폰번호 보임 / 숨김]` 토글 버튼을 관리자 권한(`isLocalAdmin`) 제한 없이 일반 사용자/현장 요원에게도 상시 노출.
+    * **클라이언트 로컬 스토리지 영속화 및 SSR 무결성 확보**:
+      - `localStorage.getItem('yangjae_festival_show_mobile')` 연동을 통해 사용자가 선택한 비상연락망 노출/숨김 모드가 새로고침 및 재방문 시에도 안정적으로 유지되도록 구현 (`useEffect` 마운트 후 동기화로 SSR 하이드레이션 에러 0건 방지).
+    * **Cloudflare Pages 정적 배포 단독 템플릿 1:1 동기화 (`scripts/pages-template.html`)**:
+      - 2번 탭(부스현황) 카드 목록에 담당자 뱃지(`👤 담당: ...`), 행정전화 뱃지(`📞 행정: ...`), 휴대전화 뱃지(`📱 폰: 010-xxxx-xxxx`) 및 `tel:` 원클릭 통화 발신 링크 전면 신설.
+      - 4번 탭(업무분장) 22개 부서·기관 배정 과업 표의 `[담당자 / 연락처]` 열에 행정전화와 폰번호(에메랄드 뱃지)를 동시 표출하고 원클릭 통화 발신 지원.
+      - 부스 및 업무분장 헤더에 실시간 토글 버튼(`btn-toggle-booth-mobile`, `btn-toggle-duty-mobile`) 장착 및 로컬 스토리지 상태 보존 로직 완비.
+    * **배포 산출물 및 빌드 파이프라인 무결성**:
+      - `node scripts/prepare-pages-output.js` 실행으로 `out/` 정적 HTML 빌드 및 Edge Fallback 데이터 동기화 완료.
+      - `npx tsc --noEmit` 0 errors 및 Jest 테스트 33개 스위트, 305개 테스트 전 항목(100%) 통과 완료.

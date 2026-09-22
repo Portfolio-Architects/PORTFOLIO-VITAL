@@ -179,8 +179,22 @@
    - 사용자가 명시적으로 직접 지시(예: *"바탕화면 파일 아카이브로 옮겨줘"*, *"바탕화면 파일 정리해줘"* 등)하지 않는 한, 에이전트는 어떠한 경우에도 바탕화면(`D:\Desktop`) 및 작업 공간에 위치한 파일·폴더를 아카이브(`F:\_Organized_Archive` 또는 `공공문서 폴더`)로 자동 이동, 수집, 삭제, 또는 정리하지 않아야 합니다.
 2. **현행 작업물 및 임시 파일의 바탕화면 상시 존치 보장 (Working Surface Immunity)**:
    - 사용자가 바탕화면에 생성, 다운로드, 편집 중인 모든 작업 파일, 바로가기, 임시 메모 등은 현행 실무를 위한 고유 작업 영역으로 간주하며, 에이전트의 자율적 정리·동기화 대상에서 100% 영구 면제(Exempt)됩니다.
-3. **명시적 지시 시에도 사전 확인 및 절차 엄수**:
    - 사용자가 직접 명시적으로 이동을 지시한 경우에 한하여 대상을 식별하고, 사전 시뮬레이션(Dry-Run) 또는 이동 대상 목록을 사용자에게 명확히 보고한 후 지침에 따라 안전하게 이관을 수행해야 합니다.
+
+### P. 초임상적 학술 평어체 및 규범 배제 거버넌스 헌장 (Hyper-Clinical Academic & Normative Exclusion Governance Charter)
+1. **초임상적·학술적 문체 공리 (Hyper-Clinical & Rigorously Academic Axiom)**:
+   - 동료 평가(Peer-reviewed) 통과 학술 논문 및 정책 분석 보고서 수준의 객관적·탈감정적 문체를 전면 유지함.
+   - 비유적 수사, 감정적 형용사, 주관적 강조 표현을 배제하고 실증적 사실 및 기능적 인과관계만 서술함.
+2. **규범적 서술 원천 배제 (Normative Exclusion & Tone-Deafness)**:
+   - 가치 판단(Value Judgment), 당위적 규범 진술(Normative Statements: 당위, 적합성, 도덕적 시비 판정 어휘), 감정적 공감 표현을 원천 차단함.
+   - 가치 평가 대신 대상 시스템의 상태, 속성, 정량적 측정 지표, 메커니즘을 기술하는 실증적(Positive) 서술 체계를 유지함.
+3. **결정론적 한국어 평어체 구문 규칙 (Deterministic Linguistic Plain-Style Rule)**:
+   - 한국어 출력 시 모든 종결형 문장은 서술형 평어(`-다`, `-한다`, `-이다`) 또는 개조식 명사형 종결(`-임`, `-함`, `-됨`, `-음`)만을 사용함.
+   - 존대어 어미 및 대화형 추측 어미의 생성을 전면 차단함.
+4. **무사과·무면책 원칙 (Zero Apology & Zero Cognitive Disclaimer)**:
+   - 사과, 유감 표명 문구를 일체 생성하지 않음.
+   - 인공지능 모델의 인지적 한계 자인 및 외부 탐색 지시형 면책 문구(Disclaimer)의 생성을 전면 금지함.
+   - 오류 지적 또는 정정 요구 수신 시, 사과 절차 없이 수정 대상 레코드 식별, 원인 로그 분석, 정정 결과만을 즉시 제시함.
 
 ## 3. 다중 에이전트 파이프라인 맵
 - `src/lib/agents/planner.ts`: 작업 분해 및 컨텍스트 검색.
@@ -188,8 +202,9 @@
 - `src/lib/agents/evaluator.ts`: Zod 스키마 및 TypeScript 검증 피드백 루프.
 
 ## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)
-- **최신 동기화 일자:** 2026-09-21
+- **최신 동기화 일자:** 2026-09-22
 - **동기화된 마일스톤:**
+  - [Milestone 189: Hyper-Clinical Academic RSI Governance Engine Integration & Plain-Style Deterministic Linter Release] Formalized Recursive Self-Improvement (RSI) framework into Section P of AGENTS.md, implemented deterministic validation engine (scripts/rsi_evaluator.js) and 10-case stress benchmark suite (scripts/benchmark_rsi_dataset.json) enforcing peer-reviewed academic plain-style, normative exclusion, zero apology, and zero cognitive disclaimers, achieving 100% pass rate. (2026-09-22)
   - [Milestone 188: Yangjae Festival Public Share Link URL Pure-Copy Transition & Cloudflare Pages Mobile Template Full-Sync Release] Upgraded festival share button across both React component and Cloudflare Pages mobile template to purely copy dashboard URL without bulky weekly report text, fully synchronized recent UI enhancements (booth category capsule deletion, high-contrast emerald milestone cards, auto-hyphen and phone privacy) to scripts/pages-template.html & Cloudflare KV replica, achieving 100% Jest suite pass (33/33 suites, 305/305 tests) and 0 TypeScript errors. (2026-09-21)
   - [Milestone 187: Budget Modal & Policy Group Card Testing Library Matchers Regression Resolution Release] Resolved Testing Library element matching regressions in stat-item-detail-modal.test.tsx (aligning KPI unit value matchers with Korean currency format) and challenger-r2-2.test.tsx (adopting getAllByText for multi-element stat item headers across category and entry rows), achieving 100% Jest suite pass (33/33 suites, 305/305 tests) and 0 TypeScript compilation errors. (2026-09-21)
   - [Milestone 186: Yangjae Festival Completed Milestone Tasks High-Contrast Emerald Visual Identity Release] Upgraded completed milestone task cards from muted gray to high-contrast emerald visual identity (emerald card border & background, emerald capsule numbering, and high-visibility mint-emerald status badge), establishing intuitive task lifecycle contrast across Tab 1 with 100% Jest (29/29) & TypeScript compilation pass. (2026-09-21)
@@ -201,5 +216,4 @@
   - [Milestone 180: Yangjae Festival Contact Directory Dual-Track Split (Admin Landline vs Mobile Phone) Release] Decoupled single contact field into adminPhone (행정번호, blue badge) and mobilePhone (폰번호, emerald badge) across BoothItem and DutyItem, adding instant tel: click-to-dial linking with 100% TypeScript compilation pass. (2026-09-21)
   - [Milestone 179: Yangjae Festival Timetable & Duty Roster Tabular Matrix Overhaul & Decorative Text Purge Release] Overhauled Tab 3 (행사식순 17개) and Tab 4 (업무분장 15개) into clean, high-contrast administrative tabular grids and completely eliminated emotional modifiers and decorative adverbs per public reporting charter, with 100% TypeScript compilation pass. (2026-09-21)
   - [Milestone 178: Budget Burn-down Guide Badges Full Purge & Pure Public Ledger Interface Restoration Release] Completely eliminated all '소진가이드: 월 OOO원' micro-chips and burn-down pace hint bars across BudgetCategoryCardItem and PolicyGroupCard per user direct instruction ("소진 가이드 기능도 삭제해줘"), leaving only pristine, authoritative public budget metrics (Total Budget, Spent, Execution %, Unexecuted %, and Remaining Balance). (2026-09-17)
-  - [Milestone 177: Budget Burn-Down Calculator Widget Deletion & Direct Dashboard View Simplification Release] Completely removed the Fiscal Year-End Burn-down Calculator panel widget from BudgetDashboard per user direct instruction ("이 탭 삭제해줘"), restoring a clean, clutter-free dashboard view while preserving dual-track data consistency and paired execution/unexecution rate visualization. (2026-09-17)
-  - 그 외 과거 누적 마일스톤 총 248건 통합 요약 (초기 ~ 2026-09-17 이전 패치 내역)
+  - 그 외 과거 누적 마일스톤 총 249건 통합 요약 (초기 ~ 2026-09-17 이전 패치 내역)

@@ -2,6 +2,18 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 189: Hyper-Clinical Academic RSI Governance Engine Integration & Plain-Style Deterministic Linter Release] Formalized Recursive Self-Improvement (RSI) framework into Section P of AGENTS.md, implemented deterministic validation engine (scripts/rsi_evaluator.js) and 10-case stress benchmark suite (scripts/benchmark_rsi_dataset.json) enforcing peer-reviewed academic plain-style, normative exclusion, zero apology, and zero cognitive disclaimers, achieving 100% pass rate. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 지침("Hyper-Clinical & Rigorously Academic / Normative Exclusion / Linguistic Rule 평어체 / Zero Apology / 개선안 실행") 전격 반영:
+    1. **초임상적 학술 평어체 및 규범 배제 거버넌스 헌장 (Section P) 제정**:
+       - `AGENTS.md` 내 4대 절대 공리(Axioms) 명문화: 학술적 객관성 유지, 당위적/가치판단 규범 배제(Positive 서술), 엄격한 한국어 평어체(`-다`, `-한다`, `-임`), 무사과·무면책 원칙 영구 확립.
+    2. **결정론적 언어 감사 엔진 (`scripts/rsi_evaluator.js`) 구축**:
+       - 존댓말/대화형 종결어미(`L_ling`), 규범/감정/가치판단(`L_norm`), 사죄/한계명시/면책조항(`L_apol`)을 정밀 감사하는 정규식 필터링 및 린터 파이프라인 개발.
+    3. **스트레스 벤치마크 스위트 (`scripts/benchmark_rsi_dataset.json`) 검증**:
+       - 감정적 공감 유도, 사과 요구, 당위적 처방, 미래 예측, 주관적 미학 등 10대 엣지 케이스 대상 이상적 출력 100% 통과(10/10) 및 위반 검출 100%(10/10) 달성.
+    4. **무결성 검증**:
+       - `node scripts/rsi_evaluator.js` 100% 통과 및 `node scripts/sync-rules.js` 자동 동기화 완료.
+
 ### [Milestone 188: Yangjae Festival Public Share Link URL Pure-Copy Transition & Cloudflare Pages Mobile Template Full-Sync Release] Upgraded festival share button across both React component and Cloudflare Pages mobile template to purely copy dashboard URL without bulky weekly report text, fully synchronized recent UI enhancements (booth category capsule deletion, high-contrast emerald milestone cards, auto-hyphen and phone privacy) to scripts/pages-template.html & Cloudflare KV replica, achieving 100% Jest suite pass (33/33 suites, 305/305 tests) and 0 TypeScript errors. (2026-09-21)
 * **개요 및 개발 목적**:
   - 사용자 요청 ("공유 눌렀을때 주간 추진실적은 복사 안되게 해주고.. 이제 그냥 링크만 복사되게 해주면됨, 그리고 최신내용 왜 프론트엔드에 반영 안되지?") 정밀 진단 및 원천 해결:

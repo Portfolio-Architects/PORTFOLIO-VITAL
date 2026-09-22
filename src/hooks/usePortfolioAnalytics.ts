@@ -253,6 +253,9 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
       const regVal = Math.round(slope * (i + 1) + intercept);
       const plannedMonthSpend = Math.round(plannedMonthlyAmounts[i]);
       
+      const cumulativeRate = totalBudget > 0 ? Number(((cumulative / totalBudget) * 100).toFixed(1)) : 0;
+      const targetRate = totalBudget > 0 ? Number(((targetVal / totalBudget) * 100).toFixed(1)) : 0;
+      
       if (i <= currentMonth - 1) {
         // 1월~현재 월 (실제 데이터 반영)
         // 가계획 입력값이 있다면 계획값을 사용하고, 없으면 실제 누적 실적값을 계획선 베이스로 적용
@@ -262,6 +265,8 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
           name: m,
           monthly: actualMonthAmount,
           cumulative: cumulative,
+          cumulativeRate: cumulativeRate,
+          targetRate: targetRate,
           planCumulative: planCumulativeVal,
           planMonthly: plannedMonthSpend > 0 ? plannedMonthSpend : actualMonthAmount,
           regressionCumulative: regVal >= 0 ? regVal : 0,
@@ -275,6 +280,8 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
           name: m,
           monthly: undefined,
           cumulative: undefined,
+          cumulativeRate: undefined,
+          targetRate: targetRate,
           planCumulative: planCumulativeVal,
           planMonthly: plannedMonthSpend,
           regressionCumulative: regVal >= 0 ? regVal : 0,

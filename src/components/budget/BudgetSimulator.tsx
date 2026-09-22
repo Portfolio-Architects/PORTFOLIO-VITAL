@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useBudgetSimulator } from '@/hooks/useBudgetSimulator';
 import { SimulationSummaryCards } from './ui/SimulationSummaryCards';
+import { SimulationBurnUpChart } from './ui/SimulationBurnUpChart';
 import { SimulationInputForm } from './ui/SimulationInputForm';
 import { SimulationResultTable } from './ui/SimulationResultTable';
 import { SimulationEntry } from '@/types';
@@ -177,6 +178,15 @@ export const BudgetSimulator: React.FC = React.memo(() => {
       <SimulationSummaryCards
         projectSummaries={projectSummaries}
         statItemSummaries={statItemSummaries}
+      />
+
+      {/* 2-1. Commitment Burn-Up Chart (지출 예정액 반영 선그래프) */}
+      <SimulationBurnUpChart
+        categories={categories}
+        budgetEntries={budgetEntries}
+        entries={entries}
+        projectSummaries={projectSummaries}
+        availableDetailedProjects={availableDetailedProjects}
       />
 
       {/* 3. Simulation Input Form */}
