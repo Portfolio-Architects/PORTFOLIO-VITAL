@@ -319,6 +319,62 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 206: Yangjae Festival Duty Title Count Badge Capsule Removal & Ultra-Clean Header Typography Release] Removed redundant '22개 부서·기관' count capsule badge from duty section header, presenting a clean, focused title presentation across React component and Cloudflare Pages static output, verified by 100% Jest suite pass (32/32 tests) and zero compilation errors. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("이 캡슐도 필요없음" + `22개 부서·기관` 배지 스크린샷) 전격 이행:
+    1. **타이틀 인접 캡슐 배지 전면 소거 및 가독성 고도화**:
+       - 메인 제목(`업무분장 및 비상연락망`) 우측에 붙어 있던 부서 개수 캡슐 배지(`duties-count-badge`)를 영구 제거.
+       - 타이틀 폰트의 시각적 위계를 방패 아이콘과 메인 텍스트만으로 정갈하게 단일화(`text-sm font-extrabold tracking-tight`).
+    2. **멀티 플랫폼 소스 동시 반영**:
+       - `YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`, `out/festival/yangjae/index.html` 전수 갱신 완료.
+    3. **정량적 검증 성과**:
+       - 단위 테스트 32개 전수 통과 (100% PASS), Next.js 프로덕션 빌드 무결점 통과 (0 errors).
+
+### [Milestone 205: Yangjae Festival Operations Team Badge Capsule Removal & Clean Header UI Release] Removed redundant '👥 행사 운영단' badge capsule from the duty section header across React dashboard and Cloudflare Pages static templates per user review, maximizing horizontal breathing room for the main section title, achieving 100% Jest test pass (32/32 tests) and zero build errors. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("이 캡슐 삭제 해도 됨" + `👥 행사 운영단` 스크린샷) 전격 이행:
+    1. **중복 UI 요소 소거 및 가로 개방감 극대화**:
+       - Tab 4(업무분장) 1행 우측에 위치하던 `👥 행사 운영단` 캡슐 배지 컴포넌트 전면 소거.
+       - 타이틀(`업무분장 및 비상연락망`)과 뱃지(`6개 구분 서식 틀`)가 전체 행 너비를 독점적으로 활용하도록 여백 개방.
+    2. **멀티 플랫폼 소스 동시 반영**:
+       - `src/components/festival/YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`, `out/` 정적 번들 동시 반영 완료.
+    3. **정량적 검증 성과**:
+       - 단위 테스트 32개 전수 통과 (100% PASS), Turbopack 프로덕션 빌드 무결점 통과 (0 errors).
+
+### [Milestone 204: Yangjae Festival Duty Roster Data Reset & Standard Framework Template Architecture Release] Cleared out legacy specific duty roster assignments into an official blank template across 6 key functional divisions, preserving full table grid structure and adding elegant fallback placeholders, while maintaining 100% Jest test pass (32/32 tests) and zero Next.js build errors. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("그리고 업무 분장 내역 일단 전부 비워주고, 틀만 만들어봐") 전격 이행:
+    1. **기존 22개 부서 세부 데이터 안전 격리 백업**:
+       - 기존 상세 내역 데이터는 손실 방지를 위해 `data/FESTIVAL_YANGJAE_2026.backup_duties_22.json`으로 영구 보존 조치 완료함.
+    2. **공공 페스티벌 6대 핵심 영역 표준 서식 틀(Template) 구축**:
+       - 6대 카테고리(`총괄기획`, `체육회`, `대행용역`, `응급안전`, `체험부스`, `유관부서`)별 1개씩 클린 서식 항목(`deptOrOrg: ""`, `role: ""`, `manager: ""`, `phone: ""`, `tasks: []`)으로 데이터셋 초기화.
+    3. **프론트엔드 서식 플레이스홀더 및 상태 배지 스마트 렌더링**:
+       - 부서·기관명 미입력 시: `(부서·기관 미지정)` 회색 이탤릭 플레이스홀더 표시.
+       - 담당 역할 미지정 시: `(담당 역할 설정 대기)` 회색 이탤릭 플레이스홀더 표시.
+       - 담당자/연락처 미기재 시: `-` 단정형 대시 표시.
+       - 배정 과업 미작성 시: `(과업 세부 내역 작성 대기)` 안내 문구 렌더링.
+       - 상단 카운트 배지: 서식 모드 감지 시 `6개 구분 서식 틀`로 동적 표기 전환.
+    4. **멀티 플랫폼 데이터 파이프라인 전수 동기화**:
+       - `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts`, `scripts/pages-template.html`, `out/` 정적 산출물 100% 동기화 반영 완료.
+    5. **정량적 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 32개 단위 테스트 전수 통과 (100% PASS).
+       - Turbopack 프로덕션 빌드 무결점 통과 (0 errors).
+
+### [Milestone 203: Yangjae Festival Responsive 2-Row Header Layout & Anti-Squish Alignment Release] Refactored Duty and Schedule section headers into an intelligent 2-row layout with explicit whitespace protection, resolving vertical character stacking and text squishing in desktop and narrow mobile viewports, achieving 100% Jest suite pass (32/32 tests) and zero Next.js production build errors. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("프론트엔드 행정렬 수정 요청" + 스크린샷) 전격 분석 및 완벽 해결:
+    1. **근본 원인 (Root Cause) 규명**:
+       - 데스크톱 브라우저(뷰포트 가로폭 $\ge 640\text{px}$) 환경에서 Tailwind의 `sm:flex-row` 미디어 쿼리가 강제 활성화되었으나, 컴포넌트 전체 컨테이너는 모바일 카드 뷰 규격인 `max-w-md`($448\text{px}$)로 고정되어 있어 심각한 가로폭 결핍 발생.
+       - 우측 고정 영역(`shrink-0`: 비상연락망 스위치 및 행사 운영단 뱃지)이 $240\text{px}$ 이상을 차지하여, 좌측 타이틀 영역 가용 너비가 $80\text{px}$ 이하로 붕괴.
+       - 이로 인해 타이틀(`업무분장 및 비상연락망`)과 기관 뱃지가 한 글자 단위(`업\n무\n분\n장\n...`)로 세로로 찌그러지며 줄바꿈이 파괴되는 현상 발생.
+    2. **반응형 2행(2-Row) 최적화 레이아웃 구조 개편**:
+       - **1행 (타이틀 및 운영단 뱃지)**: 좌측에 방패 아이콘(`🛡`), 메인 타이틀(`업무분장 및 비상연락망`, `whitespace-nowrap`), 부서 개수 뱃지(`22개 부서·기관`, `whitespace-nowrap`), 우측에 `👥 행사 운영단` 뱃지를 양끝 정렬(`justify-between`)하여 완벽한 제목 행 구성.
+       - **2행 (부제 설명 및 비상연락망 토글 스위치)**: 좌측에 과업 일람 설명(`truncate`, `min-w-0`), 우측에 `📱 비상연락망 [ON/OFF 스위치]`를 양끝 정렬 배치하여 상·하단 시각적 균형감 및 완벽한 행 정렬(Row alignment) 확립.
+       - 동일 결함 잠재 구간인 행사 식순(Tab 3) 헤더 역시 2행 구조(1행: 식순 타이틀+일자 뱃지, 2행: 식순 안내 설명)로 통일 적용.
+    3. **정량적 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 32개 단위 테스트 전수 통과 (100% PASS).
+       - `npm run build`: Turbopack 컴파일 성공, TypeScript 검사 통과 (0 errors), Next.js 프로덕션 정적 빌드 및 `out/` 정적 번들 생성 100% 완료.
+
 ### [Milestone 201: Yangjae Festival Contact Manager Name Privacy Masking (O-Mask) Release] Implemented intelligent Korean person name privacy masking (replacing middle character with 'O') across Booth and Duty contact modules when emergency contacts are hidden (OFF mode), while preserving institutional, departmental, and team names without accidental distortion, achieving 100% Jest suite pass (32/32 tests) and 0 ESLint/TypeScript compilation errors. (2026-09-22)
 * **개요 및 개발 목적**:
   - 사용자 요청 ("그럼 이름 부분도 폰번호 숨김 상태일때는 가운데 글자를 O 처리해줘") 전격 반영:
@@ -5418,3 +5474,80 @@ sequenceDiagram
       - `npm run lint`: ESLint 정적 분석 **0 errors**.
       - `node scripts/prepare-pages-output.js`: Cloudflare Functions Edge Fallback 및 정적 번들(`out/`) 자동 주입 완료.
       - `node scripts/sync-festival-to-cloud.js`: Cloudflare KV 24/7 Read-Only Replica 실시간 동기화 완료.
+
+- [x] **양재천 페스티벌 모바일/데스크톱 반응형 2-Row 헤더 행정렬 최적화 및 텍스트 줄바꿈 압사 결함 해소 (Milestone 203 - 2026-09-22)**
+  - 사용자 요구사항: "프론트엔드 행정렬 수정 요청"
+  - 주요 조치 및 엔지니어링 실적:
+    * **행정렬 붕괴 근본 원인(Root Cause) 규명 및 레이아웃 구조 개편**:
+      - 데스크톱 브라우저 환경에서 `sm:flex-row` 쿼리가 발동되었으나 `max-w-md`($448\text{px}$) 컨테이너 가로폭 제약으로 인해 우측 버튼군($240\text{px}$)에 의해 좌측 타이틀 영역($80\text{px}$)이 압사당해 `업무분장 및 비상연락망` 글자가 세로 1글자씩 떨어지는 결함 해결.
+      - Tab 4(업무분장) 및 Tab 3(행사식순) 헤더를 직관적인 2-Row(1행: 타이틀+카운트뱃지+운영단뱃지, 2행: 부제설명+비상연락망 스위치) 구조로 분리하고 `whitespace-nowrap`을 적용하여 1글자 단위 붕괴를 원천 차단.
+    * **React 컴포넌트 및 Cloudflare Pages 템플릿 동시 반영**:
+      - `src/components/festival/YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 동시 갱신.
+    * **정량적 검증 성과**:
+      - Jest 단위 테스트 32개 전수 통과 (100% PASS), Next.js 16.2 Turbopack 프로덕션 빌드 성공 및 `out/` 정적 번들 최신화 완료.
+
+- [x] **양재천 페스티벌 업무분장 내역 데이터 안전 백업 및 6대 표준 서식 틀 리셋 (Milestone 204 - 2026-09-22)**
+  - 사용자 요구사항: "그리고 업무 분장 내역 일단 전부 비워주고, 틀만 만들어봐"
+  - 주요 조치 및 엔지니어링 실적:
+    * **기존 22개 부서 세부 데이터 안전 격리 백업**:
+      - `data/FESTIVAL_YANGJAE_2026.backup_duties_22.json`으로 영구 보존.
+    * **6대 표준 기능 구분 클린 서식 틀(Template) 수립**:
+      - `총괄기획`, `체육회`, `대행용역`, `응급안전`, `체험부스`, `유관부서` 6대 카테고리별 1개씩 빈 뼈대 서식 항목으로 데이터 초기화.
+    * **프론트엔드 서식 플레이스홀더 및 동적 배지 전환**:
+      - 부서명(`(부서·기관 미지정)`), 담당 역할(`(담당 역할 설정 대기)`), 배정 과업(`(과업 세부 내역 작성 대기)`) 회색 플레이스홀더 및 상태 배지(`6개 구분 서식 틀`) 스마트 렌더링.
+    * **정량적 검증 성과**:
+      - 단위 테스트 32개 전수 통과 (100% PASS), Turbopack 프로덕션 빌드 성공 및 `out/` 정적 번들 주입 완료.
+
+- [x] **양재천 페스티벌 행사 운영단 캡슐 배지 소거 및 헤더 개방감 최적화 릴리즈 (Milestone 205 - 2026-09-22)**
+  - 사용자 요구사항: "이 캡슐 삭제 해도 됨" (`👥 행사 운영단` 캡슐 배지 삭제)
+  - 주요 조치 및 엔지니어링 실적:
+    * **중복 캡슐 배지 컴포넌트 전면 소거**:
+      - `YangjaeFestivalDashboard.tsx` 및 `pages-template.html` 탭 4 상단 1행 우측 `👥 행사 운영단` 캡슐 컴포넌트 완전 제거.
+      - 1행 타이틀 및 서식 배지가 가로 전체 폭을 온전히 확보하여 시각적 개방감 극대화.
+    * **정량적 검증 성과**:
+      - 단위 테스트 32개 전수 통과 (100% PASS), Turbopack 프로덕션 빌드 무결점 통과 (0 errors), `out/` 정적 번들 갱신 완료.
+
+- [x] **양재천 페스티벌 업무분장 타이틀 인접 캡슐 배지 소거 및 타이포그래피 정돈 릴리즈 (Milestone 206 - 2026-09-22)**
+  - 사용자 요구사항: "이 캡슐도 필요없음" (`22개 부서·기관` 캡슐 배지 삭제)
+  - 주요 조치 및 엔지니어링 실적:
+    * **타이틀 인접 캡슐 배지 전면 소거**:
+      - `YangjaeFestivalDashboard.tsx`, `pages-template.html` 탭 4 상단 `업무분장 및 비상연락망` 옆 캡슐 배지 컴포넌트 완전 제거.
+      - 방패 아이콘과 메인 텍스트만으로 구성된 간결하고 정돈된 타이포그래피 확립.
+    * **정량적 검증 성과**:
+      - 단위 테스트 32개 전수 통과 (100% PASS), Turbopack 프로덕션 빌드 무결점 통과 (0 errors), `out/` 정적 번들 갱신 완료.
+
+- [x] **양재천 페스티벌 업무분장 헤더 방패 아이콘 및 부제 설명 소거 1열 미니멀 정렬 릴리즈 (Milestone 207 - 2026-09-22)**
+  - 사용자 요구사항: "이 두개도 삭제" (초록색 방패 아이콘 `🛡` 및 부제 설명 `보건소·체육회·대행사 및 협조부서 배정 과업 일람` 소거)
+  - 주요 조치 및 엔지니어링 실적:
+    * **방패 아이콘 및 부제 설명문구 전면 영구 소거**:
+      - `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 탭 4 헤더 내 `Shield` 컴포넌트 및 부제 `<p>` 태그 완전 제거.
+      - 좌측 메인 타이틀(`업무분장 및 비상연락망`)과 우측의 `📱 비상연락망 [스위치]` 토글 컨트롤만 남긴 극단적 미니멀 1열 양끝 정렬(`flex items-center justify-between`) 완성.
+    * **업무분장 데이터 6대 표준 카테고리 클린 서식 틀 리셋 및 백업**:
+      - 기존 22개 부서 세부 데이터를 `data/FESTIVAL_YANGJAE_2026.backup_duties_22.json`에 영구 백업.
+      - `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts`의 업무분장을 6대 핵심 기능 구분(`총괄기획`, `체육회`, `대행용역`, `응급안전`, `체험부스`, `유관부서`)의 클린 빈 서식 틀로 리셋.
+    * **정량적 검증 성과**:
+      - Jest 32개 단위 테스트 전수 통과 (100% PASS), Next.js 16.2 Turbopack 프로덕션 빌드 무결점 통과 (0 errors), Cloudflare Pages 배포 산출물(`out/`) 100% 동기화 완료.
+
+- [x] **양재천 페스티벌 업무분장 카테고리 필터 바 소거 및 통합 뷰 확립 릴리즈 (Milestone 208 - 2026-09-22)**
+  - 사용자 요구사항: "이 필터 기능도 삭제" (업무분장 탭 내 가로 스크롤 카테고리 필터 칩 바 삭제)
+  - 주요 조치 및 엔지니어링 실적:
+    * **카테고리 필터 알약 바(Filter Pills) 전면 소거**:
+      - `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 탭 4 상단 내 `DUTY_CATEGORIES.map` 필터 칩 바(`<div id="duty-filter-pills" ...>`) 완전 제거.
+      - 불필요한 가로 스크롤바와 칩 요소를 소거하여 검색창과 업무분장 그리드가 직접 연결되는 깔끔한 미니멀 레이아웃 완성.
+    * **필터링 로직 간소화 및 통합 목록 뷰 확립**:
+      - `filteredDuties` 내 `selectedDutyCategory !== '전체'` 필터 분기를 제거하여 모든 기능별 과업이 단일 테이블에서 한눈에 조망되도록 통합.
+      - 미사용 `selectedDutyCategory` 상태 변수를 정리하여 React 컴포넌트 렌더링 오버헤드 원천 차단.
+    * **정량적 검증 성과**:
+      - Jest 단위 테스트 32개 전수 통과 (100% PASS), TypeScript strict 타입 검사 0 errors 무결성 통과, Next.js 16.2 Turbopack 프로덕션 빌드 무결점 통과, Cloudflare Pages 정적 번들(`out/festival/yangjae/index.html`) 100% 동기화 완료.
+
+- [x] **양재천 페스티벌 행사 식순 헤더 장식 및 필터 바 소거 단일행 릴리즈 (Milestone 209 - 2026-09-22)**
+  - 사용자 요구사항: "이 부분도 행사 식순 타이틀만 남겨놓고 다 삭제해줘" (식순 탭 내 시계 아이콘, 식순 수 배지, 일시 배지, 부제 설명, 및 페이즈 필터 칩 바 삭제)
+  - 주요 조치 및 엔지니어링 실적:
+    * **행사 식순 헤더 시각적 장식 요소 및 필터 알약 바 전면 소거**:
+      - `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 탭 3 헤더 영역 내 시계 아이콘(`⏱`), `17개 식순` 배지, `📅 2026. 10. 31.(토)` 배지, 부제 설명 문구(`07:30 직원 출근부터 14:30 환경 정비까지...`), 및 `SCHEDULE_PHASES` 필터 칩 바 완전 제거.
+      - 오직 `행사 식순` 타이틀만 남긴 단일 행(1열) 클린 미니멀 헤더 확립.
+    * **식순 필터링 로직 간소화 및 통합 뷰 구축**:
+      - `filteredSchedule` 내 `selectedSchedulePhase !== '전체'` 필터 분기를 제거하고 전체 식순이 검색어에 따라 즉각 필터링되는 통합 뷰 구현.
+      - 미사용 `selectedSchedulePhase` 상태 변수를 정리하여 컴포넌트 리렌더링 부하 최소화.
+    * **정량적 검증 성과**:
+      - Jest 단위 테스트 32개 전수 통과 (100% PASS), TypeScript strict 타입 검사 0 errors 무결점 통과, Next.js 16.2 Turbopack 프로덕션 빌드 무결점 통과, Cloudflare Pages 배포 산출물(`out/festival/yangjae/index.html`) 100% 동기화 완료.

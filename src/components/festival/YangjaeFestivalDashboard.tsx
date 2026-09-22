@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useSyncExternalStore, useCallback, useEffect } from 'react';
-import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, Smartphone, User, Users, Building2, Tent, FolderInput, ArrowRightLeft, Table, Armchair, Clock, Calendar, Search, Shield, MapPin, Lock } from 'lucide-react';
+import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, Smartphone, User, Users, Building2, Tent, FolderInput, ArrowRightLeft, Table, Armchair, Clock, Search, Shield, MapPin, Lock } from 'lucide-react';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem, ScheduleItem, DutyItem } from '@/hooks/useYangjaeFestival';
 
 export interface DetailDraft {
@@ -1062,9 +1062,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     duties: false,
   });
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
-  const [selectedSchedulePhase, setSelectedSchedulePhase] = useState<string>('전체');
   const [scheduleSearchQuery, setScheduleSearchQuery] = useState<string>('');
-  const [selectedDutyCategory, setSelectedDutyCategory] = useState<string>('전체');
   const [dutySearchQuery, setDutySearchQuery] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [isLargeFont, setIsLargeFont] = useState<boolean>(false);
@@ -1292,9 +1290,6 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
   const filteredSchedule = useMemo(() => {
     let list = activeSchedule;
-    if (selectedSchedulePhase !== '전체') {
-      list = list.filter((item) => item.phase === selectedSchedulePhase);
-    }
     if (scheduleSearchQuery.trim()) {
       const q = scheduleSearchQuery.trim().toLowerCase();
       list = list.filter((item) =>
@@ -1305,7 +1300,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       );
     }
     return list;
-  }, [activeSchedule, selectedSchedulePhase, scheduleSearchQuery]);
+  }, [activeSchedule, scheduleSearchQuery]);
 
   const activeDuties = useMemo(() => {
     return (data?.duties || YANGJAE_FALLBACK_DATA.duties || []) as DutyItem[];
@@ -1313,9 +1308,6 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
   const filteredDuties = useMemo(() => {
     let list = activeDuties;
-    if (selectedDutyCategory !== '전체') {
-      list = list.filter((d) => d.category === selectedDutyCategory);
-    }
     if (dutySearchQuery.trim()) {
       const q = dutySearchQuery.trim().toLowerCase();
       list = list.filter((d) =>
@@ -1328,7 +1320,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       );
     }
     return list;
-  }, [activeDuties, selectedDutyCategory, dutySearchQuery]);
+  }, [activeDuties, dutySearchQuery]);
 
   const handleSelectCategory = useCallback((cat: string) => {
     setSelectedCategory(cat);
@@ -3089,58 +3081,11 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             <div className={selectedTab === 'schedule' ? 'block space-y-3.5' : 'hidden'}>
               {/* Header Stats Bar */}
               <div className="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-                {/* Header Bar: 2-Row Optimized Layout */}
-                <div className="space-y-2 border-b border-slate-200 pb-2.5">
-                  {/* Row 1: Title & Schedule Date Badge */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                        <Clock className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 flex items-center gap-1.5 flex-wrap`}>
-                          <span className="whitespace-nowrap">행사 식순</span>
-                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 whitespace-nowrap">17개 식순</span>
-                        </h3>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
-                      <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                      <span className="whitespace-nowrap">2026. 10. 31.(토)</span>
-                    </div>
-                  </div>
-
-                  {/* Row 2: Subtitle */}
-                  <div className="pt-0.5">
-                    <p className="text-[11px] text-slate-500 font-medium truncate min-w-0">07:30 직원 출근부터 14:30 환경 정비까지 진행 순서 및 의전 규정</p>
-                  </div>
-                </div>
-
-                {/* Quick Phase Filter Pills */}
-                <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin">
-                  {SCHEDULE_PHASES.map((ph) => {
-                    const count = ph === '전체' 
-                      ? activeSchedule.length 
-                      : activeSchedule.filter((s) => s.phase === ph).length;
-                    const isSelected = selectedSchedulePhase === ph;
-                    return (
-                      <button
-                        key={`phase-pill-${ph}`}
-                        type="button"
-                        onClick={() => setSelectedSchedulePhase(ph)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-blue-600 text-white shadow-2xs'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        <span>{ph}</span>
-                        <span className={`ml-1 text-[10.5px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-blue-800 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
+                {/* Header Bar: Clean 1-Row Layout */}
+                <div className="border-b border-slate-200 pb-2.5">
+                  <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 tracking-tight whitespace-nowrap`}>
+                    <span>행사 식순</span>
+                  </h3>
                 </div>
 
                 {/* Search Bar */}
@@ -3309,78 +3254,32 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             <div className={selectedTab === 'duties' ? 'block space-y-3.5' : 'hidden'}>
               {/* Header Stats Bar */}
               <div className="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-                {/* Header Bar: 2-Row Optimized Layout */}
-                <div className="space-y-2 border-b border-slate-200 pb-2.5">
-                  {/* Row 1: Title & Group Badge */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                        <Shield className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 flex items-center gap-1.5 flex-wrap`}>
-                          <span className="whitespace-nowrap">업무분장 및 비상연락망</span>
-                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 whitespace-nowrap">22개 부서·기관</span>
-                        </h3>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
-                      <Users className="w-3.5 h-3.5 text-emerald-700" />
-                      <span className="whitespace-nowrap">행사 운영단</span>
-                    </div>
-                  </div>
-
-                  {/* Row 2: Subtitle & Emergency Contact Switch */}
-                  <div className="flex items-center justify-between gap-2 pt-0.5">
-                    <p className="text-[11px] text-slate-500 font-medium truncate min-w-0">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
-                    <button
-                      type="button"
-                      onClick={handleSwitchToggle}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none shrink-0"
-                      title={showPrivateMobile ? "비상연락망 켜짐 (클릭 시 끄기)" : "비상연락망 꺼짐 (클릭 시 비밀번호 인증 후 켜기)"}
-                    >
-                      <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
-                        <Smartphone className="w-3.5 h-3.5 text-slate-600" />
-                        <span>비상연락망</span>
-                      </span>
-                      {/* Toggle Track */}
-                      <span className={`w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center ${showPrivateMobile ? 'bg-emerald-500' : 'bg-slate-300'}`}>
-                        {/* Toggle Knob */}
-                        <span className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${showPrivateMobile ? 'translate-x-3.5' : 'translate-x-0'}`} />
-                      </span>
-                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border whitespace-nowrap ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
-                        {showPrivateMobile ? 'ON (보임)' : 'OFF (숨김)'}
-                      </span>
-                    </button>
-                  </div>
+                {/* Header Bar: Clean 1-Row Layout */}
+                <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+                  <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 tracking-tight whitespace-nowrap`}>
+                    <span>업무분장 및 비상연락망</span>
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={handleSwitchToggle}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none shrink-0"
+                    title={showPrivateMobile ? "비상연락망 켜짐 (클릭 시 끄기)" : "비상연락망 꺼짐 (클릭 시 비밀번호 인증 후 켜기)"}
+                  >
+                    <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
+                      <Smartphone className="w-3.5 h-3.5 text-slate-600" />
+                      <span>비상연락망</span>
+                    </span>
+                    {/* Toggle Track */}
+                    <span className={`w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center ${showPrivateMobile ? 'bg-emerald-500' : 'bg-slate-300'}`}>
+                      {/* Toggle Knob */}
+                      <span className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${showPrivateMobile ? 'translate-x-3.5' : 'translate-x-0'}`} />
+                    </span>
+                    <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border whitespace-nowrap ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
+                      {showPrivateMobile ? 'ON (보임)' : 'OFF (숨김)'}
+                    </span>
+                  </button>
                 </div>
 
-                {/* Category Filter Pills */}
-                <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin">
-                  {DUTY_CATEGORIES.map((cat) => {
-                    const count = cat === '전체'
-                      ? activeDuties.length
-                      : activeDuties.filter((d) => d.category === cat).length;
-                    const isSelected = selectedDutyCategory === cat;
-                    return (
-                      <button
-                        key={`duty-cat-${cat}`}
-                        type="button"
-                        onClick={() => setSelectedDutyCategory(cat)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-slate-900 text-white shadow-2xs'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        <span>{cat}</span>
-                        <span className={`ml-1 text-[10.5px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
 
                 {/* Search Bar */}
                 <div className="relative">
@@ -3464,14 +3363,18 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               {/* 부서·기관명 */}
                               <td className="py-3 px-3">
                                 <div className="font-extrabold text-xs text-slate-900 leading-snug">
-                                  {duty.deptOrOrg}
+                                  {duty.deptOrOrg || (
+                                    <span className="text-slate-400 italic font-normal text-xs">(부서·기관 미지정)</span>
+                                  )}
                                 </div>
                               </td>
 
                               {/* 담당 역할 */}
                               <td className="py-3 px-3">
                                 <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} font-bold text-slate-800 leading-snug`}>
-                                  {duty.role}
+                                  {duty.role || (
+                                    <span className="text-slate-400 italic font-normal text-xs">(담당 역할 설정 대기)</span>
+                                  )}
                                 </div>
                               </td>
 
@@ -3487,6 +3390,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                   {(() => {
                                     const adminNo = formatAutoHyphen((duty.adminPhone || (!duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
                                     const mobileNo = formatAutoHyphen((duty.mobilePhone || (duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
+
+                                    if (!duty.manager && !adminNo && (!showPrivateMobile || !mobileNo)) {
+                                      return <span className="text-slate-400 text-xs font-medium">-</span>;
+                                    }
 
                                     return (
                                       <div className="flex flex-col gap-1">
@@ -3524,17 +3431,21 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
                               {/* 배정 과업 */}
                               <td className="py-3 px-3">
-                                <ul className="space-y-1">
-                                  {duty.tasks.map((task, tIdx) => (
-                                    <li
-                                      key={`duty-${duty.id}-task-${tIdx}`}
-                                      className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-700 font-medium flex items-start gap-1.5 leading-relaxed`}
-                                    >
-                                      <span className="text-slate-400 font-bold select-none shrink-0">•</span>
-                                      <span>{task}</span>
-                                    </li>
-                                  ))}
-                                </ul>
+                                {duty.tasks && duty.tasks.length > 0 ? (
+                                  <ul className="space-y-1">
+                                    {duty.tasks.map((task, tIdx) => (
+                                      <li
+                                        key={`duty-${duty.id}-task-${tIdx}`}
+                                        className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-700 font-medium flex items-start gap-1.5 leading-relaxed`}
+                                      >
+                                        <span className="text-slate-400 font-bold select-none shrink-0">•</span>
+                                        <span>{task}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <span className="text-slate-400 italic font-normal text-xs">(과업 세부 내역 작성 대기)</span>
+                                )}
                               </td>
                             </tr>
                           );

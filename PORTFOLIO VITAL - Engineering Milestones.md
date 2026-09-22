@@ -2,6 +2,50 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 209: Yangjae Festival Schedule Tab Header Clutter & Filter Pills Purge Release] Purged visual clutter (clock icon, 17-item badge, event date badge, subtitle description) and phase filter pills from Schedule tab, consolidated into pristine single-row minimalist title header with instant search, achieving 100% Jest pass (32/32 tests) and zero TypeScript/Turbopack errors. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("이 부분도 행사 식순 타이틀만 남겨놓고 다 삭제해줘" - 행사 식순 탭 헤더 장식 요소 및 카테고리 필터 칩 바 삭제) 전격 반영:
+    1. **행사 식순 헤더 시각적 장식 요소 및 필터 알약 바 전면 소거**:
+       - `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 탭 3 헤더 영역 내 시계 아이콘(`⏱`), `17개 식순` 배지, `📅 2026. 10. 31.(토)` 배지, 부제 설명 문구(`07:30 직원 출근부터 14:30 환경 정비까지...`), 및 `SCHEDULE_PHASES` 필터 칩 바 완전 제거.
+       - 오직 `행사 식순` 타이틀만 남긴 단일 행(1열) 클린 미니멀 헤더 확립.
+    2. **식순 필터링 로직 간소화 및 통합 뷰 구축**:
+       - `filteredSchedule` 내 `selectedSchedulePhase !== '전체'` 필터 분기를 제거하고 전체 식순이 검색어에 따라 즉각 필터링되는 통합 뷰 구현.
+       - 미사용 `selectedSchedulePhase` 상태 변수를 정리하여 컴포넌트 리렌더링 부하 최소화.
+    3. **정량적 검증 성과**:
+       - Jest 단위 테스트 32개 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+       - Cloudflare Pages 배포 산출물(`out/festival/yangjae/index.html`) 100% 동기화 완료.
+
+### [Milestone 208: Yangjae Festival Duty Category Filter Pills Purge & All-Duties View Consolidation Release] Purged category filter pills bar from duties tab header, removed redundant category filtering logic to display consolidated duty list with high-performance text search, and synchronized React dashboard with Cloudflare Pages mobile bundle achieving 100% Jest pass (32/32 tests) and zero TypeScript/Turbopack errors. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("이 필터 기능도 삭제" - 업무분장 탭 내 가로 스크롤 카테고리 필터 칩 바 삭제 요청) 전격 반영:
+    1. **업무분장 카테고리 필터 알약 바(Filter Pills) 전면 소거**:
+       - `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 탭 4 상단 내 `DUTY_CATEGORIES.map` 필터 칩 바(`<div id="duty-filter-pills" ...>`) 완전 제거.
+       - 가로 스크롤바와 번잡한 필터 칩을 없애고 검색창과 업무분장 그리드가 직접 연결되는 깔끔한 미니멀 레이아웃 완성.
+    2. **필터링 로직 간소화 및 통합 목록 뷰 확립**:
+       - `filteredDuties` 내 `selectedDutyCategory !== '전체'` 필터 분기를 제거하여 모든 기능별 과업이 단일 테이블에서 한눈에 조망되도록 통합.
+       - 미사용 `selectedDutyCategory` 상태 변수를 정리하여 React 컴포넌트 렌더링 오버헤드 원천 차단.
+    3. **정량적 검증 성과**:
+       - Jest 단위 테스트 32개 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결성 확인.
+       - Cloudflare Pages 정적 번들(`out/festival/yangjae/index.html`) 100% 동기화 완료.
+
+### [Milestone 207: Yangjae Festival Duty Header Clutter Purge & Minimalist Single-Row Alignment Release] Purged visual clutter (shield icon, subtitle description, '👥 행사 운영단' badge, and '22개 부서·기관' count badge) from duty module header, established flawless single-row flex-between layout, and reset duty data to 6-category clean standard template with full Cloudflare Pages synchronization and 100% Jest pass (32/32 tests). (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("프론트엔드 행정렬 수정 요청", "그리고 업무 분장 내역 일단 전부 비워주고, 틀만 만들어봐", "이 캡슐 삭제 해도 됨", "이 캡슐도 필요없음", "이 두개도 삭제") 전격 반영:
+    1. **업무분장 탭 헤더 시각적 군더더기 전면 소거 및 1열 칼정렬 수립**:
+       - 모바일 뷰(320px~448px)에서 타이틀이 세로로 찌그러지던 레이아웃 병목을 해결하기 위해, 헤더 영역의 불필요한 장식 요소(초록색 방패 아이콘 `🛡`, 부제 설명문구 `보건소·체육회·대행사 및 협조부서 배정 과업 일람`, `👥 행사 운영단` 배지, `22개 부서·기관` 카운트 배지)를 전면 영구 삭제.
+       - 좌측 메인 타이틀(`업무분장 및 비상연락망`)과 우측의 `📱 비상연락망 [스위치]` 토글 컨트롤만 남긴 극단적 미니멀 1열 양끝 정렬(`flex items-center justify-between`) 확립.
+    2. **업무분장 데이터 6대 표준 카테고리 클린 서식 틀 리셋**:
+       - 기존 22개 부서 세부 업무분장 데이터를 `data/FESTIVAL_YANGJAE_2026.backup_duties_22.json`에 영구 백업.
+       - `data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`, `functions/api/festival/yangjae.ts`의 기본 업무분장을 6대 핵심 기능 구분(`총괄기획`, `체육회`, `대행용역`, `응급안전`, `체험부스`, `유관부서`)의 클린 빈 서식 틀로 전면 교체.
+    3. **프론트엔드 100% 동기화 (React & Cloudflare Pages 모바일 템플릿)**:
+       - `src/components/festival/YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 양측에 1:1 완벽 반영.
+       - `scripts/prepare-pages-output.js`를 통해 정적 산출물(`out/`) 템플릿 재생성 완료.
+    4. **정량적 무결성 검증**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 32개 단위 테스트 전수 통과 (100% PASS).
+       - Next.js 16.2 Turbopack 프로덕션 빌드 및 Cloudflare Pages 배포 산출물 무결성 확보.
+
 ### [Milestone 202: Yangjae Festival KakaoTalk Link Share Official Title Alignment Release] Updated festival sharing metadata and OpenGraph titles across all platforms to '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌' (harmonizing OG meta tags, Web Share API payloads, Next.js metadata, SSOT JSON, and Cloudflare Pages bundle), achieving 100% Jest suite pass (32/32 tests), 0 ESLint/TypeScript compilation errors, and real-time Cloudflare KV synchronization. (2026-09-22)
 * **개요 및 개발 목적**:
   - 사용자 요청 ("카톡 공유 할때, 상단 메시지.. 바꿔줘 제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌로") 전격 반영:

@@ -168,35 +168,12 @@
       <!-- Content 3: Schedule -->
       <div id="content-schedule" class="space-y-3.5 hidden">
         <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-          <!-- Header Bar: 2-Row Optimized Layout -->
-          <div class="space-y-2 border-b border-slate-200 pb-2.5">
-            <!-- Row 1: Title & Schedule Date Badge -->
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-2 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs font-black text-sm">
-                  ⏱
-                </div>
-                <div class="min-w-0">
-                  <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5 flex-wrap">
-                    <span class="whitespace-nowrap">행사 식순</span>
-                    <span id="schedule-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 whitespace-nowrap">17개 식순</span>
-                  </h3>
-                </div>
-              </div>
-              <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
-                <span>📅</span>
-                <span class="whitespace-nowrap">2026. 10. 31.(토)</span>
-              </div>
-            </div>
-
-            <!-- Row 2: Subtitle -->
-            <div class="pt-0.5">
-              <p class="text-[11px] text-slate-500 font-medium truncate min-w-0">07:30 직원 출근부터 14:30 환경 정비까지 진행 순서 및 의전 규정</p>
-            </div>
+          <!-- Header Bar: Clean 1-Row Layout -->
+          <div class="border-b border-slate-200 pb-2.5">
+            <h3 class="text-sm font-extrabold text-slate-900 whitespace-nowrap">
+              <span>행사 식순</span>
+            </h3>
           </div>
-
-          <!-- Quick Phase Filter Pills -->
-          <div id="schedule-filter-pills" class="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar"></div>
 
           <!-- Search Bar -->
           <div class="relative">
@@ -221,52 +198,30 @@
       <!-- Content 4: Duties -->
       <div id="content-duties" class="space-y-3.5 hidden">
         <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-          <!-- Header Bar: 2-Row Optimized Layout -->
-          <div class="space-y-2 border-b border-slate-200 pb-2.5">
-            <!-- Row 1: Title & Badges -->
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-2 min-w-0">
-                <div class="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-2xs font-black text-sm">
-                  🛡
-                </div>
-                <div class="min-w-0">
-                  <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5 flex-wrap">
-                    <span class="whitespace-nowrap">업무분장 및 비상연락망</span>
-                    <span id="duties-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 whitespace-nowrap">22개 부서·기관</span>
-                  </h3>
-                </div>
-              </div>
-              <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
-                <span>👥</span>
-                <span class="whitespace-nowrap">행사 운영단</span>
-              </div>
-            </div>
-
-            <!-- Row 2: Subtitle & Emergency Contact Switch -->
-            <div class="flex items-center justify-between gap-2 pt-0.5">
-              <p class="text-[11px] text-slate-500 font-medium truncate min-w-0">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
-              <button
-                id="btn-toggle-duty-mobile"
-                type="button"
-                onclick="handleSwitchToggleClick()"
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none shrink-0"
-                title="비상연락망(폰번호) 스위치 - 관계자 보안 인증"
-              >
-                <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
-                  <span>📱 비상연락망</span>
-                </span>
-                <!-- Toggle Track -->
-                <span id="duty-switch-track" class="w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center bg-slate-300">
-                  <!-- Toggle Knob -->
-                  <span id="duty-switch-knob" class="w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out translate-x-0"></span>
-                </span>
-                <span id="duty-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 whitespace-nowrap">OFF (숨김)</span>
-              </button>
-            </div>
+          <!-- Header Bar: Clean 1-Row Layout -->
+          <div class="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+            <h3 class="text-sm font-extrabold text-slate-900 tracking-tight whitespace-nowrap">
+              <span>업무분장 및 비상연락망</span>
+            </h3>
+            <button
+              id="btn-toggle-duty-mobile"
+              type="button"
+              onclick="handleSwitchToggleClick()"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none shrink-0"
+              title="비상연락망(폰번호) 스위치 - 관계자 보안 인증"
+            >
+              <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
+                <span>📱 비상연락망</span>
+              </span>
+              <!-- Toggle Track -->
+              <span id="duty-switch-track" class="w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center bg-slate-300">
+                <!-- Toggle Knob -->
+                <span id="duty-switch-knob" class="w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out translate-x-0"></span>
+              </span>
+              <span id="duty-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 whitespace-nowrap">OFF (숨김)</span>
+            </button>
           </div>
 
-          <!-- Category Filter Pills -->
-          <div id="duty-filter-pills" class="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar"></div>
 
           <!-- Search Bar -->
           <div class="relative">
@@ -1018,27 +973,11 @@
 
     function renderSchedule() {
       const container = document.getElementById('schedule-table-container');
-      const pillsContainer = document.getElementById('schedule-filter-pills');
-      if (!container || !pillsContainer) return;
+      if (!container) return;
 
       const schedule = appData.schedule || [];
-      const badge = document.getElementById('schedule-count-badge');
-      if (badge) badge.innerText = schedule.length + '개 식순';
-
-      pillsContainer.innerHTML = SCHEDULE_PHASES.map(ph => {
-        const count = ph === '전체' ? schedule.length : schedule.filter(s => s.phase === ph).length;
-        const isSelected = activeSchedulePhase === ph;
-        return '<button type="button" onclick="selectSchedulePhase(\'' + ph + '\')" class="px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ' +
-          (isSelected ? 'bg-blue-600 text-white shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200') + '">' +
-          '<span>' + ph + '</span>' +
-          '<span class="ml-1 text-[10.5px] px-1.5 py-0.2 rounded-full ' + (isSelected ? 'bg-blue-800 text-white' : 'bg-slate-200 text-slate-600') + '">' + count + '</span>' +
-        '</button>';
-      }).join('');
 
       let filtered = schedule;
-      if (activeSchedulePhase !== '전체') {
-        filtered = filtered.filter(s => s.phase === activeSchedulePhase);
-      }
       if (scheduleSearchQuery.trim()) {
         const q = scheduleSearchQuery.trim().toLowerCase();
         filtered = filtered.filter(s =>
@@ -1144,27 +1083,11 @@
 
     function renderDuties() {
       const container = document.getElementById('duties-table-container');
-      const pillsContainer = document.getElementById('duty-filter-pills');
-      if (!container || !pillsContainer) return;
+      if (!container) return;
 
       const duties = appData.duties || [];
-      const badge = document.getElementById('duties-count-badge');
-      if (badge) badge.innerText = duties.length + '개 부서·기관';
-
-      pillsContainer.innerHTML = DUTY_CATEGORIES.map(cat => {
-        const count = cat === '전체' ? duties.length : duties.filter(d => d.category === cat).length;
-        const isSelected = activeDutyCategory === cat;
-        return '<button type="button" onclick="selectDutyCategory(\'' + cat + '\')" class="px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ' +
-          (isSelected ? 'bg-slate-900 text-white shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200') + '">' +
-          '<span>' + cat + '</span>' +
-          '<span class="ml-1 text-[10.5px] px-1.5 py-0.2 rounded-full ' + (isSelected ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-600') + '">' + count + '</span>' +
-        '</button>';
-      }).join('');
 
       let filtered = duties;
-      if (activeDutyCategory !== '전체') {
-        filtered = filtered.filter(d => d.category === activeDutyCategory);
-      }
       if (dutySearchQuery.trim()) {
         const q = dutySearchQuery.trim().toLowerCase();
         filtered = filtered.filter(d =>
@@ -1216,24 +1139,30 @@
           ? '<ul class="space-y-1">' +
               duty.tasks.map(t => '<li class="flex items-start gap-1.5 text-xs text-slate-800 font-medium leading-relaxed break-keep"><span class="text-slate-400 font-bold shrink-0 text-xs select-none">•</span><span>' + t + '</span></li>').join('') +
             '</ul>'
-          : '<span class="text-slate-400 text-xs">-</span>';
+          : '<span class="text-slate-400 italic font-normal text-xs">(과업 세부 내역 작성 대기)</span>';
+
+        const deptDisplay = duty.deptOrOrg
+          ? '<div class="font-extrabold text-xs text-slate-900 leading-snug">' + duty.deptOrOrg + '</div>'
+          : '<div class="text-slate-400 italic font-normal text-xs leading-snug">(부서·기관 미지정)</div>';
+
+        const roleDisplay = duty.role
+          ? '<div class="text-xs font-bold text-slate-800 leading-snug">' + duty.role + '</div>'
+          : '<div class="text-slate-400 italic font-normal text-xs leading-snug">(담당 역할 설정 대기)</div>';
+
+        const contactDisplay = (duty.manager || phoneHtml)
+          ? '<div class="space-y-1">' +
+              (duty.manager ? '<div class="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">👤 ' + (showPrivateMobile ? duty.manager : maskPersonName(duty.manager)) + '</div>' : '') +
+              phoneHtml +
+            '</div>'
+          : '<span class="text-slate-400 text-xs font-medium">-</span>';
 
         return '<tr class="transition-colors align-top ' + rowHover + '">' +
           '<td class="py-3 px-3 text-center whitespace-nowrap">' +
             '<span class="text-[11px] font-extrabold px-2 py-0.5 rounded border ' + catBadgeClass + '">' + duty.category + '</span>' +
           '</td>' +
-          '<td class="py-3 px-3">' +
-            '<div class="font-extrabold text-xs text-slate-900 leading-snug">' + duty.deptOrOrg + '</div>' +
-          '</td>' +
-          '<td class="py-3 px-3">' +
-            '<div class="text-xs font-bold text-slate-800 leading-snug">' + duty.role + '</div>' +
-          '</td>' +
-          '<td class="py-3 px-3 whitespace-nowrap">' +
-            '<div class="space-y-1">' +
-              (duty.manager ? '<div class="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">👤 ' + (showPrivateMobile ? duty.manager : maskPersonName(duty.manager)) + '</div>' : '') +
-              phoneHtml +
-            '</div>' +
-          '</td>' +
+          '<td class="py-3 px-3">' + deptDisplay + '</td>' +
+          '<td class="py-3 px-3">' + roleDisplay + '</td>' +
+          '<td class="py-3 px-3 whitespace-nowrap">' + contactDisplay + '</td>' +
           '<td class="py-3 px-3">' + tasksHtml + '</td>' +
         '</tr>';
       }).join('');
