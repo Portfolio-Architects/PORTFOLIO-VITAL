@@ -252,7 +252,7 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
     });
   }, []);
 
-  const handleAddSignalNoop = useCallback((_t: string) => {}, []);
+  const handleAddSignalNoop = useCallback(() => {}, []);
 
   useEffect(() => {
     syncTombstones().catch(() => {});

@@ -138,15 +138,24 @@
             <span class="inline-block w-3 h-3 border-[1.5px] border-slate-900 rounded-[1px] shrink-0"></span>
             <span>부스 배치 계획</span>
           </h3>
-          <div class="flex items-center gap-1.5 shrink-0">
+          <div class="flex items-center gap-2 shrink-0">
+            <!-- Emergency Contact Switch -->
             <button
               id="btn-toggle-booth-mobile"
               type="button"
-              onclick="toggleShowPrivateMobile()"
-              class="px-2 py-1 text-xs font-bold rounded-lg border flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-300"
-              title="휴대전화 번호 숨기기 (공공/화면공유 모드)"
+              onclick="handleSwitchToggleClick()"
+              class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none"
+              title="비상연락망(폰번호) 스위치 - 관계자 보안 인증"
             >
-              <span>📱 폰번호 보임</span>
+              <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1">
+                <span>📱 비상연락망</span>
+              </span>
+              <!-- Toggle Track -->
+              <span id="booth-switch-track" class="w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center bg-slate-300">
+                <!-- Toggle Knob -->
+                <span id="booth-switch-knob" class="w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out translate-x-0"></span>
+              </span>
+              <span id="booth-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">OFF (숨김)</span>
             </button>
             <span id="booth-count-badge" class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200/90 px-2.5 py-1 rounded-full whitespace-nowrap shadow-3xs shrink-0"></span>
           </div>
@@ -217,15 +226,24 @@
                 <p class="text-[11px] text-slate-500 font-medium">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
               </div>
             </div>
-            <div class="flex items-center gap-1.5 shrink-0">
+            <div class="flex items-center gap-2 shrink-0">
+              <!-- Emergency Contact Switch -->
               <button
                 id="btn-toggle-duty-mobile"
                 type="button"
-                onclick="toggleShowPrivateMobile()"
-                class="px-2 py-1 text-xs font-bold rounded-lg border flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-300"
-                title="휴대전화 번호 숨기기 (공공/화면공유 모드)"
+                onclick="handleSwitchToggleClick()"
+                class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none"
+                title="비상연락망(폰번호) 스위치 - 관계자 보안 인증"
               >
-                <span>📱 폰번호 보임</span>
+                <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1">
+                  <span>📱 비상연락망</span>
+                </span>
+                <!-- Toggle Track -->
+                <span id="duty-switch-track" class="w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center bg-slate-300">
+                  <!-- Toggle Knob -->
+                  <span id="duty-switch-knob" class="w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out translate-x-0"></span>
+                </span>
+                <span id="duty-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">OFF (숨김)</span>
               </button>
               <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
                 <span>👥</span>
@@ -268,6 +286,56 @@
     </div>
   </div>
 
+  <!-- Emergency Contact PIN Verification Modal -->
+  <div id="pin-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl border-2 border-slate-300 max-w-sm w-full p-5 space-y-4">
+      <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center shrink-0 text-xl">
+          🔒
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">비상연락망 보안 인증</h3>
+          <p class="text-xs text-slate-500 font-medium">행사 관계자 및 근무자 확인 비밀번호 입력</p>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label for="input-contact-pin" class="block text-xs font-bold text-slate-700">인증 비밀번호</label>
+        <div class="relative">
+          <input
+            id="input-contact-pin"
+            type="password"
+            inputmode="numeric"
+            maxlength="10"
+            placeholder="비밀번호 4자리 (예: 행사일)"
+            onkeydown="if(event.key==='Enter') submitPinVerify();"
+            class="w-full px-3.5 py-2.5 text-sm font-mono font-bold tracking-widest text-center border-2 border-slate-300 rounded-xl bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 text-slate-900"
+          />
+        </div>
+        <div id="pin-error-msg" class="text-xs font-bold text-red-600 hidden text-center">
+          ✕ 비밀번호가 올바르지 않습니다.
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-1">
+        <button
+          type="button"
+          onclick="closePinModal()"
+          class="flex-1 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-300 transition-colors cursor-pointer"
+        >
+          취소
+        </button>
+        <button
+          type="button"
+          onclick="submitPinVerify()"
+          class="flex-1 py-2 text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-colors cursor-pointer active:scale-95"
+        >
+          인증 및 ON
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let appData = __APP_DATA_JSON__;
     let activeTab = 'milestones';
@@ -278,37 +346,118 @@
     let dutySearchQuery = '';
     let expandedTasks = new Set();
     let isLargeFont = false;
-    let showPrivateMobile = true;
-
+    let showPrivateMobile = false;
     try {
       const savedMobile = localStorage.getItem('yangjae_festival_show_mobile');
-      if (savedMobile !== null) showPrivateMobile = savedMobile === 'true';
+      const isAuthed = localStorage.getItem('yangjae_contact_authed') === 'true';
+      if (savedMobile === 'true' && isAuthed) {
+        showPrivateMobile = true;
+      }
     } catch (e) {}
 
-    window.toggleShowPrivateMobile = function() {
-      showPrivateMobile = !showPrivateMobile;
-      try {
-        localStorage.setItem('yangjae_festival_show_mobile', String(showPrivateMobile));
-      } catch (e) {}
-      updateMobileToggleButtons();
-      renderBooths();
-      renderDuties();
+    const VALID_PINS = ['1031', '0000', '7116', '2026', 'gangnam'];
+
+    window.handleSwitchToggleClick = function() {
+      if (showPrivateMobile) {
+        // ON 상태에서 클릭 시 -> 즉시 OFF로 전환 (숨김)
+        showPrivateMobile = false;
+        try {
+          localStorage.setItem('yangjae_festival_show_mobile', 'false');
+        } catch (e) {}
+        updateMobileToggleButtons();
+        renderBooths();
+        renderDuties();
+      } else {
+        // OFF 상태에서 ON으로 켤 때: 이미 인증된 브라우저인지 확인
+        let isAuthed = false;
+        try {
+          isAuthed = localStorage.getItem('yangjae_contact_authed') === 'true';
+        } catch (e) {}
+
+        if (isAuthed) {
+          showPrivateMobile = true;
+          try {
+            localStorage.setItem('yangjae_festival_show_mobile', 'true');
+          } catch (e) {}
+          updateMobileToggleButtons();
+          renderBooths();
+          renderDuties();
+        } else {
+          openPinModal();
+        }
+      }
+    };
+
+    window.openPinModal = function() {
+      const modal = document.getElementById('pin-modal');
+      const input = document.getElementById('input-contact-pin');
+      const errMsg = document.getElementById('pin-error-msg');
+      if (errMsg) errMsg.classList.add('hidden');
+      if (input) {
+        input.value = '';
+        input.classList.remove('border-red-500');
+      }
+      if (modal) modal.classList.remove('hidden');
+      setTimeout(() => { if (input) input.focus(); }, 50);
+    };
+
+    window.closePinModal = function() {
+      const modal = document.getElementById('pin-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.submitPinVerify = function() {
+      const input = document.getElementById('input-contact-pin');
+      const errMsg = document.getElementById('pin-error-msg');
+      const entered = (input?.value || '').trim();
+
+      if (VALID_PINS.includes(entered)) {
+        try {
+          localStorage.setItem('yangjae_contact_authed', 'true');
+          localStorage.setItem('yangjae_festival_show_mobile', 'true');
+        } catch (e) {}
+        showPrivateMobile = true;
+        closePinModal();
+        updateMobileToggleButtons();
+        renderBooths();
+        renderDuties();
+      } else {
+        if (errMsg) errMsg.classList.remove('hidden');
+        if (input) {
+          input.classList.add('border-red-500');
+          input.focus();
+        }
+      }
     };
 
     function updateMobileToggleButtons() {
-      const boothBtn = document.getElementById('btn-toggle-booth-mobile');
-      const dutyBtn = document.getElementById('btn-toggle-duty-mobile');
-      const text = showPrivateMobile ? '📱 폰번호 보임' : '📱 폰번호 숨김';
-      const title = showPrivateMobile ? '휴대전화 번호 숨기기 (공공/화면공유 모드)' : '휴대전화 번호 표시 (비상연락망 모드)';
-      const activeClass = 'bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-300';
-      const inactiveClass = 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-300';
+      const isON = !!showPrivateMobile;
+      const trackClassON = 'bg-emerald-500';
+      const trackClassOFF = 'bg-slate-300';
+      const knobClassON = 'translate-x-3.5';
+      const knobClassOFF = 'translate-x-0';
+      const labelText = isON ? 'ON (보임)' : 'OFF (숨김)';
+      const labelClassON = 'text-[10px] font-black px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 border border-emerald-300/80';
+      const labelClassOFF = 'text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 border border-slate-300/80';
+      const titleText = isON ? '비상연락망 켜짐 (클릭 시 끄기)' : '비상연락망 꺼짐 (클릭 시 관계자 비밀번호 인증 후 켜기)';
 
-      [boothBtn, dutyBtn].forEach(btn => {
-        if (!btn) return;
-        btn.setAttribute('title', title);
-        btn.className = 'px-2 py-1 text-xs font-bold rounded-lg border flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap ' + (showPrivateMobile ? activeClass : inactiveClass);
-        const textSpan = btn.querySelector('span');
-        if (textSpan) textSpan.innerText = text;
+      ['booth', 'duty'].forEach(prefix => {
+        const btn = document.getElementById('btn-toggle-' + prefix + '-mobile');
+        const track = document.getElementById(prefix + '-switch-track');
+        const knob = document.getElementById(prefix + '-switch-knob');
+        const label = document.getElementById(prefix + '-switch-label');
+
+        if (btn) btn.setAttribute('title', titleText);
+        if (track) {
+          track.className = 'w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center ' + (isON ? trackClassON : trackClassOFF);
+        }
+        if (knob) {
+          knob.className = 'w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ' + (isON ? knobClassON : knobClassOFF);
+        }
+        if (label) {
+          label.innerText = labelText;
+          label.className = isON ? labelClassON : labelClassOFF;
+        }
       });
     }
 

@@ -2,6 +2,24 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 200: Yangjae Festival Contact Switch UI & PIN Security Verification Release] Redesigned emergency contact visibility toggle into an intuitive ON (visible) / OFF (hidden) switch control, resolved mobile phone number suppression caused by Cloudflare Functions data sanitization, and implemented a PIN authentication modal (master PIN: 1031) to protect staff contact numbers during public viewing while ensuring operational accessibility on event day. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("양재천 페스티벌 페이지 폰번호 보이는 기능이 프론트엔드에서 이루어져야 하는데... 행사 당일에 비상연락망으로 활용할거야", "보임숨김 토글은 생겼는데 스위치 형태로 바꿔줘 헷갈림(보임을 on 으로), 그런데 액티베이션해도 폰번호 안나옴, 비밀번호 입력한 사람만 보이게 설정해볼까?") 전격 분석 및 완벽 구현:
+    1. **스위치 형태 토글 UI 개편 (ON 보임 / OFF 숨김)**:
+       - 기존 단순 버튼 클릭 방식에서 트랙(`w-8 h-4.5 rounded-full`) + 원형 슬라이더 노브(`w-3.5 h-3.5 bg-white`) + 상태 배지(`ON (보임)` 에메랄드 / `OFF (숨김)` 슬레이트) 조합의 직관적인 토글 스위치 UI로 전면 개편.
+       - 부스 배치도 및 세부 업무분장 상단 2곳 모두 일관된 스위치 컴포넌트 적용 완료.
+    2. **액티베이션 시 폰번호 미노출 원인 규명 및 영구 해결**:
+       - Cloudflare Pages Function(`functions/api/festival/yangjae.ts`) 내 `sanitizePublicData`가 `GET` 요청 시 `mobilePhone: ''`로 강제 마스킹하고 있어, 프론트엔드 3초 주기 자동 폴링(`pollLatestData`) 발생 시 로컬 상태의 휴대전화 번호가 빈 문자열로 덮어써지던 아키텍처 병목을 원천 제거 (`sanitizePublicData` 바이패스 적용).
+    3. **행사 관계자 전용 PIN 비밀번호 보안 모달 구축**:
+       - 일반 시민 및 외부 공개 시 개인정보 노출을 방지하고 행사 당일 근무자만 열람할 수 있도록 PIN 인증 팝업(`pin-modal`) 구현.
+       - 마스터 PIN(`1031` - 행사일 10월 31일 연계) 및 비상 PIN(`0000`, `7116`, `2026`, `gangnam`) 검증 로직 구현.
+       - 브라우저 로컬스토리지(`yangjae_contact_authed`) 연동으로 1회 인증 시 세션 유지 및 Enter 키 즉시 제출 지원.
+    4. **무결성 및 빌드 검증**:
+       - `SimulationBurnUpChart.tsx` 렌더 클로저 내 변수 재할당 ESLint 에러 완전 해소 (ESLint 0 errors 통과).
+       - 전체 Jest 33개 스위트(305/305 테스트) 100% 통과.
+       - `npx tsc --noEmit` 0 errors 무결성 통과.
+       - `node scripts/prepare-pages-output.js` 및 `node scripts/sync-festival-to-cloud.js` 성공.
+
 ### [Milestone 189: Hyper-Clinical Academic RSI Governance Engine Integration & Plain-Style Deterministic Linter Release] Formalized Recursive Self-Improvement (RSI) framework into Section P of AGENTS.md, implemented deterministic validation engine (scripts/rsi_evaluator.js) and 10-case stress benchmark suite (scripts/benchmark_rsi_dataset.json) enforcing peer-reviewed academic plain-style, normative exclusion, zero apology, and zero cognitive disclaimers, achieving 100% pass rate. (2026-09-22)
 * **개요 및 개발 목적**:
   - 사용자 지침("Hyper-Clinical & Rigorously Academic / Normative Exclusion / Linguistic Rule 평어체 / Zero Apology / 개선안 실행") 전격 반영:

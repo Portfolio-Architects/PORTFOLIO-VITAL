@@ -51,23 +51,8 @@ export const onRequestOptions: PagesFunction<Env> = async (context) => {
 };
 
 function sanitizePublicData<T>(data: T): T {
-  if (!data || typeof data !== 'object') return data;
-  const clone = JSON.parse(JSON.stringify(data)) as Record<string, unknown>;
-  if (Array.isArray(clone.booths)) {
-    clone.booths = clone.booths.map((b: Record<string, unknown>) => ({
-      ...b,
-      mobilePhone: '',
-      phone: typeof b.phone === 'string' && b.phone.startsWith('010') ? '' : b.phone,
-    }));
-  }
-  if (Array.isArray(clone.duties)) {
-    clone.duties = clone.duties.map((d: Record<string, unknown>) => ({
-      ...d,
-      mobilePhone: '',
-      phone: typeof d.phone === 'string' && d.phone.startsWith('010') ? '' : d.phone,
-    }));
-  }
-  return clone as T;
+  // 프론트엔드 비상연락망(PIN 인증 및 토글 스위치)에서 활용할 수 있도록 원본 데이터를 온전히 반환
+  return data;
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {

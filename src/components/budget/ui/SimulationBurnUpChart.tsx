@@ -167,13 +167,20 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
     const currentRateVal = totalBudget > 0 ? Number(((currentTotalSpent / totalBudget) * 100).toFixed(1)) : 0;
     const finalProjectedRateVal = totalBudget > 0 ? Number(((finalSimulatedTotal / totalBudget) * 100).toFixed(1)) : 0;
 
-    let rollingSpent = 0;
+    // Pre-calculate cumulative spent per month purely without closure mutation
+    const actualCumulativeAmounts: number[] = [];
+    let rollingAcc = 0;
+    for (let idx = 0; idx < 12; idx++) {
+      rollingAcc += monthlySpent[idx] || 0;
+      actualCumulativeAmounts.push(rollingAcc);
+    }
+
     const data = MONTHS.map((m, i) => {
       const targetRateVal = i < 11 ? Number((((i + 1) / 11) * 100).toFixed(1)) : 100;
 
       if (i <= currentMonth - 1) {
-        rollingSpent += monthlySpent[i];
-        const actRate = totalBudget > 0 ? Number(((rollingSpent / totalBudget) * 100).toFixed(1)) : 0;
+        const actSpent = actualCumulativeAmounts[i] || 0;
+        const actRate = totalBudget > 0 ? Number(((actSpent / totalBudget) * 100).toFixed(1)) : 0;
 
         return {
           name: m,

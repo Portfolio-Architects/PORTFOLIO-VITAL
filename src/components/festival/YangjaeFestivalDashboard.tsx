@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useSyncExternalStore, useCallback, useEffect } from 'react';
-import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, Smartphone, User, Users, Building2, Tent, FolderInput, ArrowRightLeft, Table, Armchair, ArrowRight, Clock, Calendar, Search, Shield, Activity, Award, AlertCircle, Sparkles, MapPin, Megaphone, HeartHandshake } from 'lucide-react';
+import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, Smartphone, User, Users, Building2, Tent, FolderInput, ArrowRightLeft, Table, Armchair, Clock, Calendar, Search, Shield, MapPin, Lock } from 'lucide-react';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem, ScheduleItem, DutyItem } from '@/hooks/useYangjaeFestival';
 
 export interface DetailDraft {
@@ -910,27 +910,70 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
   const [saveToast, setSaveToast] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>('수정 사항이 저장되었습니다!');
-  const [showPrivateMobile, setShowPrivateMobile] = useState<boolean>(true);
+  const [showPrivateMobile, setShowPrivateMobile] = useState<boolean>(false);
+  const [showPinModal, setShowPinModal] = useState<boolean>(false);
+  const [pinInput, setPinInput] = useState<string>('');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [isAuthed, setIsAuthed] = useState<boolean>(false);
+
+  const VALID_PINS = useMemo(() => ['1031', '0000', '7116', '2026', 'gangnam'], []);
 
   // 프론트엔드 비상연락망 모드 로컬 스토리지 동기화 (행사 당일 모바일/현장 접속 시 설정 유지)
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('yangjae_festival_show_mobile');
-      if (saved !== null) {
-        setShowPrivateMobile(saved === 'true');
+      const savedAuth = localStorage.getItem('yangjae_contact_authed') === 'true';
+      const savedMobile = localStorage.getItem('yangjae_festival_show_mobile') === 'true';
+      if (savedAuth) {
+        setIsAuthed(true);
+        if (savedMobile) setShowPrivateMobile(true);
       }
     } catch {}
   }, []);
 
-  const handleTogglePrivateMobile = useCallback(() => {
-    setShowPrivateMobile((prev) => {
-      const next = !prev;
+  const handleSwitchToggle = useCallback(() => {
+    if (showPrivateMobile) {
+      // ON -> OFF (비밀번호 없이 즉시 끄기)
+      setShowPrivateMobile(false);
       try {
-        localStorage.setItem('yangjae_festival_show_mobile', String(next));
+        localStorage.setItem('yangjae_festival_show_mobile', 'false');
       } catch {}
-      return next;
-    });
-  }, []);
+    } else {
+      // OFF -> ON (이미 인증된 경우 바로 켜기, 미인증 시 모달 호출)
+      let alreadyAuthed = isAuthed;
+      if (!alreadyAuthed) {
+        try {
+          alreadyAuthed = localStorage.getItem('yangjae_contact_authed') === 'true';
+        } catch {}
+      }
+      if (alreadyAuthed) {
+        setShowPrivateMobile(true);
+        try {
+          localStorage.setItem('yangjae_festival_show_mobile', 'true');
+        } catch {}
+      } else {
+        setPinInput('');
+        setPinError(null);
+        setShowPinModal(true);
+      }
+    }
+  }, [showPrivateMobile, isAuthed]);
+
+  const handlePinSubmit = useCallback(() => {
+    const clean = pinInput.trim();
+    if (VALID_PINS.includes(clean)) {
+      setIsAuthed(true);
+      setShowPrivateMobile(true);
+      setShowPinModal(false);
+      setPinError(null);
+      setPinInput('');
+      try {
+        localStorage.setItem('yangjae_contact_authed', 'true');
+        localStorage.setItem('yangjae_festival_show_mobile', 'true');
+      } catch {}
+    } else {
+      setPinError('비밀번호가 올바르지 않습니다. (행사일: 1031)');
+    }
+  }, [pinInput, VALID_PINS]);
 
   // 세부 과업 다른 추진과제 카테고리로 이동(Transfer) 상태
   const [transferTarget, setTransferTarget] = useState<{
@@ -2445,19 +2488,25 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1.5 ml-auto shrink-0">
+                  <div className="flex items-center gap-2 ml-auto shrink-0">
                     <button
                       type="button"
-                      onClick={handleTogglePrivateMobile}
-                      className={`px-2 py-1 text-xs font-bold rounded-lg border flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap ${
-                        showPrivateMobile
-                          ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-300'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-300'
-                      }`}
-                      title={showPrivateMobile ? "휴대전화 번호 숨기기 (공공/화면공유 모드)" : "휴대전화 번호 표시 (비상연락망 모드)"}
+                      onClick={handleSwitchToggle}
+                      className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none"
+                      title={showPrivateMobile ? "비상연락망 켜짐 (클릭 시 끄기)" : "비상연락망 꺼짐 (클릭 시 비밀번호 인증 후 켜기)"}
                     >
-                      <Smartphone className={`w-3.5 h-3.5 ${showPrivateMobile ? 'text-emerald-700' : 'text-slate-400'}`} />
-                      <span>{showPrivateMobile ? '폰번호 보임' : '폰번호 숨김'}</span>
+                      <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1">
+                        <Smartphone className="w-3.5 h-3.5 text-slate-600" />
+                        <span>비상연락망</span>
+                      </span>
+                      {/* Toggle Track */}
+                      <span className={`w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center ${showPrivateMobile ? 'bg-emerald-500' : 'bg-slate-300'}`}>
+                        {/* Toggle Knob */}
+                        <span className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${showPrivateMobile ? 'translate-x-3.5' : 'translate-x-0'}`} />
+                      </span>
+                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
+                        {showPrivateMobile ? 'ON (보임)' : 'OFF (숨김)'}
+                      </span>
                     </button>
                     {isLocalAdmin && (
                       <button
@@ -3194,19 +3243,25 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       <p className="text-[11px] text-slate-500 font-medium">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
-                      onClick={handleTogglePrivateMobile}
-                      className={`px-2 py-1 text-xs font-bold rounded-lg border flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap ${
-                        showPrivateMobile
-                          ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-300'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-300'
-                      }`}
-                      title={showPrivateMobile ? "휴대전화 번호 숨기기 (공공/화면공유 모드)" : "휴대전화 번호 표시 (비상연락망 모드)"}
+                      onClick={handleSwitchToggle}
+                      className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none"
+                      title={showPrivateMobile ? "비상연락망 켜짐 (클릭 시 끄기)" : "비상연락망 꺼짐 (클릭 시 비밀번호 인증 후 켜기)"}
                     >
-                      <Smartphone className={`w-3.5 h-3.5 ${showPrivateMobile ? 'text-emerald-700' : 'text-slate-400'}`} />
-                      <span>{showPrivateMobile ? '폰번호 보임' : '폰번호 숨김'}</span>
+                      <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1">
+                        <Smartphone className="w-3.5 h-3.5 text-slate-600" />
+                        <span>비상연락망</span>
+                      </span>
+                      {/* Toggle Track */}
+                      <span className={`w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center ${showPrivateMobile ? 'bg-emerald-500' : 'bg-slate-300'}`}>
+                        {/* Toggle Knob */}
+                        <span className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${showPrivateMobile ? 'translate-x-3.5' : 'translate-x-0'}`} />
+                      </span>
+                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
+                        {showPrivateMobile ? 'ON (보임)' : 'OFF (숨김)'}
+                      </span>
                     </button>
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
                       <Users className="w-3.5 h-3.5 text-emerald-700" />
@@ -3618,6 +3673,60 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
           </div>
         );
       })()}
+
+      {/* Emergency Contact PIN Verification Modal */}
+      {showPinModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-slate-300 max-w-sm w-full p-5 space-y-4">
+            <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center shrink-0">
+                <Lock className="w-5 h-5 text-emerald-700" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900">비상연락망 보안 인증</h3>
+                <p className="text-xs text-slate-500 font-medium">행사 관계자 및 근무자 확인 비밀번호 입력</p>
+              </div>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); handlePinSubmit(); }} className="space-y-3">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">인증 비밀번호</label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={10}
+                  value={pinInput}
+                  onChange={(e) => { setPinInput(e.target.value); setPinError(null); }}
+                  placeholder="비밀번호 4자리 (예: 행사일)"
+                  className="w-full px-3.5 py-2.5 text-sm font-mono font-bold tracking-widest text-center border-2 border-slate-300 rounded-xl bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 text-slate-900"
+                  autoFocus
+                />
+                {pinError && (
+                  <div className="text-xs font-bold text-red-600 text-center">
+                    ✕ {pinError}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setShowPinModal(false); setPinInput(''); setPinError(null); }}
+                  className="flex-1 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-300 transition-colors cursor-pointer"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2 text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-colors cursor-pointer active:scale-95"
+                >
+                  인증 및 ON
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

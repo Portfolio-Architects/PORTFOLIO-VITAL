@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useSyncExternalStore } from 'react';
+import React, { useEffect, useSyncExternalStore } from 'react';
 import { useWikiSync } from '@/hooks/useWikiSync';
 import { PartialBlock } from '@blocknote/core';
 import { useCreateBlockNote, SuggestionMenuController, getDefaultReactSlashMenuItems, DefaultReactSuggestionItem } from '@blocknote/react';
