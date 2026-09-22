@@ -483,6 +483,59 @@
       return str;
     }
 
+    function maskPersonName(raw) {
+      if (!raw || typeof raw !== 'string') return '';
+      const trimmed = raw.trim();
+      if (!trimmed) return '';
+
+      if (
+        trimmed.includes('/') ||
+        trimmed.includes('·') ||
+        trimmed.includes('(주)') ||
+        trimmed.endsWith('연구소') ||
+        trimmed.endsWith('병원') ||
+        trimmed.endsWith('의사회') ||
+        trimmed.endsWith('센터') ||
+        trimmed.endsWith('담당')
+      ) {
+        return trimmed;
+      }
+
+      const parts = trimmed.split(/\s+/);
+      const first = parts[0];
+
+      if (/(팀|과|단|소|회|원)$/.test(first) && !/^(팀장|주무관|주임|협회장|과장)/.test(parts[1] || '')) {
+        return trimmed;
+      }
+
+      const hangulRegex = /^[가-힣]{2,4}$/;
+      if (hangulRegex.test(first)) {
+        if (parts.length > 1) {
+          const second = parts[1];
+          const isTitleOrParen = /^(팀장|주무관|주임|협회장|과장|국장|팀원|대표|센터장|사무관|서기관|주사|\()/.test(second);
+          if (!isTitleOrParen) {
+            return trimmed;
+          }
+        }
+
+        let masked = first;
+        if (first.length === 2) {
+          masked = first[0] + 'O';
+        } else if (first.length === 3) {
+          masked = first[0] + 'O' + first[2];
+        } else if (first.length === 4) {
+          masked = first[0] + 'OO' + first[3];
+        }
+
+        if (parts.length > 1) {
+          return masked + ' ' + parts.slice(1).join(' ');
+        }
+        return masked;
+      }
+
+      return trimmed;
+    }
+
     const STAFF_PHONE_MAP = {
       '오창선': { ext: '7116', tel: '02-3423-7116' },
       '지영팀장님': { ext: '7031', tel: '02-3423-7031' },
@@ -900,8 +953,9 @@
 
         let contactBadges = '';
         if (b.manager) {
+          const displayManager = showPrivateMobile ? b.manager : maskPersonName(b.manager);
           contactBadges += '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 text-[10.5px] sm:text-[11px] font-bold shrink-0 shadow-3xs">' +
-            '<span>👤 담당: ' + b.manager + '</span>' +
+            '<span>👤 담당: ' + displayManager + '</span>' +
           '</span>';
         }
         if (adminNo) {
@@ -1103,7 +1157,7 @@
         filtered = filtered.filter(d =>
           (d.deptOrOrg && d.deptOrOrg.toLowerCase().includes(q)) ||
           (d.role && d.role.toLowerCase().includes(q)) ||
-          (d.manager && d.manager.toLowerCase().includes(q)) ||
+          (d.manager && (d.manager.toLowerCase().includes(q) || maskPersonName(d.manager).toLowerCase().includes(q))) ||
           (d.phone && d.phone.toLowerCase().includes(q)) ||
           (d.tasks && d.tasks.some(t => t.toLowerCase().includes(q)))
         );
@@ -1163,7 +1217,7 @@
           '</td>' +
           '<td class="py-3 px-3 whitespace-nowrap">' +
             '<div class="space-y-1">' +
-              (duty.manager ? '<div class="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">👤 ' + duty.manager + '</div>' : '') +
+              (duty.manager ? '<div class="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">👤 ' + (showPrivateMobile ? duty.manager : maskPersonName(duty.manager)) + '</div>' : '') +
               phoneHtml +
             '</div>' +
           '</td>' +

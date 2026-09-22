@@ -319,6 +319,23 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 201: Yangjae Festival Contact Manager Name Privacy Masking (O-Mask) Release] Implemented intelligent Korean person name privacy masking (replacing middle character with 'O') across Booth and Duty contact modules when emergency contacts are hidden (OFF mode), while preserving institutional, departmental, and team names without accidental distortion, achieving 100% Jest suite pass (32/32 tests) and 0 ESLint/TypeScript compilation errors. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("그럼 이름 부분도 폰번호 숨김 상태일때는 가운데 글자를 O 처리해줘") 전격 반영:
+    1. **담당자 인명 지능형 가운데 글자 'O' 마스킹 알고리즘 구현 (`maskPersonName`)**:
+       - 비상연락망(폰번호) 숨김 상태(`!showPrivateMobile`)에서 담당자 성명의 가운데 글자를 'O'로 치환하여 일반 시민 및 외부 공개 시 개인 식별 정보 보호 체계 수립.
+       - 적용 대상: 3음절 한국어 인명(`오창선` $\to$ `오O선`, `심다영` $\to$ `심O영`, `김형종` $\to$ `김O종`, `구채연` $\to$ `구O연`), 직급/직책 결합 인명(`김지영 팀장` $\to$ `김O영 팀장`, `오창선 주무관` $\to$ `오O선 주무관`, `김형종 주임` $\to$ `김O종 주임`, `진우복 협회장` $\to$ `진O복 협회장`), 소속 표기 인명(`김다희 팀장(제이민)` $\to$ `김O희 팀장(제이민)`).
+       - 단체/부서명 보존 가드: `보건행정팀`, `약무팀`, `정신건강팀`, `의무1팀`, `강남구의사회`, `고려대 척추측만연구소` 등 기관·부서·팀명은 마스킹 대상에서 자동 격리 보존.
+    2. **프론트엔드 실시간 연동 (React 컴포넌트 & Cloudflare Pages 모바일 템플릿)**:
+       - `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html`의 부스 배치도 및 세부 업무분장 담당자 렌더링에 동시 반영.
+       - 스위치 토글(`OFF (숨김)` $\leftrightarrow$ `ON (보임)`) 전환 시 0ms 즉각 원본 성명 $\leftrightarrow$ 마스킹 성명 실시간 스위칭.
+       - 업무분장 검색창에서 실명(`오창선`) 및 마스킹명(`오O선`) 양방향 검색 일치 지원.
+    3. **정량적 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 32개 단위 테스트 전수 통과 (100% PASS).
+       - `npx tsc --noEmit` 정적 타입 검사: **0 errors**.
+       - `npm run lint` 코드 스타일 진단: **0 errors**.
+       - Cloudflare KV 및 Pages 산출물 갱신 완료.
+
 ### [Milestone 200: Yangjae Festival Contact Switch UI & PIN Security Verification Release] Redesigned emergency contact visibility toggle into an intuitive ON (visible) / OFF (hidden) switch control, resolved mobile phone number suppression caused by Cloudflare Functions data sanitization, and implemented a PIN authentication modal (master PIN: 1031) to protect staff contact numbers during public viewing while ensuring operational accessibility on event day. (2026-09-22)
 * **개요 및 개발 목적**:
   - 사용자 요청 ("양재천 페스티벌 페이지 폰번호 보이는 기능이 프론트엔드에서 이루어져야 하는데... 행사 당일에 비상연락망으로 활용할거야", "보임숨김 토글은 생겼는데 스위치 형태로 바꿔줘 헷갈림(보임을 on 으로), 그런데 액티베이션해도 폰번호 안나옴, 비밀번호 입력한 사람만 보이게 설정해볼까?") 전격 분석 및 완벽 구현:

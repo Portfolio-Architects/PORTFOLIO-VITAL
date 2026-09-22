@@ -354,10 +354,10 @@ const FALLBACK_FESTIVAL_DATA = {
       "status": "확정",
       "tables": 2,
       "chairs": 5,
-      "manager": "감염병예방팀",
-      "phone": "02-3423-7222",
-      "adminPhone": "02-3423-7222",
-      "mobilePhone": ""
+      "manager": "구채연",
+      "phone": "02-3423-7106",
+      "adminPhone": "02-3423-7106",
+      "mobilePhone": "010-3071-9606"
     },
     {
       "id": 5,
@@ -368,9 +368,9 @@ const FALLBACK_FESTIVAL_DATA = {
       "status": "확정",
       "tables": 2,
       "chairs": 10,
-      "manager": "감염병관리팀",
-      "phone": "02-3423-7212",
-      "adminPhone": "02-3423-7212",
+      "manager": "이희경",
+      "phone": "02-3423-7129",
+      "adminPhone": "02-3423-7129",
       "mobilePhone": ""
     },
     {
@@ -382,10 +382,10 @@ const FALLBACK_FESTIVAL_DATA = {
       "status": "확정",
       "tables": 2,
       "chairs": 10,
-      "manager": "만성질환관리팀",
-      "phone": "02-3423-7232",
-      "adminPhone": "02-3423-7232",
-      "mobilePhone": ""
+      "manager": "김영희",
+      "phone": "02-3423-7112",
+      "adminPhone": "02-3423-7112",
+      "mobilePhone": "010-3455-4057"
     },
     {
       "id": 7,

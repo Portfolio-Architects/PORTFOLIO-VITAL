@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, calculateFestivalBudgetSummary } from '@/hooks/useYangjaeFestival';
-import { YangjaeFestivalDashboard, STAFF_PHONE_MAP, getStaffInfo, parseDetail, parseBoothScale } from '@/components/festival/YangjaeFestivalDashboard';
+import { YangjaeFestivalDashboard, STAFF_PHONE_MAP, getStaffInfo, parseDetail, parseBoothScale, maskPersonName } from '@/components/festival/YangjaeFestivalDashboard';
 import { renderHook } from '@testing-library/react';
 
 // Mock fetch globally
@@ -913,10 +913,52 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       // Modal should be closed
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
+
+    it('correctly masks middle character of Korean names with O and preserves titles/parentheses', () => {
+      expect(maskPersonName('오창선')).toBe('오O선');
+      expect(maskPersonName('심다영')).toBe('심O영');
+      expect(maskPersonName('김형종')).toBe('김O종');
+      expect(maskPersonName('구채연')).toBe('구O연');
+      expect(maskPersonName('김지영 팀장')).toBe('김O영 팀장');
+      expect(maskPersonName('오창선 주무관')).toBe('오O선 주무관');
+      expect(maskPersonName('김형종 주임')).toBe('김O종 주임');
+      expect(maskPersonName('이무상 주임')).toBe('이O상 주임');
+      expect(maskPersonName('진우복 협회장')).toBe('진O복 협회장');
+      expect(maskPersonName('김다희 팀장(제이민)')).toBe('김O희 팀장(제이민)');
+      expect(maskPersonName('이산')).toBe('이O');
+      expect(maskPersonName('남궁민수')).toBe('남OO수');
+    });
+
+    it('preserves organization, team, and department names without accidental masking', () => {
+      expect(maskPersonName('보건행정팀')).toBe('보건행정팀');
+      expect(maskPersonName('의무1팀')).toBe('의무1팀');
+      expect(maskPersonName('약무팀')).toBe('약무팀');
+      expect(maskPersonName('정신건강팀')).toBe('정신건강팀');
+      expect(maskPersonName('강남구의사회')).toBe('강남구의사회');
+      expect(maskPersonName('강남구한의사회')).toBe('강남구한의사회');
+      expect(maskPersonName('서울대병원 담당')).toBe('서울대병원 담당');
+      expect(maskPersonName('자생한방병원')).toBe('자생한방병원');
+      expect(maskPersonName('고려대 척추측만연구소')).toBe('고려대 척추측만연구소');
+      expect(maskPersonName('의무팀 의사·간호사')).toBe('의무팀 의사·간호사');
+      expect(maskPersonName('129응급구조단 / 운전대원')).toBe('129응급구조단 / 운전대원');
+      expect(maskPersonName('')).toBe('');
+      expect(maskPersonName(null)).toBe('');
+    });
+
+    it('renders masked manager names by default in Booths tab when phone is hidden', async () => {
+      localStorage.removeItem('yangjae_contact_authed');
+      localStorage.removeItem('yangjae_festival_show_mobile');
+
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      const boothsTabBtn = await screen.findByRole('button', { name: /2\. 부스현황/i });
+      fireEvent.click(boothsTabBtn);
+
+      // In default hidden state, manager should be masked with 'O'
+      expect(screen.getByText(/담당:\s*오O선/)).toBeInTheDocument();
+      expect(screen.getByText(/담당:\s*김O현 주무관/)).toBeInTheDocument();
+      expect(screen.queryByText('담당: 오창선')).toBeNull();
+    });
   });
 });
-
-
-
-
 

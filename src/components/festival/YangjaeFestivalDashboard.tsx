@@ -157,6 +157,76 @@ export function formatAutoHyphen(value: string | undefined | null): string {
   return str;
 }
 
+/**
+ * 개인정보 보호를 위해 비상연락망(폰번호) 숨김 상태에서 담당자 성명의 가운데 글자를 'O'로 마스킹합니다.
+ * 기관명/부서명/팀명/직종(예: 약무팀, 보건행정팀, 강남구의사회 등)은 보존하고 순수 인명만 마스킹 처리합니다.
+ * 
+ * 예시:
+ * - '오창선' -> '오O선'
+ * - '심다영' -> '심O영'
+ * - '김지영 팀장' -> '김O영 팀장'
+ * - '오창선 주무관' -> '오O선 주무관'
+ * - '김다희 팀장(제이민)' -> '김O희 팀장(제이민)'
+ * - '진우복 협회장' -> '진O복 협회장'
+ * - '보건행정팀' -> '보건행정팀'
+ */
+export function maskPersonName(raw: string | undefined | null): string {
+  if (!raw) return '';
+  const trimmed = String(raw).trim();
+  if (!trimmed) return '';
+
+  // 기관/부서/구분자 포함 명칭 보존
+  if (
+    trimmed.includes('/') ||
+    trimmed.includes('·') ||
+    trimmed.includes('(주)') ||
+    trimmed.endsWith('연구소') ||
+    trimmed.endsWith('병원') ||
+    trimmed.endsWith('의사회') ||
+    trimmed.endsWith('센터') ||
+    trimmed.endsWith('담당')
+  ) {
+    return trimmed;
+  }
+
+  const parts = trimmed.split(/\s+/);
+  const first = parts[0];
+
+  // 단체/팀명 어미 검사 (팀, 과, 단, 소, 회, 원) - 뒤에 팀장/주무관 등 직급이 없는 경우
+  if (/(팀|과|단|소|회|원)$/.test(first) && !/^(팀장|주무관|주임|협회장|과장)/.test(parts[1] || '')) {
+    return trimmed;
+  }
+
+  // 2~4음절 한글 인명 검사
+  const hangulRegex = /^[가-힣]{2,4}$/;
+  if (hangulRegex.test(first)) {
+    // 2단어 이상일 경우 직급/직책 또는 괄호 부가설명 여부 확인
+    if (parts.length > 1) {
+      const second = parts[1];
+      const isTitleOrParen = /^(팀장|주무관|주임|협회장|과장|국장|팀원|대표|센터장|사무관|서기관|주사|\()/.test(second);
+      if (!isTitleOrParen) {
+        return trimmed;
+      }
+    }
+
+    let masked = first;
+    if (first.length === 2) {
+      masked = first[0] + 'O';
+    } else if (first.length === 3) {
+      masked = first[0] + 'O' + first[2];
+    } else if (first.length === 4) {
+      masked = first[0] + 'OO' + first[3];
+    }
+
+    if (parts.length > 1) {
+      return masked + ' ' + parts.slice(1).join(' ');
+    }
+    return masked;
+  }
+
+  return trimmed;
+}
+
 export type YangjaeReportTab = 'milestones' | 'booths' | 'schedule' | 'duties';
 
 const YANGJAE_REPORT_TABS: { id: YangjaeReportTab; label: string }[] = [
@@ -1252,6 +1322,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         d.deptOrOrg.toLowerCase().includes(q) ||
         d.role.toLowerCase().includes(q) ||
         d.manager.toLowerCase().includes(q) ||
+        maskPersonName(d.manager).toLowerCase().includes(q) ||
         d.phone.toLowerCase().includes(q) ||
         d.tasks.some((t) => t.toLowerCase().includes(q))
       );
@@ -2894,7 +2965,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               {booth.manager && (
                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold shrink-0 shadow-3xs`}>
                                   <User className="w-3 h-3 text-slate-500 shrink-0" />
-                                  <span>담당: {booth.manager}</span>
+                                  <span>담당: {showPrivateMobile ? booth.manager : maskPersonName(booth.manager)}</span>
                                 </span>
                               )}
 
@@ -3396,7 +3467,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                   {duty.manager && (
                                     <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                                       <User className="w-3 h-3 text-slate-500 shrink-0" />
-                                      <span>{duty.manager}</span>
+                                      <span>{showPrivateMobile ? duty.manager : maskPersonName(duty.manager)}</span>
                                     </div>
                                   )}
                                   {(() => {
