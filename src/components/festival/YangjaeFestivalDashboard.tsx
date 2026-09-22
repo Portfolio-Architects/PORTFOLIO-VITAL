@@ -1729,7 +1729,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       ? `${window.location.origin}/festival/yangjae`
       : PUBLIC_SHARE_URL;
 
-    const title = data?.meta?.title || '2026 양재천 걷자! 건강 페스티벌';
+    const title = data?.meta?.title || '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌';
 
     // 1. First attempt clipboard copy of only the link URL
     const copiedSuccess = await copyToClipboardSafe(targetUrl);
@@ -1913,7 +1913,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     className="w-full px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-bold text-slate-900"
                   />
                 ) : (
-                  <span className="font-extrabold text-slate-900 leading-snug break-keep min-w-0">{data?.meta?.title || '2026 양재천 건강 페스티벌'}</span>
+                  <span className="font-extrabold text-slate-900 leading-snug break-keep min-w-0">{data?.meta?.title || '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌'}</span>
                 )}
               </div>
 
@@ -3089,22 +3089,30 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             <div className={selectedTab === 'schedule' ? 'block space-y-3.5' : 'hidden'}>
               {/* Header Stats Bar */}
               <div className="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                      <Clock className="w-4 h-4" />
+                {/* Header Bar: 2-Row Optimized Layout */}
+                <div className="space-y-2 border-b border-slate-200 pb-2.5">
+                  {/* Row 1: Title & Schedule Date Badge */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 flex items-center gap-1.5 flex-wrap`}>
+                          <span className="whitespace-nowrap">행사 식순</span>
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 whitespace-nowrap">17개 식순</span>
+                        </h3>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 flex items-center gap-1.5`}>
-                        <span>행사 식순</span>
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">17개 식순</span>
-                      </h3>
-                      <p className="text-[11px] text-slate-500 font-medium">07:30 직원 출근부터 14:30 환경 정비까지 진행 순서 및 의전 규정</p>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+                      <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                      <span className="whitespace-nowrap">2026. 10. 31.(토)</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
-                    <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                    <span>2026. 10. 31.(토) 08:00~14:00</span>
+
+                  {/* Row 2: Subtitle */}
+                  <div className="pt-0.5">
+                    <p className="text-[11px] text-slate-500 font-medium truncate min-w-0">07:30 직원 출근부터 14:30 환경 정비까지 진행 순서 및 의전 규정</p>
                   </div>
                 </div>
 
@@ -3301,27 +3309,37 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             <div className={selectedTab === 'duties' ? 'block space-y-3.5' : 'hidden'}>
               {/* Header Stats Bar */}
               <div className="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                      <Shield className="w-4 h-4" />
+                {/* Header Bar: 2-Row Optimized Layout */}
+                <div className="space-y-2 border-b border-slate-200 pb-2.5">
+                  {/* Row 1: Title & Group Badge */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                        <Shield className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 flex items-center gap-1.5 flex-wrap`}>
+                          <span className="whitespace-nowrap">업무분장 및 비상연락망</span>
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 whitespace-nowrap">22개 부서·기관</span>
+                        </h3>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 flex items-center gap-1.5`}>
-                        <span>업무분장 및 비상연락망</span>
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">22개 부서·기관</span>
-                      </h3>
-                      <p className="text-[11px] text-slate-500 font-medium">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+                      <Users className="w-3.5 h-3.5 text-emerald-700" />
+                      <span className="whitespace-nowrap">행사 운영단</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+
+                  {/* Row 2: Subtitle & Emergency Contact Switch */}
+                  <div className="flex items-center justify-between gap-2 pt-0.5">
+                    <p className="text-[11px] text-slate-500 font-medium truncate min-w-0">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
                     <button
                       type="button"
                       onClick={handleSwitchToggle}
-                      className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none shrink-0"
                       title={showPrivateMobile ? "비상연락망 켜짐 (클릭 시 끄기)" : "비상연락망 꺼짐 (클릭 시 비밀번호 인증 후 켜기)"}
                     >
-                      <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1">
+                      <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
                         <Smartphone className="w-3.5 h-3.5 text-slate-600" />
                         <span>비상연락망</span>
                       </span>
@@ -3330,14 +3348,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         {/* Toggle Knob */}
                         <span className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${showPrivateMobile ? 'translate-x-3.5' : 'translate-x-0'}`} />
                       </span>
-                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
+                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border whitespace-nowrap ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
                         {showPrivateMobile ? 'ON (보임)' : 'OFF (숨김)'}
                       </span>
                     </button>
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
-                      <Users className="w-3.5 h-3.5 text-emerald-700" />
-                      <span>행사 운영단</span>
-                    </div>
                   </div>
                 </div>
 

@@ -280,7 +280,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       });
 
       const sharePayload = shareMock.mock.calls[0][0];
-      expect(sharePayload.title).toContain('2026 양재천 걷자! 건강 페스티벌');
+      expect(sharePayload.title).toContain('제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌');
       expect(sharePayload.text).toBe('https://portfolio-hchps.pages.dev/festival/yangjae');
       expect(sharePayload.url).toBeUndefined();
     });

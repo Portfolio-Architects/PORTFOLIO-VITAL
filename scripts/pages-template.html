@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>2026 양재천 걷자! 건강페스티벌</title>
-  <meta name="description" content="『강남구보건소』와 함께하는 2026 양재천 걷자! 건강 페스티벌 실시간 진행현황 대시보드" />
+  <title>제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌</title>
+  <meta name="description" content="『강남구보건소』와 함께하는 제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌 실시간 진행현황 대시보드" />
   
   <!-- OpenGraph / SNS Sharing Metadata (KakaoTalk, SMS, Telegram) -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="2026 양재천 걷자! 건강페스티벌" />
-  <meta property="og:description" content="『강남구보건소』와 함께하는 2026 양재천 걷자! 건강 페스티벌 실시간 진행현황 대시보드" />
-  <meta property="og:site_name" content="2026 양재천 걷자! 건강페스티벌" />
+  <meta property="og:title" content="제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌" />
+  <meta property="og:description" content="『강남구보건소』와 함께하는 제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌 실시간 진행현황 대시보드" />
+  <meta property="og:site_name" content="제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="2026 양재천 걷자! 건강페스티벌" />
-  <meta name="twitter:description" content="『강남구보건소』와 함께하는 2026 양재천 걷자! 건강 페스티벌 실시간 진행현황 대시보드" />
+  <meta name="twitter:title" content="제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌" />
+  <meta name="twitter:description" content="『강남구보건소』와 함께하는 제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌 실시간 진행현황 대시보드" />
 
   <link rel="icon" href="/icon.png" sizes="64x64" type="image/png" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -168,22 +168,30 @@
       <!-- Content 3: Schedule -->
       <div id="content-schedule" class="space-y-3.5 hidden">
         <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs font-black text-sm">
-                ⏱
+          <!-- Header Bar: 2-Row Optimized Layout -->
+          <div class="space-y-2 border-b border-slate-200 pb-2.5">
+            <!-- Row 1: Title & Schedule Date Badge -->
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs font-black text-sm">
+                  ⏱
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5 flex-wrap">
+                    <span class="whitespace-nowrap">행사 식순</span>
+                    <span id="schedule-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 whitespace-nowrap">17개 식순</span>
+                  </h3>
+                </div>
               </div>
-              <div>
-                <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-                  <span>행사 식순</span>
-                  <span id="schedule-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">17개 식순</span>
-                </h3>
-                <p class="text-[11px] text-slate-500 font-medium">07:30 직원 출근부터 14:30 환경 정비까지 진행 순서 및 의전 규정</p>
+              <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+                <span>📅</span>
+                <span class="whitespace-nowrap">2026. 10. 31.(토)</span>
               </div>
             </div>
-            <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
-              <span>📅</span>
-              <span>2026. 10. 31.(토) 08:00~14:00</span>
+
+            <!-- Row 2: Subtitle -->
+            <div class="pt-0.5">
+              <p class="text-[11px] text-slate-500 font-medium truncate min-w-0">07:30 직원 출근부터 14:30 환경 정비까지 진행 순서 및 의전 규정</p>
             </div>
           </div>
 
@@ -213,29 +221,38 @@
       <!-- Content 4: Duties -->
       <div id="content-duties" class="space-y-3.5 hidden">
         <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-2xs font-black text-sm">
-                🛡
+          <!-- Header Bar: 2-Row Optimized Layout -->
+          <div class="space-y-2 border-b border-slate-200 pb-2.5">
+            <!-- Row 1: Title & Badges -->
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-2xs font-black text-sm">
+                  🛡
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5 flex-wrap">
+                    <span class="whitespace-nowrap">업무분장 및 비상연락망</span>
+                    <span id="duties-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 whitespace-nowrap">22개 부서·기관</span>
+                  </h3>
+                </div>
               </div>
-              <div>
-                <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-                  <span>업무분장 및 비상연락망</span>
-                  <span id="duties-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">22개 부서·기관</span>
-                </h3>
-                <p class="text-[11px] text-slate-500 font-medium">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
+              <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+                <span>👥</span>
+                <span class="whitespace-nowrap">행사 운영단</span>
               </div>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <!-- Emergency Contact Switch -->
+
+            <!-- Row 2: Subtitle & Emergency Contact Switch -->
+            <div class="flex items-center justify-between gap-2 pt-0.5">
+              <p class="text-[11px] text-slate-500 font-medium truncate min-w-0">보건소·체육회·대행사 및 협조부서 배정 과업 일람</p>
               <button
                 id="btn-toggle-duty-mobile"
                 type="button"
                 onclick="handleSwitchToggleClick()"
-                class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none shrink-0"
                 title="비상연락망(폰번호) 스위치 - 관계자 보안 인증"
               >
-                <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1">
+                <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
                   <span>📱 비상연락망</span>
                 </span>
                 <!-- Toggle Track -->
@@ -243,12 +260,8 @@
                   <!-- Toggle Knob -->
                   <span id="duty-switch-knob" class="w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out translate-x-0"></span>
                 </span>
-                <span id="duty-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">OFF (숨김)</span>
+                <span id="duty-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 whitespace-nowrap">OFF (숨김)</span>
               </button>
-              <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
-                <span>👥</span>
-                <span>행사 운영단</span>
-              </div>
             </div>
           </div>
 
@@ -665,7 +678,7 @@
           '<div class="overview-row">' +
             '<span class="overview-label font-bold text-slate-600 tracking-wide">• 행사명</span>' +
             '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
-            '<span class="font-extrabold text-slate-900 leading-snug break-keep min-w-0">' + (meta.title || '2026 양재천 건강 페스티벌') + '</span>' +
+            '<span class="font-extrabold text-slate-900 leading-snug break-keep min-w-0">' + (meta.title || '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌') + '</span>' +
           '</div>' +
           '<div class="overview-row">' +
             '<span class="overview-label font-bold text-slate-600 tracking-wide">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>' +
@@ -1297,7 +1310,7 @@
     };
 
     document.getElementById('btn-share').onclick = function() {
-      const title = appData.meta?.title || '2026 양재천 걷자! 건강 페스티벌';
+      const title = appData.meta?.title || '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌';
       const targetUrl = window.location.origin + '/festival/yangjae';
 
       let copied = false;

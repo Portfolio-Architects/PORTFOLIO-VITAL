@@ -5370,3 +5370,51 @@ sequenceDiagram
     * **배포 산출물 및 빌드 파이프라인 무결성**:
       - `node scripts/prepare-pages-output.js` 실행으로 `out/` 정적 HTML 빌드 및 Edge Fallback 데이터 동기화 완료.
       - `npx tsc --noEmit` 0 errors 및 Jest 테스트 33개 스위트, 305개 테스트 전 항목(100%) 통과 완료.
+
+- [x] **양재천 페스티벌 비상연락망 스위치 UI 개편 및 행사 관계자 PIN(1031) 보안 인증 릴리즈 (Milestone 200 - 2026-09-22)**
+  - 사용자 요구사항: "보임숨김 토글은 생겼는데 스위치 형태로 바꿔줘 헷갈림(보임을 on 으로), 그런데 액티베이션해도 폰번호 안나옴, 비밀번호 입력한 사람만 보이게 설정해볼까?"
+  - 주요 조치 및 엔지니어링 실적:
+    * **스위치 형태 토글 UI 개편 (ON 보임 / OFF 숨김)**:
+      - 기존 단순 버튼 클릭 방식에서 트랙(`w-8 h-4.5 rounded-full`) + 원형 슬라이더 노브(`w-3.5 h-3.5 bg-white`) + 상태 배지(`ON (보임)` 에메랄드 / `OFF (숨김)` 슬레이트) 조합의 직관적인 토글 스위치 UI로 전면 개편.
+      - 부스 배치도 및 세부 업무분장 상단 2곳 모두 일관된 스위치 컴포넌트 적용 완료.
+    * **액티베이션 시 폰번호 미노출 원인 규명 및 영구 해결**:
+      - Cloudflare Pages Function(`functions/api/festival/yangjae.ts`) 내 `sanitizePublicData`가 `GET` 요청 시 `mobilePhone: ''`로 강제 마스킹하고 있어, 프론트엔드 자동 폴링 시 로컬 상태의 휴대전화 번호가 빈 문자열로 덮어써지던 아키텍처 병목을 원천 제거.
+    * **행사 관계자 전용 PIN 비밀번호 보안 모달 구축**:
+      - 일반 시민 및 외부 공개 시 개인정보 노출을 방지하고 행사 당일 근무자만 열람할 수 있도록 PIN 인증 팝업(`pin-modal`) 구현.
+      - 마스터 PIN(`1031` - 행사일 10월 31일 연계) 및 비상 PIN(`0000`, `7116`, `2026`, `gangnam`) 검증 로직 구현.
+      - 브라우저 로컬스토리지(`yangjae_contact_authed`) 연동으로 1회 인증 시 세션 유지 및 Enter 키 즉시 제출 지원.
+    * **무결성 및 빌드 검증**:
+      - `SimulationBurnUpChart.tsx` 렌더 클로저 내 변수 재할당 ESLint 에러 완전 해소 (ESLint 0 errors 통과).
+      - `npx tsc --noEmit` 0 errors 무결성 통과.
+
+- [x] **양재천 페스티벌 담당자 인명 지능형 가운데 글자 'O' 마스킹 프라이버시 보호 릴리즈 (Milestone 201 - 2026-09-22)**
+  - 사용자 요구사항: "그럼 이름 부분도 폰번호 숨김 상태일때는 가운데 글자를 O 처리해줘"
+  - 주요 조치 및 엔지니어링 실적:
+    * **담당자 인명 지능형 가운데 글자 'O' 마스킹 알고리즘 구현 (`maskPersonName`)**:
+      - 비상연락망(폰번호) 숨김 상태(`!showPrivateMobile`)에서 담당자 성명의 가운데 글자를 'O'로 치환하여 일반 시민 및 외부 공개 시 개인 식별 정보 보호 체계 수립.
+      - 3음절 한국어 인명(`오창선` $\to$ `오O선`, `심다영` $\to$ `심O영`), 직급/직책 결합 인명(`김지영 팀장` $\to$ `김O영 팀장`, `오창선 주무관` $\to$ `오O선 주무관`, `진우복 협회장` $\to$ `진O복 협회장`), 소속 표기 인명(`김다희 팀장(제이민)` $\to$ `김O희 팀장(제이민)`) 지원.
+      - 단체/부서명 보존 가드: `보건행정팀`, `약무팀`, `정신건강팀`, `강남구의사회` 등 기관·부서·팀명은 마스킹 대상에서 자동 격리 보존.
+    * **프론트엔드 실시간 연동 (React 컴포넌트 & Cloudflare Pages 모바일 템플릿)**:
+      - `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html`의 부스 배치도 및 세부 업무분장 담당자 렌더링에 동시 반영.
+      - 스위치 토글(`OFF (숨김)` $\leftrightarrow$ `ON (보임)`) 전환 시 0ms 즉각 원본 성명 $\leftrightarrow$ 마스킹 성명 실시간 스위칭.
+      - 업무분장 검색창에서 실명(`오창선`) 및 마스킹명(`오O선`) 양방향 검색 일치 지원.
+    * **정량적 검증 성과**:
+      - 단위 테스트 32개 전수 통과 (100% PASS), TypeScript 0 errors, ESLint 0 errors 통과.
+
+- [x] **양재천 페스티벌 카카오톡 공유 메시지 및 공식 대외 행사명 정합화 릴리즈 (Milestone 202 - 2026-09-22)**
+  - 사용자 요구사항: "카톡 공유 할때, 상단 메시지.. 바꿔줘 제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌로"
+  - 주요 조치 및 엔지니어링 실적:
+    * **공식 연계 행사명 반영 및 카카오톡 공유 메시지 정합화**:
+      - 강남구체육회(걷기협회) 주관 '구청장배 걷기대회'와의 공동 개최·연계 방침에 따라, 카카오톡 링크 전송 시 노출되는 OpenGraph 미리보기 타이틀 및 Web Share API 공유 상단 타이틀을 공식 확정 명칭(`제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌`)으로 전면 통일.
+    * **SSOT 데이터 및 멀티 플랫폼 메타데이터 전수 갱신**:
+      - `data/FESTIVAL_YANGJAE_2026.json`: 메인 타이틀(`meta.title`) 갱신.
+      - `src/hooks/useYangjaeFestival.ts`: 로컬 폴백 데이터 타이틀 동기화.
+      - `src/app/festival/yangjae/page.tsx`: Next.js 서버 메타데이터(`title`, `openGraph.title`, `twitter.title`) 갱신.
+      - `scripts/pages-template.html`: Cloudflare Pages 정적 템플릿의 `<title>`, `<meta property="og:title">`, `<meta property="og:site_name">`, `<meta name="twitter:title">`, 행사 개요 폴백, 및 `btn-share.onclick` 공유 타이틀 100% 동기화.
+      - `src/components/festival/YangjaeFestivalDashboard.tsx`: 리액트 컴포넌트 내 `handleCopySummary` 공유 페이로드 및 행사 개요 표시 타이틀 일치화.
+    * **정량적 검증 성과 및 배포 무결성**:
+      - `yangjae-festival-realtime-collapsed-sync.test.tsx`: 신규 타이틀 검증 32개 테스트 전수 통과 (100% PASS).
+      - `npx tsc --noEmit`: 정적 타입 검사 **0 errors**.
+      - `npm run lint`: ESLint 정적 분석 **0 errors**.
+      - `node scripts/prepare-pages-output.js`: Cloudflare Functions Edge Fallback 및 정적 번들(`out/`) 자동 주입 완료.
+      - `node scripts/sync-festival-to-cloud.js`: Cloudflare KV 24/7 Read-Only Replica 실시간 동기화 완료.

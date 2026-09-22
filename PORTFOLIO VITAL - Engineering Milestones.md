@@ -2,6 +2,24 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 202: Yangjae Festival KakaoTalk Link Share Official Title Alignment Release] Updated festival sharing metadata and OpenGraph titles across all platforms to '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌' (harmonizing OG meta tags, Web Share API payloads, Next.js metadata, SSOT JSON, and Cloudflare Pages bundle), achieving 100% Jest suite pass (32/32 tests), 0 ESLint/TypeScript compilation errors, and real-time Cloudflare KV synchronization. (2026-09-22)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("카톡 공유 할때, 상단 메시지.. 바꿔줘 제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌로") 전격 반영:
+    1. **공식 연계 행사명 반영 및 카카오톡 공유 메시지 정합화**:
+       - 강남구체육회(걷기협회) 주관 '구청장배 걷기대회'와의 공동 개최·연계 방침에 따라, 카카오톡 링크 전송 시 노출되는 OpenGraph 미리보기 타이틀 및 Web Share API 공유 상단 타이틀을 공식 확정 명칭(`제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌`)으로 전면 통일.
+    2. **SSOT 데이터 및 멀티 플랫폼 메타데이터 전수 갱신**:
+       - `data/FESTIVAL_YANGJAE_2026.json`: 메인 타이틀(`meta.title`) 갱신.
+       - `src/hooks/useYangjaeFestival.ts`: 로컬 폴백 데이터 타이틀 동기화.
+       - `src/app/festival/yangjae/page.tsx`: Next.js 서버 메타데이터(`title`, `openGraph.title`, `twitter.title`) 갱신.
+       - `scripts/pages-template.html`: Cloudflare Pages 정적 템플릿의 `<title>`, `<meta property="og:title">`, `<meta property="og:site_name">`, `<meta name="twitter:title">`, 행사 개요 폴백, 및 `btn-share.onclick` 공유 타이틀 100% 동기화.
+       - `src/components/festival/YangjaeFestivalDashboard.tsx`: 리액트 컴포넌트 내 `handleCopySummary` 공유 페이로드 및 행사 개요 표시 타이틀 일치화.
+    3. **정량적 검증 성과 및 배포 무결성**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx`: 신규 타이틀 포함 여부 검증 32개 테스트 전수 통과 (100% PASS).
+       - `npx tsc --noEmit`: 정적 타입 검사 **0 errors**.
+       - `npm run lint`: ESLint 정적 분석 **0 errors**.
+       - `node scripts/prepare-pages-output.js`: Cloudflare Functions Edge Fallback 및 정적 번들(`out/`) 자동 주입 완료.
+       - `node scripts/sync-festival-to-cloud.js`: Cloudflare KV 24/7 Read-Only Replica 실시간 동기화 완료.
+
 ### [Milestone 201: Yangjae Festival Contact Manager Name Privacy Masking (O-Mask) Release] Implemented intelligent Korean person name privacy masking (replacing middle character with 'O') across Booth and Duty contact modules when emergency contacts are hidden (OFF mode), while preserving institutional, departmental, and team names without accidental distortion, achieving 100% Jest suite pass (32/32 tests) and 0 ESLint/TypeScript compilation errors. (2026-09-22)
 * **개요 및 개발 목적**:
   - 사용자 요청 ("그럼 이름 부분도 폰번호 숨김 상태일때는 가운데 글자를 O 처리해줘") 전격 반영:

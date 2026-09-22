@@ -96,7 +96,7 @@ export interface FestivalData {
 
 export const YANGJAE_FALLBACK_DATA: FestivalData = {
   "meta": {
-    "title": "2026 양재천 걷자! 건강 페스티벌",
+    "title": "제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌",
     "shortTitle": "2026 양재천 건강 페스티벌",
     "eventDate": "2026-10-31(토)",
     "eventTime": "08:00 ~ 14:00",

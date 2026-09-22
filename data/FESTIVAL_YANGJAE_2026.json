@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "2026 양재천 걷자! 건강 페스티벌",
+    "title": "제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌",
     "shortTitle": "2026 양재천 건강 페스티벌",
     "eventDate": "2026-10-31(토)",
     "eventTime": "08:00 ~ 14:00",
@@ -11,7 +11,7 @@
       "건강 걷기 체험 프로그램(구청장배 걷기대회 연계)",
       "의료 및 건강 관련 체험·홍보 부스 운영"
     ],
-    "staffNote": "행사 참여 직원 대체휴무 시행 예정 (전 직원 참여, 금연단속원 포함)",
+    "staffNote": "행사 참여 직원 대체휴무 시행 예정 (전 직원 참여)",
     "organizer": "강남구보건소 보건행정과 건강증진팀, 강남구체육회(걷기협회)",
     "overallProgress": 70,
     "lastUpdated": "2026-09-22"
@@ -192,8 +192,8 @@
       "id": 1,
       "category": "운영본부",
       "name": "보건행정과",
-      "scale": "5동",
-      "program": "운영부스 2동, 응급의료부스 1동, VIP 대기 부스 2동",
+      "scale": "6동",
+      "program": "운영부스 2동, 응급의료부스 1동, VIP 대기 부스 3동",
       "status": "확정",
       "tables": 10,
       "chairs": 20,
@@ -275,16 +275,16 @@
     {
       "id": 7,
       "category": "보건소 부서",
-      "name": "의약과 의무1팀",
+      "name": "의무1팀",
       "scale": "2동",
       "program": "두근두근 CPR 체험존",
       "status": "확정",
       "tables": 2,
       "chairs": 4,
-      "manager": "의무1팀",
-      "phone": "02-3423-7132",
-      "adminPhone": "02-3423-7132",
-      "mobilePhone": ""
+      "manager": "이상화",
+      "phone": "02-3423-7158",
+      "adminPhone": "02-3423-7158",
+      "mobilePhone": "010-2613-3091"
     },
     {
       "id": 8,
@@ -295,10 +295,10 @@
       "status": "확정",
       "tables": 2,
       "chairs": 4,
-      "manager": "약무팀",
-      "phone": "02-3423-7152",
-      "adminPhone": "02-3423-7152",
-      "mobilePhone": ""
+      "manager": "김지현",
+      "phone": "02-3423-7173",
+      "adminPhone": "02-3423-7173",
+      "mobilePhone": "010-2980-9011"
     },
     {
       "id": 9,
@@ -309,24 +309,24 @@
       "status": "확정",
       "tables": 2,
       "chairs": 10,
-      "manager": "정신건강팀",
-      "phone": "02-3423-7272",
-      "adminPhone": "02-3423-7272",
-      "mobilePhone": ""
+      "manager": "안세연",
+      "phone": "02-3423-8796",
+      "adminPhone": "02-3423-8796",
+      "mobilePhone": "010-9147-8924"
     },
     {
       "id": 10,
       "category": "보건소 부서",
       "name": "건강관리과 어르신건강팀",
       "scale": "3동",
-      "program": "강남구치매안심센터 행복한 기억찾기 캠페인\n내 신체나이 알아보기, 운동 실습(웰에이징 센터)",
+      "program": "강남구치매안심센터 행복한 기억찾기 캠페인(02-6380-5609)\n내 신체나이 알아보기, 운동 실습(웰에이징 센터)",
       "status": "확정",
       "tables": 8,
       "chairs": 14,
-      "manager": "김지현 주무관",
-      "phone": "02-3423-7173",
-      "adminPhone": "02-3423-7173",
-      "mobilePhone": ""
+      "manager": "홍기수",
+      "phone": "02-3423-7985",
+      "adminPhone": "02-3423-7985",
+      "mobilePhone": "010-4279-0790"
     },
     {
       "id": 11,
@@ -337,10 +337,10 @@
       "status": "확정",
       "tables": 2,
       "chairs": 4,
-      "manager": "강남구의사회",
-      "phone": "02-549-8080",
-      "adminPhone": "02-549-8080",
-      "mobilePhone": ""
+      "manager": "이지영",
+      "phone": "02-549-0971",
+      "adminPhone": "02-549-0971",
+      "mobilePhone": "010-2279-5982"
     },
     {
       "id": 12,
@@ -351,10 +351,10 @@
       "status": "확정",
       "tables": 4,
       "chairs": 12,
-      "manager": "강남구한의사회",
-      "phone": "02-557-2680",
-      "adminPhone": "02-557-2680",
-      "mobilePhone": ""
+      "manager": "김명주",
+      "phone": "-",
+      "adminPhone": "-",
+      "mobilePhone": "010-9100-0785"
     },
     {
       "id": 13,
@@ -365,9 +365,9 @@
       "status": "확정",
       "tables": 2,
       "chairs": 7,
-      "manager": "서울대병원 담당",
-      "phone": "010-5663-8276",
-      "adminPhone": "",
+      "manager": "임동은",
+      "phone": "02-2112-5487",
+      "adminPhone": "02-2112-5487",
       "mobilePhone": "010-5663-8276"
     },
     {
@@ -379,9 +379,9 @@
       "status": "확정",
       "tables": 6,
       "chairs": 16,
-      "manager": "강남차병원 담당",
-      "phone": "010-2698-0992",
-      "adminPhone": "",
+      "manager": "김규리",
+      "phone": "02-3468-3226",
+      "adminPhone": "02-3468-3226",
       "mobilePhone": "010-2698-0992"
     },
     {
@@ -393,10 +393,10 @@
       "status": "확정",
       "tables": 4,
       "chairs": 10,
-      "manager": "자생한방병원",
+      "manager": "김봉진",
       "phone": "1577-0007",
       "adminPhone": "1577-0007",
-      "mobilePhone": ""
+      "mobilePhone": "010-9931-0994"
     },
     {
       "id": 16,
@@ -407,9 +407,9 @@
       "status": "확정",
       "tables": 2,
       "chairs": 4,
-      "manager": "(주)유디 담당",
-      "phone": "010-5192-2210",
-      "adminPhone": "",
+      "manager": "유규열",
+      "phone": "02-6268-5339",
+      "adminPhone": "02-6268-5339",
       "mobilePhone": "010-5192-2210"
     },
     {
@@ -421,10 +421,10 @@
       "status": "확정",
       "tables": 4,
       "chairs": 8,
-      "manager": "고려대 척추측만연구소",
-      "phone": "02-920-5678",
-      "adminPhone": "02-920-5678",
-      "mobilePhone": ""
+      "manager": "전예진",
+      "phone": "-",
+      "adminPhone": "-",
+      "mobilePhone": "010-7935-3095"
     },
     {
       "id": 18,
@@ -435,9 +435,9 @@
       "status": "확정",
       "tables": 1,
       "chairs": 4,
-      "manager": "한국신체정보 담당",
-      "phone": "010-9985-3732",
-      "adminPhone": "",
+      "manager": "박준홍",
+      "phone": "-",
+      "adminPhone": "-",
       "mobilePhone": "010-9985-3732"
     },
     {
@@ -449,10 +449,10 @@
       "status": "확정",
       "tables": 2,
       "chairs": 6,
-      "manager": "김다희 팀장(제이민)",
-      "phone": "010-8494-0544",
-      "adminPhone": "",
-      "mobilePhone": "010-8494-0544"
+      "manager": "고명규",
+      "phone": "-",
+      "adminPhone": "-",
+      "mobilePhone": "010-9788-9471"
     }
   ],
   "schedule": [
