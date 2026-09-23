@@ -42,20 +42,6 @@
     "budgetEntryId": "mu4yrmo4hl8d0bvkr"
   },
   {
-    "name": "건증실 전산 소모품 토너",
-    "detailedProject": "건강증진지원실 운영",
-    "statItem": "201-01 사무관리비",
-    "unitPrice": 3232000,
-    "quantity": 1,
-    "amount": 3232000,
-    "memo": "",
-    "id": "mu4yo0jez73qlrntp",
-    "categoryId": "mnrcir0v56b8pixdb",
-    "createdAt": "2026-09-17T03:19:32.282Z",
-    "status": "PLANNED",
-    "budgetEntryId": "mu4yo0jevx9takj17"
-  },
-  {
     "name": "페스티벌 사무관리비 지출",
     "detailedProject": "건강생활실천사업(건강증진)",
     "statItem": "201-01 사무관리비",

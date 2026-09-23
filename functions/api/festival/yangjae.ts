@@ -129,7 +129,7 @@ const FALLBACK_FESTIVAL_DATA = {
     "staffNote": "행사 참여 직원 대체휴무 시행 예정 (전 직원 참여)",
     "organizer": "강남구보건소 보건행정과 건강증진팀, 강남구체육회(걷기협회)",
     "overallProgress": 70,
-    "lastUpdated": "2026-09-22"
+    "lastUpdated": "2026-09-23"
   },
   "budget": {
     "total": 49900000,
@@ -395,8 +395,8 @@ const FALLBACK_FESTIVAL_DATA = {
       "scale": "2동",
       "program": "두근두근 CPR 체험존",
       "status": "확정",
-      "tables": 2,
-      "chairs": 4,
+      "tables": 4,
+      "chairs": 8,
       "manager": "이상화",
       "phone": "02-3423-7158",
       "adminPhone": "02-3423-7158",
@@ -409,8 +409,8 @@ const FALLBACK_FESTIVAL_DATA = {
       "scale": "2동",
       "program": "불법 마약 근절 캠페인 부스",
       "status": "확정",
-      "tables": 2,
-      "chairs": 4,
+      "tables": 4,
+      "chairs": 8,
       "manager": "김지현",
       "phone": "02-3423-7173",
       "adminPhone": "02-3423-7173",
@@ -580,7 +580,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "title": "직원 출근 및 사전 준비",
       "lead": "보건행정과",
       "status": "예정",
-      "note": "행사 참여 직원 현장 도착, 출석 확인 및 명찰 배부, 무대·부스 점검"
+      "note": "행사 참여 직원 서명, 무대·부스 점검"
     },
     {
       "id": 2,

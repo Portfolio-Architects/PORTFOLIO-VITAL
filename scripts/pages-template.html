@@ -166,27 +166,29 @@
       </div>
 
       <!-- Content 3: Schedule -->
-      <div id="content-schedule" class="space-y-3.5 hidden">
-        <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-          <!-- Header Bar: Clean 1-Row Layout -->
-          <div class="border-b border-slate-200 pb-2.5">
+      <div id="content-schedule" class="space-y-2.5 hidden">
+        <div class="bg-white border border-slate-300 rounded-xl px-3.5 py-2 shadow-2xs flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+          <div class="flex items-center gap-2 shrink-0">
             <h3 class="text-sm font-extrabold text-slate-900 whitespace-nowrap">
               <span>행사 식순</span>
             </h3>
+            <span id="schedule-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
+              17개 식순 · 07:30~14:30
+            </span>
           </div>
 
-          <!-- Search Bar -->
-          <div class="relative">
+          <!-- Compact Search Bar -->
+          <div class="relative flex-1 sm:max-w-xs min-w-[200px]">
             <input
               id="input-schedule-search"
               type="text"
-              placeholder="식순명, 담당자, 내용 검색 (예: 국민의례, 걷기대회, 축하공연...)"
-              class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
+              placeholder="식순명, 담당자, 내용 검색..."
+              class="w-full pl-3 pr-8 py-1 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
             />
             <button
               id="btn-clear-schedule-search"
               type="button"
-              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer hidden text-xs font-bold"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer hidden text-xs font-bold"
             >✕</button>
           </div>
         </div>
@@ -839,6 +841,8 @@
       let confirmedDong = 0;
       let pendingDong = 0;
       let totalBus = 0;
+      let totalTables = 0;
+      let totalChairs = 0;
 
       for (let i = 0; i < allBooths.length; i++) {
         const b = allBooths[i];
@@ -852,6 +856,9 @@
         totalBus += parsed.bus;
         if (isConfirmed) confirmedDong += parsed.dong;
         else pendingDong += parsed.dong;
+
+        totalTables += (typeof b.tables === 'number' ? b.tables : (Number(b.tables) || 0));
+        totalChairs += (typeof b.chairs === 'number' ? b.chairs : (Number(b.chairs) || 0));
       }
 
       const summaryContainer = document.getElementById('booth-summary-banner');
@@ -888,6 +895,13 @@
                   '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 whitespace-nowrap">확정 ' + confirmedDong + '동</span>' +
                   (pendingDong > 0 ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-amber-950/70 text-amber-300 border border-amber-700/60 whitespace-nowrap">협의 ' + pendingDong + '동</span>' : '') +
                   (totalBus > 0 ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-sky-950/80 text-sky-300 border border-sky-700/60 whitespace-nowrap">버스 ' + totalBus + '대</span>' : '') +
+                '</div>' +
+              '</div>' +
+              '<div class="col-span-2 mt-2.5 pt-2 border-t border-slate-800/90 flex items-center justify-between gap-2 flex-wrap">' +
+                '<span class="text-[11px] sm:text-xs font-bold text-slate-400">필요 집기 총계</span>' +
+                '<div class="flex items-center gap-1.5 sm:gap-2">' +
+                  '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-amber-950/70 text-amber-300 border border-amber-700/60">테이블 <strong class="text-white font-black">' + totalTables + '개</strong></span>' +
+                  '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-teal-950/70 text-teal-300 border border-teal-700/60">의자 <strong class="text-white font-black">' + totalChairs + '개</strong></span>' +
                 '</div>' +
               '</div>' +
             '</div>' +
@@ -977,6 +991,11 @@
 
       const schedule = appData.schedule || [];
 
+      const countBadge = document.getElementById('schedule-count-badge');
+      if (countBadge) {
+        countBadge.textContent = schedule.length + '개 식순 · 07:30~14:30';
+      }
+
       let filtered = schedule;
       if (scheduleSearchQuery.trim()) {
         const q = scheduleSearchQuery.trim().toLowerCase();
@@ -989,91 +1008,65 @@
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="p-8 text-center text-xs text-slate-500 font-medium">검색 조건과 일치하는 행사 식순이 없습니다.</div>';
+        container.innerHTML = '<div class="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-300 rounded-xl shadow-2xs">검색 조건과 일치하는 행사 식순이 없습니다.</div>';
         return;
       }
 
-      const rowsHtml = filtered.map(item => {
+      const cardsHtml = filtered.map(item => {
         const isCeremony = item.id === 7 || (item.title && item.title.includes('국민의례'));
         const isWalkingStart = item.id === 14 || (item.title && item.title.includes('걷기'));
-        const isDone = item.status === '완료' || item.status === 'done';
-        const isInProgress = item.status === '진행중' || item.status === 'in-progress';
 
-        const rowBg = isCeremony ? 'bg-blue-50/50 hover:bg-blue-50/80' : (isWalkingStart ? 'bg-emerald-50/50 hover:bg-emerald-50/80' : 'hover:bg-slate-50/80');
+        const cardBorderBg = isCeremony
+          ? 'border-blue-300 bg-blue-50/20 shadow-2xs'
+          : (isWalkingStart
+            ? 'border-emerald-300 bg-emerald-50/20 shadow-2xs'
+            : 'border-slate-300 shadow-2xs');
 
-        let ceremonyBox = '';
-        if (isCeremony) {
-          ceremonyBox = '<div class="mt-2 p-2.5 bg-white/95 border border-blue-200 rounded-lg space-y-1 text-xs text-blue-950 shadow-3xs">' +
-            '<div class="flex items-center gap-1.5 font-bold text-blue-900 text-[11.5px]">' +
-              '<span>🛡</span><span>대통령훈령 제438호(국민의례 규정) 약식절차 1 준용</span>' +
+        const ceremonyBadge = isCeremony
+          ? '<span class="inline-flex items-center gap-1 text-[9.5px] font-bold text-blue-800 bg-blue-100/90 border border-blue-300 px-1.5 py-0.2 rounded cursor-help shrink-0 whitespace-nowrap" title="대통령훈령 제438호 약식절차 1 준용: ① 국기에 대한 경례(전주 없는 애국가 1절 반주, 맹세문 미낭송) ② 묵념(묵념곡 10~15초) ※ \'애국가 제창 등 이하 생략\' 발언 규정상 엄격 금지">🛡 의전 약식1 준용</span>'
+          : '';
+
+        const walkingBadge = isWalkingStart
+          ? '<span class="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-1.5 py-0.2 rounded cursor-help shrink-0 whitespace-nowrap" title="수변문화쉼터 ↔ 영동4교 2km 코스 완주 (12:30 인센티브 배부 마감)">📍 2km 왕복 (마감 12:30)</span>'
+          : '';
+
+        const phaseBadgeClass = item.phase === '공식행사'
+          ? 'bg-blue-50 text-blue-800 border-blue-200'
+          : (item.phase === '걷기대회'
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+            : (item.phase === '식전·준비'
+              ? 'bg-slate-100 text-slate-700 border-slate-200'
+              : 'bg-purple-50 text-purple-800 border-purple-200'));
+
+        const leadBar = item.lead
+          ? '<div class="text-xs text-slate-600 font-medium mb-1.5 flex items-center gap-1">👤 주관/담당: <strong class="text-slate-900">' + item.lead + '</strong></div>'
+          : '';
+
+        const noteBox = item.note
+          ? '<div class="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200 leading-relaxed"><span class="font-bold text-slate-600">내용: </span>' + item.note + '</div>'
+          : '';
+
+        return '<div class="p-3.5 bg-white border-2 rounded-xl transition-all ' + cardBorderBg + '">' +
+          '<div class="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-200">' +
+            '<div class="flex items-center gap-1.5 flex-wrap">' +
+              '<span class="font-mono font-black text-slate-700 text-xs">No.' + item.id + '</span>' +
+              '<span class="text-[11px] font-bold px-2 py-0.5 rounded border ' + phaseBadgeClass + '">' + item.phase + '</span>' +
+              '<span class="inline-flex items-center gap-1 font-mono text-[11px] text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">' +
+                '<span>⏱</span><span>' + item.time + '</span>' +
+                (item.duration ? '<span class="text-blue-700 font-extrabold">(' + item.duration + ')</span>' : '') +
+              '</span>' +
             '</div>' +
-            '<div class="space-y-0.5 text-[11px] text-slate-700 pl-5 leading-relaxed font-medium">' +
-              '<div>• <strong>국기에 대한 경례</strong>: 전주 없는 애국가 반주 1절에 맞춰 실시 (맹세문 미낭송)</div>' +
-              '<div>• <strong>순국선열과 호국영령에 대한 묵념</strong>: 묵념곡 10~15초 연주</div>' +
-              '<div class="text-red-600 font-bold bg-red-50 p-1.5 rounded border border-red-200 mt-1">' +
-                '※ 의전 금지 멘트 수칙: 사회자가 "애국가 제창 등 이하 생략하겠습니다" 멘트를 발언하는 것은 국가상징 품격을 저해하므로 규정상 엄격히 금지함.' +
-              '</div>' +
-            '</div>' +
-          '</div>';
-        }
-
-        let walkingBox = '';
-        if (isWalkingStart) {
-          walkingBox = '<div class="mt-2 p-2 bg-white/95 border border-emerald-200 rounded-lg text-xs text-emerald-950 shadow-3xs flex items-center justify-between gap-2 flex-wrap">' +
-            '<div class="flex items-center gap-1.5 font-bold">' +
-              '<span>📍</span><span>코스: 수변문화쉼터 ↔ 영동4교 (2km 왕복 수변 산책로)</span>' +
-            '</div>' +
-            '<span class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">' +
-              '완주 인센티브 마감: 12:30' +
-            '</span>' +
-          '</div>';
-        }
-
-        const statusBadge = isDone
-          ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">✓ 완료</span>'
-          : (isInProgress
-            ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 animate-pulse">▶ 진행</span>'
-            : '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">○ 예정</span>');
-
-        return '<tr class="transition-colors align-top ' + rowBg + '">' +
-          '<td class="py-3 px-3 text-center font-mono text-xs font-extrabold text-slate-700">#' + item.id + '</td>' +
-          '<td class="py-3 px-3 text-center whitespace-nowrap">' +
-            '<div class="inline-flex items-center gap-1 font-mono text-xs font-bold text-slate-900">⏱ ' + item.time + '</div>' +
-            (item.duration ? '<div class="text-[11px] font-semibold text-blue-700 mt-0.5">' + item.duration + '</div>' : '') +
-          '</td>' +
-          '<td class="py-3 px-3 text-center whitespace-nowrap">' +
-            '<span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">' + item.phase + '</span>' +
-          '</td>' +
-          '<td class="py-3 px-3">' +
-            '<div class="space-y-1">' +
-              '<div class="text-sm font-extrabold text-slate-900 leading-snug">' + item.title + '</div>' +
-              (item.note ? '<p class="text-xs text-slate-600 font-medium leading-relaxed">' + item.note + '</p>' : '') +
-              ceremonyBox +
-              walkingBox +
-            '</div>' +
-          '</td>' +
-          '<td class="py-3 px-3 text-center whitespace-nowrap">' +
-            (item.lead ? '<span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-800 border border-slate-200">👤 ' + item.lead + '</span>' : '<span class="text-slate-400 text-xs">-</span>') +
-          '</td>' +
-          '<td class="py-3 px-3 text-center whitespace-nowrap">' + statusBadge + '</td>' +
-        '</tr>';
+          '</div>' +
+          '<div class="flex items-center justify-between gap-1.5 mb-1.5 flex-wrap">' +
+            '<div class="text-sm font-extrabold text-slate-900">' + item.title + '</div>' +
+            '<div class="flex items-center gap-1 shrink-0">' + ceremonyBadge + walkingBadge + '</div>' +
+          '</div>' +
+          leadBar +
+          noteBox +
+        '</div>';
       }).join('');
 
-      container.innerHTML = '<div class="overflow-x-auto">' +
-        '<table class="w-full text-left border-collapse min-w-[720px]">' +
-          '<thead>' +
-            '<tr class="bg-slate-100 border-b border-slate-300 text-slate-700 text-xs font-extrabold">' +
-              '<th class="py-2.5 px-3 text-center w-14 shrink-0">순번</th>' +
-              '<th class="py-2.5 px-3 text-center w-36 shrink-0">시간 (소요)</th>' +
-              '<th class="py-2.5 px-3 text-center w-24 shrink-0">구분</th>' +
-              '<th class="py-2.5 px-3 text-left">식순명 및 세부 내용</th>' +
-              '<th class="py-2.5 px-3 text-center w-36 shrink-0">주관 / 담당</th>' +
-              '<th class="py-2.5 px-3 text-center w-20 shrink-0">상태</th>' +
-            '</tr>' +
-          '</thead>' +
-          '<tbody class="divide-y divide-slate-200">' + rowsHtml + '</tbody>' +
-        '</table>' +
-      '</div>';
+      container.innerHTML = '<div class="space-y-2.5">' + cardsHtml + '</div>';
     }
 
     window.selectSchedulePhase = function(ph) {
@@ -1190,6 +1183,7 @@
 
     function setActiveTab(tab) {
       activeTab = tab;
+
       const tabs = ['milestones', 'booths', 'schedule', 'duties'];
       tabs.forEach(t => {
         const btn = document.getElementById('tab-' + t);

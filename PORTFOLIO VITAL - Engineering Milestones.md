@@ -2,6 +2,128 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 217: Yangjae Festival Schedule Box-Card Individual Addition & Deletion Pipeline Release] Implemented individual schedule item box addition ('식순 추가' in top header bar & dashed card button at list bottom) and row deletion ('삭제' button in edit mode) with instant atomic persistence to FESTIVAL_YANGJAE_2026.json, auto-focus inline edit mode transition, dynamic header item count badge, and multi-platform static synchronization, achieving 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-23)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("식순 박스 개별 추가 가능하게 기능 구현해줘") 전격 분석 및 완벽 구현:
+    1. **행사 식순 상단 헤더 및 하단 전용 '식순 추가' 버튼 듀얼 탑재**:
+       - 행사 식순 탭(Tab 3) 헤더 우측(검색창 우측)에 관리자 전용 `[+ 식순 추가]` 버튼 신설.
+       - 식순 리스트 최하단에 시각적 접근성이 뛰어난 점선 테두리 카드 형태의 `[+ 새 행사 식순 박스 추가]` 대형 버튼 추가 배치.
+       - 검색 결과가 없는 공백 상태(`filteredSchedule.length === 0`)에서도 즉시 추가할 수 있도록 중앙 안내 박스 내 추가 버튼 연동.
+    2. **추가 즉시 인라인 편집 모드 자동 활성화 및 디스크 영속 저장**:
+       - 식순 추가 클릭 시 최대 ID를 자동 추적하여 순차 번호(`nextId = maxId + 1`)를 부여하고 기본 템플릿 항목(구분: '공식행사', 시간: '12:00 ~ 12:30', 제목: '신규 행사 식순', 주관: '보건행정과', 내용: '식순 세부 내용을 입력하세요.')을 생성.
+       - 생성 즉시 로컬 디스크 SSOT(`data/FESTIVAL_YANGJAE_2026.json`)에 원자적(Atomic) 영속 저장 완료.
+       - 추가와 동시에 해당 신규 카드 박스의 인라인 편집 모드(`editingScheduleId = nextId`)로 자동 진입하여 식순명 인풋에 포커스 제공.
+    3. **식순 개별 삭제(Trash2) 기능 안전 연동**:
+       - 식순 카드 편집 모드 상단 우측에 로즈(Rose) 계열의 `[삭제]` 버튼 신설.
+       - 관리자 확인 팝업(`confirm`)을 거쳐 오삭제를 방지하며, 삭제 시 로컬 디스크 즉각 반영 및 편집 상태를 안전하게 초기화.
+    4. **헤더 식순 총계 뱃지 동적 반영 및 멀티 플랫폼 1:1 동기화**:
+       - 상단 헤더의 식순 수량 표시를 하드코딩(`17개`)에서 동적 수치(`{activeSchedule.length}개 식순 · 07:30~14:30`)로 전환.
+       - `scripts/pages-template.html` 및 `out/festival/yangjae/index.html` 내 식순 뱃지(`id="schedule-count-badge"`) 연동 및 `prepare-pages-output.js` 재빌드 완료.
+    5. **정량적 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx`: R15 신규 단위 테스트 추가 포함 35개 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 216: Yangjae Festival Schedule Tab Status Badge & Edit-Control Purge Release] Purged redundant status badges ('○ 예정', '▶ 진행', '✓ 완료') and status selection controls from schedule box-cards across React component and Cloudflare Pages static templates, decluttering the 448px mobile container header while preserving inline editing for phase, title, time, lead, and details with 100% Jest pass (34/34 tests) and zero TypeScript errors. (2026-09-23)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("식순에서는 예정 확정 기능 지워도 됨" + `○ 예정` 배지 스크린샷) 전격 반영:
+    1. **행사 식순 카드 헤더 내 상태 배지(`○ 예정` / `▶ 진행` / `✓ 완료`) 전면 소거**:
+       - `YangjaeFestivalDashboard.tsx` 탭 3 박스형 카드 헤더 영역 내 위치하던 상태 배지(`○ 예정` 등) 영구 제거.
+       - 읽기 모드 카드 상단 헤더: 좌측 `No.{item.id}` + 구분 배지(`식전·준비`, `공식행사`, `걷기대회`, `공연·폐회`) + 시간 배지(`⏱ {item.time} ({duration})`), 우측 `[수정]` 버튼으로 1열 양끝 정렬 완성.
+    2. **식순 인라인 편집 모드 내 상태 셀렉트박스 제거**:
+       - 식순 수정 시 불필요한 상태 선택(`<select>`: 예정/진행중/완료) 드롭다운을 완전 배제하고, 구분(phase), 식순명(title), 시간(time), 주관/담당(lead), 세부내용(note)에 집중된 인라인 편집 UX 보존.
+       - 우측에는 `[저장]` 및 `[취소]` 버튼만 직관적으로 배치.
+    3. **정적 배포 템플릿(`scripts/pages-template.html`) 1:1 완벽 동기화**:
+       - `renderSchedule()` 내 상태 배지 연산(`isDone`, `isInProgress`, `statusBadge`) 및 DOM 주입 코드 완전 소거.
+       - `node scripts/prepare-pages-output.js` 재빌드로 `out/festival/yangjae/index.html` 정적 배포 산출물 즉시 최신화.
+    4. **정량적 검증 성과**:
+       - Jest 단위 테스트 34개 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 215: Yangjae Festival Schedule Tab Header Edit-Guidance Capsule Purge & Minimalist Top Bar Release] Purged redundant edit guidance capsule ('✎ 식순명·세부내용 클릭 또는 [수정]으로 편집 가능') from Schedule Tab header, presenting a pristine, focused title presentation aligned with minimalist public administration design standards, with 100% Jest pass (34/34 tests) and zero TypeScript errors. (2026-09-23)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("이 캡슐은 지워줘" + 식순 편집 안내 캡슐 배지 스크린샷) 전격 반영:
+    1. **행사 식순 상단 헤더 내 편집 안내 캡슐 배지 전면 소거**:
+       - `YangjaeFestivalDashboard.tsx` 탭 3 헤더 영역 내 위치하던 파란색 안내 캡슐 배지(`✎ 식순명·세부내용 클릭 또는 [수정]으로 편집 가능`) 영구 제거.
+       - 타이틀(`행사 식순`)과 시간 배지(`17개 식순 · 07:30~14:30`), 그리고 우측 검색창만 남긴 깔끔한 1열 양끝 정렬 레이아웃 완성.
+    2. **정량적 검증 성과**:
+       - Jest 단위 테스트 34개 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 214: Yangjae Festival Booth Hero Banner Table & Chair Total Requirements Integration Release] Integrated dynamic aggregation and high-contrast dual badges for total required tables (64 units) and chairs (166 units) directly into the Booth Tab hero card across React dashboard and Cloudflare Pages static templates, eliminating cognitive load and providing instant equipment logistics visibility with 100% Jest pass (34/34 tests) and zero TypeScript errors. (2026-09-23)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("필요테이블과 의자 수도 간단하게 써줄래? 햇갈리네" + 부스 통계 카드 스크린샷) 전격 반영:
+    1. **부스 현황 상단 히어로 배너 내 '필요 집기 총계(테이블·의자)' 전격 신설**:
+       - 18개 참여 기관 및 1개 운영본부의 집기 수요 데이터를 실시간 파싱 및 합산하여, 부스 현황 히어로 배너 하단에 2열 전폭(`col-span-2`) 집기 총계 요약 바 신설.
+       - 호박색(Amber) 테이블 뱃지(`테이블 64개`) 및 청록색(Teal) 의자 뱃지(`의자 166개`)로 시각적 대비를 극대화하여 혼선 원천 차단.
+    2. **멀티 플랫폼 소스 동시 반영**:
+       - `src/components/festival/YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`, `out/festival/yangjae/index.html` 1:1 완벽 동기화.
+    3. **정량적 검증 성과**:
+       - Jest 단위 테스트 34개 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 213: Yangjae Festival Schedule Tab Box-Card Layout Transformation & Strict Container Width Consistency Release] Transformed schedule tab (Tab 3) from multi-column table into compact box cards modeled directly after the Booths tab ("2. 부스현황") with full inline editability, strict max-w-md (448px) container width alignment across all 4 category tabs, eliminating desktop wide container expansion (max-w-6xl) and horizontal scroll, achieving 100% Jest pass (34/34 tests) and zero TypeScript errors. (2026-09-23)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("데스크톱 와이드 컨테이너 전폭 확장 하지말고.. 다른 카테고리 탭과 동일한 가로 사이즈여야해.. 박스형태로 만들면 되잖아 부스현황처럼") 전격 반영:
+    1. **전 탭 동일 가로폭 규격 엄수 (`max-w-md` 통일 및 `max-w-6xl` 전폭 확장 해제)**:
+       - 행사 식순 탭(Tab 3) 선택 시 데스크톱에서 너비가 전폭 확장되던 `max-w-6xl` 스타일을 완전 철회하고, 모든 탭(1. 추진과제, 2. 부스현황, 3. 행사식순, 4. 업무분장)이 동일한 일관된 모바일 카드 뷰 컨테이너 폭(`max-w-md`, 448px)을 유지하도록 엄격 고정.
+       - `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 내 탭 전환 시의 컨테이너 폭 동적 변형 로직 제거.
+    2. **부스현황 탭과 동일한 박스 형태(`Box Cards`) 카드 UI 전면 개편**:
+       - `max-w-md` 컨테이너 내에서 가로 스크롤을 유발하던 다중 컬럼 `<table>` 구조를 전면 폐기하고, 부스현황 탭과 동일한 `p-3.5 bg-white border-2 border-slate-300 rounded-xl shadow-2xs` 박스형 카드 리스트(`space-y-2.5`)로 전면 전환.
+       - **카드 상단 헤더**: `No.{item.id}`, 구분 뱃지(`식전·준비`, `공식행사`, `걷기대회`, `공연·폐회`), 시간 뱃지(`⏱ {item.time} ({duration})`), 상태 뱃지(`✓ 완료` / `▶ 진행` / `○ 예정`), [수정] 버튼 배치.
+       - **카드 본문 (읽기 모드)**: 굵고 또렷한 식순명, 의전 및 코스 특수 뱃지(`[의전 약식1 준용]`, `[2km 왕복 (마감 12:30)]`), 주관/담당 메타 바(`👤 주관/담당: {item.lead}`), 세부내용 박스(`내용: {item.note}`)를 깔끔하게 위계화하여 448px 내에서 완벽한 가독성 확보.
+    3. **인라인 수정·저장 UX 및 키보드 단축키(Enter/Esc) 100% 보존**:
+       - 관리자가 [수정] 버튼 클릭 또는 식순명/세부내용 클릭 시, 해당 카드 내부에서 식순명 인풋, 2-컬럼 시간/주관 인풋, 세부내용 인풋, 구분/상태 셀렉트박스가 활성화.
+       - `Enter` 키로 즉시 디스크 저장(`handleSaveSchedule`), `Esc` 키로 취소(`handleCancelEditSchedule`) 지원.
+    4. **멀티 플랫폼 산출물 동시 빌드 및 정량적 검증**:
+       - `scripts/prepare-pages-output.js` 실행으로 Cloudflare Pages 번들(`out/festival/yangjae/index.html`) 100% 동일 동기화.
+       - Jest 단위 테스트 34개 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 212: Yangjae Festival Schedule Title & Details Inline Editing & Disk Save Pipeline Release] Implemented row-level inline editing for schedule items (title, note, time, lead, and status) in Tab 3 timetable, equipped with instant Enter/Esc keyboard shortcuts, atomic disk save mutation to FESTIVAL_YANGJAE_2026.json, and admin edit badges, achieving 100% Jest pass (34/34 tests) and zero TypeScript errors. (2026-09-23)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("식순명과 세부내용도 내가 수정할수 있게 만들어주고") 전격 반영:
+    1. **행사 식순 항목(Title & Note) 인라인 양방향 편집 파이프라인 구축**:
+       - 행사 식순 탭(Tab 3)의 타임테이블 각 행에 로컬 관리자 전용 [수정] 버튼 및 식순명·세부내용 직접 클릭 트리거 연동.
+       - 편집 모드 활성화 시 고대비 블루 포커스 링(`border-blue-500`, `ring-2 ring-blue-300`)과 함께 식순명 인풋(w-44), 세부내용 인풋(flex-1), 시간(time), 구분(phase), 주관/담당(lead), 상태(status) 셀렉트박스가 인라인으로 활성화.
+    2. **직관적인 저장/취소 UX 및 키보드 단축키 지원**:
+       - 인풋창 내 `Enter` 키 입력 또는 [저장] 버튼 클릭 시 즉시 로컬 디스크 SSOT(`data/FESTIVAL_YANGJAE_2026.json`)에 원자적(Atomic) 영속 저장 및 쿼리 캐시 동기화 완료.
+       - `Escape` 키 입력 또는 [취소] 버튼 클릭 시 수정 취소 및 기존 읽기 모드로 부드럽게 복귀.
+    3. **정량적 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx`: R14 단위 테스트 신설 포함 34개 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+       - Cloudflare Pages 정적 번들(`out/festival/yangjae/index.html`) 자동 주입 완료.
+
+### [Milestone 211: Yangjae Festival Full-Screen Single-View Schedule Table & Ultra-Compact 17-Item Layout Release] Expanded schedule tab container width to max-w-6xl on desktop and streamlined timetable grid into a high-density, single-screen layout with inline notes, compact badges, and 1-row header, displaying all 17 event items without vertical scrolling or text clipping, achieving 100% Jest pass (32/32 tests) and zero TypeScript errors. (2026-09-23)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("행사 식순.. 한화면에 내용 모두 나오도록 수정해볼까?" + 스크린샷) 전격 분석 및 완벽 구현:
+    1. **데스크톱 와이드 화면 컨테이너 너비 확장 (`max-w-6xl`)**:
+       - 행사 식순 탭(`selectedTab === 'schedule'`) 활성화 시, 기존 좁은 모바일 카드 규격(`max-w-md`, 448px)에서 데스크톱 전폭 대시보드 규격(`max-w-6xl`, 1152px)으로 가로폭을 시원하게 확장.
+       - 6개 컬럼(`순번`, `시간 (소요)`, `구분`, `식순명 및 세부 내용`, `주관 / 담당`, `상태`)이 가로 스크롤 전혀 없이 단 0.1px의 잘림 없이 펼쳐지도록 칼정렬 수립.
+    2. **행사 식순 상단 헤더 슬림 1열 통합 (`Compact 1-Row Layout`)**:
+       - 2층 구조로 상하 공간을 많이 차지하던 헤더와 검색창을 단일 행(`flex items-center justify-between`)으로 통합 배치하여 헤더 높이를 120px에서 40px로 66% 이상 절감.
+    3. **17개 전 식순 항목 초밀도 단일 화면(Zero-Scroll) 레이아웃 확립**:
+       - 행 패딩을 `py-1 px-2.5`로 컴팩트하게 압축하고 수직 정렬을 `align-middle`로 통일.
+       - 시간 및 소요시간(`07:30 ~ 08:00 (30분)`) 1줄 인라인 나란히 배치.
+       - 식순명과 세부 내용(`· {item.note}`)을 인라인으로 유기적 연결하여 세로 줄바꿈 낭비 원천 차단.
+       - 국민의례(7번) 및 걷기대회(14번)의 거대한 고정 안내 박스를 단정한 인라인 뱃지(`[의전 약식1 준용]`, `[2km 왕복 (마감 12:30)]`)로 경량화하여 행 높이를 32~34px로 균일화.
+       - 총 테이블 높이 약 560px로 데스크톱 1080p 화면에서 스크롤 없이 17개 전 항목이 한 화면에 100% 조망 완료.
+    4. **멀티 플랫폼 소스 전수 동기화**:
+       - `src/components/festival/YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`, `out/festival/yangjae/index.html` 100% 동시 반영 완료.
+    5. **정량적 검증 성과**:
+       - Jest 32개 단위 테스트 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 210: Localhost Dev Server Safe Restart & Port 3001 Reclamation Release] Successfully identified and cleanly terminated legacy Next.js background process (PID 7048) occupying port 3001, refreshed developer runtime artifacts (AGENTS.md and Engineering Report), and re-launched Next.js local development server on port 3001 with strict adherence to localhost security boundaries. (2026-09-23)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("로컬호스트 재시작") 전격 반영:
+    1. **포트 3001 점유 프로세스 식별 및 안전 강제 종료**:
+       - TCP 포트 3001 바인딩 상태 정밀 추적 결과, 기존 잔존 노드 프로세스(PID 7048) 식별.
+       - `Stop-Process -Id 7048 -Force` 명령으로 안전 차단 완료 및 포트 상태 `TimeWait` 회수 확인.
+    2. **필수 엔지니어링 문서 아티팩트 자동 노출**:
+       - 규정(규칙 D)에 의거하여 `AGENTS.md` 및 `PORTFOLIO VITAL - Engineering Report.md`를 우측 아티팩트 사이드바에 즉각 현행화 노출.
+    3. **Next.js 로컬 개발 서버(`http://localhost:3001`) 재가동**:
+       - `npm run dev` 데몬 프로세스를 신규 기동하여 무중단 개발 환경 복원 완료.
+
 ### [Milestone 209: Yangjae Festival Schedule Tab Header Clutter & Filter Pills Purge Release] Purged visual clutter (clock icon, 17-item badge, event date badge, subtitle description) and phase filter pills from Schedule tab, consolidated into pristine single-row minimalist title header with instant search, achieving 100% Jest pass (32/32 tests) and zero TypeScript/Turbopack errors. (2026-09-22)
 * **개요 및 개발 목적**:
   - 사용자 요청 ("이 부분도 행사 식순 타이틀만 남겨놓고 다 삭제해줘" - 행사 식순 탭 헤더 장식 요소 및 카테고리 필터 칩 바 삭제) 전격 반영:

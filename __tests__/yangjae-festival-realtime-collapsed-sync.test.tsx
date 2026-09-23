@@ -960,5 +960,103 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(screen.queryByText('담당: 오창선')).toBeNull();
     });
   });
+
+  describe('R14. Schedule Title and Note Inline Editing & Real-time Disk Save', () => {
+    it('switches to Schedule tab, enables inline editing for title/note, and saves updated schedule to disk', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      // 1. Switch to 3. 행사식순 Tab
+      const scheduleTabBtn = await screen.findByRole('button', { name: /3\. 행사식순/i });
+      fireEvent.click(scheduleTabBtn);
+
+      // 2. Verify reading mode schedule items are present
+      expect(screen.getByText('직원 출근 및 사전 준비')).toBeInTheDocument();
+
+      // 3. Find edit buttons and click the first one
+      const editButtons = screen.getAllByTitle('식순명 및 세부내용 수정');
+      expect(editButtons.length).toBeGreaterThan(0);
+      fireEvent.click(editButtons[0]);
+
+      // 4. Verify inline input fields appear with current values
+      const titleInput = screen.getByPlaceholderText('식순명 입력') as HTMLInputElement;
+      const noteInput = screen.getByPlaceholderText('세부내용 입력 (예: 참가자 집결, 주요 내용)') as HTMLInputElement;
+      expect(titleInput).toBeInTheDocument();
+      expect(titleInput.value).toBe('직원 출근 및 사전 준비');
+      expect(noteInput.value).toContain('행사 참여 직원 현장 도착');
+
+      // 5. Change title and note
+      fireEvent.change(titleInput, { target: { value: '직원 집결 및 비상 사전 점검' } });
+      fireEvent.change(noteInput, { target: { value: '전 직원 현장 집결 및 무대 장비 최종 점검' } });
+
+      // 6. Click Save button
+      const saveBtn = screen.getByTitle('저장 (Enter)');
+      fireEvent.click(saveBtn);
+
+      // 7. Verify save mutation triggered POST request with updated schedule
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/api/festival/yangjae',
+          expect.objectContaining({
+            method: 'POST',
+            body: expect.stringContaining('직원 집결 및 비상 사전 점검'),
+          })
+        );
+      });
+    });
+
+    it('cancels inline schedule edit mode without saving when cancel button is clicked', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      const scheduleTabBtn = await screen.findByRole('button', { name: /3\. 행사식순/i });
+      fireEvent.click(scheduleTabBtn);
+
+      const editButtons = screen.getAllByTitle('식순명 및 세부내용 수정');
+      fireEvent.click(editButtons[0]);
+
+      const titleInput = screen.getByPlaceholderText('식순명 입력');
+      expect(titleInput).toBeInTheDocument();
+
+      // Click cancel
+      const cancelBtn = screen.getByTitle('취소 (Esc)');
+      fireEvent.click(cancelBtn);
+
+      // Verify returned to reading mode
+      expect(screen.queryByPlaceholderText('식순명 입력')).toBeNull();
+      expect(screen.getByText('직원 출근 및 사전 준비')).toBeInTheDocument();
+    });
+
+    it('adds a new schedule item box and immediately enters edit mode', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      const scheduleTabBtn = await screen.findByRole('button', { name: /3\. 행사식순/i });
+      fireEvent.click(scheduleTabBtn);
+
+      // Find top "식순 추가" button
+      const addScheduleBtn = screen.getByTitle('새 행사 식순 추가');
+      expect(addScheduleBtn).toBeInTheDocument();
+      fireEvent.click(addScheduleBtn);
+
+      // Verify save mutation triggered POST request with newly added schedule item
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/api/festival/yangjae',
+          expect.objectContaining({
+            method: 'POST',
+            body: expect.stringContaining('신규 행사 식순'),
+          })
+        );
+      });
+
+      // Verify inline input fields appear with default new schedule item
+      const titleInput = screen.getByPlaceholderText('식순명 입력') as HTMLInputElement;
+      expect(titleInput).toBeInTheDocument();
+      expect(titleInput.value).toBe('신규 행사 식순');
+
+      // Verify delete button is present in edit mode
+      const deleteBtn = screen.getByTitle('식순 항목 삭제');
+      expect(deleteBtn).toBeInTheDocument();
+    });
+  });
 });
+
 

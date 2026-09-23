@@ -978,6 +978,9 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   const [editingBoothId, setEditingBoothId] = useState<number | null>(null);
   const [editSingleBoothData, setEditSingleBoothData] = useState<BoothItem | null>(null);
 
+  const [editingScheduleId, setEditingScheduleId] = useState<number | null>(null);
+  const [editScheduleData, setEditScheduleData] = useState<ScheduleItem | null>(null);
+
   const [saveToast, setSaveToast] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>('수정 사항이 저장되었습니다!');
   const [showPrivateMobile, setShowPrivateMobile] = useState<boolean>(false);
@@ -1285,8 +1288,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   }, []);
 
   const activeSchedule = useMemo(() => {
-    return (data?.schedule || YANGJAE_FALLBACK_DATA.schedule || []) as ScheduleItem[];
-  }, [data?.schedule]);
+    const list = (data?.schedule || YANGJAE_FALLBACK_DATA.schedule || []) as ScheduleItem[];
+    if (editingScheduleId !== null && editScheduleData && !list.some((s) => s.id === editingScheduleId)) {
+      return [...list, editScheduleData];
+    }
+    return list;
+  }, [data?.schedule, editingScheduleId, editScheduleData]);
 
   const filteredSchedule = useMemo(() => {
     let list = activeSchedule;
@@ -1716,6 +1723,113 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     }
   };
 
+  // 4. 행사 식순 개별 편집 핸들러
+  const handleStartEditSchedule = useCallback((item: ScheduleItem) => {
+    setEditingScheduleId(item.id);
+    setEditScheduleData(safeClone(item));
+  }, []);
+
+  const handleCancelEditSchedule = useCallback(() => {
+    setEditingScheduleId(null);
+    setEditScheduleData(null);
+  }, []);
+
+  const handleSaveSchedule = useCallback(async () => {
+    if (!editScheduleData || editingScheduleId === null) return;
+    try {
+      const currentSchedule = (data?.schedule || YANGJAE_FALLBACK_DATA.schedule || []) as ScheduleItem[];
+      let calculatedDuration = editScheduleData.duration;
+      const timeMatch = (editScheduleData.time || '').match(/(\d{1,2}):(\d{2})\s*~\s*(\d{1,2}):(\d{2})/);
+      if (timeMatch) {
+        const startMin = parseInt(timeMatch[1], 10) * 60 + parseInt(timeMatch[2], 10);
+        const endMin = parseInt(timeMatch[3], 10) * 60 + parseInt(timeMatch[4], 10);
+        const diffMin = endMin - startMin;
+        if (diffMin > 0) {
+          calculatedDuration = `${diffMin}분`;
+        }
+      }
+
+      const updatedItem: ScheduleItem = {
+        ...editScheduleData,
+        title: (editScheduleData.title || '').trim(),
+        note: (editScheduleData.note || '').trim(),
+        time: (editScheduleData.time || '').trim(),
+        duration: calculatedDuration,
+        lead: (editScheduleData.lead || '').trim(),
+        status: editScheduleData.status || '예정',
+      };
+      const exists = currentSchedule.some((s) => s.id === editingScheduleId);
+      const nextSchedule = exists
+        ? currentSchedule.map((s) => (s.id === editingScheduleId ? updatedItem : s))
+        : [...currentSchedule, updatedItem];
+      await saveMutation.mutateAsync({
+        ...data,
+        schedule: nextSchedule,
+      });
+      setEditingScheduleId(null);
+      setEditScheduleData(null);
+      setToastMessage(`[${updatedItem.title}] 식순 정보가 저장되었습니다!`);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 3000);
+    } catch {
+      alert('행사 식순 저장에 실패했습니다.');
+    }
+  }, [data, editScheduleData, editingScheduleId, saveMutation]);
+
+  const handleAddSchedule = useCallback(async () => {
+    const currentSchedule = (data?.schedule || YANGJAE_FALLBACK_DATA.schedule || []) as ScheduleItem[];
+    const maxId = currentSchedule.reduce((max, s) => Math.max(max, Number(s?.id) || 0), 0);
+    const nextId = (Number.isFinite(maxId) ? maxId : 0) + 1;
+    const newScheduleItem: ScheduleItem = {
+      id: nextId,
+      phase: '공식행사',
+      time: '12:00 ~ 12:30',
+      duration: '30분',
+      title: '신규 행사 식순',
+      lead: '보건행정과',
+      status: '예정',
+      note: '식순 세부 내용을 입력하세요.',
+    };
+    if (scheduleSearchQuery) {
+      setScheduleSearchQuery('');
+    }
+    setEditingScheduleId(nextId);
+    setEditScheduleData(newScheduleItem);
+    const nextSchedule = [...currentSchedule, newScheduleItem];
+    try {
+      await saveMutation.mutateAsync({
+        ...data,
+        schedule: nextSchedule,
+      });
+      setToastMessage('새 행사 식순이 추가되었습니다! 내용을 수정해 주세요.');
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 3000);
+    } catch {
+      alert('식순 추가에 실패했습니다.');
+    }
+  }, [data, saveMutation, scheduleSearchQuery]);
+
+  const handleDeleteSchedule = useCallback(async (id: number) => {
+    if (!confirm('해당 행사 식순 항목을 삭제하시겠습니까?')) return;
+    const currentSchedule = (data?.schedule || YANGJAE_FALLBACK_DATA.schedule || []) as ScheduleItem[];
+    const nextSchedule = currentSchedule.filter((s) => s.id !== id);
+    try {
+      await saveMutation.mutateAsync({
+        ...data,
+        schedule: nextSchedule,
+      });
+      if (editingScheduleId === id) {
+        setEditingScheduleId(null);
+        setEditScheduleData(null);
+      }
+      setToastMessage('행사 식순이 삭제되었습니다.');
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 3000);
+    } catch {
+      alert('식순 삭제에 실패했습니다.');
+    }
+  }, [data, editingScheduleId, saveMutation]);
+
   const handleCopySummary = useCallback(async () => {
     const targetUrl = typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')
       ? `${window.location.origin}/festival/yangjae`
@@ -1796,7 +1910,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       )}
 
       <div 
-        className={`yangjae-dashboard-container w-full max-w-md bg-white sm:rounded-2xl sm:border-2 sm:shadow-lg overflow-hidden flex flex-col min-h-screen text-slate-900 font-sans transition-all sm:border-slate-300 ${
+        className={`yangjae-dashboard-container w-full max-w-md bg-white sm:rounded-2xl sm:border-2 sm:shadow-lg overflow-hidden flex flex-col min-h-screen text-slate-900 font-sans sm:border-slate-300 ${
           isLargeFont ? 'is-large-font text-[16px]' : ''
         }`}
       >
@@ -2662,6 +2776,21 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       )}
                     </div>
                   </div>
+
+                  {/* Row 4: 물품 소요 (필요 집기 총계) */}
+                  <div className="col-span-2 mt-2.5 pt-2 border-t border-slate-800/90 flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-400">필요 집기 총계</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-amber-950/70 text-amber-300 border border-amber-700/60 shadow-3xs">
+                        <span>테이블</span>
+                        <strong className="text-white font-black">{boothMetrics.totalTables}개</strong>
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-teal-950/70 text-teal-300 border border-teal-700/60 shadow-3xs">
+                        <span>의자</span>
+                        <strong className="text-white font-black">{boothMetrics.totalChairs}개</strong>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -3076,176 +3205,334 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             </div>
           )}
 
-          {/* TAB 3: 행사식순 (당일 17개 세부 타임테이블) */}
+          {/* TAB 3: 행사식순 (당일 17개 세부 타임테이블 - 한 화면 칼정렬 뷰) */}
           {visitedFestivalTabs.schedule && (
-            <div className={selectedTab === 'schedule' ? 'block space-y-3.5' : 'hidden'}>
-              {/* Header Stats Bar */}
-              <div className="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-                {/* Header Bar: Clean 1-Row Layout */}
-                <div className="border-b border-slate-200 pb-2.5">
+            <div className={selectedTab === 'schedule' ? 'block space-y-2.5' : 'hidden'}>
+              {/* Header Bar: Compact Single-Row Layout */}
+              <div className="bg-white border border-slate-300 rounded-xl px-3.5 py-2 shadow-2xs flex items-center justify-between gap-2.5 flex-wrap sm:flex-nowrap">
+                <div className="flex items-center gap-2 shrink-0">
                   <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 tracking-tight whitespace-nowrap`}>
                     <span>행사 식순</span>
                   </h3>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
+                    {activeSchedule.length}개 식순 · 07:30~14:30
+                  </span>
                 </div>
 
-                {/* Search Bar */}
-                <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={scheduleSearchQuery}
-                    onChange={(e) => setScheduleSearchQuery(e.target.value)}
-                    placeholder="식순명, 담당자, 내용 검색 (예: 국민의례, 걷기대회, 축하공연...)"
-                    className="w-full pl-9 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
-                  />
-                  {scheduleSearchQuery && (
+                <div className="flex items-center gap-1.5 flex-1 sm:max-w-xs justify-end">
+                  {/* Compact Search Bar */}
+                  <div className="relative flex-1 min-w-[130px]">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={scheduleSearchQuery}
+                      onChange={(e) => setScheduleSearchQuery(e.target.value)}
+                      placeholder="식순명, 담당자, 내용 검색..."
+                      className="w-full pl-8 pr-7 py-1 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
+                    />
+                    {scheduleSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setScheduleSearchQuery('')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Add Schedule Button */}
+                  {isLocalAdmin && (
                     <button
                       type="button"
-                      onClick={() => setScheduleSearchQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                      onClick={handleAddSchedule}
+                      disabled={saveMutation.isPending}
+                      className="px-2.5 py-1 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-1 cursor-pointer transition-all shadow-3xs active:scale-95 shrink-0 whitespace-nowrap"
+                      title="새 행사 식순 추가"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>식순 추가</span>
                     </button>
                   )}
                 </div>
               </div>
 
-              {/* Timetable Table Grid (칼정렬 행열 고도화) */}
-              <div className="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs">
-                {filteredSchedule.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-slate-500 font-medium">
-                    검색 조건과 일치하는 행사 식순이 없습니다.
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[720px]">
-                      <thead>
-                        <tr className="bg-slate-100 border-b border-slate-300 text-slate-700 text-xs font-extrabold">
-                          <th className="py-2.5 px-3 text-center w-14 shrink-0">순번</th>
-                          <th className="py-2.5 px-3 text-center w-36 shrink-0">시간 (소요)</th>
-                          <th className="py-2.5 px-3 text-center w-24 shrink-0">구분</th>
-                          <th className="py-2.5 px-3 text-left">식순명 및 세부 내용</th>
-                          <th className="py-2.5 px-3 text-center w-36 shrink-0">주관 / 담당</th>
-                          <th className="py-2.5 px-3 text-center w-20 shrink-0">상태</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {filteredSchedule.map((item) => {
-                          const isCeremony = item.id === 7 || item.title.includes('국민의례');
-                          const isWalkingStart = item.id === 14 || item.title.includes('걷기');
-                          const isDone = item.status === '완료' || item.status === 'done';
-                          const isInProgress = item.status === '진행중' || item.status === 'in-progress';
+              {/* Schedule Box Cards List (부스현황과 동일한 규격의 박스 형태) */}
+              {filteredSchedule.length === 0 ? (
+                <div className="p-8 text-center text-xs text-slate-500 font-medium bg-white border-2 border-slate-300 rounded-xl shadow-2xs space-y-3">
+                  <div>검색 조건과 일치하는 행사 식순이 없습니다.</div>
+                  {isLocalAdmin && (
+                    <div>
+                      <button
+                        type="button"
+                        onClick={handleAddSchedule}
+                        disabled={saveMutation.isPending}
+                        className="px-3 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg inline-flex items-center gap-1 cursor-pointer transition-all shadow-3xs active:scale-95"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>새 행사 식순 추가</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {filteredSchedule.map((item) => {
+                    const isCeremony = item.id === 7 || item.title.includes('국민의례');
+                    const isWalkingStart = item.id === 14 || item.title.includes('걷기');
+                    const isEditingThis = editingScheduleId === item.id;
 
-                          return (
-                            <tr
-                              key={`schedule-row-${item.id}`}
-                              className={`transition-colors align-top ${
-                                isCeremony
-                                  ? 'bg-blue-50/50 hover:bg-blue-50/80'
-                                  : isWalkingStart
-                                  ? 'bg-emerald-50/50 hover:bg-emerald-50/80'
-                                  : 'hover:bg-slate-50/80'
-                              }`}
-                            >
-                              {/* 순번 */}
-                              <td className="py-3 px-3 text-center font-mono text-xs font-extrabold text-slate-700">
-                                #{item.id}
-                              </td>
+                    return (
+                      <div
+                        key={`schedule-card-${item.id}`}
+                        className={`p-3.5 bg-white border-2 rounded-xl transition-all ${
+                          isEditingThis
+                            ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50/15 shadow-md'
+                            : isCeremony
+                            ? 'border-blue-300 bg-blue-50/20 shadow-2xs'
+                            : isWalkingStart
+                            ? 'border-emerald-300 bg-emerald-50/20 shadow-2xs'
+                            : 'border-slate-300 shadow-2xs'
+                        }`}
+                      >
+                        {/* Card Header: 순번, 구분, 시간 / 관리 버튼 */}
+                        <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-200">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-mono font-black text-slate-700`}>
+                              No.{item.id}
+                            </span>
 
-                              {/* 시간 및 소요 */}
-                              <td className="py-3 px-3 text-center whitespace-nowrap">
-                                <div className="inline-flex items-center gap-1 font-mono text-xs font-bold text-slate-900">
-                                  <Clock className="w-3 h-3 text-slate-500 shrink-0" />
-                                  <span>{item.time}</span>
-                                </div>
+                            {isEditingThis ? (
+                              <select
+                                value={editScheduleData?.phase || '식전·준비'}
+                                onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, phase: e.target.value } : null)}
+                                className="px-1.5 py-0.5 text-xs font-bold border border-blue-400 rounded bg-white text-slate-800 cursor-pointer"
+                              >
+                                <option value="식전·준비">식전·준비</option>
+                                <option value="공식행사">공식행사</option>
+                                <option value="걷기대회">걷기대회</option>
+                                <option value="공연·폐회">공연·폐회</option>
+                              </select>
+                            ) : (
+                              <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-bold px-2 py-0.5 rounded border ${
+                                item.phase === '공식행사'
+                                  ? 'bg-blue-50 text-blue-800 border-blue-200'
+                                  : item.phase === '걷기대회'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                  : item.phase === '식전·준비'
+                                  ? 'bg-slate-100 text-slate-700 border-slate-200'
+                                  : 'bg-purple-50 text-purple-800 border-purple-200'
+                              }`}>
+                                {item.phase}
+                              </span>
+                            )}
+
+                            {!isEditingThis && (
+                              <span className="inline-flex items-center gap-1 font-mono text-[11px] text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                <Clock className="w-3 h-3 text-slate-500 shrink-0" />
+                                <span>{item.time}</span>
                                 {item.duration && (
-                                  <div className="text-[11px] font-semibold text-blue-700 mt-0.5">
-                                    {item.duration}
-                                  </div>
+                                  <span className="text-blue-700 font-extrabold">({item.duration})</span>
                                 )}
-                              </td>
+                              </span>
+                            )}
+                          </div>
 
-                              {/* 구분 */}
-                              <td className="py-3 px-3 text-center whitespace-nowrap">
-                                <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                                  {item.phase}
-                                </span>
-                              </td>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {isEditingThis ? (
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={handleSaveSchedule}
+                                  disabled={saveMutation.isPending}
+                                  className="px-2 py-0.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                  title="저장 (Enter)"
+                                >
+                                  {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                  <span>저장</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleCancelEditSchedule}
+                                  className="px-1.5 py-0.5 text-xs font-bold bg-slate-500 hover:bg-slate-400 text-white rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                  title="취소 (Esc)"
+                                >
+                                  <X className="w-3 h-3" />
+                                  <span>취소</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteSchedule(item.id)}
+                                  disabled={saveMutation.isPending}
+                                  className="px-1.5 py-0.5 text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-900 border border-rose-300 rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                  title="식순 항목 삭제"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                  <span>삭제</span>
+                                </button>
+                              </div>
+                            ) : (
+                              isLocalAdmin && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditSchedule(item)}
+                                  className="px-2 py-0.5 text-xs font-bold bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-900 border border-slate-300 hover:border-blue-300 rounded flex items-center gap-1 cursor-pointer transition-colors shadow-3xs"
+                                  title="식순명 및 세부내용 수정"
+                                >
+                                  <Edit3 className="w-3 h-3 text-blue-600" />
+                                  <span>수정</span>
+                                </button>
+                              )
+                            )}
+                          </div>
+                        </div>
 
-                              {/* 식순명 및 세부 내용 */}
-                              <td className="py-3 px-3">
-                                <div className="space-y-1">
-                                  <div className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 leading-snug`}>
-                                    {item.title}
-                                  </div>
-                                  {item.note && (
-                                    <p className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-600 font-medium leading-relaxed`}>
-                                      {item.note}
-                                    </p>
-                                  )}
-                                  {/* 국민의례 의전 규정 안내 */}
-                                  {isCeremony && (
-                                    <div className="mt-2 p-2.5 bg-white/95 border border-blue-200 rounded-lg space-y-1 text-xs text-blue-950 shadow-3xs">
-                                      <div className="flex items-center gap-1.5 font-bold text-blue-900 text-[11.5px]">
-                                        <Shield className="w-3.5 h-3.5 text-blue-700 shrink-0" />
-                                        <span>대통령훈령 제438호(국민의례 규정) 약식절차 1 준용</span>
-                                      </div>
-                                      <div className="space-y-0.5 text-[11px] text-slate-700 pl-5 leading-relaxed font-medium">
-                                        <div>• <strong>국기에 대한 경례</strong>: 전주 없는 애국가 반주 1절에 맞춰 실시 (맹세문 미낭송)</div>
-                                        <div>• <strong>순국선열과 호국영령에 대한 묵념</strong>: 묵념곡 10~15초 연주</div>
-                                        <div className="text-red-600 font-bold bg-red-50 p-1.5 rounded border border-red-200 mt-1">
-                                          ※ 의전 금지 멘트 수칙: 사회자가 &ldquo;애국가 제창 등 이하 생략하겠습니다&rdquo; 멘트를 발언하는 것은 국가상징 품격을 저해하므로 규정상 엄격히 금지함.
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-                                  {/* 걷기대회 코스 안내 */}
-                                  {isWalkingStart && (
-                                    <div className="mt-2 p-2 bg-white/95 border border-emerald-200 rounded-lg text-xs text-emerald-950 shadow-3xs flex items-center justify-between gap-2 flex-wrap">
-                                      <div className="flex items-center gap-1.5 font-bold">
-                                        <MapPin className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                                        <span>코스: 수변문화쉼터 ↔ 영동4교 (2km 왕복 수변 산책로)</span>
-                                      </div>
-                                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
-                                        완주 인센티브 마감: 12:30
-                                      </span>
-                                    </div>
-                                  )}
+                        {/* Card Body */}
+                        {isEditingThis ? (
+                          <div className="space-y-2">
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">식순명</label>
+                              <input
+                                type="text"
+                                value={editScheduleData?.title || ''}
+                                onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, title: e.target.value } : null)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleSaveSchedule();
+                                  if (e.key === 'Escape') handleCancelEditSchedule();
+                                }}
+                                placeholder="식순명 입력"
+                                className="w-full text-sm font-extrabold border-2 border-blue-400 rounded-lg p-1.5 bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xs"
+                                autoFocus
+                              />
+                            </div>
+
+                            {/* 시간 / 주관 2-컬럼 그리드 */}
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-[10.5px] font-bold text-slate-600 mb-0.5">시간 (소요)</label>
+                                <div className="relative">
+                                  <Clock className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
+                                  <input
+                                    type="text"
+                                    value={editScheduleData?.time || ''}
+                                    onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, time: e.target.value } : null)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') handleSaveSchedule();
+                                      if (e.key === 'Escape') handleCancelEditSchedule();
+                                    }}
+                                    placeholder="07:30 ~ 08:00"
+                                    className="w-full pl-6 pr-2 py-1 text-xs font-mono font-bold border border-blue-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  />
                                 </div>
-                              </td>
+                              </div>
+                              <div>
+                                <label className="block text-[10.5px] font-bold text-slate-600 mb-0.5">주관 / 담당</label>
+                                <div className="relative">
+                                  <User className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
+                                  <input
+                                    type="text"
+                                    value={editScheduleData?.lead || ''}
+                                    onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, lead: e.target.value } : null)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') handleSaveSchedule();
+                                      if (e.key === 'Escape') handleCancelEditSchedule();
+                                    }}
+                                    placeholder="주관/담당"
+                                    className="w-full pl-6 pr-2 py-1 text-xs font-bold border border-blue-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  />
+                                </div>
+                              </div>
+                            </div>
 
-                              {/* 주관 / 담당 */}
-                              <td className="py-3 px-3 text-center whitespace-nowrap">
-                                {item.lead ? (
-                                  <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-800 border border-slate-200">
-                                    <User className="w-3 h-3 text-slate-500 shrink-0" />
-                                    <span>{item.lead}</span>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">세부내용</label>
+                              <input
+                                type="text"
+                                value={editScheduleData?.note || ''}
+                                onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, note: e.target.value } : null)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleSaveSchedule();
+                                  if (e.key === 'Escape') handleCancelEditSchedule();
+                                }}
+                                placeholder="세부내용 입력 (예: 참가자 집결, 주요 내용)"
+                                className="w-full text-xs font-medium border border-blue-300 rounded-lg p-1.5 bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xs"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            {/* 식순명 + 특수 뱃지 (의전 약식1, 걷기대회 2km 코스) */}
+                            <div className="flex items-center justify-between gap-1.5 mb-1.5 flex-wrap">
+                              <span
+                                className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 ${isLocalAdmin ? 'cursor-pointer hover:text-blue-700' : ''}`}
+                                onClick={() => isLocalAdmin && handleStartEditSchedule(item)}
+                                title={isLocalAdmin ? "클릭하여 식순명 및 세부내용 수정" : undefined}
+                              >
+                                {item.title}
+                              </span>
+
+                              {/* 특수 뱃지 그룹 */}
+                              <div className="flex items-center gap-1 shrink-0">
+                                {isCeremony && (
+                                  <span
+                                    className="inline-flex items-center gap-1 text-[9.5px] font-bold text-blue-800 bg-blue-100/90 border border-blue-300 px-1.5 py-0.2 rounded cursor-help whitespace-nowrap"
+                                    title="대통령훈령 제438호 약식절차 1 준용: ① 국기에 대한 경례(전주 없는 애국가 1절 반주, 맹세문 미낭송) ② 묵념(묵념곡 10~15초) ※ '애국가 제창 등 이하 생략' 발언 규정상 엄격 금지"
+                                  >
+                                    <Shield className="w-2.5 h-2.5 text-blue-700 shrink-0" />
+                                    <span>의전 약식1 준용</span>
                                   </span>
-                                ) : (
-                                  <span className="text-slate-400 text-xs">-</span>
                                 )}
-                              </td>
+                                {isWalkingStart && (
+                                  <span
+                                    className="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-1.5 py-0.2 rounded cursor-help whitespace-nowrap"
+                                    title="수변문화쉼터 ↔ 영동4교 2km 코스 완주 (12:30 인센티브 배부 마감)"
+                                  >
+                                    <MapPin className="w-2.5 h-2.5 text-emerald-700 shrink-0" />
+                                    <span>2km 왕복 (마감 12:30)</span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
 
-                              {/* 상태 */}
-                              <td className="py-3 px-3 text-center whitespace-nowrap">
-                                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                                  isDone
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : isInProgress
-                                    ? 'bg-amber-100 text-amber-900 animate-pulse'
-                                    : 'bg-slate-100 text-slate-700'
-                                }`}>
-                                  {isDone ? '✓ 완료' : isInProgress ? '▶ 진행' : '○ 예정'}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+                            {/* 주관 / 담당 바 (부스현황과 동일한 메타 바 스타일) */}
+                            {item.lead && (
+                              <div className="text-xs text-slate-600 font-medium mb-1.5 flex items-center gap-1">
+                                <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                                <span>주관/담당: <strong className="text-slate-900">{item.lead}</strong></span>
+                              </div>
+                            )}
+
+                            {/* 세부내용 박스 (부스현황의 "내용:" 박스와 동일한 스타일) */}
+                            {item.note && (
+                              <div
+                                className={`text-xs text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200 leading-relaxed ${isLocalAdmin ? 'cursor-pointer hover:bg-slate-100/80 hover:border-blue-200' : ''}`}
+                                onClick={() => isLocalAdmin && handleStartEditSchedule(item)}
+                                title={isLocalAdmin ? "클릭하여 세부내용 수정" : undefined}
+                              >
+                                <span className="font-bold text-slate-600">내용: </span>{item.note}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Add New Schedule Box at bottom of list */}
+                  {isLocalAdmin && (
+                    <button
+                      type="button"
+                      onClick={handleAddSchedule}
+                      disabled={saveMutation.isPending}
+                      className="w-full py-2.5 text-xs font-bold text-blue-700 hover:text-blue-800 bg-blue-50/60 hover:bg-blue-100/70 border-2 border-dashed border-blue-300 hover:border-blue-400 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-3xs active:scale-[0.99]"
+                      title="새 행사 식순 박스 추가"
+                    >
+                      <Plus className="w-4 h-4 text-blue-600" />
+                      <span>새 행사 식순 박스 추가</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

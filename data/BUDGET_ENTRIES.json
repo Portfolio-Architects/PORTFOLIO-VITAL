@@ -676,18 +676,6 @@
     "id": "mu4xb2z0bi9ah7ova"
   },
   {
-    "categoryId": "mnrcir0v56b8pixdb",
-    "amount": 3232000,
-    "date": "2026-09-17",
-    "purpose": "건증실 전산 소모품 토너",
-    "memo": "[시뮬레이션] 단가 ₩3,232,000 × 1개",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general",
-    "simulationEntryId": "mu4yo0jez73qlrntp",
-    "id": "mu4yo0jevx9takj17"
-  },
-  {
     "categoryId": "mnrcir0v5zjn4qxyg",
     "amount": 28800000,
     "date": "2026-09-17",
@@ -722,5 +710,27 @@
     "actionType": "general",
     "simulationEntryId": "mu5aau7ouusgerzby",
     "id": "mu5aau7ognvzo8ucm"
+  },
+  {
+    "categoryId": "mnrcir0v56b8pixdb",
+    "amount": 1949400,
+    "date": "2026-09-18",
+    "purpose": "(일상경비 교부요청) 서울체력장 전산소모품(토너) 구매비",
+    "memo": "",
+    "docRegNum": "보건행정과-11720",
+    "actionType": "issuance",
+    "isPlanned": false,
+    "id": "mudmej5o7cdqjiw9s"
+  },
+  {
+    "categoryId": "mnrcir0v56b8pixdb",
+    "amount": 3232000,
+    "date": "2026-09-23",
+    "purpose": "(일상경비) 2026 서울체력장 강남센터 전산소모품 구매비 지급",
+    "memo": "",
+    "docRegNum": "보건행정과-11939",
+    "actionType": "daily_expense",
+    "isPlanned": false,
+    "id": "mudmfelrl57mtc6er"
   }
 ]

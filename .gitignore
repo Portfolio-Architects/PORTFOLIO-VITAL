@@ -53,6 +53,7 @@ next-env.d.ts
 /scratch/
 scratch_*.txt
 temp_plan_text.txt
+temp_*.txt
 /audit_reports*/
 
 # python cache
