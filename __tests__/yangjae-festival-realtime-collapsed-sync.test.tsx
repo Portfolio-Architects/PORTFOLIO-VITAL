@@ -1057,6 +1057,124 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(deleteBtn).toBeInTheDocument();
     });
   });
+
+  describe('R15. Festival Duties Spreadsheet Inline Editing, Row Management & CSV Export', () => {
+    it('switches to Duties tab, enters spreadsheet edit mode, and saves updated duties to disk', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      // 1. Switch to Duties tab (Tab 4)
+      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
+      fireEvent.click(dutiesTabBtn);
+
+      // 2. Click "엑셀 편집" button
+      const editDutiesBtn = screen.getByTitle('스프레드시트 엑셀 편집 모드 시작');
+      expect(editDutiesBtn).toBeInTheDocument();
+      fireEvent.click(editDutiesBtn);
+
+      // 3. Verify spreadsheet edit banner and inputs are visible
+      expect(screen.getByText(/📊 엑셀 편집 모드/i)).toBeInTheDocument();
+      const managerInputs = screen.getAllByPlaceholderText('예: 오창선');
+      expect(managerInputs.length).toBeGreaterThan(0);
+
+      // 4. Edit first duty manager
+      fireEvent.change(managerInputs[0], { target: { value: '홍길동 주무관' } });
+      expect((managerInputs[0] as HTMLInputElement).value).toBe('홍길동 주무관');
+
+      // 5. Click "저장" button
+      const saveBtn = screen.getByTitle('업무분장 저장');
+      fireEvent.click(saveBtn);
+
+      // 6. Verify save mutation triggered POST request with updated duties
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/api/festival/yangjae',
+          expect.objectContaining({
+            method: 'POST',
+            body: expect.stringContaining('홍길동 주무관'),
+          })
+        );
+      });
+    });
+
+    it('cancels duties spreadsheet edit mode and rolls back changes without saving', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
+      fireEvent.click(dutiesTabBtn);
+
+      const editDutiesBtn = screen.getByTitle('스프레드시트 엑셀 편집 모드 시작');
+      fireEvent.click(editDutiesBtn);
+
+      const managerInputs = screen.getAllByPlaceholderText('예: 오창선');
+      fireEvent.change(managerInputs[0], { target: { value: '임시수정자' } });
+
+      // Click 취소
+      const cancelBtn = screen.getByTitle('편집 취소');
+      fireEvent.click(cancelBtn);
+
+      // Verify returned to view mode
+      expect(screen.queryByText(/📊 엑셀 편집 모드/i)).toBeNull();
+      expect(screen.queryByDisplayValue('임시수정자')).toBeNull();
+    });
+
+    it('adds a new duty row and supports reordering rows', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
+      fireEvent.click(dutiesTabBtn);
+
+      // Click "+ 새 업무분장 행 추가" button
+      const addRowBtns = screen.getAllByText(/\+ 새 업무분장 행 추가/i);
+      fireEvent.click(addRowBtns[0]);
+
+      // Verify entered edit mode and new row exists
+      expect(screen.getByText(/📊 엑셀 편집 모드/i)).toBeInTheDocument();
+      const managerInputs = screen.getAllByPlaceholderText('예: 오창선');
+      const lastManagerInput = managerInputs[managerInputs.length - 1] as HTMLInputElement;
+      expect(lastManagerInput.value).toBe('');
+
+      // Test move up on last row
+      const moveUpBtns = screen.getAllByTitle('위로 이동');
+      expect(moveUpBtns[0]).toBeDisabled(); // first row cannot move up
+      const lastMoveUpBtn = moveUpBtns[moveUpBtns.length - 1];
+      expect(lastMoveUpBtn).not.toBeDisabled();
+      fireEvent.click(lastMoveUpBtn);
+
+      // Test delete with window.confirm
+      const originalConfirm = window.confirm;
+      window.confirm = jest.fn(() => true);
+
+      const deleteBtns = screen.getAllByTitle('행 삭제');
+      const initialCount = deleteBtns.length;
+      fireEvent.click(deleteBtns[deleteBtns.length - 1]);
+
+      expect(window.confirm).toHaveBeenCalled();
+      const updatedDeleteBtns = screen.getAllByTitle('행 삭제');
+      expect(updatedDeleteBtns.length).toBe(initialCount - 1);
+
+      window.confirm = originalConfirm;
+    });
+
+    it('exports duties table to CSV on button click', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
+      fireEvent.click(dutiesTabBtn);
+
+      // Mock URL.createObjectURL and URL.revokeObjectURL
+      const mockCreateObjectURL = jest.fn(() => 'blob:mock-url');
+      const mockRevokeObjectURL = jest.fn();
+      window.URL.createObjectURL = mockCreateObjectURL;
+      window.URL.revokeObjectURL = mockRevokeObjectURL;
+
+      const csvBtn = screen.getByTitle('업무분장 엑셀(CSV) 다운로드');
+      expect(csvBtn).toBeInTheDocument();
+      fireEvent.click(csvBtn);
+
+      expect(mockCreateObjectURL).toHaveBeenCalled();
+      expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+    });
+  });
 });
 
 

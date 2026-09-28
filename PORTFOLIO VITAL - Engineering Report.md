@@ -319,6 +319,67 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 221: 2026 양재천 건강 페스티벌 대행 용역 0928 산출내역서 정밀 원가 감사, 7대 거품 비목 적발, 6대 실무 규격 현실화 및 과업내용서 법정 표준 조항 보강] Comprehensive cost audit on agency's 0928 quote (54,171,700 KRW) vs proposal (260828.pdf), identification of 7 inflated unit cost items (~3.5M KRW buffer), separation of Sports Council co-share (3.9M KRW) to safeguard public contract ceiling (<= 49,900,000 KRW), integration of 6 refined specifications (1,200 bracelets, 20 booth banners, 36 electrical runs, 20 staff), and formulation of strict statutory RFP contractual clauses. (2026-09-28)
+* **개요 및 개발 목적**:
+  - 2026 양재천 건강 페스티벌(2026. 10. 31.) 대행 용역 1인 수의계약 체결을 앞두고, 대행사(제이민 커뮤니케이션)가 제출한 0928 수정 견적서(54,171,700원) 및 당초 운영제안서(260828.pdf) 전 행을 정밀 교차 감사함.
+  - 보건소 본 계약 법정 한도(부구청장 방침 4,990만 원 이하)를 엄수하기 위한 체육회 자체 카드결제 분담금(390만 원) 분리 발행 체계를 수립하고, 공공 조달 시세 대비 부풀려진 7대 과다 계상 비목을 규명하여 발주처의 예산 협상 주도권을 확립함.
+  - 현장 실무 수요를 반영한 6대 핵심 규격을 정립하고, 대행사가 일방적으로 축소한 현장 지원 인력(10명 누락 적발)을 20명으로 환원하도록 강력 통제함.
+  - 향후 계약서에 결합될 `양재천 건강 페스티벌 과업내용서.hwpx`의 6대 핵심 법정 표준 조항(포토존 2종, 부스 세분화 및 간선 36개소, 파라솔 쉼터, 고무팔찌 1,200개, 체험 프로그램 운영비 150만 원 실비 정산 증빙 의무 등)을 완성함.
+* **핵심 분석 및 조치 성과 (Core Audit & Administrative Actions)**:
+  1. **대행사 질의 5건에 대한 1:1 공식 행정 회신문 확정**:
+     - VIP실 다과 보건소 자체 집행(견적 제외), 파라솔 세트 필수 배치 지시, 1km DJ 부스 운영 및 페이스페인팅 미실시 확정, 걷기 홍보 시안 반영 지시, 부스지원비 150만 원의 합법적 프로그램 운영 실비 집행(세금계산서/원천징수 수취 후 계좌이체 및 증빙 첨부 정산) 지침 확립.
+  2. **7대 과다 계상 거품 비목 적발 및 흡수 여력 입증**:
+     - 가로현수막(장당 10만 원 $\to$ 시세 4~5만 원, 100만 원 거품), X배너(개당 7만 원 $\to$ 시세 2.5~3.5만 원, 30만 원 거품), 반환점 스티커(1,000매 30만 원 $\to$ 전문인쇄 2~3만 원, 10배 폭리), A4 미니배너(개당 2.5만 원 $\to$ 시세 7천 원), 초청장(부당 4천 원 $\to$ 시세 1.5천 원), 청소비·운임비(인건비·장비비와의 이중 청구 40만 원), 코스 DJ(메인 무대 전체 음향 150만 원 대비 250만 원 과다) 등 총 300만~350만 원 상당의 단가 거품 규명.
+     - 추가 소요 항목(팔찌 1,200개, 부스 배너 20개, 간선 36개, 인력 20명 등 약 242만 원)을 총액 49,900,000원(부가세 포함) 한도 내에서 100% 자체 흡수하도록 단가 조정 가이드라인 완성.
+  3. **과업내용서 6대 법정 표준 조항 완성**:
+     - 포토존 2종(360도 회전 포토부스 전담인력 1명 상주 + 인스타그램 액자 포토존), MQ 36동 + 대기실 캐노피 4동 및 간선 36개소, 파라솔 세트 조성, 고무팔찌 1,200개 및 부스현수막 36장/부스배너 20개, 체험부스 운영 실비 150만 원 정산 증빙 의무, 체육회 분담금(390만 원) 분계 및 보건소 도급 상한액(4,990만 원) 명시.
+
+### [Milestone 220: Yangjae Festival Booth Staff Count (인원수) Field Integration & Dynamic Aggregation Pipeline Release] Integrated staff count (`staffCount`) field across individual booth cards (reading & editing modes), updated hero banner summary bar with real-time total personnel aggregation, unified local JSON storage (`FESTIVAL_YANGJAE_2026.json`), React dashboard (`YangjaeFestivalDashboard.tsx`), and Cloudflare Pages static template (`scripts/pages-template.html`), achieving 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-28)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("양재천 페스티벌 부스 탭에서 부스별 인원수도 넣을수 있게 업데이트 해줘") 전격 분석 및 완벽 구현:
+    1. **부스 데이터 모델 확장 (`BoothItem`)**:
+       - `src/hooks/useYangjaeFestival.ts`의 `BoothItem` 인터페이스에 `staffCount?: number;` 필드 신설.
+       - 단일 진실 공급원(`data/FESTIVAL_YANGJAE_2026.json`) 및 fallback 데이터 19개 전 부스에 현실적 인원수(총 76명) 초깃값 부여.
+    2. **부스 카드 읽기 및 편집 모드 인원수 필드 전면 구현**:
+       - **읽기 모드**: 부스 하단 집기 정보 영역에 인디고 계열의 `인원 N명` 뱃지(`<Users className="w-3 h-3 text-indigo-700" />`)를 테이블/의자 뱃지 전면에 배치.
+       - **단일 및 일괄 편집 모드**: 집기 설정 영역을 3컬럼 그리드(`grid-cols-3`)로 개편하여 `인원(명)` 입력창을 신설하고, 값 변경 시 실시간 반영 및 `data/FESTIVAL_YANGJAE_2026.json` 원자적 디스크 저장 연동.
+       - **신규 부스 추가**: 신규 부스 생성 시 기본 인원수(`staffCount: 2`) 기본값 자동 할당.
+    3. **상단 히어로 배너 집기 및 인원 총계 실시간 동적 합산**:
+       - `boothMetrics` 내 `totalStaff`, `confirmedStaff` 합산 로직 추가.
+       - 4행 타이틀을 "필요 집기 및 인원 총계"로 갱신하고 `인원 {boothMetrics.totalStaff}명` 프리미엄 뱃지 추가 배치.
+    4. **정적 배포 템플릿(`scripts/pages-template.html`) 1:1 완벽 동기화**:
+       - Cloudflare Pages 정적 템플릿 내 부스 카드 인원수 뱃지 및 히어로 배너 인원 총계 동적 렌더링 반영 후 `node scripts/prepare-pages-output.js` 재빌드 완료.
+    5. **정량적 무결점 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 35개 단위 테스트 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 219: Yangjae Festival Emergency Contact PIN Authentication Hint Purge Release] Completely purged security hints ('(행사일: 1031)' in authentication failure error message and '(예: 행사일)' in password input placeholder) across React dashboard and Cloudflare Pages static templates, enforcing strict zero-disclosure confidentiality for emergency contact phone numbers with 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-28)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("비상연락망 on 할때 힌트 주지마") 전격 분석 및 완벽 반영:
+    1. **비상연락망 PIN 인증 모달 내 힌트 전면 소거**:
+       - 비밀번호 입력창 `placeholder`에서 힌트 텍스트(`(예: 행사일)`)를 영구 제거하여 `비밀번호 4자리 입력`으로 단정화.
+       - 잘못된 비밀번호 입력 시 노출되던 에러 메시지 내 힌트(`(행사일: 1031)`)를 완전 삭제하고 표준 보안 실패 메시지(`비밀번호가 올바르지 않습니다.`)로 통일.
+    2. **정적 배포 템플릿(`scripts/pages-template.html`) 1:1 완벽 동기화**:
+       - Cloudflare Pages 템플릿 내 PIN 인풋 placeholder 힌트 삭제 및 `node scripts/prepare-pages-output.js` 재빌드 완료.
+    3. **정량적 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 35개 단위 테스트 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 218: Yangjae Festival Schedule Tab Header 2-Row Layout Transformation & Zero-Clipping Guard Release] Refactored Schedule Tab (Tab 3) header into a high-contrast 2-row layout (Row 1: Title, Count Badge, and Add Schedule Button; Row 2: Full-Width Search Bar), completely eliminating horizontal text clipping and button truncation in narrow container viewports (max-w-md 448px), aligned with Tab 4 (Duties) visual design standards with 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-28)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("UI 짤리는것 교정좀 해줘" + 스크린샷) 전격 분석 및 완벽 해결:
+    1. **식순 헤더 잘림 현상(Root Cause) 규명 및 해소**:
+       - 모바일 카드 뷰 컨테이너(`max-w-md`, 448px) 내부 가용 폭(약 400px) 대비, 기존 1행에 타이틀(약 218px) + 검색창(130px) + '식순 추가' 버튼(88px)이 동시 배치되어 가로폭(452px)을 초과함.
+       - 데스크톱 브라우저 환경에서 `sm:flex-nowrap` 강제로 인해 줄바꿈이 차단되어 우측 '식순 추가' 버튼이 컨테이너 테두리 밖으로 삐져나가 잘리는 현상 발생.
+    2. **업무분장 탭(Tab 4)과 동일한 2행(2-Row) 레이아웃 전면 개편**:
+       - **1행 (상단 행)**: 좌측에 메인 타이틀(`행사 식순`) + 카운트 뱃지(`{activeSchedule.length}개 식순 · 07:30~14:30`), 우측에 관리자 전용 `[+ 식순 추가]` 버튼을 양끝 정렬(`justify-between`)하여 가용폭 400px 내 285px만 점유, 115px 이상 여유 공간 확보.
+       - **2행 (하단 행)**: 검색창을 전폭(`w-full`)으로 시원하게 확장하여 placeholder(`식순명, 담당자, 내용 검색...`) 및 입력어가 단 한 글자도 잘리지 않는 완벽한 시인성 확보.
+    3. **정적 배포 템플릿(`scripts/pages-template.html`) 1:1 완벽 동기화**:
+       - Cloudflare Pages 템플릿 내 행사 식순 헤더를 2행 구조로 일치화하고 `node scripts/prepare-pages-output.js` 재빌드 완료.
+    4. **정량적 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 35개 단위 테스트 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
 ### [Milestone 217: Yangjae Festival Schedule Box-Card Individual Addition & Deletion Pipeline Release] Implemented individual schedule item box addition ('식순 추가' in top header bar & dashed card button at list bottom) and row deletion ('삭제' button in edit mode) with instant atomic persistence to FESTIVAL_YANGJAE_2026.json, auto-focus inline edit mode transition, dynamic header item count badge, and multi-platform static synchronization, achieving 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-23)
 * **개요 및 개발 목적**:
   - 사용자 요청 ("식순 박스 개별 추가 가능하게 기능 구현해줘") 전격 분석 및 완벽 구현:
@@ -5718,3 +5779,95 @@ sequenceDiagram
       - `yangjae-festival-realtime-collapsed-sync.test.tsx`: R14 단위 테스트 신설 포함 34개 전수 통과 (100% PASS).
       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
       - Cloudflare Pages 정적 번들(`out/festival/yangjae/index.html`) 자동 주입 완료.
+
+- [x] **양재천 페스티벌 업무분장 엑셀 스프레드시트 인라인 편집·행 관리·CSV 내보내기 및 듀얼 스토리지 영속화 파이프라인 구축 (Milestone 221 - 2026-09-28)**
+  - 사용자 요구사항: "업무분장 페이지는 엑셀처럼 내가 입력하고 저장 및 수정 할수 있게 만들어줘"
+  - 주요 조치 및 엔지니어링 실적:
+    * **업무분장(Tab 4) 엑셀 스프레드시트 편집 인터페이스 전면 신설**:
+      - `YangjaeFestivalDashboard.tsx` 탭 4에 `editingDuties` 및 `editDutiesData` 상태 기반의 엑셀 스프레드시트 편집 모드 구축.
+      - 구분(카테고리), 부서·기관명, 담당 역할, 담당자, 행정전화, 휴대전화, 배정 과업을 각 셀 인풋으로 직접 입력 및 편집 가능하도록 테이블 그리드 전면 재설계.
+      - 카테고리 데이터리스트(`<datalist id="yangjae-duty-category-options">`) 연동을 통해 8대 공식 카테고리(총괄기획, 보건소, 체육회, 대행용역, 응급안전, 체험부스, 유관부서, 자원봉사) 원클릭 자동완성 제공.
+    * **스마트 입력 편의 및 데이터 정규화 파이프라인 탑재**:
+      - 전화번호 입력 시 `formatAutoHyphen` 실시간 자동 하이픈 마스킹 적용(행정전화 `02-3423-XXXX`, 휴대전화 `010-XXXX-XXXX`).
+      - 배정 과업 텍스트에어리어에서 엔터 줄바꿈(`\n`) 시 개조식 문자열 배열(`string[]`)로 자동 분할 저장되는 파서 탑재.
+      - 상/하 순서 변경(▲/▼), 신규 행 추가(`+ 새 업무분장 행 추가`), 행 삭제(확인 모달 연동) 등 완벽한 엑셀 조작성 확보.
+    * **업무분장 전체 데이터 UTF-8 BOM CSV 원클릭 내보내기(다운로드) 신설**:
+      - 상단 헤더에 `[📥 엑셀(CSV)]` 다운로드 버튼을 배치하여 Microsoft Excel에서 한글 깨짐 없이 즉시 열리는 UTF-8 with BOM 인코딩 CSV 파일(`양재천_페스티벌_업무분장_{날짜}.csv`) 자동 생성 및 다운로드 구현.
+    * **단일 진실 공급원(SSOT) 듀얼 영속화 및 실시간 동기화**:
+      - 로컬 디스크(`data/FESTIVAL_YANGJAE_2026.json`), React 대시보드 상태, fallback 데이터(`YANGJAE_FALLBACK_DATA`), 및 Cloudflare Pages 배포 산출물(`out/festival/yangjae/index.html`) 간 완전한 실시간 양방향 영속화 보장.
+    * **정량적 검증 성과**:
+      - `yangjae-festival-realtime-collapsed-sync.test.tsx`: R15 엑셀 편집·행 관리·CSV 내보내기 전용 검증 스위트 신설 포함 총 39개 테스트 100% 전수 통과 (100% PASS).
+      - `npx tsc --noEmit` 무결점 통과 (0 errors).
+      - Next.js 로컬 개발 서버(`http://localhost:3001`) 0ms 랙 프리징 없는 안정 가동 유지.
+
+- [x] **양재천 페스티벌 업무분장 배정 과업 컬럼 최소 폭 보장 및 데스크톱 와이드 컨테이너 확장 릴리즈 (Milestone 222 - 2026-09-28)**
+  - 사용자 요구사항: "한 행이 왜이렇게 커졌지??" (업무분장 1행의 과도한 세로 높이 팽창 및 공백 이상 현상 교정)
+  - 결함 원인 분석:
+    * 뷰 모드 테이블에서 `배정 과업` 컬럼에 최소 폭(`min-w`)이 지정되지 않아, 고정폭 컬럼들(구분, 부서명, 역할, 연락처 등)에 밀려 잔여 공간(약 44px)으로 컬럼이 극단적 압축됨.
+    * 44px 너비로 인해 4개 세부 과업의 긴 문장들이 1~2글자 단위로 줄바꿈되어 50여 줄로 수직 팽창하면서 행 높이가 약 1,000px까지 비정상적으로 치솟음.
+    * 대시보드 외부 컨테이너가 데스크톱 환경에서도 모바일 규격(`max-w-md`, 448px)으로 잠겨 있어, 우측의 과업 텍스트가 화면 밖으로 가려진 채 좌측 컬럼들의 거대한 수직 공백만 노출됨.
+  - 주요 조치 및 엔지니어링 실적:
+    * **배정 과업 컬럼 최소 너비 보장 및 한국어 단어 줄바꿈(break-keep) 적용**:
+      - 뷰 모드 테이블의 `배정 과업` 헤더 및 셀에 `min-w-[320px]`을 부여하고 테이블 전체 폭을 `min-w-[900px]`로 확장.
+      - 과업 리스트 항목에 `break-keep` 및 `leading-snug`를 적용하여 1줄당 자연스러운 문장 가독성을 확보하고 행 높이를 1,000px에서 정상 높이(약 80px)로 92% 이상 대폭 슬림화 교정.
+    * **데스크톱 와이드 화면 동적 확장 컨테이너(`sm:max-w-5xl xl:max-w-6xl`) 연동**:
+      - 테이블 중심 탭(`duties`, `schedule`, `booths`) 활성화 시 데스크톱 브라우저에서 전폭 대시보드(`sm:max-w-5xl xl:max-w-6xl`)로 컨테이너가 자연스럽게 확장되도록 동적 전환 탑재.
+      - 6개 컬럼 전체가 가로 스크롤 없이 한 화면에 완벽하게 정렬되어 표시되도록 사용성 대폭 향상.
+    * **멀티 플랫폼 소스 전수 동기화**:
+      - `src/components/festival/YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`, `out/festival/yangjae/index.html` 100% 일괄 반영 완료.
+    * **정량적 검증 성과**:
+      - Jest 단위 테스트 39개 전수 통과 (100% PASS).
+      - `npx tsc --noEmit` 무결점 통과 (0 errors).
+
+- [x] **양재천 페스티벌 모바일 전용 뷰포트(max-w-md 448px) 고정 및 업무분장 전폭 카드/스프레드시트 뷰 개편 릴리즈 (Milestone 223 - 2026-09-28)**
+  - 사용자 요구사항: "이러면 프론트엔드에서는 짤릴거아냐 모바일로만 볼건데" (모바일 전용 환경에 맞춘 컨테이너 규격 원복 및 화면 잘림·1,000px 수직 팽창 영구 차단)
+  - 주요 조치 및 엔지니어링 실적:
+    * **대시보드 외부 컨테이너 모바일 전용 규격(`w-full sm:max-w-md`, 448px) 원복 및 고정**:
+      - `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 상단 컨테이너에서 데스크톱 와이드 확장(`sm:max-w-5xl xl:max-w-6xl`) 코드를 완전히 제거하고, 모바일 규격(`sm:max-w-md`)으로 원복 및 고정.
+      - 사용자의 모바일-퍼스트/모바일 전용 이용 환경에 100% 최적화.
+    * **업무분장(Tab 4) 뷰 모드: 데스크톱 테이블에서 모바일 전폭 카드 스택 뷰로 전면 전환**:
+      - 가로 900px 테이블 구조를 완전히 걷어내고, Tab 5(부스현황) 및 Tab 3(행사식순)과 동일한 모바일 전폭 카드(`bg-white border-2 border-slate-300 rounded-xl p-3.5 space-y-2.5 shadow-2xs`) 뷰로 전면 재설계.
+      - [카드 헤더: 구분 뱃지 + 부서·기관명 + 관리자 수정 버튼] -> [담당 역할: 볼드 텍스트] -> [담당자 및 연락처 바: 👤담당자, 📞행정전화(원클릭 다이얼), 📱휴대전화(원클릭 다이얼)] -> [배정 과업: 연한 배경 박스 내 글머리 기호(•) 목록] 구조 구축.
+      - 360px~448px 모바일 뷰포트에서 가로 스크롤 잘림 0%, 텍스트 압축으로 인한 세로 1,000px 팽창 0% 달성 및 카드당 높이 120~150px의 컴팩트한 모바일 가독성 확보.
+    * **업무분장 편집 모드(`editingDuties`): 모바일 카드형 스프레드시트 에디터 구축**:
+      - 모바일 환경에서도 손쉽게 입력·수정·순서이동·삭제할 수 있도록 각 행을 독립된 카드 에디터 아이템으로 재구성.
+      - 상단: `[#No] [구분 드롭다운] [▲ 위로] [▼ 아래로] [🗑️ 삭제]`, 중단: 부서·기관명, 담당 역할, 담당자, 행정전화/휴대전화 그리드, 하단: 배정 과업 텍스트에어리어(줄바꿈 시 개조식 목록 자동 분할).
+      - 하단 바: `[+ 새 업무분장 행 추가]`, `[취소]`, `[업무분장 전체 저장]` 연동.
+    * **멀티 플랫폼 정적 배포 산출물 100% 동기화**:
+      - `scripts/pages-template.html` 내 `renderDuties()` 함수 및 `setActiveTab()`을 모바일 카드 뷰 규격으로 전면 동기화.
+      - `node scripts/prepare-pages-output.js` 실행으로 `out/festival/yangjae/index.html` 정적 파일 빌드 갱신 완료.
+    * **정량적 검증 성과**:
+      - Jest 단위 테스트 39개 전수 통과 (100% PASS).
+      - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+      - Next.js 로컬 개발 서버(`http://localhost:3001`) 정상 구동 유지.
+
+- [x] **양재천 페스티벌 추진과제 탭 참석자(attendees) 캡슐 배지 및 편집 입력 기능 전면 영구 소거 릴리즈 (Milestone 224 - 2026-09-28)**
+  - 사용자 요구사항: "추진과제 탭에 스샷에 나오는 캡슐 삭제해줘, 기능도 삭제해줘 의미가 없다" (회색 부서 캡슐 및 노란색 전화번호 캡슐 UI 및 관련 기능 영구 삭제)
+  - 주요 조치 및 엔지니어링 실적:
+    * **추진과제 탭(Tab 1) 뷰 모드 내 참석자 캡슐 UI 블록 전면 소거**:
+      - `YangjaeFestivalDashboard.tsx` 추진과제 세부 과업 렌더링 블록 내 `{parsed.attendees && ( ... )}` 컴포넌트(회색 담당자 캡슐 및 노란색 전화번호 캡슐) 완전 삭제.
+      - `scripts/pages-template.html` 내 `attendeesHtml` 생성 로직 및 DOM 주입 코드를 완전 소거하여 순수 개조식 본문 텍스트만 표시되도록 시각적 정제 완성.
+    * **추진과제 인라인 편집 모드(`DetailEditRow`) 내 참여자 입력 기능 완전 삭제**:
+      - 세부 과업 편집 컴포넌트(`DetailEditRow`) 내 `attendees` 상태, `setAttendees` 변이, 및 참여자 입력창(`<input placeholder="참석자 (예: 과장님 7010...)" />`)을 전면 영구 삭제.
+      - 날짜(`date`), 상태(`status`), 본문(`text`) 중심의 간결하고 쾌적한 3필드 편집 인터페이스로 개편하여 모바일 가독성 및 입력 편의성 대폭 증대.
+      - 이동 모달(`transferModal`) 미리보기 영역 내 `parsedPreview.attendees` 표시 블록도 동시 소거.
+    * **로컬 JSON 데이터(`data/FESTIVAL_YANGJAE_2026.json`) 내 잔존 태그 33건 일괄 클렌징**:
+      - 세부 과업 문자열에 포함되어 있던 33건의 `[참여:...]` 레거시 태그를 정규식 기반으로 완전 소거하여 순수 공문서 개조식 텍스트로 원자적 영속화 완료.
+      - `functions/api/festival/yangjae.ts` 내 fallback 데이터 및 `out/festival/yangjae/index.html` 100% 동기화 재빌드 완료.
+    * **정량적 검증 성과**:
+      - Jest 단위 테스트 39개 전수 통과 (100% PASS).
+      - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+      - Next.js 로컬 개발 서버(`http://localhost:3001`) 정상 구동 유지.
+
+- [x] **공문서 표준 문체 헌장 내 사용자 및 상대방 심리 대변·감정 묘사 전면 금지(Zero Psychological Ventriloquism) 조항 신설 및 영구 거버넌스 잠금 (Milestone 225 - 2026-09-28)**
+  - 사용자 요구사항: "나의 심리를 대변하는 말투로 하지 말고(설정 저장해) 객관적인 문체로 서술하기로 했잖아"
+  - 결함 원인 분석:
+    * 에이전트의 응답 텍스트에 사용자 또는 협상 상대방의 내면 심리(예: "주무관님이 화가 났다", "피가 마르는", "답답한 심정", "안도감" 등)를 의인화·소설화하여 서술하는 감정적·문학적 수식어가 노출되어, 공문서 표준의 탈감정성 및 객관적 보고 원칙을 훼손함.
+  - 주요 조치 및 엔지니어링 실적:
+    * **`AGENTS.md` 규칙 M(공문서 및 행정 보고 표준 문체 헌장) 조항 보강 및 영구 잠금**:
+      - 규칙 M-1에 `사용자 및 상대방 내면 심리 대변·감정 묘사 전면 금지 (Zero Psychological Ventriloquism)` 조항을 공식 신설.
+      - 사용자 또는 상대방의 내면 감정 상태를 대변·의인화·추측하여 서술하는 일체의 감정적 말투를 원천 차단하고, 오직 계약 조항, 사실관계, 법정 절차, 정량 수치만을 건조하고 탈감정적으로 서술하도록 강제.
+    * **`AGENTS.md` 규칙 P(초임상적 학술 평어체 및 규범 배제 거버넌스 헌장) 엄격 준수 재확인**:
+      - 무사과 원칙(Zero Apology) 및 실증적 사실 서술 원칙에 입각하여 오류 수정 시 사과 없이 대상 레코드 식별 및 정정 결과를 즉시 반영.
+    * **자동 동기화 스크립트 실행 및 마일스톤 로그 최신화**:
+      - `node scripts/sync-rules.js` 실행으로 `AGENTS.md` 마일스톤 로그를 225번으로 완전 동기화.

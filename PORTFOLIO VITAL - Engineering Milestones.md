@@ -2,6 +2,70 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 224: Yangjae Festival Milestone Task Attendees Capsule & Edit Control Full Purge Release] Completely purged attendees capsule badges (both grey department badge and yellow phone number badge) from Milestone Tasks tab reading view, removed attendees input field and state from inline edit mode (`DetailEditRow`), and batch-cleaned 33 residual `[참여:...]` legacy tags from `FESTIVAL_YANGJAE_2026.json`, achieving 100% Jest pass (39/39 tests) and zero TypeScript errors. (2026-09-28)
+* **개요 및 개발 목적**:
+  - 사용자 지침 ("추진과제 탭에 스샷에 나오는 캡슐 삭제해줘, 기능도 삭제해줘 의미가 없다") 전격 반영:
+    1. **추진과제 탭(Tab 1) 뷰 모드 참석자 캡슐 전면 소거**: `YangjaeFestivalDashboard.tsx` 및 `scripts/pages-template.html` 내 `{parsed.attendees && ( ... )}` 캡슐 UI 블록 완전 삭제.
+    2. **추진과제 인라인 편집 모드(`DetailEditRow`) 내 참여자 입력 기능 완전 삭제**: `attendees` 상태 및 입력창을 제거하고 날짜(`date`), 상태(`status`), 본문(`text`) 중심의 간결한 3필드 인터페이스로 정제.
+    3. **로컬 JSON 데이터(`FESTIVAL_YANGJAE_2026.json`) 내 잔존 태그 33건 일괄 클렌징**: 33건의 `[참여:...]` 레거시 태그를 완전 소거하여 순수 공문서 개조식 텍스트로 원자적 영속화 완료.
+    4. **정적 배포 산출물 100% 동기화**: `scripts/pages-template.html` 및 `out/festival/yangjae/index.html` 재빌드 완료.
+    5. **정량적 검증 성과**: Jest 39개 단위 테스트 전수 통과 (100% PASS), `npx tsc --noEmit` 0 errors 통과.
+
+### [Milestone 223: Yangjae Festival Mobile-First Viewport (max-w-md 448px) Locking & Full-Width Duties Card/Spreadsheet View Release] Reverted desktop wide container expansion to fixed mobile viewport (`sm:max-w-md`, 448px) and redesigned Duties tab (Tab 4) from a 900px desktop table into a mobile-first card stack view (view mode) and mobile card spreadsheet editor (edit mode), eliminating 1,000px vertical inflation and horizontal clipping with 100% Jest pass (39/39 tests) and zero TypeScript errors. (2026-09-28)
+* **개요 및 개발 목적**:
+  - 사용자 지침 ("이러면 프론트엔드에서는 짤릴거아냐 모바일로만 볼건데") 전격 반영:
+    1. **모바일 전용 컨테이너(`sm:max-w-md`, 448px) 고정**: 데스크톱 와이드 확장(`sm:max-w-5xl xl:max-w-6xl`)을 해제하고 일관된 모바일 폼팩터 규격으로 원복.
+    2. **업무분장 모바일 카드 뷰 전면 개편**: 가로 900px 테이블 대신 부스/식순 탭과 동일한 모바일 전폭 카드 스택 뷰로 재설계하여 360~448px 화면에서 가로 잘림 0%, 세로 1,000px 팽창 0% 달성.
+    3. **모바일 카드형 스프레드시트 에디터 구축**: 각 행을 카드 단위 인라인 에디터(순서이동, 추가, 삭제, 자동 하이픈, 과업 줄바꿈 파서)로 개편하여 모바일에서도 엑셀 조작성을 완벽 보장.
+    4. **멀티 플랫폼 정적 배포 산출물 동기화**: `scripts/pages-template.html` 및 `out/festival/yangjae/index.html` 100% 동기화.
+    5. **정량적 검증 성과**: Jest 39개 단위 테스트 전수 통과 (100% PASS), `npx tsc --noEmit` 0 errors 통과.
+
+### [Milestone 220: Yangjae Festival Booth Staff Count (인원수) Field Integration & Dynamic Aggregation Pipeline Release] Integrated staff count (`staffCount`) field across individual booth cards (reading & editing modes), updated hero banner summary bar with real-time total personnel aggregation, unified local JSON storage (`FESTIVAL_YANGJAE_2026.json`), React dashboard (`YangjaeFestivalDashboard.tsx`), and Cloudflare Pages static template (`scripts/pages-template.html`), achieving 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-28)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("양재천 페스티벌 부스 탭에서 부스별 인원수도 넣을수 있게 업데이트 해줘") 전격 분석 및 완벽 구현:
+    1. **부스 데이터 모델 확장 (`BoothItem`)**:
+       - `src/hooks/useYangjaeFestival.ts`의 `BoothItem` 인터페이스에 `staffCount?: number;` 필드 신설.
+       - 단일 진실 공급원(`data/FESTIVAL_YANGJAE_2026.json`) 및 fallback 데이터 19개 전 부스에 현실적 인원수(총 76명) 초깃값 부여.
+    2. **부스 카드 읽기 및 편집 모드 인원수 필드 전면 구현**:
+       - **읽기 모드**: 부스 하단 집기 정보 영역에 인디고 계열의 `인원 N명` 뱃지(`<Users className="w-3 h-3 text-indigo-700" />`)를 테이블/의자 뱃지 전면에 배치.
+       - **단일 및 일괄 편집 모드**: 집기 설정 영역을 3컬럼 그리드(`grid-cols-3`)로 개편하여 `인원(명)` 입력창을 신설하고, 값 변경 시 실시간 반영 및 `data/FESTIVAL_YANGJAE_2026.json` 원자적 디스크 저장 연동.
+       - **신규 부스 추가**: 신규 부스 생성 시 기본 인원수(`staffCount: 2`) 기본값 자동 할당.
+    3. **상단 히어로 배너 집기 및 인원 총계 실시간 동적 합산**:
+       - `boothMetrics` 내 `totalStaff`, `confirmedStaff` 합산 로직 추가.
+       - 4행 타이틀을 "필요 집기 및 인원 총계"로 갱신하고 `인원 {boothMetrics.totalStaff}명` 프리미엄 뱃지 추가 배치.
+    4. **정적 배포 템플릿(`scripts/pages-template.html`) 1:1 완벽 동기화**:
+       - Cloudflare Pages 정적 템플릿 내 부스 카드 인원수 뱃지 및 히어로 배너 인원 총계 동적 렌더링 반영 후 `node scripts/prepare-pages-output.js` 재빌드 완료.
+    5. **정량적 무결점 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 35개 단위 테스트 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 219: Yangjae Festival Emergency Contact PIN Authentication Hint Purge Release] Completely purged security hints ('(행사일: 1031)' in authentication failure error message and '(예: 행사일)' in password input placeholder) across React dashboard and Cloudflare Pages static templates, enforcing strict zero-disclosure confidentiality for emergency contact phone numbers with 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-28)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("비상연락망 on 할때 힌트 주지마") 전격 분석 및 완벽 반영:
+    1. **비상연락망 PIN 인증 모달 내 힌트 전면 소거**:
+       - 비밀번호 입력창 `placeholder`에서 힌트 텍스트(`(예: 행사일)`)를 영구 제거하여 `비밀번호 4자리 입력`으로 단정화.
+       - 잘못된 비밀번호 입력 시 노출되던 에러 메시지 내 힌트(`(행사일: 1031)`)를 완전 삭제하고 표준 보안 실패 메시지(`비밀번호가 올바르지 않습니다.`)로 통일.
+    2. **정적 배포 템플릿(`scripts/pages-template.html`) 1:1 완벽 동기화**:
+       - Cloudflare Pages 템플릿 내 PIN 인풋 placeholder 힌트 삭제 및 `node scripts/prepare-pages-output.js` 재빌드 완료.
+    3. **정량적 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 35개 단위 테스트 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
+### [Milestone 218: Yangjae Festival Schedule Tab Header 2-Row Layout Transformation & Zero-Clipping Guard Release] Refactored Schedule Tab (Tab 3) header into a high-contrast 2-row layout (Row 1: Title, Count Badge, and Add Schedule Button; Row 2: Full-Width Search Bar), completely eliminating horizontal text clipping and button truncation in narrow container viewports (max-w-md 448px), aligned with Tab 4 (Duties) visual design standards with 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-28)
+* **개요 및 개발 목적**:
+  - 사용자 요청 ("UI 짤리는것 교정좀 해줘" + 스크린샷) 전격 분석 및 완벽 해결:
+    1. **식순 헤더 잘림 현상(Root Cause) 규명 및 해소**:
+       - 모바일 카드 뷰 컨테이너(`max-w-md`, 448px) 내부 가용 폭(약 400px) 대비, 기존 1행에 타이틀(약 218px) + 검색창(130px) + '식순 추가' 버튼(88px)이 동시 배치되어 가로폭(452px)을 초과함.
+       - 데스크톱 브라우저 환경에서 `sm:flex-nowrap` 강제로 인해 줄바꿈이 차단되어 우측 '식순 추가' 버튼이 컨테이너 테두리 밖으로 삐져나가 잘리는 현상 발생.
+    2. **업무분장 탭(Tab 4)과 동일한 2행(2-Row) 레이아웃 전면 개편**:
+       - **1행 (상단 행)**: 좌측에 메인 타이틀(`행사 식순`) + 카운트 뱃지(`{activeSchedule.length}개 식순 · 07:30~14:30`), 우측에 관리자 전용 `[+ 식순 추가]` 버튼을 양끝 정렬(`justify-between`)하여 가용폭 400px 내 285px만 점유, 115px 이상 여유 공간 확보.
+       - **2행 (하단 행)**: 검색창을 전폭(`w-full`)으로 시원하게 확장하여 placeholder(`식순명, 담당자, 내용 검색...`) 및 입력어가 단 한 글자도 잘리지 않는 완벽한 시인성 확보.
+    3. **정적 배포 템플릿(`scripts/pages-template.html`) 1:1 완벽 동기화**:
+       - Cloudflare Pages 템플릿 내 행사 식순 헤더를 2행 구조로 일치화하고 `node scripts/prepare-pages-output.js` 재빌드 완료.
+    4. **정량적 검증 성과**:
+       - `yangjae-festival-realtime-collapsed-sync.test.tsx` 35개 단위 테스트 전수 통과 (100% PASS).
+       - TypeScript strict 타입 검사 `0 errors` 무결점 확인.
+
 ### [Milestone 217: Yangjae Festival Schedule Box-Card Individual Addition & Deletion Pipeline Release] Implemented individual schedule item box addition ('식순 추가' in top header bar & dashed card button at list bottom) and row deletion ('삭제' button in edit mode) with instant atomic persistence to FESTIVAL_YANGJAE_2026.json, auto-focus inline edit mode transition, dynamic header item count badge, and multi-platform static synchronization, achieving 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-23)
 * **개요 및 개발 목적**:
   - 사용자 요청 ("식순 박스 개별 추가 가능하게 기능 구현해줘") 전격 분석 및 완벽 구현:

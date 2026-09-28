@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useSyncExternalStore, useCallback, useEffect } from 'react';
-import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, Phone, Smartphone, User, Users, Building2, Tent, FolderInput, ArrowRightLeft, Table, Armchair, Clock, Search, Shield, MapPin, Lock } from 'lucide-react';
+import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, ArrowUp, ArrowDown, Phone, Smartphone, User, Users, Building2, Tent, FolderInput, ArrowRightLeft, Table, Armchair, Clock, Search, Shield, MapPin, Lock, FileSpreadsheet, Download } from 'lucide-react';
 import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem, ScheduleItem, DutyItem } from '@/hooks/useYangjaeFestival';
 
 export interface DetailDraft {
@@ -685,15 +685,14 @@ const DetailEditRow = React.memo(function DetailEditRow({
   const [prevDetail, setPrevDetail] = useState<string>(initialDetail);
   const [date, setDate] = useState<string>(parsed.date);
   const [status, setStatus] = useState<'done' | 'in-progress' | 'todo'>(parsed.status);
-  const [attendees, setAttendees] = useState<string>(parsed.attendees);
   const [text, setText] = useState<string>(parsed.text);
 
   const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
-  const latestValuesRef = React.useRef({ date, status, attendees, text, lastEmitted });
+  const latestValuesRef = React.useRef({ date, status, text, lastEmitted });
 
   useEffect(() => {
-    latestValuesRef.current = { date, status, attendees, text, lastEmitted };
-  }, [date, status, attendees, text, lastEmitted]);
+    latestValuesRef.current = { date, status, text, lastEmitted };
+  }, [date, status, text, lastEmitted]);
 
   if (prevDetail !== initialDetail) {
     setPrevDetail(initialDetail);
@@ -702,7 +701,6 @@ const DetailEditRow = React.memo(function DetailEditRow({
       setLastEmitted(initialDetail);
       setDate(parsed.date);
       setStatus(parsed.status);
-      setAttendees(parsed.attendees);
       setText(parsed.text);
     }
   }
@@ -712,8 +710,8 @@ const DetailEditRow = React.memo(function DetailEditRow({
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
     }
-    const { date: d, status: s, attendees: a, text: t, lastEmitted: le } = latestValuesRef.current;
-    const formatted = formatDetail({ date: d, status: s, attendees: a, text: t });
+    const { date: d, status: s, text: t, lastEmitted: le } = latestValuesRef.current;
+    const formatted = formatDetail({ date: d, status: s, attendees: '', text: t });
     if (formatted !== le) {
       setLastEmitted(formatted);
       latestValuesRef.current.lastEmitted = formatted;
@@ -722,14 +720,14 @@ const DetailEditRow = React.memo(function DetailEditRow({
   }, [onUpdate]);
 
   const scheduleEmit = useCallback(
-    (newDate: string, newStatus: 'done' | 'in-progress' | 'todo', newAttendees: string, newText: string) => {
-      latestValuesRef.current = { date: newDate, status: newStatus, attendees: newAttendees, text: newText, lastEmitted: latestValuesRef.current.lastEmitted };
+    (newDate: string, newStatus: 'done' | 'in-progress' | 'todo', newText: string) => {
+      latestValuesRef.current = { date: newDate, status: newStatus, text: newText, lastEmitted: latestValuesRef.current.lastEmitted };
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
       debounceTimerRef.current = setTimeout(() => {
         debounceTimerRef.current = null;
-        const formatted = formatDetail({ date: newDate, status: newStatus, attendees: newAttendees, text: newText });
+        const formatted = formatDetail({ date: newDate, status: newStatus, attendees: '', text: newText });
         setLastEmitted(formatted);
         latestValuesRef.current.lastEmitted = formatted;
         onUpdate(formatted);
@@ -743,8 +741,8 @@ const DetailEditRow = React.memo(function DetailEditRow({
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
-        const { date: d, status: s, attendees: a, text: t, lastEmitted: le } = latestValuesRef.current;
-        const formatted = formatDetail({ date: d, status: s, attendees: a, text: t });
+        const { date: d, status: s, text: t, lastEmitted: le } = latestValuesRef.current;
+        const formatted = formatDetail({ date: d, status: s, attendees: '', text: t });
         if (formatted !== le) {
           onUpdate(formatted);
         }
@@ -777,54 +775,45 @@ const DetailEditRow = React.memo(function DetailEditRow({
 
   return (
     <div className="p-2 bg-white rounded-lg border border-slate-200 space-y-1.5 shadow-2xs">
-      <div className="flex items-center gap-1.5">
-        {/* 날짜 입력 */}
-        <input
-          type="text"
-          value={date}
-          onChange={(e) => {
-            setDate(e.target.value);
-            scheduleEmit(e.target.value, status, attendees, text);
-          }}
-          onBlur={flushChange}
-          placeholder="날짜 (7.29)"
-          className="w-24 px-2 py-0.5 border border-amber-400 rounded bg-amber-50/40 text-xs font-bold font-mono shrink-0"
-        />
-        {/* 상태 선택 */}
-        <select
-          value={status}
-          onChange={(e) => {
-            const nextStatus = e.target.value as 'done' | 'in-progress' | 'todo';
-            setStatus(nextStatus);
-            scheduleEmit(date, nextStatus, attendees, text);
-          }}
-          onBlur={flushChange}
-          className={`px-1.5 py-0.5 text-xs font-black rounded border cursor-pointer shrink-0 ${
-            status === 'done'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-              : status === 'in-progress'
-              ? 'bg-amber-50 text-amber-900 border-amber-300'
-              : 'bg-blue-50 text-blue-900 border-blue-300'
-          }`}
-        >
-          <option value="done">✓ 완료</option>
-          <option value="in-progress">▶ 진행</option>
-          <option value="todo">○ 예정</option>
-        </select>
-        {/* 참여자 입력 */}
-        <input
-          type="text"
-          value={attendees}
-          onChange={(e) => {
-            setAttendees(e.target.value);
-            scheduleEmit(date, status, e.target.value, text);
-          }}
-          onBlur={flushChange}
-          placeholder="참석자 (예: 과장님 7010, 오창선 7116, 김지현 7173, 김형종 7250, 강남차병원 0992, 서울대병원 8276, 유디 2210, 한국신체정보 3732, 제이민(김다희) 0544, 지영팀장님 7031, 희선팀장님 7011...)"
-          className="flex-1 min-w-0 px-2 py-0.5 border border-slate-300 rounded text-xs font-medium text-slate-800 bg-white"
-        />
+      <div className="flex items-center justify-between gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* 날짜 입력 */}
+          <input
+            type="text"
+            value={date}
+            onChange={(e) => {
+              setDate(e.target.value);
+              scheduleEmit(e.target.value, status, text);
+            }}
+            onBlur={flushChange}
+            placeholder="날짜 (7.29)"
+            className="w-24 px-2 py-0.5 border border-amber-400 rounded bg-amber-50/40 text-xs font-bold font-mono shrink-0"
+          />
+          {/* 상태 선택 */}
+          <select
+            value={status}
+            onChange={(e) => {
+              const nextStatus = e.target.value as 'done' | 'in-progress' | 'todo';
+              setStatus(nextStatus);
+              scheduleEmit(date, nextStatus, text);
+            }}
+            onBlur={flushChange}
+            className={`px-1.5 py-0.5 text-xs font-black rounded border cursor-pointer shrink-0 ${
+              status === 'done'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                : status === 'in-progress'
+                ? 'bg-amber-50 text-amber-900 border-amber-300'
+                : 'bg-blue-50 text-blue-900 border-blue-300'
+            }`}
+          >
+            <option value="done">✓ 완료</option>
+            <option value="in-progress">▶ 진행</option>
+            <option value="todo">○ 예정</option>
+          </select>
+        </div>
+
         {/* 위치(순서) 이동 및 삭제 버튼 그룹 */}
-        <div className="flex items-center gap-0.5 shrink-0 bg-slate-100 p-0.5 rounded-md border border-slate-200">
+        <div className="flex items-center gap-0.5 shrink-0 bg-slate-100 p-0.5 rounded-md border border-slate-200 ml-auto">
           <button
             type="button"
             disabled={!canMoveUp}
@@ -880,7 +869,7 @@ const DetailEditRow = React.memo(function DetailEditRow({
         value={text}
         onChange={(e) => {
           setText(e.target.value);
-          scheduleEmit(date, status, attendees, e.target.value);
+          scheduleEmit(date, status, e.target.value);
         }}
         onBlur={flushChange}
         rows={2}
@@ -981,6 +970,9 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   const [editingScheduleId, setEditingScheduleId] = useState<number | null>(null);
   const [editScheduleData, setEditScheduleData] = useState<ScheduleItem | null>(null);
 
+  const [editingDuties, setEditingDuties] = useState<boolean>(false);
+  const [editDutiesData, setEditDutiesData] = useState<DutyItem[]>(() => (data?.duties || YANGJAE_FALLBACK_DATA.duties || []) as DutyItem[]);
+
   const [saveToast, setSaveToast] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>('수정 사항이 저장되었습니다!');
   const [showPrivateMobile, setShowPrivateMobile] = useState<boolean>(false);
@@ -1044,7 +1036,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         localStorage.setItem('yangjae_festival_show_mobile', 'true');
       } catch {}
     } else {
-      setPinError('비밀번호가 올바르지 않습니다. (행사일: 1031)');
+      setPinError('비밀번호가 올바르지 않습니다.');
     }
   }, [pinInput, VALID_PINS]);
 
@@ -1069,6 +1061,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   const [dutySearchQuery, setDutySearchQuery] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [isLargeFont, setIsLargeFont] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!editingDuties && data?.duties) {
+      setEditDutiesData(safeClone(data.duties as DutyItem[]));
+    }
+  }, [data?.duties, editingDuties]);
 
   // DetailEditRow memoized stable handlers
   const handleUpdateDetailRow = useCallback((dIdx: number, newDetailStr: string) => {
@@ -1183,6 +1181,8 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     let confirmedTables = 0;
     let totalChairs = 0;
     let confirmedChairs = 0;
+    let totalStaff = 0;
+    let confirmedStaff = 0;
 
     for (let i = 0; i < list.length; i++) {
       const b = list[i];
@@ -1214,12 +1214,15 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
       const tablesCount = typeof b.tables === 'number' ? b.tables : (Number(b.tables) || 0);
       const chairsCount = typeof b.chairs === 'number' ? b.chairs : (Number(b.chairs) || 0);
+      const staffCount = typeof b.staffCount === 'number' ? b.staffCount : (Number(b.staffCount) || 0);
 
       totalTables += tablesCount;
       totalChairs += chairsCount;
+      totalStaff += staffCount;
       if (isConfirmed) {
         confirmedTables += tablesCount;
         confirmedChairs += chairsCount;
+        confirmedStaff += staffCount;
       }
     }
 
@@ -1237,6 +1240,8 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       confirmedTables,
       totalChairs,
       confirmedChairs,
+      totalStaff,
+      confirmedStaff,
     };
   }, [activeBooths]);
 
@@ -1599,6 +1604,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
       const updatedBooth: BoothItem = {
         ...editSingleBoothData,
+        staffCount: Math.max(0, Number(editSingleBoothData.staffCount) || 0),
         tables: Math.max(0, Number(editSingleBoothData.tables) || 0),
         chairs: Math.max(0, Number(editSingleBoothData.chairs) || 0),
         manager: (editSingleBoothData.manager || '').trim(),
@@ -1702,6 +1708,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         return {
           ...b,
           id: idx + 1,
+          staffCount: Math.max(0, Number(b.staffCount) || 0),
           tables: Math.max(0, Number(b.tables) || 0),
           chairs: Math.max(0, Number(b.chairs) || 0),
           manager: (b.manager || '').trim(),
@@ -1830,6 +1837,155 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     }
   }, [data, editingScheduleId, saveMutation]);
 
+  // 5. 업무분장 (TAB 4) 엑셀 편집 및 관리 핸들러
+  const handleStartEditDuties = useCallback(() => {
+    setEditDutiesData(safeClone((data?.duties || YANGJAE_FALLBACK_DATA.duties || []) as DutyItem[]));
+    setEditingDuties(true);
+  }, [data?.duties]);
+
+  const handleCancelEditDuties = useCallback(() => {
+    setEditDutiesData(safeClone((data?.duties || YANGJAE_FALLBACK_DATA.duties || []) as DutyItem[]));
+    setEditingDuties(false);
+  }, [data?.duties]);
+
+  const handleSaveDuties = useCallback(async () => {
+    try {
+      const normalizedDuties: DutyItem[] = editDutiesData.map((d, idx) => {
+        const adminFormatted = formatAutoHyphen((d.adminPhone || '').trim());
+        const mobileFormatted = formatAutoHyphen((d.mobilePhone || '').trim());
+        const phoneFormatted = formatAutoHyphen(adminFormatted || mobileFormatted || (d.phone || '').trim());
+
+        let cleanTasks: string[] = [];
+        if (Array.isArray(d.tasks)) {
+          cleanTasks = d.tasks.map((t) => (typeof t === 'string' ? t.trim() : '')).filter(Boolean);
+        } else if (typeof d.tasks === 'string') {
+          cleanTasks = (d.tasks as string)
+            .split('\n')
+            .map((t) => t.trim().replace(/^[-•*]\s*/, ''))
+            .filter(Boolean);
+        }
+
+        return {
+          ...d,
+          id: idx + 1,
+          category: (d.category || '총괄기획').trim(),
+          deptOrOrg: (d.deptOrOrg || '').trim(),
+          role: (d.role || '').trim(),
+          manager: (d.manager || '').trim(),
+          adminPhone: adminFormatted,
+          mobilePhone: mobileFormatted,
+          phone: phoneFormatted,
+          tasks: cleanTasks,
+        };
+      });
+
+      await saveMutation.mutateAsync({
+        ...data,
+        duties: normalizedDuties,
+      });
+      setEditingDuties(false);
+      setToastMessage('업무분장 데이터가 저장되었습니다!');
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 3000);
+    } catch {
+      alert('업무분장 저장에 실패했습니다.');
+    }
+  }, [data, editDutiesData, saveMutation]);
+
+  const handleAddDutyRow = useCallback(() => {
+    const list = editingDuties ? editDutiesData : ((data?.duties || YANGJAE_FALLBACK_DATA.duties || []) as DutyItem[]);
+    const maxId = list.reduce((max, d) => Math.max(max, Number(d?.id) || 0), 0);
+    const nextId = (Number.isFinite(maxId) ? maxId : 0) + 1;
+    const newDuty: DutyItem = {
+      id: nextId,
+      category: '총괄기획',
+      deptOrOrg: '',
+      role: '',
+      manager: '',
+      phone: '',
+      adminPhone: '',
+      mobilePhone: '',
+      tasks: ['과업 세부 내용을 입력하세요.'],
+    };
+    setEditDutiesData([...list, newDuty]);
+    setEditingDuties(true);
+  }, [data?.duties, editDutiesData, editingDuties]);
+
+  const handleDeleteDutyRow = useCallback((dutyId: number) => {
+    if (!confirm('해당 업무분장 행을 삭제하시겠습니까?')) return;
+    setEditDutiesData((prev) => prev.filter((d) => d.id !== dutyId));
+  }, []);
+
+  const handleMoveDutyUp = useCallback((dutyId: number) => {
+    setEditDutiesData((prev) => {
+      const list = [...prev];
+      const idx = list.findIndex((d) => d.id === dutyId);
+      if (idx <= 0) return prev;
+      const temp = list[idx];
+      list[idx] = list[idx - 1];
+      list[idx - 1] = temp;
+      return list;
+    });
+  }, []);
+
+  const handleMoveDutyDown = useCallback((dutyId: number) => {
+    setEditDutiesData((prev) => {
+      const list = [...prev];
+      const idx = list.findIndex((d) => d.id === dutyId);
+      if (idx === -1 || idx >= list.length - 1) return prev;
+      const temp = list[idx];
+      list[idx] = list[idx + 1];
+      list[idx + 1] = temp;
+      return list;
+    });
+  }, []);
+
+  const updateDutyField = useCallback((dutyId: number, field: keyof DutyItem, value: any) => {
+    setEditDutiesData((prev) => {
+      return prev.map((d) => {
+        if (d.id !== dutyId) return d;
+        let formattedVal = value;
+        if ((field === 'adminPhone' || field === 'mobilePhone' || field === 'phone') && typeof value === 'string') {
+          formattedVal = formatAutoHyphen(value);
+        }
+        const updated = { ...d, [field]: formattedVal };
+        if (field === 'adminPhone' && !d.mobilePhone) {
+          updated.phone = String(formattedVal);
+        } else if (field === 'mobilePhone' && !d.adminPhone) {
+          updated.phone = String(formattedVal);
+        }
+        return updated;
+      });
+    });
+  }, []);
+
+  const handleExportDutiesCsv = useCallback(() => {
+    const list = ((data?.duties || YANGJAE_FALLBACK_DATA.duties || []) as DutyItem[]);
+    let csvContent = '\uFEFF구분,부서·기관명,담당역할,담당자,행정전화,휴대전화,배정과업\n';
+    list.forEach((d) => {
+      const tasksStr = (d.tasks || []).join('; ');
+      const row = [
+        `"${(d.category || '').replace(/"/g, '""')}"`,
+        `"${(d.deptOrOrg || '').replace(/"/g, '""')}"`,
+        `"${(d.role || '').replace(/"/g, '""')}"`,
+        `"${(d.manager || '').replace(/"/g, '""')}"`,
+        `"${(d.adminPhone || d.phone || '').replace(/"/g, '""')}"`,
+        `"${(d.mobilePhone || '').replace(/"/g, '""')}"`,
+        `"${tasksStr.replace(/"/g, '""')}"`,
+      ];
+      csvContent += row.join(',') + '\n';
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `2026_양재천페스티벌_업무분장_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [data?.duties]);
+
   const handleCopySummary = useCallback(async () => {
     const targetUrl = typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')
       ? `${window.location.origin}/festival/yangjae`
@@ -1910,7 +2066,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       )}
 
       <div 
-        className={`yangjae-dashboard-container w-full max-w-md bg-white sm:rounded-2xl sm:border-2 sm:shadow-lg overflow-hidden flex flex-col min-h-screen text-slate-900 font-sans sm:border-slate-300 ${
+        className={`yangjae-dashboard-container w-full sm:max-w-md bg-white sm:rounded-2xl sm:border-2 sm:shadow-lg overflow-hidden flex flex-col min-h-screen text-slate-900 font-sans sm:border-slate-300 transition-all duration-200 ${
           isLargeFont ? 'is-large-font text-[16px]' : ''
         }`}
       >
@@ -2550,39 +2706,6 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                             </button>
                                           )}
                                         </div>
-
-                                        {/* 4. 분리된 참석자 태그 & 행정번호 연동 */}
-                                        {parsed.attendees && (
-                                          <div className="flex items-center gap-1.5 flex-wrap pt-1.5 border-t border-slate-200/70 mt-1.5">
-                                            {parsed.attendees.split(',').map((person, pIdx) => {
-                                              const trimmed = person.trim();
-                                              if (!trimmed) return null;
-                                              const staff = getStaffInfo(trimmed);
-                                              return staff ? (
-                                                <a
-                                                  key={`attendee-${trimmed}-${pIdx}`}
-                                                  href={`tel:${staff.full}`}
-                                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300/80 shadow-3xs transition-all cursor-pointer active:scale-95"
-                                                  title={`전화 연결: ${staff.full}`}
-                                                >
-                                                  <Phone className="w-2.5 h-2.5 text-amber-700 shrink-0" />
-                                                  <span>{trimmed}</span>
-                                                  <span className="text-amber-900 font-mono text-[9px] bg-amber-200/90 px-1.5 py-0.2 rounded-full font-black">
-                                                    {staff.ext}
-                                                  </span>
-                                                </a>
-                                              ) : (
-                                                <span
-                                                  key={`attendee-${trimmed}-${pIdx}`}
-                                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-100 text-slate-700 border border-slate-200/80 shadow-3xs"
-                                                >
-                                                  <User className="w-2.5 h-2.5 text-slate-500 shrink-0" />
-                                                  <span>{trimmed}</span>
-                                                </span>
-                                              );
-                                            })}
-                                          </div>
-                                        )}
                                       </div>
                                     </div>
                                   );
@@ -2632,6 +2755,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             scale: '1동',
                             program: '체험 프로그램 내용',
                             status: '확정',
+                            staffCount: 2,
                             tables: 2,
                             chairs: 4,
                             manager: '',
@@ -2777,10 +2901,15 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     </div>
                   </div>
 
-                  {/* Row 4: 물품 소요 (필요 집기 총계) */}
+                  {/* Row 4: 물품 소요 (필요 집기 및 인원 총계) */}
                   <div className="col-span-2 mt-2.5 pt-2 border-t border-slate-800/90 flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[11px] sm:text-xs font-bold text-slate-400">필요 집기 총계</span>
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-400">필요 집기 및 인원 총계</span>
                     <div className="flex items-center gap-1.5 sm:gap-2">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-indigo-950/70 text-indigo-300 border border-indigo-700/60 shadow-3xs">
+                        <Users className="w-3 h-3 text-indigo-300 shrink-0" />
+                        <span>인원</span>
+                        <strong className="text-white font-black">{boothMetrics.totalStaff}명</strong>
+                      </span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-amber-950/70 text-amber-300 border border-amber-700/60 shadow-3xs">
                         <span>테이블</span>
                         <strong className="text-white font-black">{boothMetrics.totalTables}개</strong>
@@ -3153,7 +3282,20 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             placeholder="예: 2동, 1동 + 검진버스"
                           />
                         </div>
-                        <div className="grid grid-cols-2 gap-2 bg-amber-50/70 p-2 rounded-lg border border-amber-300/80">
+                        <div className="grid grid-cols-3 gap-2 bg-amber-50/70 p-2 rounded-lg border border-amber-300/80">
+                          <div className="flex items-center gap-1.5">
+                            <Users className="w-3.5 h-3.5 text-indigo-800 shrink-0" />
+                            <span className="text-xs font-bold text-slate-800 whitespace-nowrap shrink-0">인원:</span>
+                            <input
+                              type="number"
+                              min="0"
+                              max="99"
+                              value={targetBooth.staffCount ?? 0}
+                              onChange={(e) => updateBoothField('staffCount', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                              className="w-12 sm:w-14 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-indigo-950 text-right"
+                            />
+                            <span className="text-xs font-bold text-slate-600">명</span>
+                          </div>
                           <div className="flex items-center gap-1.5">
                             <Table className="w-3.5 h-3.5 text-amber-800 shrink-0" />
                             <span className="text-xs font-bold text-slate-800 whitespace-nowrap shrink-0">테이블:</span>
@@ -3163,7 +3305,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               max="99"
                               value={targetBooth.tables ?? 0}
                               onChange={(e) => updateBoothField('tables', Math.max(0, parseInt(e.target.value, 10) || 0))}
-                              className="w-16 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-amber-950 text-right"
+                              className="w-12 sm:w-14 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-amber-950 text-right"
                             />
                             <span className="text-xs font-bold text-slate-600">개</span>
                           </div>
@@ -3176,7 +3318,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               max="99"
                               value={targetBooth.chairs ?? 0}
                               onChange={(e) => updateBoothField('chairs', Math.max(0, parseInt(e.target.value, 10) || 0))}
-                              className="w-16 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-sky-950 text-right"
+                              className="w-12 sm:w-14 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-sky-950 text-right"
                             />
                             <span className="text-xs font-bold text-slate-600">개</span>
                           </div>
@@ -3188,6 +3330,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           <span>부스규모: <strong className="text-slate-900">{booth.scale}</strong></span>
                         </div>
                         <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] sm:text-xs font-bold bg-indigo-50 text-indigo-900 border border-indigo-200/90 shadow-3xs">
+                            <Users className="w-3 h-3 text-indigo-700 shrink-0" />
+                            <span>인원 <strong>{booth.staffCount ?? 0}</strong>명</span>
+                          </span>
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] sm:text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/90 shadow-3xs">
                             <Table className="w-3 h-3 text-amber-700 shrink-0" />
                             <span>테이블 <strong>{booth.tables ?? 0}</strong>개</span>
@@ -3208,40 +3354,19 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
           {/* TAB 3: 행사식순 (당일 17개 세부 타임테이블 - 한 화면 칼정렬 뷰) */}
           {visitedFestivalTabs.schedule && (
             <div className={selectedTab === 'schedule' ? 'block space-y-2.5' : 'hidden'}>
-              {/* Header Bar: Compact Single-Row Layout */}
-              <div className="bg-white border border-slate-300 rounded-xl px-3.5 py-2 shadow-2xs flex items-center justify-between gap-2.5 flex-wrap sm:flex-nowrap">
-                <div className="flex items-center gap-2 shrink-0">
-                  <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 tracking-tight whitespace-nowrap`}>
-                    <span>행사 식순</span>
-                  </h3>
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
-                    {activeSchedule.length}개 식순 · 07:30~14:30
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5 flex-1 sm:max-w-xs justify-end">
-                  {/* Compact Search Bar */}
-                  <div className="relative flex-1 min-w-[130px]">
-                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={scheduleSearchQuery}
-                      onChange={(e) => setScheduleSearchQuery(e.target.value)}
-                      placeholder="식순명, 담당자, 내용 검색..."
-                      className="w-full pl-8 pr-7 py-1 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
-                    />
-                    {scheduleSearchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => setScheduleSearchQuery('')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
+              {/* Header Bar: Clean 2-Row Layout (Zero-Clipping Alignment) */}
+              <div className="bg-white border-2 border-slate-300 rounded-xl p-3 shadow-2xs space-y-2.5">
+                {/* Row 1: Title, Count Badge & Add Schedule Button */}
+                <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 tracking-tight whitespace-nowrap`}>
+                      <span>행사 식순</span>
+                    </h3>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
+                      {activeSchedule.length}개 식순 · 07:30~14:30
+                    </span>
                   </div>
 
-                  {/* Add Schedule Button */}
                   {isLocalAdmin && (
                     <button
                       type="button"
@@ -3252,6 +3377,27 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>식순 추가</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Row 2: Full-Width Search Bar */}
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={scheduleSearchQuery}
+                    onChange={(e) => setScheduleSearchQuery(e.target.value)}
+                    placeholder="식순명, 담당자, 내용 검색..."
+                    className="w-full pl-8 pr-7 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
+                  />
+                  {scheduleSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setScheduleSearchQuery('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    >
+                      <X className="w-3 h-3" />
                     </button>
                   )}
                 </div>
@@ -3542,206 +3688,507 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
               {/* Header Stats Bar */}
               <div className="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
                 {/* Header Bar: Clean 1-Row Layout */}
-                <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
-                  <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 tracking-tight whitespace-nowrap`}>
-                    <span>업무분장 및 비상연락망</span>
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={handleSwitchToggle}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none shrink-0"
-                    title={showPrivateMobile ? "비상연락망 켜짐 (클릭 시 끄기)" : "비상연락망 꺼짐 (클릭 시 비밀번호 인증 후 켜기)"}
-                  >
-                    <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
-                      <Smartphone className="w-3.5 h-3.5 text-slate-600" />
-                      <span>비상연락망</span>
+                <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 tracking-tight whitespace-nowrap flex items-center gap-1.5`}>
+                      <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>업무분장 및 비상연락망</span>
+                    </h3>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                      총 {editingDuties ? editDutiesData.length : activeDuties.length}개 항목
                     </span>
-                    {/* Toggle Track */}
-                    <span className={`w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center ${showPrivateMobile ? 'bg-emerald-500' : 'bg-slate-300'}`}>
-                      {/* Toggle Knob */}
-                      <span className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${showPrivateMobile ? 'translate-x-3.5' : 'translate-x-0'}`} />
-                    </span>
-                    <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border whitespace-nowrap ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
-                      {showPrivateMobile ? 'ON (보임)' : 'OFF (숨김)'}
-                    </span>
-                  </button>
-                </div>
+                    {editingDuties && (
+                      <span className="text-[10.5px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 animate-pulse">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                        엑셀 편집 중
+                      </span>
+                    )}
+                  </div>
 
-
-                {/* Search Bar */}
-                <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={dutySearchQuery}
-                    onChange={(e) => setDutySearchQuery(e.target.value)}
-                    placeholder="부서명, 담당자, 전화번호, 과업 내용 검색 (예: 오창선, 체육회, 구급차, 제이민...)"
-                    className="w-full pl-9 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900"
-                  />
-                  {dutySearchQuery && (
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
+                    {/* Emergency Contact Switch Toggle */}
                     <button
                       type="button"
-                      onClick={() => setDutySearchQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                      onClick={handleSwitchToggle}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none shrink-0"
+                      title={showPrivateMobile ? "비상연락망 켜짐 (클릭 시 끄기)" : "비상연락망 꺼짐 (클릭 시 비밀번호 인증 후 켜기)"}
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
+                        <Smartphone className="w-3.5 h-3.5 text-slate-600" />
+                        <span className="hidden xs:inline">비상연락망</span>
+                      </span>
+                      {/* Toggle Track */}
+                      <span className={`w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center ${showPrivateMobile ? 'bg-emerald-500' : 'bg-slate-300'}`}>
+                        {/* Toggle Knob */}
+                        <span className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${showPrivateMobile ? 'translate-x-3.5' : 'translate-x-0'}`} />
+                      </span>
+                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border whitespace-nowrap ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
+                        {showPrivateMobile ? 'ON' : 'OFF'}
+                      </span>
                     </button>
-                  )}
-                </div>
-              </div>
 
-              {/* Roster Table Grid (칼정렬 행열 고도화) */}
-              <div className="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs">
-                {filteredDuties.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-slate-500 font-medium">
-                    검색 조건과 일치하는 업무분장 항목이 없습니다.
+                    {/* CSV Export Button */}
+                    <button
+                      type="button"
+                      onClick={handleExportDutiesCsv}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                      title="업무분장 엑셀(CSV) 다운로드"
+                    >
+                      <Download className="w-3.5 h-3.5 text-slate-600" />
+                      <span className="hidden sm:inline">엑셀(CSV)</span>
+                    </button>
+
+                    {/* Edit Mode Buttons */}
+                    {editingDuties ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleAddDutyRow}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                          title="새 업무분장 행 추가"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>행 추가</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleSaveDuties}
+                          disabled={saveMutation.isPending}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50 shrink-0"
+                          title="업무분장 저장"
+                        >
+                          {saveMutation.isPending ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Save className="w-3.5 h-3.5" />
+                          )}
+                          <span>저장</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleCancelEditDuties}
+                          disabled={saveMutation.isPending}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                          title="편집 취소"
+                        >
+                          <X className="w-3.5 h-3.5 text-slate-500" />
+                          <span>취소</span>
+                        </button>
+                      </>
+                    ) : (
+                      /* View Mode Admin Buttons */
+                      isLocalAdmin && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={handleAddDutyRow}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                            title="새 업무분장 행 추가 및 편집"
+                          >
+                            <Plus className="w-3.5 h-3.5 text-emerald-600" />
+                            <span className="hidden sm:inline">행 추가</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleStartEditDuties}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+                            title="스프레드시트 엑셀 편집 모드 시작"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>엑셀 편집</span>
+                          </button>
+                        </>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Search Bar (View Mode) vs Excel Mode Banner (Edit Mode) */}
+                {editingDuties ? (
+                  <div className="bg-emerald-50/90 border border-emerald-300/80 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+                    <div className="flex items-start gap-2">
+                      <FileSpreadsheet className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                      <div className="text-xs text-emerald-950 font-medium leading-relaxed">
+                        <span className="font-extrabold text-emerald-900">📊 엑셀 편집 모드: </span>
+                        스프레드시트처럼 각 셀을 클릭하여 구분, 부서, 역할, 담당자, 연락처, 세부과업을 직접 입력·수정할 수 있습니다.
+                        <span className="text-emerald-800 font-bold ml-1">(과업 입력란에서 엔터 줄바꿈 시 개조식 목록으로 자동 분할 저장됩니다.)</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                      <span className="text-[11px] font-bold text-emerald-800 bg-white/80 px-2 py-0.5 rounded border border-emerald-200">
+                        전화번호 자동 하이픈 연동
+                      </span>
+                    </div>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[780px]">
-                      <thead>
-                        <tr className="bg-slate-100 border-b border-slate-300 text-slate-700 text-xs font-extrabold">
-                          <th className="py-2.5 px-3 text-center w-24 shrink-0">구분</th>
-                          <th className="py-2.5 px-3 text-left w-44 shrink-0">부서·기관명</th>
-                          <th className="py-2.5 px-3 text-left w-48 shrink-0">담당 역할</th>
-                          <th className="py-2.5 px-3 text-left w-48 shrink-0">담당자 / 연락처</th>
-                          <th className="py-2.5 px-3 text-left">배정 과업</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {filteredDuties.map((duty) => {
-                          const isHQ = duty.category === '총괄기획';
-                          const isSports = duty.category === '체육회';
-                          const isSafety = duty.category === '응급안전';
-                          const isAgency = duty.category === '대행용역';
-
-                          return (
-                            <tr
-                              key={`duty-row-${duty.id}`}
-                              className={`transition-colors align-top ${
-                                isHQ
-                                  ? 'hover:bg-blue-50/40'
-                                  : isSports
-                                  ? 'hover:bg-indigo-50/40'
-                                  : isSafety
-                                  ? 'hover:bg-red-50/40'
-                                  : isAgency
-                                  ? 'hover:bg-amber-50/40'
-                                  : 'hover:bg-slate-50/80'
-                              }`}
-                            >
-                              {/* 구분 */}
-                              <td className="py-3 px-3 text-center whitespace-nowrap">
-                                <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded ${
-                                  isHQ
-                                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                                    : isSports
-                                    ? 'bg-indigo-100 text-indigo-800 border border-indigo-200'
-                                    : isSafety
-                                    ? 'bg-red-100 text-red-800 border border-red-200'
-                                    : isAgency
-                                    ? 'bg-amber-100 text-amber-900 border border-amber-200'
-                                    : 'bg-slate-100 text-slate-700 border border-slate-200'
-                                }`}>
-                                  {duty.category}
-                                </span>
-                              </td>
-
-                              {/* 부서·기관명 */}
-                              <td className="py-3 px-3">
-                                <div className="font-extrabold text-xs text-slate-900 leading-snug">
-                                  {duty.deptOrOrg || (
-                                    <span className="text-slate-400 italic font-normal text-xs">(부서·기관 미지정)</span>
-                                  )}
-                                </div>
-                              </td>
-
-                              {/* 담당 역할 */}
-                              <td className="py-3 px-3">
-                                <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} font-bold text-slate-800 leading-snug`}>
-                                  {duty.role || (
-                                    <span className="text-slate-400 italic font-normal text-xs">(담당 역할 설정 대기)</span>
-                                  )}
-                                </div>
-                              </td>
-
-                              {/* 담당자 / 연락처 (행정번호 & 폰번호 구분) */}
-                              <td className="py-3 px-3 whitespace-nowrap">
-                                <div className="space-y-1">
-                                  {duty.manager && (
-                                    <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                                      <User className="w-3 h-3 text-slate-500 shrink-0" />
-                                      <span>{showPrivateMobile ? duty.manager : maskPersonName(duty.manager)}</span>
-                                    </div>
-                                  )}
-                                  {(() => {
-                                    const adminNo = formatAutoHyphen((duty.adminPhone || (!duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
-                                    const mobileNo = formatAutoHyphen((duty.mobilePhone || (duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
-
-                                    if (!duty.manager && !adminNo && (!showPrivateMobile || !mobileNo)) {
-                                      return <span className="text-slate-400 text-xs font-medium">-</span>;
-                                    }
-
-                                    return (
-                                      <div className="flex flex-col gap-1">
-                                        {adminNo && (
-                                          <div>
-                                            <a
-                                              href={`tel:${adminNo.replace(/[^0-9]/g, '')}`}
-                                              className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 shadow-3xs transition-all active:scale-95 cursor-pointer"
-                                              title={`행정전화 걸기: ${adminNo}`}
-                                            >
-                                              <Phone className="w-3 h-3 text-blue-700 shrink-0" />
-                                              <span className="text-[10.5px] font-extrabold text-blue-800">행정:</span>
-                                              <span className="font-mono">{adminNo}</span>
-                                            </a>
-                                          </div>
-                                        )}
-                                        {showPrivateMobile && mobileNo && (
-                                          <div>
-                                            <a
-                                              href={`tel:${mobileNo.replace(/[^0-9]/g, '')}`}
-                                              className="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 shadow-3xs transition-all active:scale-95 cursor-pointer"
-                                              title={`휴대전화 걸기: ${mobileNo}`}
-                                            >
-                                              <Smartphone className="w-3 h-3 text-emerald-700 shrink-0" />
-                                              <span className="text-[10.5px] font-extrabold text-emerald-800">폰:</span>
-                                              <span className="font-mono">{mobileNo}</span>
-                                            </a>
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })()}
-                                </div>
-                              </td>
-
-                              {/* 배정 과업 */}
-                              <td className="py-3 px-3">
-                                {duty.tasks && duty.tasks.length > 0 ? (
-                                  <ul className="space-y-1">
-                                    {duty.tasks.map((task, tIdx) => (
-                                      <li
-                                        key={`duty-${duty.id}-task-${tIdx}`}
-                                        className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-700 font-medium flex items-start gap-1.5 leading-relaxed`}
-                                      >
-                                        <span className="text-slate-400 font-bold select-none shrink-0">•</span>
-                                        <span>{task}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <span className="text-slate-400 italic font-normal text-xs">(과업 세부 내역 작성 대기)</span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={dutySearchQuery}
+                      onChange={(e) => setDutySearchQuery(e.target.value)}
+                      placeholder="부서명, 담당자, 전화번호, 과업 내용 검색 (예: 오창선, 체육회, 구급차, 제이민...)"
+                      className="w-full pl-9 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900"
+                    />
+                    {dutySearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setDutySearchQuery('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
+
+              {/* Datalist helper for Category Auto-Complete */}
+              <datalist id="yangjae-duty-category-options">
+                <option value="총괄기획" />
+                <option value="보건소" />
+                <option value="체육회" />
+                <option value="대행용역" />
+                <option value="응급안전" />
+                <option value="체험부스" />
+                <option value="유관부서" />
+                <option value="자원봉사" />
+                <option value="기타" />
+              </datalist>
+
+              {/* Main Duties Area: Editing Mode (Mobile Card Editor) vs View Mode (Mobile Card Stack) */}
+              {editingDuties ? (
+                /* EXCEL SPREADSHEET EDITING MODE (MOBILE CARD EDITOR) */
+                <div className="space-y-3">
+                  {editDutiesData.map((duty, idx) => {
+                    const isFirst = idx === 0;
+                    const isLast = idx === editDutiesData.length - 1;
+                    const rawTasksText = Array.isArray(duty.tasks)
+                      ? duty.tasks.join('\n')
+                      : (duty.tasks || '');
+
+                    return (
+                      <div
+                        key={`edit-duty-card-${duty.id}`}
+                        className="bg-white border-2 border-emerald-300/90 rounded-xl p-3 sm:p-3.5 space-y-2.5 shadow-2xs"
+                      >
+                        {/* 카드 상단 헤더: No, 구분, 순서이동/삭제 관리 */}
+                        <div className="flex items-center justify-between gap-2 pb-2 border-b border-emerald-100">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="font-mono font-black text-xs text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
+                              #{idx + 1}
+                            </span>
+                            <div className="flex-1 max-w-[130px]">
+                              <input
+                                list="yangjae-duty-category-options"
+                                type="text"
+                                value={duty.category || ''}
+                                onChange={(e) => updateDutyField(duty.id, 'category', e.target.value)}
+                                placeholder="구분"
+                                className="w-full text-xs font-bold px-2 py-1 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                              />
+                            </div>
+                          </div>
+
+                          {/* 순서이동 / 삭제 액션 버튼 */}
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveDutyUp(duty.id)}
+                              disabled={isFirst}
+                              className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 disabled:hover:bg-slate-100 cursor-pointer transition-all active:scale-95"
+                              title="위로 이동"
+                            >
+                              <ArrowUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveDutyDown(duty.id)}
+                              disabled={isLast}
+                              className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 disabled:hover:bg-slate-100 cursor-pointer transition-all active:scale-95"
+                              title="아래로 이동"
+                            >
+                              <ArrowDown className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteDutyRow(duty.id)}
+                              className="p-1 rounded bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 cursor-pointer transition-all active:scale-95 ml-0.5"
+                              title="행 삭제"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* 부서·기관명 & 담당 역할 */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">부서·기관명</label>
+                            <input
+                              type="text"
+                              value={duty.deptOrOrg || ''}
+                              onChange={(e) => updateDutyField(duty.id, 'deptOrOrg', e.target.value)}
+                              placeholder="예: 보건행정과"
+                              className="w-full text-xs font-semibold px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">담당 역할</label>
+                            <input
+                              type="text"
+                              value={duty.role || ''}
+                              onChange={(e) => updateDutyField(duty.id, 'role', e.target.value)}
+                              placeholder="예: 총괄 기획 및 예산"
+                              className="w-full text-xs font-medium px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 담당자 & 연락처 (3컬럼 그리드) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">담당자</label>
+                            <input
+                              type="text"
+                              value={duty.manager || ''}
+                              onChange={(e) => updateDutyField(duty.id, 'manager', e.target.value)}
+                              placeholder="예: 오창선"
+                              className="w-full text-xs font-medium px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">행정전화</label>
+                            <input
+                              type="text"
+                              value={duty.adminPhone || ''}
+                              onChange={(e) => updateDutyField(duty.id, 'adminPhone', e.target.value)}
+                              placeholder="02-3423-7139"
+                              className="w-full text-xs font-mono px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">휴대전화</label>
+                            <input
+                              type="text"
+                              value={duty.mobilePhone || ''}
+                              onChange={(e) => updateDutyField(duty.id, 'mobilePhone', e.target.value)}
+                              placeholder="010-XXXX-XXXX"
+                              className="w-full text-xs font-mono px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 배정 과업 (줄바꿈 시 분할) */}
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-0.5">배정 과업 (줄바꿈 시 개조식 목록으로 자동 분할)</label>
+                          <textarea
+                            rows={Math.min(5, Math.max(2, (rawTasksText.split('\n').length || 1)))}
+                            value={rawTasksText}
+                            onChange={(e) => updateDutyField(duty.id, 'tasks', e.target.value)}
+                            placeholder="과업 내용을 입력하세요 (줄바꿈 시 각 줄이 개조식 목록으로 저장됩니다)"
+                            className="w-full text-xs leading-relaxed px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-y"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* 하단 행 추가 및 저장 바 */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={handleAddDutyRow}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-dashed border-emerald-300 hover:border-emerald-400 bg-emerald-50/60 hover:bg-emerald-100/70 text-emerald-800 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-98"
+                    >
+                      <Plus className="w-4 h-4 text-emerald-600" />
+                      <span>+ 새 업무분장 행 추가</span>
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCancelEditDuties}
+                        disabled={saveMutation.isPending}
+                        className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg shadow-3xs cursor-pointer transition-all active:scale-95"
+                      >
+                        취소
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveDuties}
+                        disabled={saveMutation.isPending}
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+                      >
+                        {saveMutation.isPending ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Save className="w-3.5 h-3.5" />
+                        )}
+                        <span>업무분장 전체 저장</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* VIEW MODE (MOBILE CARD STACK VIEW) */
+                <div className="space-y-3">
+                  {filteredDuties.length === 0 ? (
+                    <div className="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-300 rounded-xl shadow-2xs">
+                      검색 조건과 일치하는 업무분장 항목이 없습니다.
+                    </div>
+                  ) : (
+                    filteredDuties.map((duty) => {
+                      const isHQ = duty.category === '총괄기획';
+                      const isSports = duty.category === '체육회';
+                      const isSafety = duty.category === '응급안전';
+                      const isAgency = duty.category === '대행용역';
+
+                      const adminNo = formatAutoHyphen((duty.adminPhone || (!duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
+                      const mobileNo = formatAutoHyphen((duty.mobilePhone || (duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
+
+                      return (
+                        <div
+                          key={`duty-card-${duty.id}`}
+                          className="bg-white border-2 border-slate-300 rounded-xl p-3.5 space-y-2.5 shadow-2xs transition-all hover:border-slate-400"
+                        >
+                          {/* 카드 헤더: 구분 배지 + 부서·기관명 + (관리자일 때 수정 버튼) */}
+                          <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 gap-2">
+                            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                              <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded border shrink-0 ${
+                                isHQ
+                                  ? 'bg-blue-100 text-blue-800 border-blue-200'
+                                  : isSports
+                                  ? 'bg-indigo-100 text-indigo-800 border-indigo-200'
+                                  : isSafety
+                                  ? 'bg-red-100 text-red-800 border-red-200'
+                                  : isAgency
+                                  ? 'bg-amber-100 text-amber-900 border-amber-200'
+                                  : 'bg-slate-100 text-slate-700 border-slate-200'
+                              }`}>
+                                {duty.category}
+                              </span>
+                              <div className="font-extrabold text-sm text-slate-900 leading-snug">
+                                {duty.deptOrOrg || <span className="text-slate-400 italic font-normal text-xs">(부서·기관 미지정)</span>}
+                              </div>
+                            </div>
+
+                            {isLocalAdmin && (
+                              <button
+                                type="button"
+                                onClick={handleStartEditDuties}
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 px-2 py-1 rounded shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                                title="스프레드시트 엑셀 편집 모드로 열기"
+                              >
+                                <Edit3 className="w-3 h-3 text-slate-500" />
+                                <span>수정</span>
+                              </button>
+                            )}
+                          </div>
+
+                          {/* 담당 역할 */}
+                          <div className="flex items-start gap-1.5">
+                            <span className="text-xs font-bold text-slate-500 shrink-0">역할:</span>
+                            <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} font-bold text-slate-900 leading-snug break-keep`}>
+                              {duty.role || <span className="text-slate-400 italic font-normal text-xs">(담당 역할 설정 대기)</span>}
+                            </div>
+                          </div>
+
+                          {/* 담당자 및 연락처 바 (가로 1열 정렬) */}
+                          {(() => {
+                            const hasManager = Boolean(duty.manager);
+                            const hasAdmin = Boolean(adminNo);
+                            const hasMobile = Boolean(showPrivateMobile && mobileNo);
+
+                            if (!hasManager && !hasAdmin && !hasMobile) return null;
+
+                            return (
+                              <div className="flex items-center gap-1.5 flex-wrap pt-0.5 pb-0.5">
+                                {hasManager && (
+                                  <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                                    <User className="w-3 h-3 text-slate-500 shrink-0" />
+                                    <span>{showPrivateMobile ? duty.manager : maskPersonName(duty.manager)}</span>
+                                  </div>
+                                )}
+                                {hasAdmin && (
+                                  <a
+                                    href={`tel:${adminNo.replace(/[^0-9]/g, '')}`}
+                                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                    title={`행정전화 걸기: ${adminNo}`}
+                                  >
+                                    <Phone className="w-3 h-3 text-blue-700 shrink-0" />
+                                    <span className="text-[10.5px] font-extrabold text-blue-800">행정:</span>
+                                    <span className="font-mono">{adminNo}</span>
+                                  </a>
+                                )}
+                                {hasMobile && (
+                                  <a
+                                    href={`tel:${mobileNo.replace(/[^0-9]/g, '')}`}
+                                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                    title={`휴대전화 걸기: ${mobileNo}`}
+                                  >
+                                    <Smartphone className="w-3 h-3 text-emerald-700 shrink-0" />
+                                    <span className="text-[10.5px] font-extrabold text-emerald-800">폰:</span>
+                                    <span className="font-mono">{mobileNo}</span>
+                                  </a>
+                                )}
+                              </div>
+                            );
+                          })()}
+
+                          {/* 배정 과업 박스 */}
+                          <div className="bg-slate-50/90 rounded-lg p-2.5 border border-slate-200">
+                            <div className="text-[11px] font-bold text-slate-500 mb-1 flex items-center gap-1">
+                              <span>배정 과업:</span>
+                            </div>
+                            {duty.tasks && duty.tasks.length > 0 ? (
+                              <ul className="space-y-1">
+                                {duty.tasks.map((task, tIdx) => (
+                                  <li
+                                    key={`duty-${duty.id}-task-${tIdx}`}
+                                    className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-800 font-medium flex items-start gap-1.5 leading-snug break-keep`}
+                                  >
+                                    <span className="text-slate-400 font-bold select-none shrink-0">•</span>
+                                    <span>{task}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <span className="text-slate-400 italic font-normal text-xs">(과업 세부 내역 작성 대기)</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+
+                  {/* 하단 관리자 도구 바 (View Mode) */}
+                  {isLocalAdmin && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={handleAddDutyRow}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-98"
+                      >
+                        <Plus className="w-4 h-4 text-emerald-600" />
+                        <span>+ 새 업무분장 행 추가</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleStartEditDuties}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+                      >
+                        <FileSpreadsheet className="w-3.5 h-3.5" />
+                        <span>스프레드시트 엑셀 편집</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -3834,12 +4281,6 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       <div className="text-xs font-bold text-slate-900 leading-snug">
                         {parsedPreview.text}
                       </div>
-                      {parsedPreview.attendees && (
-                        <div className="text-[10.5px] text-slate-500 font-medium flex items-center gap-1">
-                          <User className="w-3 h-3 text-slate-400" />
-                          <span>참석자: {parsedPreview.attendees}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -3980,7 +4421,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                   maxLength={10}
                   value={pinInput}
                   onChange={(e) => { setPinInput(e.target.value); setPinError(null); }}
-                  placeholder="비밀번호 4자리 (예: 행사일)"
+                  placeholder="비밀번호 4자리 입력"
                   className="w-full px-3.5 py-2.5 text-sm font-mono font-bold tracking-widest text-center border-2 border-slate-300 rounded-xl bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 text-slate-900"
                   autoFocus
                 />
