@@ -2,6 +2,18 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 226: Personal Information Protection (PIPA) Compliance Framework & Local Privacy Guard CLI Integration Release] Established comprehensive 3-tier privacy compliance architecture for public administration, deployed automated multi-format de-identification CLI (`scripts/privacy_guard.py`), enacted AGENTS.md Rule Q guardrail, and authored practical 10-point compliance checklist (`docs/PERSONAL_INFO_PROTECTION_GUIDE.md`). (2026-09-29)
+* **개요 및 개발 목적**:
+  - 사용자 질의 및 요청 ("개인정보 보호법 위반하지 않게 내가 업무 처리할수 있게 도와줄래??") 전격 분석 및 완벽 구현:
+    1. **로컬 개인정보 자동 탐지 및 비식별화 CLI 유틸리티(`scripts/privacy_guard.py`) 신규 구축**:
+       - 텍스트(.txt, .md), 구조화 데이터(.json, .csv), 한글문서(.hwpx) 내부 XML까지 아우르는 정밀 개인정보 스캔 및 마스킹 엔진 구현.
+       - 주민등록번호, 외국인등록번호, 전화번호, 카드번호, 계좌번호, 운전면허/여권번호, 이메일, 민감정보 키워드 100% 탐지 및 안전한 마스킹 사본 원클릭 생성.
+    2. **에이전트 행동 수칙([AGENTS.md](file:///d:/Desktop/PORTFOLIO/PORTFOLIO%20-%20VITAL/AGENTS.md)) 내 'Rule Q. 개인정보 보호법 준수 및 비식별화 가드레일' 제정**:
+       - 열람 전 PII 탐지 차단, 기안서/HWPX 가명·익명화 의무화, 로컬 도구 연동 및 목적 외 이용 방지 수칙 명문화.
+    3. **공무 실무자를 위한 행정 실무 가이드라인 및 자가진단표([docs/PERSONAL_INFO_PROTECTION_GUIDE.md](file:///d:/Desktop/PORTFOLIO/PORTFOLIO%20-%20VITAL/docs/PERSONAL_INFO_PROTECTION_GUIDE.md)) 제정**:
+       - ｢개인정보 보호법｣ 5대 핵심 조항(수집, 목적외제공, 민감정보, 고유식별정보, 위탁) 실무 적용 해설.
+       - 생성형 AI 활용 5단계 표준 프로세스, 표준 마스킹 표기법, 결재 전 10대 자가진단 체크리스트 수록.
+
 ### [Milestone 224: Yangjae Festival Milestone Task Attendees Capsule & Edit Control Full Purge Release] Completely purged attendees capsule badges (both grey department badge and yellow phone number badge) from Milestone Tasks tab reading view, removed attendees input field and state from inline edit mode (`DetailEditRow`), and batch-cleaned 33 residual `[참여:...]` legacy tags from `FESTIVAL_YANGJAE_2026.json`, achieving 100% Jest pass (39/39 tests) and zero TypeScript errors. (2026-09-28)
 * **개요 및 개발 목적**:
   - 사용자 지침 ("추진과제 탭에 스샷에 나오는 캡슐 삭제해줘, 기능도 삭제해줘 의미가 없다") 전격 반영:

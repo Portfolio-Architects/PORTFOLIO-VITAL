@@ -129,7 +129,7 @@ const FALLBACK_FESTIVAL_DATA = {
     "staffNote": "행사 참여 직원 대체휴무 시행 예정 (전 직원 참여)",
     "organizer": "강남구보건소 보건행정과 건강증진팀, 강남구체육회(걷기협회)",
     "overallProgress": 70,
-    "lastUpdated": "2026-09-28"
+    "lastUpdated": "2026-09-29"
   },
   "budget": {
     "total": 49900000,
@@ -211,7 +211,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "id": 3,
       "number": "추진과제 2",
       "title": "부스 운영",
-      "status": "done",
+      "status": "in-progress",
       "period": "9월 1주 ~ 9월 2주",
       "cooperationDepts": [],
       "details": [
@@ -232,7 +232,8 @@ const FALLBACK_FESTIVAL_DATA = {
         "[완료][26.9.14.] 건강관리과 부스 운영 신청서 제출 : ",
         "[완료][26.9.16.]강남구의사회 부스 운영 확정 : ",
         "[완료][26.9.21.] 자생한방병원 부스 운영 신청서 제출 : ",
-        "[완료][26.9.28.]보건행정과 건강증진팀 부스 운영 확정 : "
+        "[완료][26.9.28.]보건행정과 건강증진팀 부스 운영 확정 : ",
+        "[예정][26.10.2.] 부스 배치 세부 구획"
       ]
     },
     {
@@ -254,14 +255,15 @@ const FALLBACK_FESTIVAL_DATA = {
         "[완료][26.9.23.] 공원녹지과, 치수과 : 양재천 일대 상부 산책로 사용 협조",
         "[완료][26.9.23.] 문화도시과, 치수과 : 수변문화 쉼터 주변 장소 사용 및 행복콘서트팀 지원 협조",
         "[완료][26.9.28.]동국제약 건강기능 식품 협찬 협의 : 행사 날 음파전동칫솔 1200개 협찬 확정",
+        "[완료][26.9.28.] 정책홍보실 : 알림톡 발송 완료",
+        "[완료][26.9.29] 주민자치과 : 정례반상회 홍보자료 제출",
+        "[완료][26.9.29.] 헬스체크업 : 4,000명 대상 홍보 문자 발송 완료",
         "[진행][26.10.26.] 보도자료 : 정책홍보실 10월 26일 게시 예정",
         "[예정] [협조예정] 도시계획과: 양재천 교량 및 산책로 현수막 게첨",
-        "[예정] [협조예정] 주민자치과: 정례반상회 홍보자료 제출 및 행정복지센터 홍보 포스터 부착 협조",
         "[예정]인근 동 주민센터(개포·일원·대치·도곡 등) 동장님 협조 요청 : 관내 단체 및 주민 참여 독려",
         "[예정]개포 현대 2단지 아파트 입주자 대표회 미팅",
         "[예정]자원순환과 : 쓰레기 수거 협조",
         "[예정] 업무 분장 : ",
-        "[예정] 수변문화쉼터 사용 및 행복콘서트 지원 협조 : 문화도시과",
         "[예정]남부혈액원 주차 5대 협조 공문 발송: "
       ]
     },
@@ -274,7 +276,6 @@ const FALLBACK_FESTIVAL_DATA = {
       "cooperationDepts": [],
       "details": [
         "[진행] 행사 방침서 작성 중 : ",
-        "[예정] 계약 방침",
         "[예정] 업무 분장 방침"
       ]
     },
@@ -336,7 +337,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "phone": "02-3423-7018",
       "adminPhone": "02-3423-7018",
       "mobilePhone": "010-3912-3269",
-      "staffCount": 0
+      "staffCount": 4
     },
     {
       "id": 3,
@@ -366,7 +367,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "phone": "02-3423-7106",
       "adminPhone": "02-3423-7106",
       "mobilePhone": "010-3071-9606",
-      "staffCount": 0
+      "staffCount": 6
     },
     {
       "id": 5,
@@ -471,7 +472,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "phone": "02-549-0971",
       "adminPhone": "02-549-0971",
       "mobilePhone": "010-2279-5982",
-      "staffCount": 0
+      "staffCount": 8
     },
     {
       "id": 12,
@@ -531,7 +532,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "phone": "1577-0007",
       "adminPhone": "1577-0007",
       "mobilePhone": "010-9931-0994",
-      "staffCount": 6
+      "staffCount": 7
     },
     {
       "id": 16,
@@ -546,7 +547,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "phone": "02-6268-5339",
       "adminPhone": "02-6268-5339",
       "mobilePhone": "010-5192-2210",
-      "staffCount": 0
+      "staffCount": 12
     },
     {
       "id": 17,
@@ -561,7 +562,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "phone": "-",
       "adminPhone": "-",
       "mobilePhone": "010-7935-3095",
-      "staffCount": 0
+      "staffCount": 4
     },
     {
       "id": 18,

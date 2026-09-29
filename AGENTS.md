@@ -197,14 +197,26 @@
    - 인공지능 모델의 인지적 한계 자인 및 외부 탐색 지시형 면책 문구(Disclaimer)의 생성을 전면 금지함.
    - 오류 지적 또는 정정 요구 수신 시, 사과 절차 없이 수정 대상 레코드 식별, 원인 로그 분석, 정정 결과만을 즉시 제시함.
 
+### Q. 개인정보 보호법 준수 및 비식별화 가드레일 (PIPA Compliance & Safe De-identification Guard)
+1. **열람 전 개인정보 감지 및 차단 원칙 (Zero PII Ingestion Guard)**:
+   - 에이전트는 로컬 업무 문서(`D:\Desktop\공공문서 폴더`, `F:\_Organized_Archive` 등)를 조회할 때 주민등록번호, 외국인등록번호, 계좌번호, 개인 휴대전화번호, 카드번호 등 ｢개인정보 보호법｣상 고유식별정보 및 금융정보가 감지되면 원본 식별자를 응답에 평문으로 절대 노출하지 않으며, 즉시 마스킹 처리(`홍*동`, `******-*******`, `010-****-1234`)하여 인용해야 합니다.
+2. **산출물 가명·익명화 의무 (Sanitized Output Enforcement)**:
+   - 기안서, 사업계획서, 행사 식순 대본, HWPX 문서 생성 시 특정 공무원이나 민간 참여자의 실명 기재를 지양하고 공식 직제명(`총괄주무관`, `건강증진과장`, `의전담당관`) 또는 가명(`구민 대표 A`)을 적용합니다.
+   - 건강검진 결과, 질환명, 장애등급 등 민감정보(법 제23조)는 개인별 명단 형태로 기안하지 않고 반드시 총괄 통계 수치(건수, 비율)로 변환하여 수록합니다.
+3. **로컬 비식별화 도구 연동 의무 (Local Tool Interoperability)**:
+   - 대규모 인적사항 또는 서식이 포함된 문서를 AI 컨텍스트에 투입하기 전, 로컬 비식별화 CLI 도구([privacy_guard.py](file:///d:/Desktop/PORTFOLIO/PORTFOLIO%20-%20VITAL/scripts/privacy_guard.py))의 `--scan` 또는 `--sanitize` 명령을 활용하여 비식별화 복제본을 우선 생성·검증해야 합니다.
+4. **목적 외 이용 방지 및 임시 파일 관리 (Storage Limitation & Safe Cleanup)**:
+   - 당초 공고되거나 승인된 사업 목적 외의 타 업무로 개인정보를 전용하거나 임의 열람하지 않으며, 업무 종료 후 불필요한 임시 마스킹 파일이나 로그는 잔류하지 않도록 안전하게 정리 지원합니다.
+
 ## 3. 다중 에이전트 파이프라인 맵
 - `src/lib/agents/planner.ts`: 작업 분해 및 컨텍스트 검색.
 - `src/lib/agents/generator.ts`: 실행 및 코드 합성.
 - `src/lib/agents/evaluator.ts`: Zod 스키마 및 TypeScript 검증 피드백 루프.
 
 ## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)
-- **최신 동기화 일자:** 2026-09-28
+- **최신 동기화 일자:** 2026-09-29
 - **동기화된 마일스톤:**
+  - [Milestone 226: Personal Information Protection (PIPA) Compliance Framework & Local Privacy Guard CLI Integration Release] Established comprehensive 3-tier privacy compliance architecture for public administration, deployed automated multi-format de-identification CLI (`scripts/privacy_guard.py`), enacted AGENTS.md Rule Q guardrail, and authored practical 10-point compliance checklist (`docs/PERSONAL_INFO_PROTECTION_GUIDE.md`). (2026-09-29)
   - [Milestone 224: Yangjae Festival Milestone Task Attendees Capsule & Edit Control Full Purge Release] Completely purged attendees capsule badges (both grey department badge and yellow phone number badge) from Milestone Tasks tab reading view, removed attendees input field and state from inline edit mode (`DetailEditRow`), and batch-cleaned 33 residual `[참여:...]` legacy tags from `FESTIVAL_YANGJAE_2026.json`, achieving 100% Jest pass (39/39 tests) and zero TypeScript errors. (2026-09-28)
   - [Milestone 223: Yangjae Festival Mobile-First Viewport (max-w-md 448px) Locking & Full-Width Duties Card/Spreadsheet View Release] Reverted desktop wide container expansion to fixed mobile viewport (`sm:max-w-md`, 448px) and redesigned Duties tab (Tab 4) from a 900px desktop table into a mobile-first card stack view (view mode) and mobile card spreadsheet editor (edit mode), eliminating 1,000px vertical inflation and horizontal clipping with 100% Jest pass (39/39 tests) and zero TypeScript errors. (2026-09-28)
   - [Milestone 220: Yangjae Festival Booth Staff Count (인원수) Field Integration & Dynamic Aggregation Pipeline Release] Integrated staff count (`staffCount`) field across individual booth cards (reading & editing modes), updated hero banner summary bar with real-time total personnel aggregation, unified local JSON storage (`FESTIVAL_YANGJAE_2026.json`), React dashboard (`YangjaeFestivalDashboard.tsx`), and Cloudflare Pages static template (`scripts/pages-template.html`), achieving 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-28)
@@ -216,5 +228,4 @@
   - [Milestone 214: Yangjae Festival Booth Hero Banner Table & Chair Total Requirements Integration Release] Integrated dynamic aggregation and high-contrast dual badges for total required tables (64 units) and chairs (166 units) directly into the Booth Tab hero card across React dashboard and Cloudflare Pages static templates, eliminating cognitive load and providing instant equipment logistics visibility with 100% Jest pass (34/34 tests) and zero TypeScript errors. (2026-09-23)
   - [Milestone 213: Yangjae Festival Schedule Tab Box-Card Layout Transformation & Strict Container Width Consistency Release] Transformed schedule tab (Tab 3) from multi-column table into compact box cards modeled directly after the Booths tab ("2. 부스현황") with full inline editability, strict max-w-md (448px) container width alignment across all 4 category tabs, eliminating desktop wide container expansion (max-w-6xl) and horizontal scroll, achieving 100% Jest pass (34/34 tests) and zero TypeScript errors. (2026-09-23)
   - [Milestone 212: Yangjae Festival Schedule Title & Details Inline Editing & Disk Save Pipeline Release] Implemented row-level inline editing for schedule items (title, note, time, lead, and status) in Tab 3 timetable, equipped with instant Enter/Esc keyboard shortcuts, atomic disk save mutation to FESTIVAL_YANGJAE_2026.json, and admin edit badges, achieving 100% Jest pass (34/34 tests) and zero TypeScript errors. (2026-09-23)
-  - [Milestone 211: Yangjae Festival Full-Screen Single-View Schedule Table & Ultra-Compact 17-Item Layout Release] Expanded schedule tab container width to max-w-6xl on desktop and streamlined timetable grid into a high-density, single-screen layout with inline notes, compact badges, and 1-row header, displaying all 17 event items without vertical scrolling or text clipping, achieving 100% Jest pass (32/32 tests) and zero TypeScript errors. (2026-09-23)
-  - 그 외 과거 누적 마일스톤 총 268건 통합 요약 (초기 ~ 2026-09-23 이전 패치 내역)
+  - 그 외 과거 누적 마일스톤 총 269건 통합 요약 (초기 ~ 2026-09-23 이전 패치 내역)
