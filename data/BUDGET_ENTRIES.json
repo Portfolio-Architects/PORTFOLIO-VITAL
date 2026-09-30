@@ -732,5 +732,27 @@
     "actionType": "daily_expense",
     "isPlanned": false,
     "id": "mudmfelrl57mtc6er"
+  },
+  {
+    "categoryId": "mnrcir0v0vx5ae1qd",
+    "amount": 1920000,
+    "date": "2026-09-29",
+    "purpose": "헬스체크업 운동 프로그램 강사료 지급(9월)",
+    "memo": "",
+    "docRegNum": "보건행정과-12159",
+    "actionType": "general",
+    "isPlanned": false,
+    "id": "munqzw6q0ojllloyb"
+  },
+  {
+    "categoryId": "mnrcir0v5zjn4qxyg",
+    "amount": 7608440,
+    "date": "2026-09-30",
+    "purpose": "2026년 9월 서울체력장 강남센터 기간제근로자 인건비 지출",
+    "memo": "",
+    "docRegNum": "보건행정과-12070",
+    "actionType": "general",
+    "isPlanned": false,
+    "id": "munr0ta0qg8ldhtqp"
   }
 ]
