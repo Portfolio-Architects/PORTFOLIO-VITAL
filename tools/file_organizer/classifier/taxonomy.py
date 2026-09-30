@@ -41,11 +41,15 @@ class ClassificationResult:
         """
         dest_filename = filename if filename else self.canonical_base
         if self.is_duplicate:
-            path = Path("_Duplicates") / self.year / self.project / self.stage / dest_filename
+            if self.stage == "활동사진·미디어":
+                path = Path("_Duplicates") / self.year / self.project / self.stage / self.doc_type / dest_filename
+            else:
+                path = Path("_Duplicates") / self.year / self.project / self.stage / dest_filename
         else:
             path = Path(self.year) / self.project / self.stage / self.doc_type / dest_filename
         self.target_rel_path = path
         return path
+
 
     def to_dict(self) -> dict:
         """Convert classification result to serializable dict."""

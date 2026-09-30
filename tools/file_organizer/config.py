@@ -16,12 +16,19 @@ SUPPORTED_TEXT_EXTENSIONS: Set[str] = {
 }
 
 # Binary and media extensions (Strict SHA-256 only deduplication)
-BINARY_MEDIA_EXTENSIONS: Set[str] = {
-    ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".ico",
-    ".zip", ".7z", ".tar", ".gz", ".rar",
-    ".bin", ".exe", ".dll", ".iso",
-    ".mp4", ".avi", ".mov", ".mkv", ".mp3", ".wav"
+MEDIA_IMAGE_EXTENSIONS: Set[str] = {
+    ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".ico", ".heic", ".raw", ".cr2", ".nef", ".tif", ".tiff"
 }
+MEDIA_VIDEO_EXTENSIONS: Set[str] = {
+    ".mp4", ".avi", ".mov", ".mkv", ".mp3", ".wav", ".wmv", ".m4v"
+}
+MEDIA_EXTENSIONS: Set[str] = MEDIA_IMAGE_EXTENSIONS | MEDIA_VIDEO_EXTENSIONS
+
+BINARY_MEDIA_EXTENSIONS: Set[str] = MEDIA_EXTENSIONS | {
+    ".zip", ".7z", ".tar", ".gz", ".rar",
+    ".bin", ".exe", ".dll", ".iso"
+}
+
 
 # ---------------------------------------------------------------------------
 # Level 1: Year Taxonomy
@@ -115,15 +122,24 @@ STAGE_04_OUTCOME = "04_결과보고·정산"
 STAGE_02_BUDGET = "02_예산·지출"
 STAGE_01_PLANNING = "01_기획·품의"
 STAGE_03_EVENT = "03_집행·행사"
+STAGE_MEDIA = "활동사진·미디어"
 
 STAGE_LIST: List[str] = [
     STAGE_01_PLANNING,
     STAGE_02_BUDGET,
     STAGE_03_EVENT,
-    STAGE_04_OUTCOME
+    STAGE_04_OUTCOME,
+    STAGE_MEDIA
 ]
 
 STAGE_UNKNOWN: str = STAGE_01_PLANNING
+
+# Media date extraction and event keywords
+RE_MEDIA_DATE = re.compile(r'(?<!\d)(20[1-3]\d)[-_.]?(0[1-9]|1[0-2])[-_.]?(0[1-9]|[12]\d|3[01])(?!\d)')
+RE_EVENT_KEYWORD = re.compile(
+    r'(개막식|폐막식|개회식|시상식|부스|체험|공연|걷기대회|체력측정|현장스케치|기념촬영|활동사진|현장사진|참여자|워크숍|세미나|교육|축제|페스티벌|행사)'
+)
+
 
 # Work Stage Disambiguation Priority Regexes
 RE_STAGE_04_OUTCOME = re.compile(

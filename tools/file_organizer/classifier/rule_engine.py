@@ -30,6 +30,10 @@ from tools.file_organizer.config import (
     STAGE_02_BUDGET,
     STAGE_03_EVENT,
     STAGE_04_OUTCOME,
+    STAGE_MEDIA,
+    MEDIA_EXTENSIONS,
+    RE_MEDIA_DATE,
+    RE_EVENT_KEYWORD,
     STAGE_UNKNOWN,
     RE_STAGE_04_OUTCOME,
     RE_STAGE_02_BUDGET,
@@ -49,19 +53,29 @@ def extract_year(
     filename: str,
     text_preview: str = "",
     path_str: str = "",
-    mtime: Optional[float] = None
+    mtime: Optional[float] = None,
+    exif_date: Optional[str] = None
 ) -> Tuple[str, str, float]:
-    """Extract standard year string (e.g. '2026년') using 5-stage cascade.
+    """Extract standard year string (e.g. '2026년') using 6-stage cascade.
 
     Returns:
         Tuple of (year_str, rationale, confidence)
     """
+    # 0. Cascade Stage 0: EXIF DateTimeOriginal / DateTime metadata (highest physical truth for media)
+    if exif_date:
+        m_exif = re.search(r'(?<!\d)(20[1-3]\d)', exif_date)
+        if m_exif:
+            y_val = int(m_exif.group(1))
+            if 2015 <= y_val <= 2035:
+                return f"{y_val}년", f"EXIF_DATETIME_ORIGINAL ({y_val})", 0.99
+
     # 1. Cascade Stage 1: Explicit 4-digit year in filename (2015-2035)
     match_4d = RE_YEAR_4DIGIT.search(filename)
     if match_4d:
         y_val = int(match_4d.group(1))
         if 2015 <= y_val <= 2035:
             return f"{y_val}년", f"FILENAME_4DIGIT ({y_val})", 0.98
+
 
     # 2. Cascade Stage 2: 8-digit date in filename (YYYYMMDD)
     match_8d = RE_YEAR_8DIGIT.search(filename)
@@ -342,9 +356,88 @@ def classify_file(file_info: FileInfo) -> ClassificationResult:
     tp = file_info.text_preview
     path_str = str(file_info.path)
     mtime = file_info.mtime
+    exif_dt = getattr(file_info, "exif_date", None)
+    is_media = getattr(file_info, "is_media", False) or file_info.extension.lower() in MEDIA_EXTENSIONS
+
+    if is_media:
+        # 1. Level 1: Year (Prioritize EXIF date, then filename date, path, mtime)
+        year, year_rat, year_conf = extract_year(fn, text_preview=tp, path_str=path_str, mtime=mtime, exif_date=exif_dt)
+
+        # 2. Level 2: Project (Filename, parent path keywords, or PROJECT_UNKNOWN)
+        project, proj_rat, proj_conf = extract_project(fn, text_preview=tp, path_str=path_str)
+
+        # 3. Level 3: Dedicated Media Stage
+        stage = STAGE_MEDIA
+        stage_rat = "MEDIA_ASSET_STAGE"
+        stage_conf = 0.95
+
+        # 4. Level 4: Album Bundling [YYYYMMDD_현장사진] or [YYYYMMDD_행사명_현장사진]
+        date_str = ""
+        if exif_dt:
+            m_dt = re.search(r'(?<!\d)(20[1-3]\d)[-:\.]?(0[1-9]|1[0-2])[-:\.]?(0[1-9]|[12]\d|3[01])(?!\d)', exif_dt)
+            if m_dt:
+                date_str = f"{m_dt.group(1)}{m_dt.group(2)}{m_dt.group(3)}"
+        if not date_str:
+            m_fn = RE_MEDIA_DATE.search(fn) or RE_MEDIA_DATE.search(path_str)
+            if m_fn:
+                date_str = f"{m_fn.group(1)}{m_fn.group(2)}{m_fn.group(3)}"
+        if not date_str and mtime is not None and mtime > 0:
+            try:
+                date_str = datetime.fromtimestamp(mtime).strftime("%Y%m%d")
+            except Exception:
+                pass
+        if not date_str:
+            date_str = "일자미상"
+
+        m_ev = None
+        for kw in ["개막식", "폐막식", "개회식", "시상식", "부스", "체험", "공연", "걷기대회", "체력측정", "현장스케치", "기념촬영", "워크숍", "세미나", "교육"]:
+            if kw in fn or kw in path_str:
+                m_ev = kw
+                break
+
+        if m_ev:
+            album_name = f"{date_str}_{m_ev}_현장사진"
+        else:
+            album_name = f"{date_str}_현장사진"
+
+
+        doc_type = album_name
+        dt_rat = f"MEDIA_ALBUM_BUNDLING ({album_name})"
+        dt_conf = 0.95
+
+        canonical_base = get_canonical_base_name(fn)
+        flags = list(file_info.status_flags)
+        if "MEDIA_ASSET" not in flags:
+            flags.append("MEDIA_ASSET")
+
+        grounds = [
+            f"Level 1 [연도별]: {year} <- {year_rat}",
+            f"Level 2 [사업별]: {project} <- {proj_rat}",
+            f"Level 3 [업무단계]: {stage} <- {stage_rat}",
+            f"Level 4 [문서유형]: {doc_type} <- {dt_rat}",
+        ]
+        avg_conf = (year_conf + proj_conf + stage_conf + dt_conf) / 4.0
+
+        result = ClassificationResult(
+            year=year,
+            project=project,
+            stage=stage,
+            doc_type=doc_type,
+            canonical_base=canonical_base,
+            is_duplicate=False,
+            duplicate_of=None,
+            is_latest_version=True,
+            is_historical_version=False,
+            confidence=avg_conf,
+            grounds=grounds,
+            status_flags=flags
+        )
+        result.compute_target_rel_path(filename=fn)
+        return result
 
     # 1. Level 1: Year
     year, year_rat, year_conf = extract_year(fn, text_preview=tp, path_str=path_str, mtime=mtime)
+
 
     # 2. Level 2: Project
     project, proj_rat, proj_conf = extract_project(fn, text_preview=tp, path_str=path_str)

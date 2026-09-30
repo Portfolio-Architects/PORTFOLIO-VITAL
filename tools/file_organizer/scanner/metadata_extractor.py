@@ -13,7 +13,9 @@ from typing import List, Optional, Set
 from tools.file_organizer.config import (
     HASH_BLOCK_SIZE,
     EMPTY_SHA256,
-    SUPPORTED_TEXT_EXTENSIONS
+    SUPPORTED_TEXT_EXTENSIONS,
+    MEDIA_EXTENSIONS,
+    MEDIA_IMAGE_EXTENSIONS
 )
 from tools.file_organizer.scanner.text_extractor import extract_text_safe
 
@@ -36,6 +38,8 @@ class FileInfo:
     ctime: float = 0.0
     text_preview: str = ""
     status_flags: List[str] = field(default_factory=list)
+    is_media: bool = False
+    exif_date: Optional[str] = None
 
     def to_dict(self) -> dict:
         """Convert FileInfo to dictionary for JSON reporting."""
@@ -48,8 +52,11 @@ class FileInfo:
             "mtime": self.mtime,
             "ctime": self.ctime,
             "text_preview": self.text_preview[:200] if self.text_preview else "",
-            "status_flags": self.status_flags
+            "status_flags": self.status_flags,
+            "is_media": self.is_media,
+            "exif_date": self.exif_date
         }
+
 
 
 def compute_sha256(filepath: Path | str, block_size: int = HASH_BLOCK_SIZE) -> str:
@@ -72,6 +79,36 @@ def compute_sha256(filepath: Path | str, block_size: int = HASH_BLOCK_SIZE) -> s
         return hasher.hexdigest()
     except Exception:
         return ""
+
+
+def extract_exif_datetime_safe(filepath: Path | str) -> Optional[str]:
+    """Safely extract EXIF DateTimeOriginal or DateTime string from image files."""
+    try:
+        from PIL import Image
+        with Image.open(filepath) as img:
+            exif = img.getexif()
+            if not exif:
+                return None
+
+            date_str = None
+            try:
+                exif_ifd = exif.get_ifd(0x8769)
+                if exif_ifd and 36867 in exif_ifd:
+                    date_str = exif_ifd[36867]
+            except Exception:
+                pass
+
+            if not date_str:
+                if 36867 in exif:
+                    date_str = exif[36867]
+                elif 306 in exif:
+                    date_str = exif[306]
+
+            if date_str and isinstance(date_str, str):
+                return date_str.strip()
+    except Exception:
+        pass
+    return None
 
 
 def extract_file_metadata(filepath: Path | str, extract_text: bool = True) -> FileInfo:
@@ -109,6 +146,14 @@ def extract_file_metadata(filepath: Path | str, extract_text: bool = True) -> Fi
         text_preview = text
         flags.append(status)
 
+    is_media = extension in MEDIA_EXTENSIONS
+    exif_date: Optional[str] = None
+    if is_media and size > 0 and extension in MEDIA_IMAGE_EXTENSIONS:
+        exif_raw = extract_exif_datetime_safe(path)
+        if exif_raw:
+            exif_date = exif_raw
+            flags.append("EXIF_EXTRACTED")
+
     return FileInfo(
         path=path,
         filename=filename,
@@ -118,8 +163,11 @@ def extract_file_metadata(filepath: Path | str, extract_text: bool = True) -> Fi
         mtime=mtime,
         ctime=ctime,
         text_preview=text_preview,
-        status_flags=flags
+        status_flags=flags,
+        is_media=is_media,
+        exif_date=exif_date
     )
+
 
 
 def scan_directory(

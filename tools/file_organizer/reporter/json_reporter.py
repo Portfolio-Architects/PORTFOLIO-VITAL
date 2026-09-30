@@ -28,7 +28,9 @@ def extract_version_tag(filename: str) -> Optional[str]:
 
 def map_stage_to_phase(stage: str) -> str:
     """Map internal stage string to standard enum phase name."""
-    if "기획" in stage or "품의" in stage:
+    if "활동사진" in stage or "미디어" in stage:
+        return "활동사진·미디어"
+    elif "기획" in stage or "품의" in stage:
         return "기획·품의"
     elif "예산" in stage or "지출" in stage:
         return "예산·지출"
@@ -38,6 +40,7 @@ def map_stage_to_phase(stage: str) -> str:
         return "결과보고·정산"
     else:
         return "기타·미분류"
+
 
 
 def build_json_audit_dict(plan: MigrationPlan) -> Dict[str, Any]:

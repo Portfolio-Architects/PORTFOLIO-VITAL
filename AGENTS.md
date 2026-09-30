@@ -214,7 +214,7 @@
 - `src/lib/agents/evaluator.ts`: Zod 스키마 및 TypeScript 검증 피드백 루프.
 
 ## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)
-- **최신 동기화 일자:** 2026-09-29
+- **최신 동기화 일자:** 2026-09-30
 - **동기화된 마일스톤:**
   - [Milestone 226: Personal Information Protection (PIPA) Compliance Framework & Local Privacy Guard CLI Integration Release] Established comprehensive 3-tier privacy compliance architecture for public administration, deployed automated multi-format de-identification CLI (`scripts/privacy_guard.py`), enacted AGENTS.md Rule Q guardrail, and authored practical 10-point compliance checklist (`docs/PERSONAL_INFO_PROTECTION_GUIDE.md`). (2026-09-29)
   - [Milestone 224: Yangjae Festival Milestone Task Attendees Capsule & Edit Control Full Purge Release] Completely purged attendees capsule badges (both grey department badge and yellow phone number badge) from Milestone Tasks tab reading view, removed attendees input field and state from inline edit mode (`DetailEditRow`), and batch-cleaned 33 residual `[참여:...]` legacy tags from `FESTIVAL_YANGJAE_2026.json`, achieving 100% Jest pass (39/39 tests) and zero TypeScript errors. (2026-09-28)

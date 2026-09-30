@@ -5890,3 +5890,26 @@ sequenceDiagram
       - 가상 개인정보 테스트 데이터(`scratch/test_privacy_data.txt`) 19건 항목 100% 탐지 검증 완료.
       - 마스킹 사본(`scratch/test_sanitized.txt`) 무결점 생성 및 고유식별정보 잔류 0건 검증 완료.
       - `node scripts/sync-rules.js` 실행으로 `AGENTS.md` 마일스톤 로그를 226번으로 완전 동기화.
+
+- [x] **공공 행정 파일 자동분류 체계 내 사진·미디어 전용 위계(활동사진·미디어) 및 EXIF 앨범 번들링 파이프라인 신규 구축 (Milestone 227 - 2026-09-30)**
+  - 사용자 요구사항: "파일분류 기능의 단점 한가지 발견, 사진 찾기가 어렵네" -> "1안으로 가자" (미디어 전용 위계 및 EXIF 앨범 번들링)
+  - 결함 및 구조적 한계 분석:
+    * 문서 중심 4단계 공공 행정 위계(`[연도] > [사업명] > [업무단계] > [문서유형]`)에서 사진 파일(`.jpg`, `.png`, `.jpeg` 등)은 본문 텍스트 추출이 불가능하여 일반행정 및 업무단계 최하위 폴더(`01_기획·품의/기타_행정문서`)로 낱장 격리 분산됨.
+    * 행사 1회당 수십~수백 장씩 대량 발생하는 활동사진을 특정 시점이나 장면 단위로 묶지 못해, 실무자가 결과보고서 및 홍보물 제작 시 필요한 사진을 발굴하기가 극도로 난해함.
+  - 주요 조치 및 엔지니어링 실적:
+    * **미디어 전용 3단계 위계(`STAGE_MEDIA = "활동사진·미디어"`) 신설**:
+      - `tools/file_organizer/config.py`: `MEDIA_IMAGE_EXTENSIONS`, `MEDIA_VIDEO_EXTENSIONS`, `MEDIA_EXTENSIONS` 및 `STAGE_MEDIA` 공식 등록.
+      - 사진/영상 확장자 감지 시 기존 4단계 업무단계를 우회하고 `[연도별] > [사업명] > 활동사진·미디어 > [YYYYMMDD_현장사진]` 전용 경로로 자동 집약.
+    * **EXIF 촬영일시(DateTimeOriginal) 자동 판독 및 스마트 앨범 군집화(Album Bundling)**:
+      - `tools/file_organizer/scanner/metadata_extractor.py`: Pillow 라이브러리 기반 안전한 EXIF `DateTimeOriginal`(36867) 및 `DateTime`(306) 추출기(`extract_exif_datetime_safe`) 구현.
+      - `tools/file_organizer/classifier/rule_engine.py`: EXIF 촬영일자 -> 파일명 날짜(`YYYYMMDD`) -> 수정일시(`mtime`) 3단계 날짜 추출 캐스케이드 정립.
+      - 서브 이벤트 키워드(`개막식`, `폐막식`, `시상식`, `부스`, `체험`, `걷기대회`, `체력측정` 등) 우선 감지 기반 앨범 폴더(`YYYYMMDD_개막식_현장사진`) 자동 생성.
+    * **중복 미디어 안전 격리 및 미분류 파일 안전 보호 가드(SKIP_UNCLASSIFIED) 강화**:
+      - `tools/file_organizer/main.py`: 중복 사진 감지 시 `_Duplicates / [연도] / [사업] / 활동사진·미디어 / [앨범] / [파일명]`으로 앨범 위계 유지 이관.
+      - 프로젝트 미식별 및 mtime 추론뿐인 순수 미분류 파일의 안전 스킵(`SKIP_UNCLASSIFIED`) 가드 안정화.
+      - `phase_breakdown` 내 `"media_activity"` 통계 지표 신설 및 `json_reporter.py` 연동.
+    * **정량적 검증 성과**:
+      - 신규 미디어 전용 회귀 테스트 스위트(`test_media_organizer.py`) 4개 전수 통과 (100% PASS).
+      - `file_organizer` 8개 테스트 스위트 105개 테스트 전수 통과 (`105 passed in 159s`).
+      - Jest 프론트엔드 33개 스위트 315개 테스트 전수 통과 (`315 passed in 57s`).
+      - `node scripts/sync-rules.js` 자동 실행으로 `AGENTS.md` 최신 동기화 완료.

@@ -26,6 +26,8 @@ from tools.file_organizer.config import (
     STAGE_02_BUDGET,
     STAGE_03_EVENT,
     STAGE_04_OUTCOME,
+    STAGE_MEDIA,
+    MEDIA_EXTENSIONS,
     EMPTY_SHA256
 )
 from tools.file_organizer.scanner.metadata_extractor import (
@@ -137,11 +139,14 @@ class MigrationPlan:
             "budget_expenditure": 0,
             "execution_event": 0,
             "outcome_settlement": 0,
+            "media_activity": 0,
             "unclassified": 0
         }
         for item in self.items:
             stage = item.classification.stage
-            if "기획" in stage or "품의" in stage:
+            if "활동사진" in stage or "미디어" in stage:
+                breakdown["media_activity"] += 1
+            elif "기획" in stage or "품의" in stage:
                 breakdown["planning_approval"] += 1
             elif "예산" in stage or "지출" in stage:
                 breakdown["budget_expenditure"] += 1
@@ -231,18 +236,46 @@ class OrganizerEngine:
                 if int(year_to_use[:-1]) > 2026:
                     year_to_use = "2026년"
 
-            # 4-tier hierarchy: [연도별] > [사업명] > [업무단계별] > [파일명]
-            if res.is_duplicate:
-                rel_path = Path("_Duplicates") / year_to_use / res.project / res.stage / info.filename
-                planned_action = "MOVE_DUPLICATE"
-                collision_strategy = "DEDUPLICATE"
-            else:
-                rel_path = Path(year_to_use) / res.project / res.stage / info.filename
-                if res.year == YEAR_UNKNOWN and res.project == PROJECT_UNKNOWN and res.stage == STAGE_UNKNOWN:
-                    planned_action = "SKIP_UNCLASSIFIED"
+            is_media = (
+                res.stage == STAGE_MEDIA
+                or getattr(info, "is_media", False)
+                or info.extension.lower() in MEDIA_EXTENSIONS
+            )
+
+            if is_media:
+                album_dir = res.doc_type if res.doc_type else "현장사진"
+                if res.is_duplicate:
+                    rel_path = Path("_Duplicates") / year_to_use / res.project / STAGE_MEDIA / album_dir / info.filename
+                    planned_action = "MOVE_DUPLICATE"
+                    collision_strategy = "DEDUPLICATE"
                 else:
+                    rel_path = Path(year_to_use) / res.project / STAGE_MEDIA / album_dir / info.filename
                     planned_action = "MOVE_PRIMARY"
-                collision_strategy = "NONE"
+                    collision_strategy = "NONE"
+            else:
+                # 4-tier hierarchy: [연도별] > [사업명] > [업무단계별] > [파일명]
+                if res.is_duplicate:
+                    rel_path = Path("_Duplicates") / year_to_use / res.project / res.stage / info.filename
+                    planned_action = "MOVE_DUPLICATE"
+                    collision_strategy = "DEDUPLICATE"
+                else:
+                    rel_path = Path(year_to_use) / res.project / res.stage / info.filename
+
+                    has_year_evidence = (
+                        res.year != YEAR_UNKNOWN
+                        and not any("MTIME_METADATA_FALLBACK" in g or "YEAR_FALLBACK" in g for g in res.grounds)
+                    )
+                    has_stage_evidence = not any("STAGE_FALLBACK_DEFAULT" in g for g in res.grounds)
+                    has_project_evidence = (res.project != PROJECT_UNKNOWN)
+
+                    if not has_project_evidence and not has_year_evidence and not has_stage_evidence:
+                        planned_action = "SKIP_UNCLASSIFIED"
+                    elif res.year == YEAR_UNKNOWN and res.project == PROJECT_UNKNOWN and res.stage == STAGE_UNKNOWN:
+                        planned_action = "SKIP_UNCLASSIFIED"
+                    else:
+                        planned_action = "MOVE_PRIMARY"
+                    collision_strategy = "NONE"
+
 
             # Update target_rel_path on classification
             res.target_rel_path = rel_path
