@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo, useSyncExternalStore, useCallback, useEffect } from 'react';
-import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ArrowUpDown, ArrowUp, ArrowDown, Phone, Smartphone, User, Users, Building2, Tent, FolderInput, ArrowRightLeft, Table, Armchair, Clock, Search, Shield, MapPin, Lock, FileSpreadsheet, Download } from 'lucide-react';
-import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem, ScheduleItem, DutyItem } from '@/hooks/useYangjaeFestival';
+import { Check, Share2, Edit3, Save, X, Plus, Trash2, Loader2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Phone, Smartphone, User, Users, Building2, Tent, FolderInput, ArrowRightLeft, Table, Armchair, Clock, Search, Shield, MapPin, Lock, FileSpreadsheet, Download, Layers } from 'lucide-react';
+import { useYangjaeFestival, useSaveYangjaeFestival, YANGJAE_FALLBACK_DATA, FestivalData, MilestoneItem, BoothItem, ScheduleItem, DutyItem, DutyStaffMember } from '@/hooks/useYangjaeFestival';
 
 export interface DetailDraft {
   uid: string;
@@ -227,17 +227,17 @@ export function maskPersonName(raw: string | undefined | null): string {
   return trimmed;
 }
 
-export type YangjaeReportTab = 'milestones' | 'booths' | 'schedule' | 'duties';
+export type YangjaeReportTab = 'milestones' | 'booths' | 'duties' | 'schedule';
 
 const YANGJAE_REPORT_TABS: { id: YangjaeReportTab; label: string }[] = [
   { id: 'milestones', label: '1. 추진과제' },
   { id: 'booths', label: '2. 부스현황' },
-  { id: 'schedule', label: '3. 행사식순' },
-  { id: 'duties', label: '4. 업무분장' },
+  { id: 'duties', label: '3. 업무분장' },
+  { id: 'schedule', label: '4. 행사식순' },
 ];
 
 const SCHEDULE_PHASES = ['전체', '식전·준비', '공식행사', '걷기대회', '공연·폐회'];
-const DUTY_CATEGORIES = ['전체', '총괄기획', '체육회', '대행용역', '응급안전', '체험부스', '유관부서'];
+export const DUTY_CATEGORIES = ['전체', '운영', '코스', '부스', 'VIP의전', '직원식사', '쓰레기처리'] as const;
 
 export interface BoothScaleParsed {
   dong: number;
@@ -1053,12 +1053,52 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   const [visitedFestivalTabs, setVisitedFestivalTabs] = useState<Record<YangjaeReportTab, boolean>>({
     milestones: true,
     booths: false,
-    schedule: false,
     duties: false,
+    schedule: false,
   });
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
   const [scheduleSearchQuery, setScheduleSearchQuery] = useState<string>('');
   const [dutySearchQuery, setDutySearchQuery] = useState<string>('');
+  const [selectedDutyCategory, setSelectedDutyCategory] = useState<string>('전체');
+  const [isDutyPillsWrapped, setIsDutyPillsWrapped] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('yangjae_duty_pills_wrap');
+        if (saved !== null) return saved === 'true';
+      } catch {}
+    }
+    return true; // 기본값: 2줄 전체 펼침 (스크롤 필요 없이 7대 구획 100% 한눈에 노출)
+  });
+  const dutyPillsRef = React.useRef<HTMLDivElement>(null);
+
+  const handleScrollDutyPillsLeft = useCallback(() => {
+    if (dutyPillsRef.current) {
+      dutyPillsRef.current.scrollBy({ left: -150, behavior: 'smooth' });
+    }
+  }, []);
+
+  const handleScrollDutyPillsRight = useCallback(() => {
+    if (dutyPillsRef.current) {
+      dutyPillsRef.current.scrollBy({ left: 150, behavior: 'smooth' });
+    }
+  }, []);
+
+  const handleDutyPillsWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.deltaY !== 0 && !isDutyPillsWrapped && dutyPillsRef.current) {
+      dutyPillsRef.current.scrollLeft += e.deltaY;
+    }
+  }, [isDutyPillsWrapped]);
+
+  const toggleDutyPillsWrap = useCallback(() => {
+    setIsDutyPillsWrapped((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('yangjae_duty_pills_wrap', String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+  const [isSyncingExcel, setIsSyncingExcel] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [isLargeFont, setIsLargeFont] = useState<boolean>(false);
 
@@ -1320,19 +1360,32 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
   const filteredDuties = useMemo(() => {
     let list = activeDuties;
+    if (selectedDutyCategory && selectedDutyCategory !== '전체') {
+      list = list.filter((d) => d.category === selectedDutyCategory);
+    }
     if (dutySearchQuery.trim()) {
       const q = dutySearchQuery.trim().toLowerCase();
       list = list.filter((d) =>
-        d.deptOrOrg.toLowerCase().includes(q) ||
-        d.role.toLowerCase().includes(q) ||
-        d.manager.toLowerCase().includes(q) ||
-        maskPersonName(d.manager).toLowerCase().includes(q) ||
-        d.phone.toLowerCase().includes(q) ||
-        d.tasks.some((t) => t.toLowerCase().includes(q))
+        (d.category && d.category.toLowerCase().includes(q)) ||
+        (d.deptOrOrg && d.deptOrOrg.toLowerCase().includes(q)) ||
+        (d.role && d.role.toLowerCase().includes(q)) ||
+        (d.manager && d.manager.toLowerCase().includes(q)) ||
+        (d.manager && maskPersonName(d.manager).toLowerCase().includes(q)) ||
+        (d.phone && d.phone.toLowerCase().includes(q)) ||
+        (d.adminPhone && d.adminPhone.includes(q)) ||
+        (d.mobilePhone && d.mobilePhone.includes(q)) ||
+        (d.tasks && d.tasks.some((t) => t.toLowerCase().includes(q))) ||
+        (d.staffMembers && d.staffMembers.some((s) =>
+          (s.name && s.name.toLowerCase().includes(q)) ||
+          (s.name && maskPersonName(s.name).toLowerCase().includes(q)) ||
+          (s.role && s.role.toLowerCase().includes(q)) ||
+          (s.adminPhone && s.adminPhone.includes(q)) ||
+          (s.mobilePhone && s.mobilePhone.includes(q))
+        ))
       );
     }
     return list;
-  }, [activeDuties, dutySearchQuery]);
+  }, [activeDuties, selectedDutyCategory, dutySearchQuery]);
 
   const handleSelectCategory = useCallback((cat: string) => {
     setSelectedCategory(cat);
@@ -1837,7 +1890,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     }
   }, [data, editingScheduleId, saveMutation]);
 
-  // 5. 업무분장 (TAB 4) 엑셀 편집 및 관리 핸들러
+  // 5. 업무분장 (TAB 3) 엑셀 편집 및 관리 핸들러
   const handleStartEditDuties = useCallback(() => {
     setEditDutiesData(safeClone((data?.duties || YANGJAE_FALLBACK_DATA.duties || []) as DutyItem[]));
     setEditingDuties(true);
@@ -1848,11 +1901,130 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     setEditingDuties(false);
   }, [data?.duties]);
 
+  const handleAddDutyStaff = useCallback((dutyId: number | string) => {
+    setEditDutiesData((prev) => {
+      return prev.map((d) => {
+        if (d.id !== dutyId) return d;
+        const currentStaff: DutyStaffMember[] = (d.staffMembers && d.staffMembers.length > 0)
+          ? [...d.staffMembers]
+          : [{
+              name: d.manager || '',
+              adminPhone: d.adminPhone || '',
+              mobilePhone: d.mobilePhone || '',
+              role: '',
+            }];
+        currentStaff.push({
+          name: '',
+          role: '',
+          adminPhone: '',
+          mobilePhone: '',
+        });
+        return {
+          ...d,
+          staffMembers: currentStaff,
+        };
+      });
+    });
+  }, []);
+
+  const handleDeleteDutyStaff = useCallback((dutyId: number | string, staffIndex: number) => {
+    setEditDutiesData((prev) => {
+      return prev.map((d) => {
+        if (d.id !== dutyId) return d;
+        const currentStaff: DutyStaffMember[] = (d.staffMembers && d.staffMembers.length > 0)
+          ? [...d.staffMembers]
+          : [{
+              name: d.manager || '',
+              adminPhone: d.adminPhone || '',
+              mobilePhone: d.mobilePhone || '',
+              role: '',
+            }];
+        if (currentStaff.length <= 1) return d;
+        currentStaff.splice(staffIndex, 1);
+        const primary = currentStaff[0];
+        const combinedManagers = currentStaff.map((s) => s.name).filter(Boolean).join(' / ');
+        return {
+          ...d,
+          staffMembers: currentStaff,
+          manager: combinedManagers || d.manager,
+          adminPhone: primary?.adminPhone || d.adminPhone,
+          mobilePhone: primary?.mobilePhone || d.mobilePhone,
+          phone: primary?.adminPhone || primary?.mobilePhone || d.phone,
+        };
+      });
+    });
+  }, []);
+
+  const handleUpdateDutyStaff = useCallback((dutyId: number | string, staffIndex: number, field: keyof DutyStaffMember, value: string) => {
+    setEditDutiesData((prev) => {
+      return prev.map((d) => {
+        if (d.id !== dutyId) return d;
+        const currentStaff: DutyStaffMember[] = (d.staffMembers && d.staffMembers.length > 0)
+          ? d.staffMembers.map((s) => ({ ...s }))
+          : [{
+              name: d.manager || '',
+              adminPhone: d.adminPhone || '',
+              mobilePhone: d.mobilePhone || '',
+              role: '',
+            }];
+
+        while (currentStaff.length <= staffIndex) {
+          currentStaff.push({ name: '', adminPhone: '', mobilePhone: '', role: '' });
+        }
+
+        let formattedVal = value;
+        if ((field === 'adminPhone' || field === 'mobilePhone') && typeof value === 'string') {
+          formattedVal = formatAutoHyphen(value);
+        }
+
+        currentStaff[staffIndex] = {
+          ...currentStaff[staffIndex],
+          [field]: formattedVal,
+        };
+
+        const primary = currentStaff[0];
+        const combinedManagers = currentStaff.map((s) => s.name).filter(Boolean).join(' / ');
+
+        return {
+          ...d,
+          staffMembers: currentStaff,
+          manager: combinedManagers || d.manager,
+          adminPhone: primary?.adminPhone || d.adminPhone,
+          mobilePhone: primary?.mobilePhone || d.mobilePhone,
+          phone: primary?.adminPhone || primary?.mobilePhone || d.phone,
+        };
+      });
+    });
+  }, []);
+
   const handleSaveDuties = useCallback(async () => {
     try {
       const normalizedDuties: DutyItem[] = editDutiesData.map((d, idx) => {
-        const adminFormatted = formatAutoHyphen((d.adminPhone || '').trim());
-        const mobileFormatted = formatAutoHyphen((d.mobilePhone || '').trim());
+        let cleanStaff: DutyStaffMember[] = [];
+        if (Array.isArray(d.staffMembers) && d.staffMembers.length > 0) {
+          cleanStaff = d.staffMembers
+            .map((s) => ({
+              name: (s.name || '').trim(),
+              role: (s.role || '').trim(),
+              adminPhone: formatAutoHyphen((s.adminPhone || '').trim()),
+              mobilePhone: formatAutoHyphen((s.mobilePhone || '').trim()),
+            }))
+            .filter((s) => Boolean(s.name || s.adminPhone || s.mobilePhone || s.role));
+        }
+
+        if (cleanStaff.length === 0 && d.manager) {
+          cleanStaff = [{
+            name: d.manager.trim(),
+            adminPhone: formatAutoHyphen((d.adminPhone || '').trim()),
+            mobilePhone: formatAutoHyphen((d.mobilePhone || '').trim()),
+            role: '',
+          }];
+        }
+
+        const primaryStaff = cleanStaff[0] || { name: d.manager || '', adminPhone: d.adminPhone || '', mobilePhone: d.mobilePhone || '' };
+        const combinedManagerNames = cleanStaff.map((s) => s.name).filter(Boolean).join(' / ') || (d.manager || '').trim();
+        const adminFormatted = primaryStaff.adminPhone || formatAutoHyphen((d.adminPhone || '').trim());
+        const mobileFormatted = primaryStaff.mobilePhone || formatAutoHyphen((d.mobilePhone || '').trim());
         const phoneFormatted = formatAutoHyphen(adminFormatted || mobileFormatted || (d.phone || '').trim());
 
         let cleanTasks: string[] = [];
@@ -1868,14 +2040,15 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         return {
           ...d,
           id: idx + 1,
-          category: (d.category || '총괄기획').trim(),
+          category: (d.category || '운영').trim(),
           deptOrOrg: (d.deptOrOrg || '').trim(),
           role: (d.role || '').trim(),
-          manager: (d.manager || '').trim(),
+          manager: combinedManagerNames,
           adminPhone: adminFormatted,
           mobilePhone: mobileFormatted,
           phone: phoneFormatted,
           tasks: cleanTasks,
+          staffMembers: cleanStaff,
         };
       });
 
@@ -1898,7 +2071,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     const nextId = (Number.isFinite(maxId) ? maxId : 0) + 1;
     const newDuty: DutyItem = {
       id: nextId,
-      category: '총괄기획',
+      category: '운영',
       deptOrOrg: '',
       role: '',
       manager: '',
@@ -1906,17 +2079,18 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       adminPhone: '',
       mobilePhone: '',
       tasks: ['과업 세부 내용을 입력하세요.'],
+      staffMembers: [{ name: '', role: '', adminPhone: '', mobilePhone: '' }],
     };
     setEditDutiesData([...list, newDuty]);
     setEditingDuties(true);
   }, [data?.duties, editDutiesData, editingDuties]);
 
-  const handleDeleteDutyRow = useCallback((dutyId: number) => {
+  const handleDeleteDutyRow = useCallback((dutyId: number | string) => {
     if (!confirm('해당 업무분장 행을 삭제하시겠습니까?')) return;
     setEditDutiesData((prev) => prev.filter((d) => d.id !== dutyId));
   }, []);
 
-  const handleMoveDutyUp = useCallback((dutyId: number) => {
+  const handleMoveDutyUp = useCallback((dutyId: number | string) => {
     setEditDutiesData((prev) => {
       const list = [...prev];
       const idx = list.findIndex((d) => d.id === dutyId);
@@ -1928,7 +2102,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     });
   }, []);
 
-  const handleMoveDutyDown = useCallback((dutyId: number) => {
+  const handleMoveDutyDown = useCallback((dutyId: number | string) => {
     setEditDutiesData((prev) => {
       const list = [...prev];
       const idx = list.findIndex((d) => d.id === dutyId);
@@ -1940,7 +2114,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     });
   }, []);
 
-  const updateDutyField = useCallback((dutyId: number, field: keyof DutyItem, value: any) => {
+  const updateDutyField = useCallback((dutyId: number | string, field: keyof DutyItem, value: any) => {
     setEditDutiesData((prev) => {
       return prev.map((d) => {
         if (d.id !== dutyId) return d;
@@ -1957,6 +2131,31 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         return updated;
       });
     });
+  }, []);
+
+  const handleSyncDesktopExcel = useCallback(async () => {
+    setIsSyncingExcel(true);
+    try {
+      const res = await fetch('/api/festival/yangjae/sync-excel', { method: 'POST' });
+      const json = await res.json();
+      if (json.success) {
+        setToastMessage('바탕화면 단일 마스터 엑셀 동기화 완료!');
+        setSaveToast(true);
+        setTimeout(() => setSaveToast(false), 3500);
+      } else {
+        const errMsg = json.error || '오류 발생';
+        setToastMessage(`동기화 실패: ${errMsg}`);
+        setSaveToast(true);
+        setTimeout(() => setSaveToast(false), 5000);
+      }
+    } catch (err: any) {
+      const msg = err?.message || String(err);
+      setToastMessage(`동기화 요청 오류: ${msg}`);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 4000);
+    } finally {
+      setIsSyncingExcel(false);
+    }
   }, []);
 
   const handleExportDutiesCsv = useCallback(() => {
@@ -2415,7 +2614,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                 if (!targetItem) return null;
                 const isExpanded = expandedTaskIds.has(item.id) || isEditingThis;
 
-                // 과제 2(행사 식순)는 상단 [3. 행사식순] 전용 탭으로 승격되었으므로 1번 탭(추진과제)에서는 노출하지 않음
+                // 과제 2(행사 식순)는 상단 [4. 행사식순] 전용 탭으로 승격되었으므로 1번 탭(추진과제)에서는 노출하지 않음
                 if (item.id === 2) return null;
 
                 return (
@@ -2924,7 +3123,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
               </div>
 
               {/* Category Filter Pills */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+              <div className="flex flex-wrap gap-1.5 pb-1">
                 {FESTIVAL_CATEGORIES.map((cat) => (
                   <button
                     key={cat}
@@ -3351,7 +3550,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             </div>
           )}
 
-          {/* TAB 3: 행사식순 (당일 17개 세부 타임테이블 - 한 화면 칼정렬 뷰) */}
+          {/* TAB 4: 행사식순 (당일 17개 세부 타임테이블 - 한 화면 칼정렬 뷰) */}
           {visitedFestivalTabs.schedule && (
             <div className={selectedTab === 'schedule' ? 'block space-y-2.5' : 'hidden'}>
               {/* Header Bar: Clean 2-Row Layout (Zero-Clipping Alignment) */}
@@ -3682,7 +3881,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             </div>
           )}
 
-          {/* TAB 4: 업무분장 (실무 과업 및 비상연락망) */}
+          {/* TAB 3: 업무분장 (실무 과업 및 비상연락망) */}
           {visitedFestivalTabs.duties && (
             <div className={selectedTab === 'duties' ? 'block space-y-3.5' : 'hidden'}>
               {/* Header Stats Bar */}
@@ -3727,6 +3926,22 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       </span>
                     </button>
 
+                    {/* Desktop Excel Sync Button */}
+                    <button
+                      type="button"
+                      onClick={handleSyncDesktopExcel}
+                      disabled={isSyncingExcel}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-400 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-black transition-all shadow-3xs cursor-pointer active:scale-95 disabled:opacity-50 shrink-0"
+                      title="바탕화면 단일 마스터 엑셀(SSOT) 덮어쓰기 동기화"
+                    >
+                      {isSyncingExcel ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700" />
+                      ) : (
+                        <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
+                      )}
+                      <span>엑셀 동기화</span>
+                    </button>
+
                     {/* CSV Export Button */}
                     <button
                       type="button"
@@ -3735,7 +3950,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       title="업무분장 엑셀(CSV) 다운로드"
                     >
                       <Download className="w-3.5 h-3.5 text-slate-600" />
-                      <span className="hidden sm:inline">엑셀(CSV)</span>
+                      <span className="hidden sm:inline">CSV</span>
                     </button>
 
                     {/* Edit Mode Buttons */}
@@ -3844,19 +4059,118 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     )}
                   </div>
                 )}
+
+                {/* 6대 업무 구획 퀵 필터 탭 바 (Quick Filter Pills: 2줄 전체펼침 및 1줄 스크롤 화살표 지원) */}
+                {!editingDuties && (
+                  <div className="space-y-1.5 pt-0.5">
+                    {/* 상단 라벨 및 보기 방식 전환 토글 바 */}
+                    <div className="flex items-center justify-between gap-1 text-[11px] font-bold text-slate-500 px-0.5">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-slate-700 font-extrabold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          <span>업무 구획 필터</span>
+                        </span>
+                        <span className="text-[10.5px] text-slate-400 font-medium truncate">
+                          ({selectedDutyCategory})
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={toggleDutyPillsWrap}
+                        className="inline-flex items-center gap-1 text-[10.5px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 shadow-3xs shrink-0"
+                        title={isDutyPillsWrapped ? '1줄 가로 스크롤 모드로 변경' : '2줄 전체 펼침 모드로 변경 (스크롤 불필요)'}
+                      >
+                        {isDutyPillsWrapped ? (
+                          <>
+                            <ArrowRightLeft className="w-3 h-3 text-slate-500" />
+                            <span>1줄 스크롤</span>
+                          </>
+                        ) : (
+                          <>
+                            <Layers className="w-3 h-3 text-emerald-600" />
+                            <span className="text-emerald-700 font-black">2줄 전체펼침 (추천)</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* 필터 칩 영역 (2줄 펼침 vs 1줄 스크롤 + 좌우 화살표) */}
+                    <div className="relative flex items-center">
+                      {/* Left Scroll Arrow (1줄 스크롤 모드 전용) */}
+                      {!isDutyPillsWrapped && (
+                        <button
+                          type="button"
+                          onClick={handleScrollDutyPillsLeft}
+                          className="absolute -left-1.5 z-10 p-1 rounded-full bg-white/95 border border-slate-300 shadow-md text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer active:scale-90 transition-all shrink-0"
+                          title="왼쪽으로 스크롤"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+
+                      {/* 퀵 필터 알약 버튼 컨테이너 */}
+                      <div
+                        ref={dutyPillsRef}
+                        onWheel={handleDutyPillsWheel}
+                        className={`flex items-center gap-1.5 text-xs font-bold transition-all ${
+                          isDutyPillsWrapped
+                            ? 'flex-wrap py-0.5'
+                            : 'overflow-x-auto scroll-smooth py-1 px-4 no-scrollbar touch-pan-x w-full'
+                        }`}
+                      >
+                        {DUTY_CATEGORIES.map((cat, cIdx) => {
+                          const isSelected = selectedDutyCategory === cat;
+                          const count = cat === '전체'
+                            ? activeDuties.length
+                            : activeDuties.filter(d => d.category === cat).length;
+                          return (
+                            <button
+                              key={`duty-cat-${cat}`}
+                              type="button"
+                              onClick={() => setSelectedDutyCategory(cat)}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black whitespace-nowrap transition-all cursor-pointer shadow-3xs active:scale-95 ${
+                                isSelected
+                                  ? 'bg-slate-900 text-white shadow-xs'
+                                  : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-300'
+                              }`}
+                            >
+                              {cat !== '전체' && <span className="opacity-60 text-[10px]">{cIdx}.</span>}
+                              <span>{cat}</span>
+                              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                                isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                              }`}>
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Right Scroll Arrow (1줄 스크롤 모드 전용) */}
+                      {!isDutyPillsWrapped && (
+                        <button
+                          type="button"
+                          onClick={handleScrollDutyPillsRight}
+                          className="absolute -right-1.5 z-10 p-1 rounded-full bg-white/95 border border-slate-300 shadow-md text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer active:scale-90 transition-all shrink-0"
+                          title="오른쪽으로 스크롤"
+                        >
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Datalist helper for Category Auto-Complete */}
+              {/* Datalist helper for Category Auto-Complete (6대 구획 표준) */}
               <datalist id="yangjae-duty-category-options">
-                <option value="총괄기획" />
-                <option value="보건소" />
-                <option value="체육회" />
-                <option value="대행용역" />
-                <option value="응급안전" />
-                <option value="체험부스" />
-                <option value="유관부서" />
-                <option value="자원봉사" />
-                <option value="기타" />
+                <option value="운영" />
+                <option value="코스" />
+                <option value="부스" />
+                <option value="VIP의전" />
+                <option value="직원식사" />
+                <option value="쓰레기처리" />
               </datalist>
 
               {/* Main Duties Area: Editing Mode (Mobile Card Editor) vs View Mode (Mobile Card Stack) */}
@@ -3948,39 +4262,112 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           </div>
                         </div>
 
-                        {/* 담당자 & 연락처 (3컬럼 그리드) */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">담당자</label>
-                            <input
-                              type="text"
-                              value={duty.manager || ''}
-                              onChange={(e) => updateDutyField(duty.id, 'manager', e.target.value)}
-                              placeholder="예: 오창선"
-                              className="w-full text-xs font-medium px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">행정전화</label>
-                            <input
-                              type="text"
-                              value={duty.adminPhone || ''}
-                              onChange={(e) => updateDutyField(duty.id, 'adminPhone', e.target.value)}
-                              placeholder="02-3423-7139"
-                              className="w-full text-xs font-mono px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 mb-0.5">휴대전화</label>
-                            <input
-                              type="text"
-                              value={duty.mobilePhone || ''}
-                              onChange={(e) => updateDutyField(duty.id, 'mobilePhone', e.target.value)}
-                              placeholder="010-XXXX-XXXX"
-                              className="w-full text-xs font-mono px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                            />
-                          </div>
-                        </div>
+                        {/* 담당 인력 구성 (다중 담당자 및 비상연락망) */}
+                        {(() => {
+                          const staffList: DutyStaffMember[] = (duty.staffMembers && duty.staffMembers.length > 0)
+                            ? duty.staffMembers
+                            : [{
+                                name: duty.manager || '',
+                                adminPhone: duty.adminPhone || '',
+                                mobilePhone: duty.mobilePhone || '',
+                                role: '',
+                              }];
+
+                          return (
+                            <div className="bg-slate-50/90 border border-slate-200 rounded-lg p-2.5 space-y-2">
+                              <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
+                                <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                                  <Users className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>배정 인력 구성</span>
+                                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-200">
+                                    {staffList.length}명
+                                  </span>
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleAddDutyStaff(duty.id)}
+                                  className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-white hover:bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded shadow-3xs cursor-pointer active:scale-95 transition-all"
+                                  title="이 업무에 담당자 추가"
+                                >
+                                  <Plus className="w-3 h-3 text-emerald-600" />
+                                  <span>+ 담당자 추가</span>
+                                </button>
+                              </div>
+
+                              <div className="space-y-2">
+                                {staffList.map((stf, sIdx) => {
+                                  const isOnlyOne = staffList.length <= 1;
+                                  return (
+                                    <div
+                                      key={`duty-${duty.id}-staff-${sIdx}`}
+                                      className="bg-white border border-slate-200/90 rounded-md p-2 shadow-3xs space-y-1.5"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-[10.5px] font-black text-slate-700 flex items-center gap-1">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                          <span>{sIdx === 0 ? '대표 담당자' : `담당자 #${sIdx + 1}`}</span>
+                                        </span>
+                                        {!isOnlyOne && (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteDutyStaff(duty.id, sIdx)}
+                                            className="text-red-500 hover:text-red-700 p-0.5 rounded hover:bg-red-50 cursor-pointer transition-all"
+                                            title="이 담당자 삭제"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        )}
+                                      </div>
+
+                                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                                        <div>
+                                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">성명 / 직책</label>
+                                          <input
+                                            type="text"
+                                            value={stf.name || ''}
+                                            onChange={(e) => handleUpdateDutyStaff(duty.id, sIdx, 'name', e.target.value)}
+                                            placeholder="예: 오창선"
+                                            className="w-full text-xs font-semibold px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">세부 역할(선택)</label>
+                                          <input
+                                            type="text"
+                                            value={stf.role || ''}
+                                            onChange={(e) => handleUpdateDutyStaff(duty.id, sIdx, 'role', e.target.value)}
+                                            placeholder="예: 총괄, 주무관"
+                                            className="w-full text-xs font-medium px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">행정전화(유선)</label>
+                                          <input
+                                            type="text"
+                                            value={stf.adminPhone || ''}
+                                            onChange={(e) => handleUpdateDutyStaff(duty.id, sIdx, 'adminPhone', e.target.value)}
+                                            placeholder="02-3423-7116"
+                                            className="w-full text-xs font-mono px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">휴대전화(비상망)</label>
+                                          <input
+                                            type="text"
+                                            value={stf.mobilePhone || ''}
+                                            onChange={(e) => handleUpdateDutyStaff(duty.id, sIdx, 'mobilePhone', e.target.value)}
+                                            placeholder="010-XXXX-XXXX"
+                                            className="w-full text-xs font-mono px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })()}
 
                         {/* 배정 과업 (줄바꿈 시 분할) */}
                         <div>
@@ -4042,10 +4429,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     </div>
                   ) : (
                     filteredDuties.map((duty) => {
-                      const isHQ = duty.category === '총괄기획';
-                      const isSports = duty.category === '체육회';
-                      const isSafety = duty.category === '응급안전';
-                      const isAgency = duty.category === '대행용역';
+                      const isOps = duty.category === '운영';
+                      const isCourse = duty.category === '코스';
+                      const isBooth = duty.category === '부스';
+                      const isVIP = duty.category === 'VIP의전';
+                      const isMeal = duty.category === '직원식사';
+                      const isWaste = duty.category === '쓰레기처리';
 
                       const adminNo = formatAutoHyphen((duty.adminPhone || (!duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
                       const mobileNo = formatAutoHyphen((duty.mobilePhone || (duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
@@ -4058,16 +4447,20 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           {/* 카드 헤더: 구분 배지 + 부서·기관명 + (관리자일 때 수정 버튼) */}
                           <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 gap-2">
                             <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                              <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded border shrink-0 ${
-                                isHQ
-                                  ? 'bg-blue-100 text-blue-800 border-blue-200'
-                                  : isSports
-                                  ? 'bg-indigo-100 text-indigo-800 border-indigo-200'
-                                  : isSafety
-                                  ? 'bg-red-100 text-red-800 border-red-200'
-                                  : isAgency
-                                  ? 'bg-amber-100 text-amber-900 border-amber-200'
-                                  : 'bg-slate-100 text-slate-700 border-slate-200'
+                              <span className={`text-[11px] font-black px-2.5 py-0.5 rounded border shrink-0 ${
+                                isOps
+                                  ? 'bg-blue-100 text-blue-900 border-blue-300'
+                                  : isCourse
+                                  ? 'bg-indigo-100 text-indigo-900 border-indigo-300'
+                                  : isBooth
+                                  ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                                  : isVIP
+                                  ? 'bg-purple-100 text-purple-900 border-purple-300'
+                                  : isMeal
+                                  ? 'bg-amber-100 text-amber-900 border-amber-300'
+                                  : isWaste
+                                  ? 'bg-rose-100 text-rose-900 border-rose-300'
+                                  : 'bg-slate-100 text-slate-800 border-slate-300'
                               }`}>
                                 {duty.category}
                               </span>
@@ -4097,8 +4490,62 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             </div>
                           </div>
 
-                          {/* 담당자 및 연락처 바 (가로 1열 정렬) */}
+                          {/* 담당자 및 연락처 바 (다중 담당자 및 단일 호환) */}
                           {(() => {
+                            const hasStaffList = Boolean(duty.staffMembers && duty.staffMembers.length > 0);
+
+                            if (hasStaffList) {
+                              return (
+                                <div className="space-y-1.5 pt-0.5 pb-0.5">
+                                  {duty.staffMembers!.map((stf, sIdx) => {
+                                    const stfAdmin = formatAutoHyphen((stf.adminPhone || '').trim());
+                                    const stfMobile = formatAutoHyphen((stf.mobilePhone || '').trim());
+                                    const hasStfName = Boolean(stf.name);
+                                    const hasStfAdmin = Boolean(stfAdmin);
+                                    const hasStfMobile = Boolean(showPrivateMobile && stfMobile);
+
+                                    if (!hasStfName && !hasStfAdmin && !hasStfMobile) return null;
+
+                                    return (
+                                      <div key={`duty-stf-${duty.id}-${sIdx}`} className="flex items-center gap-1.5 flex-wrap">
+                                        {hasStfName && (
+                                          <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                                            <User className="w-3 h-3 text-slate-500 shrink-0" />
+                                            <span>{showPrivateMobile ? stf.name : maskPersonName(stf.name)}</span>
+                                            {stf.role && (
+                                              <span className="text-[10px] text-slate-500 font-semibold ml-0.5">({stf.role})</span>
+                                            )}
+                                          </div>
+                                        )}
+                                        {hasStfAdmin && (
+                                          <a
+                                            href={`tel:${stfAdmin.replace(/[^0-9]/g, '')}`}
+                                            className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                            title={`행정전화 걸기: ${stfAdmin}`}
+                                          >
+                                            <Phone className="w-3 h-3 text-blue-700 shrink-0" />
+                                            <span className="text-[10.5px] font-extrabold text-blue-800">행정:</span>
+                                            <span className="font-mono">{stfAdmin}</span>
+                                          </a>
+                                        )}
+                                        {hasStfMobile && (
+                                          <a
+                                            href={`tel:${stfMobile.replace(/[^0-9]/g, '')}`}
+                                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                            title={`휴대전화 걸기: ${stfMobile}`}
+                                          >
+                                            <Smartphone className="w-3 h-3 text-emerald-700 shrink-0" />
+                                            <span className="text-[10.5px] font-extrabold text-emerald-800">폰:</span>
+                                            <span className="font-mono">{stfMobile}</span>
+                                          </a>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            }
+
                             const hasManager = Boolean(duty.manager);
                             const hasAdmin = Boolean(adminNo);
                             const hasMobile = Boolean(showPrivateMobile && mobileNo);

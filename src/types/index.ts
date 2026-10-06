@@ -183,6 +183,7 @@ export interface SimulationEntry {
   detailedProject: string;  // 세부사업명
   statItem: string;         // 통계목명 (ex: "201-01 사무관리비")
   categoryId?: string;      // 매핑된 BudgetCategory ID (선택사항)
+  actionType?: BudgetActionType; // 일반품의('general'), 일상경비지출('daily_expense') 등
   unitPrice: number;        // 단가
   quantity: number;         // 수량
   amount: number;           // 총액 (unitPrice * quantity)
@@ -200,7 +201,10 @@ export interface ProjectSimulationSummary {
   currentSpent: number;        // 현재 집행액
   currentRemaining: number;    // 현재 집행 잔액 (totalBudget - currentSpent)
   simulatedExpenditure: number;// 확정 지출 예정액 합계
-  finalExpectedBalance: number;// 최종 예상 잔액 (currentRemaining - simulatedExpenditure)
+  simulatedGeneralExpenditure?: number; // 일반 지출 예정액
+  simulatedDailyExpenditure?: number;   // 일상경비 지출 예정액
+  finalExpectedBalance: number;// 최종 예상 잔액 (currentRemaining - simulatedGeneralExpenditure)
+  finalDailyExpenseRemaining?: number; // 최종 예상 일상경비 잔액 (dailyExpenseRemaining - simulatedDailyExpenditure)
   executionRate: number;       // 집행률 (%)
   isDeficit: boolean;          // finalExpectedBalance < 0
   dailyExpenseIssued?: number;   // 세부사업 일상경비 총 교부액
@@ -215,7 +219,10 @@ export interface StatItemSimulationSummary {
   currentSpent: number;
   currentRemaining: number;
   simulatedExpenditure: number;
+  simulatedGeneralExpenditure?: number;
+  simulatedDailyExpenditure?: number;
   finalExpectedBalance: number;
+  finalDailyExpenseRemaining?: number;
   isDeficit: boolean;
   dailyExpenseIssued?: number;   // 통계목 일상경비 교부액
   dailyExpenseSpent?: number;    // 통계목 일상경비 실집행액

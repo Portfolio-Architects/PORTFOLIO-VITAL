@@ -680,14 +680,14 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
       // Verify representative booths are present
       expect(await screen.findByText('강남 차병원')).toBeInTheDocument();
-      expect(screen.getByText('고려대학교부설 척추측만증연구소')).toBeInTheDocument();
+      expect(screen.getByText('고려대학교 척추측만증연구소')).toBeInTheDocument();
       expect(screen.getByText('서울대학교병원 강남센터')).toBeInTheDocument();
       expect(screen.getByText('유디치과')).toBeInTheDocument();
       expect(screen.getByText('자생한방병원')).toBeInTheDocument();
       expect(screen.getByText('케이스튜디오 (디아르스)')).toBeInTheDocument();
       expect(screen.getByText('한국신체정보(주)')).toBeInTheDocument();
       expect(screen.getByText('보건행정과 건강증진팀')).toBeInTheDocument();
-      expect(screen.getByText('보건행정과 서울체력장 강남센터')).toBeInTheDocument();
+      expect(screen.getByText('보건행정과 서울체력장')).toBeInTheDocument();
 
       // Verify sequential numbering exists for operating booths (excluding HQ)
       const operatingCount = YANGJAE_FALLBACK_DATA.booths.filter(b => b.category !== '운영본부' && b.category !== '운영주체' && !(typeof b.name === 'string' && b.name.includes('보건행정팀'))).length;
@@ -714,13 +714,13 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(screen.getByText('케이스튜디오 (디아르스)')).toBeInTheDocument();
       expect(screen.getByText('한국신체정보(주)')).toBeInTheDocument();
       expect(screen.queryByText('보건행정과 건강증진팀')).toBeNull();
-      expect(screen.queryByText('보건행정과 서울체력장 강남센터')).toBeNull();
+      expect(screen.queryByText('보건행정과 서울체력장')).toBeNull();
 
       // Click '보건소 부서' filter
       const publicFilter = screen.getByRole('button', { name: '보건소 부서' });
       fireEvent.click(publicFilter);
       expect(screen.getByText('보건행정과 건강증진팀')).toBeInTheDocument();
-      expect(screen.getByText('보건행정과 서울체력장 강남센터')).toBeInTheDocument();
+      expect(screen.getByText('보건행정과 서울체력장')).toBeInTheDocument();
       expect(screen.queryByText('강남 차병원')).toBeNull();
       expect(screen.queryByText('한국신체정보(주)')).toBeNull();
     });
@@ -956,7 +956,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
       // In default hidden state, manager should be masked with 'O'
       expect(screen.getByText(/담당:\s*오O선/)).toBeInTheDocument();
-      expect(screen.getByText(/담당:\s*김O현 주무관/)).toBeInTheDocument();
+      expect(screen.getByText(/담당:\s*김O현/)).toBeInTheDocument();
       expect(screen.queryByText('담당: 오창선')).toBeNull();
     });
   });
@@ -965,8 +965,8 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('switches to Schedule tab, enables inline editing for title/note, and saves updated schedule to disk', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      // 1. Switch to 3. 행사식순 Tab
-      const scheduleTabBtn = await screen.findByRole('button', { name: /3\. 행사식순/i });
+      // 1. Switch to 4. 행사식순 Tab
+      const scheduleTabBtn = await screen.findByRole('button', { name: /4\. 행사식순/i });
       fireEvent.click(scheduleTabBtn);
 
       // 2. Verify reading mode schedule items are present
@@ -1007,7 +1007,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('cancels inline schedule edit mode without saving when cancel button is clicked', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const scheduleTabBtn = await screen.findByRole('button', { name: /3\. 행사식순/i });
+      const scheduleTabBtn = await screen.findByRole('button', { name: /4\. 행사식순/i });
       fireEvent.click(scheduleTabBtn);
 
       const editButtons = screen.getAllByTitle('식순명 및 세부내용 수정');
@@ -1028,7 +1028,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('adds a new schedule item box and immediately enters edit mode', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const scheduleTabBtn = await screen.findByRole('button', { name: /3\. 행사식순/i });
+      const scheduleTabBtn = await screen.findByRole('button', { name: /4\. 행사식순/i });
       fireEvent.click(scheduleTabBtn);
 
       // Find top "식순 추가" button
@@ -1062,8 +1062,8 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('switches to Duties tab, enters spreadsheet edit mode, and saves updated duties to disk', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      // 1. Switch to Duties tab (Tab 4)
-      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
+      // 1. Switch to Duties tab (Tab 3)
+      const dutiesTabBtn = await screen.findByRole('button', { name: /3\. 업무분장/i });
       fireEvent.click(dutiesTabBtn);
 
       // 2. Click "엑셀 편집" button
@@ -1099,7 +1099,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('cancels duties spreadsheet edit mode and rolls back changes without saving', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
+      const dutiesTabBtn = await screen.findByRole('button', { name: /3\. 업무분장/i });
       fireEvent.click(dutiesTabBtn);
 
       const editDutiesBtn = screen.getByTitle('스프레드시트 엑셀 편집 모드 시작');
@@ -1120,7 +1120,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('adds a new duty row and supports reordering rows', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
+      const dutiesTabBtn = await screen.findByRole('button', { name: /3\. 업무분장/i });
       fireEvent.click(dutiesTabBtn);
 
       // Click "+ 새 업무분장 행 추가" button
@@ -1158,7 +1158,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('exports duties table to CSV on button click', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
+      const dutiesTabBtn = await screen.findByRole('button', { name: /3\. 업무분장/i });
       fireEvent.click(dutiesTabBtn);
 
       // Mock URL.createObjectURL and URL.revokeObjectURL

@@ -15,6 +15,7 @@ export interface CategoryStats {
   generalSpent: number;
   dailyExpenseIssued: number;
   dailyExpenseSpent: number;
+  dailyExpensePlanned?: number;
   dailyExpenseRemaining: number;
 }
 
@@ -294,10 +295,17 @@ export function useBudget() {
       let dailyExpenseIssued = 0;
       let dailyExpenseSpent = 0;
       let planned = 0;
+      let dailyExpensePlanned = 0;
 
       for (const e of catEntries) {
         if (e.isPlanned) {
-          if (!e.isSettled) planned += e.amount;
+          if (!e.isSettled) {
+            if (e.actionType === 'daily_expense') {
+              dailyExpensePlanned += e.amount;
+            } else {
+              planned += e.amount;
+            }
+          }
         } else {
           if (!e.actionType || e.actionType === 'general' || e.actionType === 'correction' || e.actionType === 'transfer') {
             if (e.actionType === 'transfer') {
@@ -330,7 +338,7 @@ export function useBudget() {
       }
 
       const remaining = cat.totalBudget - spent - planned - lockedAmount;
-      const dailyExpenseRemaining = dailyExpenseIssued - dailyExpenseSpent;
+      const dailyExpenseRemaining = dailyExpenseIssued - dailyExpenseSpent - dailyExpensePlanned;
       const usageRate = cat.totalBudget > 0 ? ((spent + planned) / cat.totalBudget) * 100 : 0;
 
       const standard: CategoryStats = {
@@ -343,6 +351,7 @@ export function useBudget() {
         generalSpent,
         dailyExpenseIssued,
         dailyExpenseSpent,
+        dailyExpensePlanned,
         dailyExpenseRemaining
       };
 
@@ -359,7 +368,8 @@ export function useBudget() {
         generalSpent,
         dailyExpenseIssued,
         dailyExpenseSpent,
-        dailyExpenseRemaining
+        dailyExpensePlanned: 0,
+        dailyExpenseRemaining: dailyExpenseIssued - dailyExpenseSpent
       };
 
       statsMap.set(cat.id, { standard, excludePlanned });
@@ -410,16 +420,15 @@ export function useBudget() {
     if (delta <= 0) return true;
 
     if (actionType === 'daily_expense') {
-      if (delta > stats.dailyExpenseRemaining) {
-        alert(`[일상경비 한도 초과] 등록하려는 금액이 일상경비 잔액(${stats.dailyExpenseRemaining.toLocaleString()}원)을 초과하여 등록을 차단합니다.`);
+      const dailyLimit = stats.dailyExpenseIssued - stats.dailyExpenseSpent;
+      if (!isPlanned && delta > dailyLimit) {
+        alert(`[일상경비 한도 초과] 등록하려는 금액이 일상경비 잔액(${dailyLimit.toLocaleString()}원)을 초과하여 등록을 차단합니다.`);
         return false;
       }
     } else {
-      const limit = isPlanned
-        ? stats.remaining
-        : (stats.totalBudget - stats.spent - stats.locked);
+      const limit = stats.totalBudget - stats.spent - stats.locked;
 
-      if (delta > limit) {
+      if (!isPlanned && delta > limit) {
         alert(`[예산 한도 초과] 등록하려는 금액이 가용 예산 잔액(${limit.toLocaleString()}원)을 초과하여 등록을 차단합니다.`);
         return false;
       }

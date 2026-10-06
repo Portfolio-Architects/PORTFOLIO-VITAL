@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { Calculator, Sparkles, RotateCcw, Plus, Check, X, AlertCircle } from 'lucide-react';
-import { SimulationEntry } from '@/types';
+import { Calculator, Sparkles, RotateCcw, Plus, Check, X, AlertCircle, Coins, Building2 } from 'lucide-react';
+import { SimulationEntry, BudgetActionType, StatItemSimulationSummary } from '@/types';
 
 export interface SimulationInputFormProps {
   detailedProjects: string[];
   getStatItemsForProject: (dp: string) => string[];
+  statItemSummaries?: StatItemSimulationSummary[];
   editingEntry?: SimulationEntry | null;
   onAddEntry: (entry: Omit<SimulationEntry, 'id' | 'createdAt' | 'amount'> & { amount?: number }) => void;
   onUpdateEntry: (id: string, partial: Partial<SimulationEntry>) => void;
@@ -18,6 +19,7 @@ export interface SimulationInputFormProps {
 export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.memo(({
   detailedProjects,
   getStatItemsForProject,
+  statItemSummaries,
   editingEntry,
   onAddEntry,
   onUpdateEntry,
@@ -29,6 +31,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
   const [name, setName] = useState('');
   const [detailedProject, setDetailedProject] = useState('');
   const [statItem, setStatItem] = useState('');
+  const [actionType, setActionType] = useState<BudgetActionType>('general');
   const [unitPriceStr, setUnitPriceStr] = useState('');
   const [quantity, setQuantity] = useState<number>(1);
   const [memo, setMemo] = useState('');
@@ -42,6 +45,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
       setName(editingEntry.name || '');
       setDetailedProject(editingEntry.detailedProject || '');
       setStatItem(editingEntry.statItem || '');
+      setActionType(editingEntry.actionType || 'general');
       setUnitPriceStr(editingEntry.unitPrice ? editingEntry.unitPrice.toLocaleString('ko-KR') : '0');
       setQuantity(editingEntry.quantity || 1);
       setMemo(editingEntry.memo || '');
@@ -50,6 +54,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
       setName('');
       setDetailedProject('');
       setStatItem('');
+      setActionType('general');
       setUnitPriceStr('');
       setQuantity(1);
       setMemo('');
@@ -65,6 +70,19 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
     const amount = Math.max(0, parsedUnitPrice) * Math.max(1, quantity);
     return { unitPrice: parsedUnitPrice, calculatedAmount: amount };
   }, [unitPriceStr, quantity]);
+
+  // Current Stat Item Summary for Balance & Daily Expense Info
+  const currentStatSummary = useMemo(() => {
+    if (!detailedProject || !statItem || !statItemSummaries) return null;
+    return statItemSummaries.find(
+      s => s.detailedProject === detailedProject && s.statItem === statItem
+    ) || null;
+  }, [detailedProject, statItem, statItemSummaries]);
+
+  const dailyExpenseIssued = currentStatSummary?.dailyExpenseIssued || 0;
+  const dailyExpenseRemaining = currentStatSummary?.dailyExpenseRemaining || 0;
+  const generalRemaining = currentStatSummary?.currentRemaining || 0;
+  const hasDailyExpense = dailyExpenseIssued > 0;
 
   // Cascading Stat Item Options
   const statItemOptions = useMemo(() => {
@@ -115,11 +133,20 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
       return;
     }
 
+    // Daily expense limit check
+    if (actionType === 'daily_expense') {
+      if (calculatedAmount > dailyExpenseRemaining) {
+        setValidationError(`[일상경비 한도 초과] 등록하려는 총 예정액(₩${calculatedAmount.toLocaleString('ko-KR')}원)이 통계목 일상경비 미집행 잔액(₩${dailyExpenseRemaining.toLocaleString('ko-KR')}원)을 초과합니다.`);
+        return;
+      }
+    }
+
     if (editingEntry) {
       onUpdateEntry(editingEntry.id, {
         name: name.trim(),
         detailedProject,
         statItem,
+        actionType,
         unitPrice,
         quantity,
         amount: calculatedAmount,
@@ -131,6 +158,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
         name: name.trim(),
         detailedProject,
         statItem,
+        actionType,
         unitPrice,
         quantity,
         amount: calculatedAmount,
@@ -141,7 +169,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
       setUnitPriceStr('');
       setQuantity(1);
     }
-  }, [name, detailedProject, statItem, unitPrice, quantity, calculatedAmount, memo, editingEntry, onAddEntry, onUpdateEntry, onCancelEdit]);
+  }, [name, detailedProject, statItem, actionType, unitPrice, quantity, calculatedAmount, memo, dailyExpenseRemaining, editingEntry, onAddEntry, onUpdateEntry, onCancelEdit]);
 
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-5 md:p-6 shadow-xs space-y-5 text-slate-800">
@@ -251,6 +279,109 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
             </select>
           </div>
 
+          {/* 3-1. Expense Source & Type Segmented Selector (일반 지출 vs 일상경비 지출) */}
+          <div className="lg:col-span-12 p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl space-y-2">
+            <div className="flex items-center justify-between flex-wrap gap-1">
+              <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <span>지출 재원 및 경비 구분</span>
+                <span className="text-rose-500">*</span>
+              </label>
+              <span className="text-[11px] text-slate-500 font-medium">
+                {!detailedProject || !statItem ? (
+                  '세부사업과 통계목을 먼저 선택하세요'
+                ) : hasDailyExpense ? (
+                  '🪙 일상경비 교부 통계목 (원하는 지출 재원을 선택하세요)'
+                ) : (
+                  '🏢 본청 일반지출 전용 통계목'
+                )}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Option 1: General Expenditure */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActionType('general');
+                  setValidationError(null);
+                }}
+                className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex items-start gap-3 ${
+                  actionType === 'general'
+                    ? 'bg-indigo-50/80 border-indigo-600 shadow-xs ring-1 ring-indigo-500/20'
+                    : 'bg-white border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className={`p-2 rounded-xl shrink-0 mt-0.5 ${
+                  actionType === 'general' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-1 flex-wrap">
+                    <span className={`text-xs font-bold ${actionType === 'general' ? 'text-indigo-950' : 'text-slate-700'}`}>
+                      일반 지출 (본청 직접 집행)
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      actionType === 'general' ? 'bg-indigo-200 text-indigo-900 font-mono' : 'bg-slate-100 text-slate-600 font-mono'
+                    }`}>
+                      가용 {generalRemaining.toLocaleString('ko-KR')}원
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                    본청 총예산에서 직접 집행 (세부사업 가용 잔액 차감)
+                  </p>
+                </div>
+              </button>
+
+              {/* Option 2: Daily Expense */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (!hasDailyExpense) return;
+                  setActionType('daily_expense');
+                  setValidationError(null);
+                }}
+                disabled={!hasDailyExpense}
+                className={`p-3 rounded-xl border-2 text-left transition-all flex items-start gap-3 ${
+                  !hasDailyExpense
+                    ? 'opacity-50 bg-slate-100/60 border-slate-200 cursor-not-allowed'
+                    : actionType === 'daily_expense'
+                    ? 'bg-amber-50/90 border-amber-600 shadow-xs ring-1 ring-amber-500/20 cursor-pointer'
+                    : 'bg-white border-slate-200 hover:border-amber-300 cursor-pointer'
+                }`}
+              >
+                <div className={`p-2 rounded-xl shrink-0 mt-0.5 ${
+                  actionType === 'daily_expense' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  <Coins className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-1 flex-wrap">
+                    <span className={`text-xs font-bold ${actionType === 'daily_expense' ? 'text-amber-950' : 'text-slate-700'}`}>
+                      일상경비 지출 (교부금 내 집행)
+                    </span>
+                    {hasDailyExpense ? (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        actionType === 'daily_expense' ? 'bg-amber-200 text-amber-950 font-mono' : 'bg-amber-100/80 text-amber-900 font-mono'
+                      }`}>
+                        미집행 {dailyExpenseRemaining.toLocaleString('ko-KR')}원
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        미교부 통계목
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                    {hasDailyExpense
+                      ? `총 교부액 ₩${dailyExpenseIssued.toLocaleString('ko-KR')}원 중 미집행 잔액에서 차감`
+                      : '해당 통계목에는 교부된 일상경비가 없습니다.'}
+                  </p>
+                </div>
+              </button>
+            </div>
+          </div>
+
           {/* 4. Unit Price Input */}
           <div className="lg:col-span-3 space-y-1.5">
             <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
@@ -283,11 +414,31 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
 
           {/* 6. Total Amount Auto-Calculation */}
           <div className="lg:col-span-4 space-y-1.5">
-            <label className="text-xs font-bold text-indigo-700">총 예정 집행액 (자동 계산)</label>
-            <div className="w-full px-3.5 py-2.5 bg-indigo-50/70 border border-indigo-200/80 rounded-xl text-indigo-900 font-extrabold text-sm text-right flex items-center justify-between">
-              <span className="text-xs text-indigo-600 font-bold">₩</span>
+            <div className="flex items-center justify-between">
+              <label className={`text-xs font-bold ${actionType === 'daily_expense' ? 'text-amber-800' : 'text-indigo-700'}`}>
+                총 예정 집행액 (자동 계산)
+              </label>
+              <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                actionType === 'daily_expense'
+                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                  : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+              }`}>
+                {actionType === 'daily_expense' ? '🪙 일상경비 잔액 차감' : '🏢 본청 예산 차감'}
+              </span>
+            </div>
+            <div className={`w-full px-3.5 py-2.5 rounded-xl font-extrabold text-sm text-right flex items-center justify-between border ${
+              actionType === 'daily_expense'
+                ? 'bg-amber-50/80 border-amber-200/90 text-amber-950'
+                : 'bg-indigo-50/70 border-indigo-200/80 text-indigo-900'
+            }`}>
+              <span className={`text-xs font-bold ${actionType === 'daily_expense' ? 'text-amber-700' : 'text-indigo-600'}`}>₩</span>
               <span className="font-mono text-base">{calculatedAmount.toLocaleString('ko-KR')} 원</span>
             </div>
+            {actionType === 'daily_expense' && calculatedAmount > dailyExpenseRemaining && (
+              <p className="text-[11px] font-bold text-rose-600 mt-0.5">
+                ⚠️ 일상경비 미집행 잔액(₩{dailyExpenseRemaining.toLocaleString('ko-KR')}원)을 {(calculatedAmount - dailyExpenseRemaining).toLocaleString('ko-KR')}원 초과했습니다.
+              </p>
+            )}
           </div>
 
           {/* 7. Action Buttons */}

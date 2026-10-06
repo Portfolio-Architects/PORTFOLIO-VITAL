@@ -119,6 +119,7 @@ export const SimulationEntrySchema = z.object({
   detailedProject: z.string().catch('기본운영'),
   statItem: z.string().catch('일반운영비'),
   categoryId: z.string().optional().catch(undefined),
+  actionType: BudgetActionTypeSchema.optional().catch('general'),
   unitPrice: z.number().catch(0),
   quantity: z.number().catch(1),
   amount: z.number().catch(0),
@@ -215,6 +216,7 @@ export const getDomainSchema = (sheetName: string) => {
     case 'TASKS': return TaskSchema;
     case 'BUDGET_CATEGORIES': return BudgetCategorySchema;
     case 'BUDGET_ENTRIES': return BudgetEntrySchema;
+    case 'BUDGET_SIMULATIONS':
     case 'SIMULATION_ENTRIES': return SimulationEntrySchema;
     case 'PROJECTS': return ProjectSchema;
     case 'EXTERNAL_DOCS': return ExternalDocSchema;

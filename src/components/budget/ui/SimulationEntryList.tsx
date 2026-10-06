@@ -17,6 +17,7 @@ import {
   LayoutGrid,
   Layers,
   Table as TableIcon,
+  Coins,
 } from 'lucide-react';
 
 export interface SimulationEntryListProps {
@@ -307,6 +308,15 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                             )}
                             <div className="space-y-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
+                                {item.actionType === 'daily_expense' ? (
+                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1 shrink-0">
+                                    <Coins className="w-2.5 h-2.5 text-amber-600" /> 일상경비
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
+                                    일반지출
+                                  </span>
+                                )}
                                 <h5 className={`text-sm font-bold ${isSettled ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                                   {item.name}
                                 </h5>
@@ -421,9 +431,20 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                         </td>
                         <td className="py-3 px-4 font-sans">
                           <div className="space-y-0.5">
-                            <span className={`font-bold ${isSettled ? 'line-through text-slate-400' : 'text-slate-900'}`}>
-                              {item.name}
-                            </span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {item.actionType === 'daily_expense' ? (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 inline-flex items-center gap-0.5 shrink-0">
+                                  <Coins className="w-2.5 h-2.5 text-amber-600" /> 일상경비
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 inline-flex items-center gap-0.5 shrink-0">
+                                  일반지출
+                                </span>
+                              )}
+                              <span className={`font-bold ${isSettled ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                                {item.name}
+                              </span>
+                            </div>
                             {item.memo && (
                               <p className="text-[11px] text-slate-500 flex items-center gap-1 line-clamp-1">
                                 <FileText className="w-3 h-3 text-slate-400 shrink-0" />
@@ -507,6 +528,15 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                             ) : (
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
                                 <Clock className="w-3 h-3 text-indigo-500" /> 집행 대기
+                              </span>
+                            )}
+                            {item.actionType === 'daily_expense' ? (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
+                                <Coins className="w-2.5 h-2.5 text-amber-600" /> 일상경비
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                                일반지출
                               </span>
                             )}
                             <h4

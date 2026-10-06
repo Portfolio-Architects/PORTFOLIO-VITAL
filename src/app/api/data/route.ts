@@ -474,12 +474,19 @@ export async function POST(request: Request) {
 
           const dailyExpenseIssued = catEntries.filter((e: any) => !e.isPlanned && e.actionType === 'issuance').reduce((sum: number, e: any) => sum + e.amount, 0);
           const dailyExpenseSpent = catEntries.filter((e: any) => !e.isPlanned && e.actionType === 'daily_expense').reduce((sum: number, e: any) => sum + e.amount, 0);
+          const dailyExpensePlanned = catEntries.filter((e: any) => e.isPlanned && !e.isSettled && e.actionType === 'daily_expense').reduce((sum: number, e: any) => sum + e.amount, 0);
           
           if (actionType === 'daily_expense') {
-            if (dailyExpenseSpent > dailyExpenseIssued) {
+            const isEntryPlanned = targetEntry.isPlanned === true;
+            const totalDailyUsage = isEntryPlanned 
+              ? dailyExpenseSpent + dailyExpensePlanned 
+              : dailyExpenseSpent;
+
+            // 실집행(!isEntryPlanned) 시에는 교부 잔액 초과를 엄격히 차단
+            if (!isEntryPlanned && totalDailyUsage > dailyExpenseIssued) {
               return NextResponse.json({
                 success: false,
-                error: `[일상경비 한도 초과] 일상경비 교부 잔액을 초과하여 등록을 차단합니다.`
+                error: `[일상경비 한도 초과] 일상경비 교부 잔액(${dailyExpenseIssued.toLocaleString()}원)을 초과하여 등록을 차단합니다. (누적 지출액: ${totalDailyUsage.toLocaleString()}원)`
               }, { status: 409 });
             }
           }
@@ -490,17 +497,21 @@ export async function POST(request: Request) {
               return sum + e.amount;
             }, 0);
             const spent = generalSpent + dailyExpenseIssued;
-            const planned = catEntries.filter((e: any) => e.isPlanned && !e.isSettled).reduce((sum: number, e: any) => sum + e.amount, 0);
+            
+            // ★ 핵심: 일상경비 예정(daily_expense)은 이미 spent에 포함된 dailyExpenseIssued에서 집행되므로,
+            // 본청 일반지출 예정(planned) 집계에서는 e.actionType !== 'daily_expense'만 합산하여 이중 차감(Double Counting)을 원천 차단함!
+            const generalPlanned = catEntries.filter((e: any) => e.isPlanned && !e.isSettled && e.actionType !== 'daily_expense').reduce((sum: number, e: any) => sum + e.amount, 0);
 
             const isEntryPlanned = targetEntry.isPlanned === true;
             const totalUsage = isEntryPlanned 
-              ? spent + planned + lockedAmount 
+              ? spent + generalPlanned + lockedAmount 
               : spent + lockedAmount;
 
-            if (cat.totalBudget > 0 && totalUsage > cat.totalBudget) {
+            // 실집행(!isEntryPlanned) 시에는 가용 예산 초과를 엄격히 하드 차단
+            if (!isEntryPlanned && cat.totalBudget > 0 && totalUsage > cat.totalBudget) {
               return NextResponse.json({
                 success: false,
-                error: `[예산 한도 초과] 등록하려는 금액이 해당 예산 과목의 잔액을 초과하여 등록을 차단합니다. (누적 예정액: ${totalUsage.toLocaleString()}원 / 총예산: ${cat.totalBudget.toLocaleString()}원)`
+                error: `[예산 한도 초과] 등록하려는 금액이 해당 예산 과목의 잔액을 초과하여 등록을 차단합니다. (누적 실집행액: ${totalUsage.toLocaleString()}원 / 총예산: ${cat.totalBudget.toLocaleString()}원)`
               }, { status: 409 });
             }
           }

@@ -278,15 +278,17 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
         }
 
         if (matchedIdx >= 0) {
-          // Already present in list: ensure budgetEntryId and status are aligned
+          // Already present in list: ensure budgetEntryId, status, and actionType are aligned
           const current = list[matchedIdx];
           const needsBudgetEntryId = !current.budgetEntryId && be.id;
           const needsSettled = be.isSettled && current.status !== 'SETTLED';
-          if (needsBudgetEntryId || needsSettled) {
+          const needsActionType = !current.actionType && be.actionType;
+          if (needsBudgetEntryId || needsSettled || needsActionType) {
             list[matchedIdx] = {
               ...current,
               budgetEntryId: current.budgetEntryId || be.id,
               status: be.isSettled ? 'SETTLED' : current.status,
+              actionType: current.actionType || be.actionType || 'general',
             };
           }
           if (be.id) existingBudgetEntryIds.add(be.id);
@@ -308,6 +310,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           detailedProject: cat?.detailedProject || '기타사업',
           statItem: cat?.statItem || cat?.name || '일반운영비',
           categoryId: be.categoryId,
+          actionType: be.actionType || 'general',
           unitPrice: be.amount,
           quantity: 1,
           amount: be.amount,
@@ -399,10 +402,12 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     
     const categoryId = rawInput.categoryId || resolveCategoryId(rawInput.detailedProject, rawInput.statItem);
     const newSimId = generateId();
+    const actionType = rawInput.actionType || 'general';
 
     const newEntry: SimulationEntry = {
       ...rawInput,
       id: newSimId,
+      actionType,
       unitPrice,
       quantity,
       amount: computedAmount,
@@ -414,15 +419,16 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     // Auto-sync as BudgetEntry (isPlanned: true) to data/BUDGET_ENTRIES.json SSOT
     if (categoryId) {
       try {
+        const prefix = actionType === 'daily_expense' ? '[일상경비 시뮬레이션]' : '[시뮬레이션]';
         const created = addBudgetEntry({
           categoryId,
           amount: computedAmount,
           date: new Date().toISOString().split('T')[0],
           purpose: rawInput.name,
-          memo: rawInput.memo ? `[시뮬레이션] ${rawInput.memo}` : `[시뮬레이션] 단가 ₩${unitPrice.toLocaleString('ko-KR')} × ${quantity}개`,
+          memo: rawInput.memo ? `${prefix} ${rawInput.memo}` : `${prefix} 단가 ₩${unitPrice.toLocaleString('ko-KR')} × ${quantity}개`,
           isPlanned: true,
           isSettled: false,
-          actionType: 'general',
+          actionType,
           simulationEntryId: newSimId,
         });
         if (created && created.id) {
@@ -459,6 +465,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       if (computedAmount !== undefined) budgetUpdate.amount = computedAmount;
       if (partial.name !== undefined) budgetUpdate.purpose = partial.name;
       if (targetCategoryId) budgetUpdate.categoryId = targetCategoryId;
+      if (partial.actionType !== undefined) budgetUpdate.actionType = partial.actionType;
       if (partial.memo !== undefined) {
         budgetUpdate.memo = `[시뮬레이션] ${partial.memo}`;
       } else if (computedAmount !== undefined) {
@@ -502,6 +509,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     if (!sim) return;
     const finalAmount = actualAmount !== undefined ? actualAmount : sim.amount;
     const finalDate = actualDate || new Date().toISOString().split('T')[0];
+    const targetActionType = sim.actionType || 'general';
 
     // 1. Mark planned budget entry as settled if linked
     if (sim.budgetEntryId) {
@@ -513,12 +521,12 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       categoryId: sim.categoryId || resolveCategoryId(sim.detailedProject, sim.statItem) || '',
       amount: finalAmount,
       date: finalDate,
-      purpose: `${sim.name} (실지출 집행)`,
+      purpose: `${sim.name} (${targetActionType === 'daily_expense' ? '일상경비 실지출' : '실지출 집행'})`,
       memo: sim.memo ? `${sim.memo} [시뮬레이션 정산 완료]` : `[시뮬레이션 정산 완료: ${sim.name}]`,
       isPlanned: false,
       isSettled: false,
       relatedPlanId: sim.budgetEntryId,
-      actionType: 'general',
+      actionType: targetActionType,
     });
 
     // 3. Mark sim entry as SETTLED in local state
@@ -574,6 +582,9 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       totalBudget: number;
       currentSpent: number;
       simulatedExpenditure: number;
+      simulatedGeneralExpenditure: number;
+      simulatedDailyExpenditure: number;
+      unsyncedDailyExpense: number;
       dailyExpenseIssued: number;
       dailyExpenseSpent: number;
       dailyExpenseRemaining: number;
@@ -589,6 +600,9 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           totalBudget: 0,
           currentSpent: 0,
           simulatedExpenditure: 0,
+          simulatedGeneralExpenditure: 0,
+          simulatedDailyExpenditure: 0,
+          unsyncedDailyExpense: 0,
           dailyExpenseIssued: 0,
           dailyExpenseSpent: 0,
           dailyExpenseRemaining: 0,
@@ -614,20 +628,33 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           totalBudget: 0,
           currentSpent: 0,
           simulatedExpenditure: 0,
+          simulatedGeneralExpenditure: 0,
+          simulatedDailyExpenditure: 0,
+          unsyncedDailyExpense: 0,
           dailyExpenseIssued: 0,
           dailyExpenseSpent: 0,
           dailyExpenseRemaining: 0,
         };
         map.set(dp, target);
       }
-      target.simulatedExpenditure += entry.amount || 0;
+      const amt = entry.amount || 0;
+      target.simulatedExpenditure += amt;
+      if (entry.actionType === 'daily_expense') {
+        target.simulatedDailyExpenditure += amt;
+        if (!entry.budgetEntryId) {
+          target.unsyncedDailyExpense += amt;
+        }
+      } else {
+        target.simulatedGeneralExpenditure += amt;
+      }
     }
 
     // Convert map to summary objects
     const results: ProjectSimulationSummary[] = [];
     for (const [dp, val] of map) {
       const currentRemaining = val.totalBudget - val.currentSpent;
-      const finalExpectedBalance = currentRemaining - val.simulatedExpenditure;
+      const finalExpectedBalance = currentRemaining - val.simulatedGeneralExpenditure;
+      const finalDailyExpenseRemaining = Math.max(0, val.dailyExpenseRemaining - val.unsyncedDailyExpense);
       const executionRate = val.totalBudget > 0 
         ? ((val.currentSpent + val.simulatedExpenditure) / val.totalBudget) * 100 
         : 0;
@@ -638,7 +665,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
         currentSpent: val.currentSpent,
         currentRemaining,
         simulatedExpenditure: val.simulatedExpenditure,
+        simulatedGeneralExpenditure: val.simulatedGeneralExpenditure,
+        simulatedDailyExpenditure: val.simulatedDailyExpenditure,
         finalExpectedBalance,
+        finalDailyExpenseRemaining,
         executionRate,
         isDeficit: finalExpectedBalance < 0,
         dailyExpenseIssued: val.dailyExpenseIssued,
@@ -659,6 +689,9 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       totalBudget: number;
       currentSpent: number;
       simulatedExpenditure: number;
+      simulatedGeneralExpenditure: number;
+      simulatedDailyExpenditure: number;
+      unsyncedDailyExpense: number;
       dailyExpenseIssued: number;
       dailyExpenseSpent: number;
       dailyExpenseRemaining: number;
@@ -679,6 +712,9 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           totalBudget: 0,
           currentSpent: 0,
           simulatedExpenditure: 0,
+          simulatedGeneralExpenditure: 0,
+          simulatedDailyExpenditure: 0,
+          unsyncedDailyExpense: 0,
           dailyExpenseIssued: 0,
           dailyExpenseSpent: 0,
           dailyExpenseRemaining: 0,
@@ -709,20 +745,33 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           totalBudget: 0,
           currentSpent: 0,
           simulatedExpenditure: 0,
+          simulatedGeneralExpenditure: 0,
+          simulatedDailyExpenditure: 0,
+          unsyncedDailyExpense: 0,
           dailyExpenseIssued: 0,
           dailyExpenseSpent: 0,
           dailyExpenseRemaining: 0,
         };
         map.set(key, target);
       }
-      target.simulatedExpenditure += entry.amount || 0;
+      const amt = entry.amount || 0;
+      target.simulatedExpenditure += amt;
+      if (entry.actionType === 'daily_expense') {
+        target.simulatedDailyExpenditure += amt;
+        if (!entry.budgetEntryId) {
+          target.unsyncedDailyExpense += amt;
+        }
+      } else {
+        target.simulatedGeneralExpenditure += amt;
+      }
     }
 
     // Convert map to summary objects
     const results: StatItemSimulationSummary[] = [];
     for (const val of map.values()) {
       const currentRemaining = val.totalBudget - val.currentSpent;
-      const finalExpectedBalance = currentRemaining - val.simulatedExpenditure;
+      const finalExpectedBalance = currentRemaining - val.simulatedGeneralExpenditure;
+      const finalDailyExpenseRemaining = Math.max(0, val.dailyExpenseRemaining - val.unsyncedDailyExpense);
 
       results.push({
         statItem: val.statItem,
@@ -731,7 +780,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
         currentSpent: val.currentSpent,
         currentRemaining,
         simulatedExpenditure: val.simulatedExpenditure,
+        simulatedGeneralExpenditure: val.simulatedGeneralExpenditure,
+        simulatedDailyExpenditure: val.simulatedDailyExpenditure,
         finalExpectedBalance,
+        finalDailyExpenseRemaining,
         isDeficit: finalExpectedBalance < 0,
         dailyExpenseIssued: val.dailyExpenseIssued,
         dailyExpenseSpent: val.dailyExpenseSpent,

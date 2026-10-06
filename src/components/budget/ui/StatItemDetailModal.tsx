@@ -507,7 +507,18 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
                         return (
                           <tr key={sim.id || `sim-${idx}`} className="hover:bg-purple-50/40 transition-colors">
                             <td className="py-2.5 px-3 text-slate-900 font-bold font-sans">
-                              {sim.name}
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {sim.actionType === 'daily_expense' ? (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 inline-flex items-center gap-0.5 shrink-0">
+                                    <Coins className="w-2.5 h-2.5 text-amber-600" /> 일상경비
+                                  </span>
+                                ) : (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200 inline-flex items-center gap-0.5 shrink-0">
+                                    일반지출
+                                  </span>
+                                )}
+                                <span>{sim.name}</span>
+                              </div>
                             </td>
                             <td className="py-2.5 px-3 text-right text-slate-600">
                               ₩{formatN(sim.unitPrice || 0)}

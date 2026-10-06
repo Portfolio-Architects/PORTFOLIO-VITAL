@@ -193,6 +193,7 @@ export const BudgetSimulator: React.FC = React.memo(() => {
       <SimulationInputForm
         detailedProjects={availableDetailedProjects}
         getStatItemsForProject={getStatItemsForProject}
+        statItemSummaries={statItemSummaries}
         editingEntry={editingEntry}
         onAddEntry={addEntry}
         onUpdateEntry={handleUpdateEntryAndClear}
@@ -233,6 +234,12 @@ export const BudgetSimulator: React.FC = React.memo(() => {
               <div className="flex justify-between text-slate-500">
                 <span>계획 항목명</span>
                 <span className="font-bold text-slate-800">{settlingItem.name}</span>
+              </div>
+              <div className="flex justify-between text-slate-500">
+                <span>경비 구분</span>
+                <span className={`font-bold ${settlingItem.actionType === 'daily_expense' ? 'text-amber-700' : 'text-indigo-700'}`}>
+                  {settlingItem.actionType === 'daily_expense' ? '🪙 일상경비 실지출' : '🏢 일반 지출 (본청)'}
+                </span>
               </div>
               <div className="flex justify-between text-slate-500">
                 <span>세부사업 / 통계목</span>

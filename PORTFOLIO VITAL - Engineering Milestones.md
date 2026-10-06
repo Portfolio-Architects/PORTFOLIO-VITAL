@@ -2,6 +2,19 @@
 
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
+### [Milestone 245: Server API Daily Expense Double Counting Elimination & Zero-Trust Simulation Deficit Authorization Hotfix] Purged double-counting vulnerability on server API (`src/app/api/data/route.ts`) where issued daily expenses and planned daily expenses were simultaneously added to main budget usage triggering false 409 errors, aligned server and client planned expenditure algorithms, and authorized simulation deficit analysis without blocking. (2026-10-06)
+* **개요 및 개발 목적**:
+  - 사용자 질의 ("Next.js version: 16.2.10 (Turbopack)?? / 예산 남아있는데 왜 오류뜨지", "??" [콘솔 에러: 누적 예정액: 18,642,800원 / 총예산: 17,339,000원]) 분석 및 핫픽스:
+    1. **서버 API 일상경비 이중 합산(Double Counting) 제거**: `route.ts`의 일반지출 `planned` 계산식에서 `actionType !== 'daily_expense'`로 엄격 격리하여 이미 `dailyExpenseIssued`로 `spent`에 반영된 일상경비가 이중 합산되는 회계적 오류 완벽 차단.
+    2. **시뮬레이션 가상 적자 분석 권한 정상화**: 실집행(`!isPlanned`)에 대해서는 총예산 및 교부잔액 초과를 하드 차단하되, 시뮬레이션 항목(`isPlanned`)은 정상 저장 및 `[⚠️ 초과 예정]` 시각화가 가능하도록 서버 및 클라이언트 검증 로직 동기화 완료.
+
+### [Milestone 244: Budget Simulator Daily Expense Planned Entry Restriction Resolution & Dual-Pipeline Architecture Overhaul] Resolved blocking validation errors when entering planned daily expenses, introduced dual expenditure selection (general vs. daily expense) in simulation input form, eliminated double deduction accounting conflicts with e-호조 public budgeting standards, and integrated daily expense badges across all list, table, and modal views with 100% zero TypeScript errors. (2026-10-06)
+* **개요 및 개발 목적**:
+  - 사용자 보고 ("예산관리페이지 시뮬레이터에서 일상경비 예정내역 입력이 안되는 문제 발생") 전격 분석 및 완벽 해결:
+    1. **한도 검증(`checkLimit`) 듀얼 파이프라인 개편**: 일상경비 예정내역 등록 시 본청 잔액이 아닌 일상경비 가용잔액(`stats.dailyExpenseRemaining`)을 기준으로 한도 검사 및 차단 분기를 분리 실행하여 잔액이 있음에도 등록이 차단되던 결함 해결.
+    2. **공공회계 기준 이중 차감(Double Deduction) 방지**: 일상경비 교부(`dailyExpenseIssued`) 시 이미 차감된 예산을 시뮬레이션에서 다시 차감하지 않도록 `finalExpectedBalance` 계산식을 보정하고 `dailyExpensePlanned`를 분리 집계.
+    3. **입력 폼 세그먼트 카드 UI 및 시각화 강화**: `SimulationInputForm`에 일반지출/일상경비 인터랙티브 선택기 및 실시간 잔액 표시 탑재, 리스트 및 모달 전반에 일상경비 배지 연동 완료.
+
 ### [Milestone 230: Yangjaecheon Festival Bulk-Volume Incentive Package Analysis, Full Logistics Master Excel Release & Archive Research Report Recovery] Formulated 8-item public incentive evaluation model with bulk-volume lightweight focus, released comprehensive 2-tab administrative logistics Excel master (`2026_양재천_건강페스티벌_인센티브_및_물품리스트.xlsx`), synchronized dashboard operational duties, and recovered official Seoul Fitness Research Report PDF (`51-6110000-003662-01`, 55.6MB) from Master Archive to Desktop. (2026-10-01)
 * **개요 및 개발 목적**:
   - ｢2026 양재천 걷자! 건강 페스티벌｣ 주민 인센티브(경량·부피감 특화) 패키지 분석, 행사 물품 엑셀 마스터 구축 및 공공 아카이브 연구용역 보고서 발굴 요청에 대응:

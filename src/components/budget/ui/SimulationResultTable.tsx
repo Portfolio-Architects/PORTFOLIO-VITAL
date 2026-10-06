@@ -826,6 +826,14 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                                       {s.simulatedExpenditure.toLocaleString('ko-KR')}
                                       <span className={`text-xs ml-1 ${s.simulatedExpenditure > 0 ? 'text-purple-500 font-semibold' : 'text-slate-400'}`}>원</span>
                                     </div>
+                                    {(s.simulatedDailyExpenditure || 0) > 0 && (
+                                      <div className="mt-1 flex justify-end">
+                                        <span className="text-[11px] font-bold text-amber-950 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-md font-mono tabular-nums shadow-3xs inline-flex items-center gap-1 whitespace-nowrap shrink-0" title={`일상경비 예정액: ${(s.simulatedDailyExpenditure || 0).toLocaleString('ko-KR')}원`}>
+                                          <Coins className="w-3 h-3 text-amber-700" />
+                                          <span>일상 {(s.simulatedDailyExpenditure || 0).toLocaleString('ko-KR')}원</span>
+                                        </span>
+                                      </div>
+                                    )}
                                   </td>
                                   <td className="py-3 px-4 text-right align-top whitespace-nowrap">
                                     <div className={`font-mono font-extrabold text-[15px] sm:text-base tracking-tight tabular-nums ${
@@ -845,11 +853,11 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                                           : `잔여 ${s.totalBudget > 0 ? ((s.finalExpectedBalance / s.totalBudget) * 100).toFixed(1) : 0}%`}
                                       </span>
                                     </div>
-                                    {(s.dailyExpenseRemaining || 0) > 0 && (
+                                    {((s.finalDailyExpenseRemaining ?? s.dailyExpenseRemaining) || 0) > 0 && (
                                       <div className="mt-1.5 flex justify-end">
-                                        <span className="text-xs font-bold text-slate-800 bg-slate-200/90 border border-slate-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                                        <span className="text-xs font-bold text-slate-800 bg-slate-200/90 border border-slate-300 px-2.5 py-0.5 rounded-md font-mono tabular-nums shadow-2xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0" title={`본청 잔액 ${s.finalExpectedBalance.toLocaleString('ko-KR')}원 + 일상경비 잔액 ${(s.finalDailyExpenseRemaining ?? s.dailyExpenseRemaining ?? 0).toLocaleString('ko-KR')}원`}>
                                           <span className="text-xs font-bold font-sans text-slate-600 shrink-0 whitespace-nowrap">일상 포함</span>
-                                          <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(s.finalExpectedBalance + (s.dailyExpenseRemaining || 0)).toLocaleString('ko-KR')}원</span>
+                                          <span className="font-mono text-[13px] font-extrabold shrink-0 whitespace-nowrap">{(s.finalExpectedBalance + ((s.finalDailyExpenseRemaining ?? s.dailyExpenseRemaining) || 0)).toLocaleString('ko-KR')}원</span>
                                         </span>
                                       </div>
                                     )}
@@ -890,6 +898,16 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                                               ) : (
                                                 <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200 flex items-center gap-1">
                                                   <Clock className="w-3 h-3" /> 집행 대기
+                                                </span>
+                                              )}
+                                              {entry.actionType === 'daily_expense' ? (
+                                                <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-950 border border-amber-300 inline-flex items-center gap-1 shadow-3xs shrink-0">
+                                                  <Coins className="w-3 h-3 text-amber-700" />
+                                                  <span>일상경비</span>
+                                                </span>
+                                              ) : (
+                                                <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 inline-flex items-center gap-1 shrink-0">
+                                                  <span>일반지출</span>
                                                 </span>
                                               )}
                                               <span

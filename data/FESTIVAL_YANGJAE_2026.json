@@ -14,7 +14,7 @@
     "staffNote": "행사 참여 직원 대체휴무 시행 예정 (전 직원 참여)",
     "organizer": "강남구보건소 보건행정과 건강증진팀, 강남구체육회(걷기협회)",
     "overallProgress": 70,
-    "lastUpdated": "2026-10-01"
+    "lastUpdated": "2026-10-06"
   },
   "budget": {
     "total": 49900000,
@@ -201,292 +201,387 @@
       "category": "운영본부",
       "name": "보건행정과",
       "scale": "6동",
-      "program": "운영부스 2동, 응급의료부스 1동, VIP 대기 부스 3동",
+      "program": "운영본부(2동), 응급의료부스(1동), VIP 대기실(2동)",
       "status": "확정",
       "tables": 10,
       "chairs": 20,
+      "staffCount": 0,
       "manager": "오창선",
       "phone": "02-3423-7116",
       "adminPhone": "02-3423-7116",
       "mobilePhone": "010-2217-5298",
-      "staffCount": 0
+      "electricity": "O",
+      "electricityDetail": "케이터링(VIP)",
+      "bannerText": "운영본부 / 응급의료센터 / VIP 대기실",
+      "remarks": ""
     },
     {
       "id": 2,
       "category": "보건소 부서",
       "name": "보건행정과 건강증진팀",
       "scale": "1동",
-      "program": "금연 · 절주 · 영양 보건 사업 홍보 부스",
+      "program": "금연 · 절주 · 영양 보건 사업 홍보 부스 및 건강생활실천 1:1 상담",
       "status": "확정",
       "tables": 2,
       "chairs": 6,
-      "manager": "심다영",
-      "phone": "02-3423-7018",
-      "adminPhone": "02-3423-7018",
-      "mobilePhone": "010-3912-3269",
-      "staffCount": 5
+      "staffCount": 6,
+      "manager": "최현미",
+      "phone": "02-3423-7239",
+      "adminPhone": "02-3423-7239",
+      "mobilePhone": "010-6860-4149",
+      "electricity": "X",
+      "electricityDetail": "",
+      "bannerText": "일상 속 건강생활실천! 금연·절주·영양 홍보",
+      "remarks": ""
     },
     {
       "id": 3,
       "category": "보건소 부서",
-      "name": "보건행정과 서울체력장 강남센터",
+      "name": "보건행정과 서울체력장",
       "scale": "2동",
-      "program": "내 신체나이 알아보기, 서울체력장 인증 체력측정 (성인: 2분제자리걷기/악력, 시니어: 의자일어서기 등)",
+      "program": "내 신체나이 알아보기, 서울체력장 인증 체력측정 (성인: 2분제자리걷기·악력, 시니어: 의자일어서기)",
       "status": "확정",
       "tables": 1,
       "chairs": 4,
+      "staffCount": 3,
       "manager": "김형종",
       "phone": "02-3423-7250",
       "adminPhone": "02-3423-7250",
       "mobilePhone": "010-7567-8168",
-      "staffCount": 3
+      "electricity": "X",
+      "electricityDetail": "",
+      "bannerText": "(내 신체나이 알아보기) 서울체력장 강남센터, & 체력측정 인증",
+      "remarks": ""
     },
     {
       "id": 4,
-      "category": "보건소 부서",
-      "name": "질병관리과 감염병예방팀",
+      "category": "민간",
+      "name": "한국신체정보(주)",
       "scale": "2동",
-      "program": "‘강남’구가 알려주고 ‘도’움되는 ‘감’염병 예방지식(강남도감)",
+      "program": "내 신체나이 알아보기, 『리얼피티 프로 플러스』 40초 바른자세·체형 정밀 분석 및 AI 맞춤 운동처방",
       "status": "확정",
-      "tables": 2,
-      "chairs": 5,
-      "manager": "구채연",
-      "phone": "02-3423-7106",
-      "adminPhone": "02-3423-7106",
-      "mobilePhone": "010-3071-9606",
-      "staffCount": 6
+      "tables": 1,
+      "chairs": 4,
+      "staffCount": 2,
+      "manager": "박준홍",
+      "phone": "010-9985-3732",
+      "adminPhone": "",
+      "mobilePhone": "010-9985-3732",
+      "electricity": "O",
+      "electricityDetail": "43인치 키오스크, 프린터",
+      "bannerText": "(내 신체나이 알아보기) 강남구민 “건강의 첫 걸음” 바른자세 검사",
+      "remarks": ""
     },
     {
       "id": 5,
       "category": "보건소 부서",
-      "name": "질병관리과 감염병대응팀",
-      "scale": "1동",
-      "program": "손은 깨끗하게, 진드기는 멀리! 건강한 강남 ON",
-      "status": "확정",
-      "tables": 2,
-      "chairs": 10,
-      "manager": "이희경",
-      "phone": "02-3423-7129",
-      "adminPhone": "02-3423-7129",
-      "mobilePhone": "",
-      "staffCount": 9
-    },
-    {
-      "id": 6,
-      "category": "보건소 부서",
-      "name": "질병관리과 만성질환관리팀",
-      "scale": "1동",
-      "program": "평생 건강의 지름길, 만성질환 관리로부터!",
-      "status": "확정",
-      "tables": 2,
-      "chairs": 10,
-      "manager": "김영희",
-      "phone": "02-3423-7112",
-      "adminPhone": "02-3423-7112",
-      "mobilePhone": "010-3455-4057",
-      "staffCount": 5
-    },
-    {
-      "id": 7,
-      "category": "보건소 부서",
-      "name": "의약과 의무1팀",
-      "scale": "2동",
-      "program": "두근두근 CPR 체험존",
-      "status": "확정",
-      "tables": 4,
-      "chairs": 8,
-      "manager": "이상화",
-      "phone": "02-3423-7158",
-      "adminPhone": "02-3423-7158",
-      "mobilePhone": "010-2613-3091",
-      "staffCount": 3
-    },
-    {
-      "id": 8,
-      "category": "보건소 부서",
-      "name": "의약과 약무팀",
-      "scale": "2동",
-      "program": "불법 마약 근절 캠페인 부스",
-      "status": "확정",
-      "tables": 4,
-      "chairs": 8,
-      "manager": "김지현",
-      "phone": "02-3423-7173",
-      "adminPhone": "02-3423-7173",
-      "mobilePhone": "010-2980-9011",
-      "staffCount": 0
-    },
-    {
-      "id": 9,
-      "category": "보건소 부서",
-      "name": "건강관리과 정신건강팀",
-      "scale": "1동",
-      "program": "마음건강 충전소",
-      "status": "확정",
-      "tables": 2,
-      "chairs": 10,
-      "manager": "안세연",
-      "phone": "02-3423-8796",
-      "adminPhone": "02-3423-8796",
-      "mobilePhone": "010-9147-8924",
-      "staffCount": 4
-    },
-    {
-      "id": 10,
-      "category": "보건소 부서",
       "name": "건강관리과 어르신건강팀",
-      "scale": "3동",
-      "program": "강남구치매안심센터 행복한 기억찾기 캠페인(02-6380-5609)\n내 신체나이 알아보기, 운동 실습(웰에이징 센터)",
+      "scale": "2동",
+      "program": "내 신체나이 알아보기 - 웰에이징센터 맞춤형 신체나이·근력 운동 실습 및 상담",
       "status": "확정",
-      "tables": 8,
-      "chairs": 14,
+      "tables": 4,
+      "chairs": 8,
+      "staffCount": 5,
       "manager": "홍기수",
       "phone": "02-3423-7985",
       "adminPhone": "02-3423-7985",
       "mobilePhone": "010-4279-0790",
-      "staffCount": 5
+      "electricity": "O",
+      "electricityDetail": "태블릿 PC 3대",
+      "bannerText": "(내 신체나이 알아보기) 웰에이징센터 맞춤형 운동프로그램",
+      "remarks": ""
+    },
+    {
+      "id": 6,
+      "category": "보건소 부서",
+      "name": "질병관리과 감염병예방팀",
+      "scale": "2동",
+      "program": "‘강남’구가 알려주고 ‘도’움되는 ‘감’염병 예방지식(강남도감) 퀴즈 및 수인성 감염병 예방 홍보",
+      "status": "확정",
+      "tables": 2,
+      "chairs": 5,
+      "staffCount": 6,
+      "manager": "구채연",
+      "phone": "02-3423-7106",
+      "adminPhone": "02-3423-7106",
+      "mobilePhone": "010-3071-9606",
+      "electricity": "X",
+      "electricityDetail": "",
+      "bannerText": "‘강남’구가 알려주고 ‘도’움되는 ‘감’염병 예방지식(강남도감)",
+      "remarks": ""
+    },
+    {
+      "id": 7,
+      "category": "보건소 부서",
+      "name": "질병관리과 감염병대응팀",
+      "scale": "1동",
+      "program": "손은 깨끗하게, 진드기는 멀리! 건강한 강남 ON (뷰박스 손씻기 형광 체험, 진드기 기피제 배부)",
+      "status": "확정",
+      "tables": 2,
+      "chairs": 10,
+      "staffCount": 9,
+      "manager": "이희경",
+      "phone": "02-3423-7129",
+      "adminPhone": "02-3423-7129",
+      "mobilePhone": "02-3423-7129",
+      "electricity": "X",
+      "electricityDetail": "",
+      "bannerText": "손은 깨끗하게, 진드기는 멀리! 건강한 강남 ON",
+      "remarks": ""
+    },
+    {
+      "id": 8,
+      "category": "보건소 부서",
+      "name": "질병관리과 만성질환관리팀",
+      "scale": "1동",
+      "program": "평생 건강의 지름길, 만성질환 관리로부터! (혈압·혈당 무료 측정 및 대사증후군 1:1 상담)",
+      "status": "확정",
+      "tables": 2,
+      "chairs": 10,
+      "staffCount": 5,
+      "manager": "김영희",
+      "phone": "02-3423-7112",
+      "adminPhone": "02-3423-7112",
+      "mobilePhone": "010-3455-4057",
+      "electricity": "X",
+      "electricityDetail": "",
+      "bannerText": "평생 건강의 지름길, 만성질환 관리로부터!",
+      "remarks": ""
+    },
+    {
+      "id": 9,
+      "category": "보건소 부서",
+      "name": "의약과 의무1팀",
+      "scale": "2동",
+      "program": "생명을 살리는 4분의 기적, 두근두근 CPR 심폐소생술 및 자동심장충격기(AED) 실습 체험존",
+      "status": "확정",
+      "tables": 4,
+      "chairs": 8,
+      "staffCount": 3,
+      "manager": "이상화",
+      "phone": "02-3423-7158",
+      "adminPhone": "02-3423-7158",
+      "mobilePhone": "010-2613-3091",
+      "electricity": "X",
+      "electricityDetail": "",
+      "bannerText": "두근두근 CPR 체험존",
+      "remarks": ""
+    },
+    {
+      "id": 10,
+      "category": "보건소 부서",
+      "name": "의약과 약무팀",
+      "scale": "2동",
+      "program": "불법 마약 근절 및 가정 내 폐의약품 안심 수거 캠페인 (마약류 모형 전시 및 OX 퀴즈, VR 체험)",
+      "status": "확정",
+      "tables": 4,
+      "chairs": 8,
+      "staffCount": 10,
+      "manager": "김지현",
+      "phone": "02-3423-7173",
+      "adminPhone": "02-3423-7173",
+      "mobilePhone": "010-2980-9011",
+      "electricity": "O",
+      "electricityDetail": "VR기기(오큘러스), 충전",
+      "bannerText": "호기심이 중독으로, 마약 접근 금지! - 불법 마약 근절 캠페인 부스 -",
+      "remarks": ""
     },
     {
       "id": 11,
-      "category": "민간",
-      "name": "강남구의사회",
+      "category": "보건소 부서",
+      "name": "건강관리과 정신건강팀",
       "scale": "1동",
-      "program": "강남구의사회 & 메드렉스병원 ‘머리부터 발끝까지 안전하게 걷자’",
+      "program": "마음건강 충전소 (우울·스트레스 선별검사, 마음안심버스 사업 홍보, 전문 정신건강 상담)",
       "status": "확정",
       "tables": 2,
-      "chairs": 4,
-      "manager": "이지영",
-      "phone": "02-549-0971",
-      "adminPhone": "02-549-0971",
-      "mobilePhone": "010-2279-5982",
-      "staffCount": 8
+      "chairs": 10,
+      "staffCount": 4,
+      "manager": "안세연",
+      "phone": "02-3423-8796",
+      "adminPhone": "02-3423-8796",
+      "mobilePhone": "010-9147-8924",
+      "electricity": "X",
+      "electricityDetail": "",
+      "bannerText": "마음건강 충전소",
+      "remarks": ""
     },
     {
       "id": 12,
-      "category": "민간",
-      "name": "강남구한의사회",
-      "scale": "2동",
-      "program": "바른자세가 건강의 시작, 한의학을 통한 체형검사 체험존",
+      "category": "보건소 부서",
+      "name": "건강관리과 어르신건강팀",
+      "scale": "1동",
+      "program": "강남구치매안심센터 행복한 기억찾기 캠페인 (치매 선별검사 및 인지강화 프로그램)",
       "status": "확정",
       "tables": 4,
-      "chairs": 12,
-      "manager": "김명주",
-      "phone": "-",
-      "adminPhone": "-",
-      "mobilePhone": "010-9100-0785",
-      "staffCount": 6
+      "chairs": 7,
+      "staffCount": 2,
+      "manager": "이유리",
+      "phone": "02-6380-5609",
+      "adminPhone": "02-6380-5609",
+      "mobilePhone": "",
+      "electricity": "O",
+      "electricityDetail": "태블릿 PC 1대",
+      "bannerText": "강남구치매안심센터 행복한 기억찾기 캠페인",
+      "remarks": ""
     },
     {
       "id": 13,
       "category": "민간",
-      "name": "서울대학교병원 강남센터",
+      "name": "강남구의사회",
       "scale": "1동",
-      "program": "가정의학과 전문의 만성질환 상담",
+      "program": "강남구의사회 & 메드렉스병원 ‘머리부터 발끝까지 안전하게 걷자’ (관절·척추 정형외과 전문의 상담)",
       "status": "확정",
       "tables": 2,
-      "chairs": 7,
-      "manager": "임동은",
-      "phone": "02-2112-5487",
-      "adminPhone": "02-2112-5487",
-      "mobilePhone": "010-5663-8276",
-      "staffCount": 5
+      "chairs": 4,
+      "staffCount": 8,
+      "manager": "이지영",
+      "phone": "02-549-0971",
+      "adminPhone": "02-549-0971",
+      "mobilePhone": "010-2279-5982",
+      "electricity": "O",
+      "electricityDetail": "노트북 1대 충전",
+      "bannerText": "강남구의사회·메드렉스병원이 함께하는 '머리부터 발끝까지 안전하게 걷자'",
+      "remarks": ""
     },
     {
       "id": 14,
       "category": "민간",
-      "name": "강남 차병원",
-      "scale": "3동",
-      "program": "중년 여성 유방 자가검진 교육, 여성질환 및 영양 상담",
+      "name": "강남구한의사회",
+      "scale": "2동",
+      "program": "바른자세가 건강의 시작, 한의학을 통한 체형검사 체험존 (체형 균형 및 경락 건강 상담)",
       "status": "확정",
-      "tables": 6,
-      "chairs": 16,
-      "manager": "김규리",
-      "phone": "02-3468-3226",
-      "adminPhone": "02-3468-3226",
-      "mobilePhone": "010-2698-0992",
-      "staffCount": 10
+      "tables": 4,
+      "chairs": 12,
+      "staffCount": 6,
+      "manager": "김명주",
+      "phone": "010-9100-0785",
+      "adminPhone": "",
+      "mobilePhone": "010-9100-0785",
+      "electricity": "O",
+      "electricityDetail": "체형측정검사기 1대, 노트북 2대",
+      "bannerText": "바른자세가 건강의 시작 한의학을 통한 체형검사 체험존",
+      "remarks": ""
     },
     {
       "id": 15,
       "category": "민간",
-      "name": "자생한방병원",
-      "scale": "2동",
-      "program": "간이 침 치료, 스포츠 테이핑 및 한의학 상담",
+      "name": "서울대학교병원 강남센터",
+      "scale": "1동",
+      "program": "가정의학과 전문의 1:1 맞춤형 문진 및 만성질환 예방 생활습관 의학 전문 심층 상담",
       "status": "확정",
-      "tables": 4,
-      "chairs": 10,
-      "manager": "김봉진",
-      "phone": "1577-0007",
-      "adminPhone": "1577-0007",
-      "mobilePhone": "010-9931-0994",
-      "staffCount": 7
+      "tables": 2,
+      "chairs": 7,
+      "staffCount": 5,
+      "manager": "임동은",
+      "phone": "02-2112-5487",
+      "adminPhone": "02-2112-5487",
+      "mobilePhone": "010-5663-8276",
+      "electricity": "O",
+      "electricityDetail": "노트북1, 혈압계3",
+      "bannerText": "서울대학교병원 강남센터와 함께하는 맞춤형 문진 및 건강 상담",
+      "remarks": ""
     },
     {
       "id": 16,
       "category": "민간",
-      "name": "유디치과",
-      "scale": "1동 + 검진버스",
-      "program": "구강 검진 및 구강건강 관리법 안내",
+      "name": "강남 차병원",
+      "scale": "3동",
+      "program": "중년 여성 유방 자가검진 촉지 교육, 부인과 여성질환 및 맞춤 영양 상담",
       "status": "확정",
-      "tables": 2,
-      "chairs": 4,
-      "manager": "유규열",
-      "phone": "02-6268-5339",
-      "adminPhone": "02-6268-5339",
-      "mobilePhone": "010-5192-2210",
-      "staffCount": 12
+      "tables": 6,
+      "chairs": 16,
+      "staffCount": 10,
+      "manager": "김규리",
+      "phone": "02-3468-3226",
+      "adminPhone": "02-3468-3226",
+      "mobilePhone": "010-2698-0992",
+      "electricity": "O",
+      "electricityDetail": "미량영양소 측정기기2대\n태블릿 2대 충전용 콘센트",
+      "bannerText": "CHA의과학대학교 강남차병원, 여성 건강 지킴이",
+      "remarks": ""
     },
     {
       "id": 17,
       "category": "민간",
-      "name": "고려대학교부설 척추측만증연구소",
-      "scale": "2동 + 검진버스",
-      "program": "거북목·척추측만증 X-Ray 무료 촬영 및 교정 상담",
+      "name": "자생한방병원",
+      "scale": "2동",
+      "program": "척추·관절 간이 침 치료, 근육 테이핑 요법 시연 및 척추 건강 1:1 한방 상담",
       "status": "확정",
       "tables": 4,
-      "chairs": 8,
-      "manager": "전예진",
-      "phone": "-",
-      "adminPhone": "-",
-      "mobilePhone": "010-7935-3095",
-      "staffCount": 4
+      "chairs": 10,
+      "staffCount": 7,
+      "manager": "김봉진",
+      "phone": "1577-0007",
+      "adminPhone": "1577-0007",
+      "mobilePhone": "010-9931-0994",
+      "electricity": "X",
+      "electricityDetail": "",
+      "bannerText": "한방척추전문병원 자생한방병원 의료지원",
+      "remarks": ""
     },
     {
       "id": 18,
       "category": "민간",
-      "name": "한국신체정보(주)",
-      "scale": "2동",
-      "program": "내 신체나이 알아보기, 『리얼피티 프로 플러스』 40초 바른자세·체형 분석 및 운동처방",
+      "name": "유디치과",
+      "scale": "1동",
+      "program": "이동형 대형 치과검진버스 연계 구강 검진 및 구강건강 관리법 안내, 칫솔질 실습",
       "status": "확정",
-      "tables": 1,
+      "tables": 2,
       "chairs": 4,
-      "manager": "박준홍",
-      "phone": "-",
-      "adminPhone": "-",
-      "mobilePhone": "010-9985-3732",
-      "staffCount": 2
+      "staffCount": 12,
+      "manager": "유규열",
+      "phone": "02-6268-5339",
+      "adminPhone": "02-6268-5339",
+      "mobilePhone": "010-5192-2210",
+      "electricity": "O",
+      "electricityDetail": "부스 TV 설치, 버스(자가발전)",
+      "bannerText": "유디치과와 함께하는 건강관리",
+      "remarks": ""
     },
     {
       "id": 19,
       "category": "민간",
+      "name": "고려대학교 척추측만증연구소",
+      "scale": "2동",
+      "program": "거북목·척추측만증 X-Ray 무료 방사선 촬영 및 척추교정 전문의 1:1 상담",
+      "status": "확정",
+      "tables": 4,
+      "chairs": 8,
+      "staffCount": 4,
+      "manager": "전예진",
+      "phone": "010-7935-3095",
+      "adminPhone": "",
+      "mobilePhone": "010-7935-3095",
+      "electricity": "O",
+      "electricityDetail": "X-ray 버스(220v 가능)",
+      "bannerText": "고려대학교 척추측만증연구소, 척추 건강 체크존",
+      "remarks": ""
+    },
+    {
+      "id": 20,
+      "category": "민간",
       "name": "케이스튜디오 (디아르스)",
       "scale": "1동",
-      "program": "퍼스널 컬러 진단 및 계절별 산책·야외운동 메이크업 봉사",
+      "program": "1:1 퍼스널 컬러 진단 및 계절별 산책·야외운동 맞춤 메이크업 재능기부 봉사",
       "status": "확정",
       "tables": 2,
       "chairs": 6,
+      "staffCount": 4,
       "manager": "고명규",
-      "phone": "-",
-      "adminPhone": "-",
+      "phone": "010-9788-9471",
+      "adminPhone": "",
       "mobilePhone": "010-9788-9471",
-      "staffCount": 4
+      "electricity": "X",
+      "electricityDetail": "",
+      "bannerText": "디아르스, 퍼스널 컬러 진단 및 산책을 위한 메이크업",
+      "remarks": ""
     }
   ],
   "schedule": [
     {
       "id": 1,
-      "phase": "식전·준비",
-      "time": "07:30 ~ 08:00",
+      "phase": "식전",
+      "time": "30분",
       "duration": "30분",
       "title": "직원 출근 및 사전 준비",
       "lead": "보건행정과",
@@ -495,78 +590,78 @@
     },
     {
       "id": 2,
-      "phase": "식전·준비",
-      "time": "08:00 ~ 08:30",
+      "phase": "식전",
+      "time": "30분",
       "duration": "30분",
       "title": "행사 준비 및 현장 점검",
-      "lead": "(주)제이민",
+      "lead": "커넥팅디",
       "status": "예정",
-      "note": "음향 BGM 송출, 무대 전력망 점검, 응급의료부스 및 구급차(2대) 배치 확인"
+      "note": "BGM 송출, 무대 전력 점검, 응급의료부스 및 구급차(2대) 배치 확인"
     },
     {
       "id": 3,
-      "phase": "식전·준비",
-      "time": "08:00 ~ 09:00",
+      "phase": "식전",
+      "time": "60분",
       "duration": "60분",
       "title": "참가자 등록 및 안내",
       "lead": "운영본부",
       "status": "예정",
-      "note": "사전접수(800명) 및 현장접수 확인, 배번호표 배부, 코스 리플릿 안내"
+      "note": "사전접수(800명) 및 현장접수 확인, 배번표 배부, 리플릿 배부"
     },
     {
       "id": 4,
-      "phase": "식전·준비",
-      "time": "08:40 ~ 09:00",
+      "phase": "식전",
+      "time": "20분",
       "duration": "20분",
       "title": "식전 축하공연",
       "lead": "공연팀",
       "status": "예정",
-      "note": "K-POP 커버댄스 무대 공연"
+      "note": "JS 재즈밴드 무대 공연"
     },
     {
       "id": 5,
-      "phase": "공식행사",
-      "time": "08:40 ~ 13:30",
+      "phase": "부스운영",
+      "time": "290분",
       "duration": "290분",
-      "title": "18개 의료·건강 체험 부스 운영",
+      "title": "19개 의료·건강 체험 부스 운영",
       "lead": "보건소 및 협력기관",
       "status": "예정",
-      "note": "수변문화쉼터 부스(18동) 가동 (서울체력장, CPR, 한방·치과·정형·척추 검진)"
+      "note": ""
     },
     {
       "id": 6,
-      "phase": "공식행사",
-      "time": "09:00 ~ 09:02",
+      "phase": "개회식",
+      "time": "2분",
       "duration": "2분",
       "title": "개회식 오프닝",
-      "lead": "김연태 MC",
+      "lead": "김현욱 MC",
       "status": "예정",
       "note": "제8회 강남구청장배 걷기대회 연계 행사 개식 선언"
     },
     {
       "id": 7,
-      "phase": "공식행사",
-      "time": "09:02 ~ 09:04",
+      "phase": "개회식",
+      "time": "2분",
       "duration": "2분",
       "title": "국민의례",
-      "lead": "사회자",
+      "lead": "김현욱 MC",
       "status": "예정",
-      "note": "3) 약식절차 1     ① 국기에 대한 경례: 전주가 없는 애국가 반주 1절에 맞춰 실시한다(국기에 대한 맹세문은 낭송하지 않음).     ② 순국선열과 호국영령에 대한 묵념: 묵념곡을 연주하되 묵념곡이 없으면 구령으로 10~15초 정도 실시한다(행사 성격에 따라 생략 가능)."
+      "note": "3) 약식절차 1\n① 국기에 대한 경례: 전주가 없는 애국가 반주 1절에 맞춰 실시한다(국기에 대한 맹세문은 낭송하지 않음).\n② 순국선열과 호국영령에 대한 묵념: 묵념곡을 연주하되 묵념곡이 없으면 구령으로 10~15초 정도 실시한다(행사 성격에 따라 생략 가능)."
     },
     {
       "id": 8,
-      "phase": "공식행사",
-      "time": "09:04 ~ 09:08",
+      "phase": "개회식",
+      "time": "4분",
       "duration": "4분",
       "title": "내빈 소개",
-      "lead": "김연태 MC",
+      "lead": "김현욱 MC",
       "status": "예정",
       "note": "구청장, 국회의원, 시·구의원, 체육회장 등 참석 내빈 소개"
     },
     {
       "id": 9,
-      "phase": "공식행사",
-      "time": "09:08 ~ 09:15",
+      "phase": "개회식",
+      "time": "7분",
       "duration": "7분",
       "title": "개회사 및 내빈 축사",
       "lead": "구청장 및 내빈",
@@ -575,38 +670,38 @@
     },
     {
       "id": 10,
-      "phase": "공식행사",
-      "time": "09:15 ~ 09:20",
+      "phase": "개회식",
+      "time": "5분",
       "duration": "5분",
       "title": "체육회 표창 수여 및 레크레이션",
       "lead": "걷기협회 / MC",
       "status": "예정",
-      "note": "걷기 활성화 유공 구민 표창장 수여 및 바르게 걷기 레크레이션"
+      "note": "걷기 활성화 유공 구민 표창장 수여"
     },
     {
       "id": 11,
-      "phase": "공식행사",
-      "time": "09:20 ~ 09:30",
+      "phase": "개회식",
+      "time": "10분",
       "duration": "10분",
       "title": "준비 체조 및 스트레칭",
-      "lead": "치어리더팀",
+      "lead": "스트레칭팀",
       "status": "예정",
       "note": "출발 전 부상 방지를 위한 전신 스트레칭 및 준비 체조"
     },
     {
       "id": 12,
-      "phase": "걷기대회",
-      "time": "09:30 ~ 09:40",
+      "phase": "개회식",
+      "time": "10분",
       "duration": "10분",
       "title": "출발 지점(START 아치) 이동",
-      "lead": "진행요원",
+      "lead": "김현욱 MC",
       "status": "예정",
       "note": "메인무대에서 포이공원 출발마당 START 아치 앞 집결선 이동"
     },
     {
       "id": 13,
-      "phase": "걷기대회",
-      "time": "09:40 ~ 09:45",
+      "phase": "개회식",
+      "time": "5분",
       "duration": "5분",
       "title": "대회 출발 기념촬영",
       "lead": "구청장·내빈·참가자",
@@ -616,38 +711,38 @@
     {
       "id": 14,
       "phase": "걷기대회",
-      "time": "09:45 ~ 12:30",
+      "time": "165분",
       "duration": "165분",
       "title": "2km 건강 걷기 대회 출발",
       "lead": "걷기협회",
       "status": "예정",
-      "note": "수변문화쉼터 ↔ 영동4교 2km 코스 완주 (12:30 인센티브 배부 마감)"
+      "note": "수변문화쉼터 ↔ 영동4교 2km 코스 완주"
     },
     {
       "id": 15,
-      "phase": "공연·폐회",
-      "time": "10:15 ~ 10:35",
+      "phase": "공연",
+      "time": "20분",
       "duration": "20분",
-      "title": "부스 운영 직원 격려 순회",
+      "title": "부스 운영 직원 격려 순회(예정)",
       "lead": "구청장",
       "status": "예정",
       "note": "18개 부스 순회 방문 및 의료진·스태프 격려"
     },
     {
       "id": 16,
-      "phase": "공연·폐회",
-      "time": "10:30 ~ 12:00",
-      "duration": "90분",
-      "title": "수변 버스킹 공연 및 레크레이션",
+      "phase": "공연",
+      "time": "60분",
+      "duration": "60분",
+      "title": "식후 공연",
       "lead": "문화도시과 / MC",
       "status": "예정",
-      "note": "행복콘서트 버스킹 공연(2회) 및 스틱잡기 챌린지"
+      "note": "재즈보컬 / 마술 공연"
     },
     {
       "id": 17,
-      "phase": "공연·폐회",
-      "time": "13:30 ~ 14:30",
-      "duration": "60분",
+      "phase": "마감",
+      "time": "330분",
+      "duration": "330분",
       "title": "행사 종료 및 행사장 환경 정비",
       "lead": "보건행정과 / 자원순환과",
       "status": "예정",
@@ -657,94 +752,1169 @@
   "duties": [
     {
       "id": 1,
-      "category": "담당자",
+      "category": "운영",
+      "deptOrOrg": "보건행정과",
+      "role": "페스티벌 총괄",
+      "manager": "홍종남 (과장)",
+      "phone": "02-3423-7010",
+      "adminPhone": "02-3423-7010",
+      "mobilePhone": "010-4114-6714",
+      "tasks": [
+        "페스티벌 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "홍종남",
+          "role": "과장",
+          "adminPhone": "02-3423-7010",
+          "mobilePhone": "010-4114-6714"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 2,
+      "category": "운영",
+      "deptOrOrg": "보건행정과 보건행정팀",
+      "role": "응급의료부스 및 VIP 의전 총괄",
+      "manager": "이희선 (팀장)",
+      "phone": "02-3423-7011",
+      "adminPhone": "02-3423-7011",
+      "mobilePhone": "010-7240-6907",
+      "tasks": [
+        "응급의료부스 및 VIP 의전 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "이희선",
+          "role": "팀장",
+          "adminPhone": "02-3423-7011",
+          "mobilePhone": "010-7240-6907"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 3,
+      "category": "운영",
       "deptOrOrg": "보건행정과 건강증진팀",
-      "role": "행사 업무 담당자",
+      "role": "페스티벌 운영 총괄",
+      "manager": "김지영 (팀장)",
+      "phone": "02-3423-7031",
+      "adminPhone": "02-3423-7031",
+      "mobilePhone": "010-8941-6562",
+      "tasks": [
+        "페스티벌 운영 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "김지영",
+          "role": "팀장",
+          "adminPhone": "02-3423-7031",
+          "mobilePhone": "010-8941-6562"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 4,
+      "category": "운영",
+      "deptOrOrg": "보건행정과 민원서비스팀",
+      "role": "페스티벌 민원 업무 총괄",
+      "manager": "이래원 (팀장)",
+      "phone": "02-3423-7031",
+      "adminPhone": "02-3423-7031",
+      "mobilePhone": "010-5691-3310",
+      "tasks": [
+        "페스티벌 민원 업무 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "이래원",
+          "role": "팀장",
+          "adminPhone": "02-3423-7031",
+          "mobilePhone": "010-5691-3310"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 5,
+      "category": "운영",
+      "deptOrOrg": "보건행정과 건강증진팀",
+      "role": "페스티벌 운영 담당",
       "manager": "오창선",
       "phone": "02-3423-7116",
       "adminPhone": "02-3423-7116",
       "mobilePhone": "010-2217-5298",
-      "tasks": []
+      "tasks": [
+        "페스티벌 운영 담당"
+      ],
+      "staffMembers": [
+        {
+          "name": "오창선",
+          "role": "",
+          "adminPhone": "02-3423-7116",
+          "mobilePhone": "010-2217-5298"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
     },
     {
-      "id": 2,
-      "category": "체육회",
-      "deptOrOrg": "강남구체육회(걷기협회)",
-      "role": "걷기대회 공동 주관",
-      "manager": "진우복 / 채희경",
-      "phone": "02-3462-7330",
-      "adminPhone": "02-3462-7330",
+      "id": 6,
+      "category": "운영",
+      "deptOrOrg": "강남구체육회",
+      "role": "구청장배 걷기 대회 총괄",
+      "manager": "채희경 (팀장)",
+      "phone": "010-7137-7397",
+      "adminPhone": "",
       "mobilePhone": "010-7137-7397",
       "tasks": [
-        "제8회 강남구청장배 걷기대회 공동 주관",
-        "2km 걷기 코스(수변문화쉼터 ↔ 영동4교) 안전 관리",
-        "걷기 참가자 250명 모집 및 현장 리드",
-        "유공 구민 표창 대상자 추천 및 시상식 지원"
-      ]
+        "구청장배 걷기 대회 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "채희경",
+          "role": "팀장",
+          "adminPhone": "",
+          "mobilePhone": "010-7137-7397"
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 1,
+        "agency": 0
+      },
+      "remarks": "체육회 1명"
     },
     {
-      "id": 3,
-      "category": "대행용역",
-      "deptOrOrg": "(주)제이민 커뮤니케이션",
-      "role": "행사 연출 및 무대·음향 총괄",
-      "manager": "김다희 팀장",
-      "phone": "010-8494-0544",
+      "id": 7,
+      "category": "운영",
+      "deptOrOrg": "강남구체육회",
+      "role": "구청장배 걷기 대회 담당",
+      "manager": "김윤희",
+      "phone": "010-4355-4289",
       "adminPhone": "",
-      "mobilePhone": "010-8494-0544",
+      "mobilePhone": "010-4355-4289",
       "tasks": [
-        "메인 무대 설치, 전력망 구축 및 음향 설비 총괄",
-        "출발·도착 에어아치 및 안전 펜스 시공",
-        "전문 MC 섭외, 식전 공연팀 및 음향 BGM 운영",
-        "참가자 기념품(건기식) 및 완주 배번호표 배부 운영"
-      ]
+        "구청장배 걷기 대회 담당"
+      ],
+      "staffMembers": [
+        {
+          "name": "김윤희",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": "010-4355-4289"
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 1,
+        "agency": 0
+      },
+      "remarks": "체육회 1명"
     },
     {
-      "id": 4,
-      "category": "응급안전",
-      "deptOrOrg": "의무1팀 및 협력병원",
-      "role": "현장 응급의료 및 안전대책",
-      "manager": "이상화",
-      "phone": "02-3423-7158",
-      "adminPhone": "02-3423-7158",
-      "mobilePhone": "010-2613-3091",
+      "id": 8,
+      "category": "운영",
+      "deptOrOrg": "강남구 걷기협회",
+      "role": "대회 표창 및 체육회 의전 총괄",
+      "manager": "진우복(협회장)",
+      "phone": "010-8762-8260",
+      "adminPhone": "",
+      "mobilePhone": "010-8762-8260",
       "tasks": [
-        "응급의료부스 설치 및 간호사·구급요원 상시 대기",
-        "행사장 내 전용 특수구급차 2대 현장 배치",
-        "걷기 코스 구간별 안전요원 배치 및 낙상 사고 예방",
-        "응급환자 발생 시 강남세브란스·삼성서울병원 후송 핫라인"
-      ]
+        "대회 표창 및 체육회 의전 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "진우복",
+          "role": "협회장",
+          "adminPhone": "",
+          "mobilePhone": "010-8762-8260"
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 1,
+        "agency": 0
+      },
+      "remarks": "체육회 1명"
     },
     {
-      "id": 5,
-      "category": "체험부스",
-      "deptOrOrg": "보건소 9개 사업팀 및 민간의료 9개 기관",
-      "role": "18개 의료·건강 체험부스 운영",
-      "manager": "김지영 팀장 / 심다영",
+      "id": 9,
+      "category": "운영",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "페스티벌 대행 총괄",
+      "manager": "허종수 (대표)",
+      "phone": "010-8865-3557",
+      "adminPhone": "",
+      "mobilePhone": "010-8865-3557",
+      "tasks": [
+        "페스티벌 대행 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "허종수",
+          "role": "대표",
+          "adminPhone": "",
+          "mobilePhone": "010-8865-3557"
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 1
+      },
+      "remarks": "대행사 1명"
+    },
+    {
+      "id": 10,
+      "category": "운영",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "페스티벌 대행사 직원",
+      "manager": "김종명",
+      "phone": "010-8613-2660",
+      "adminPhone": "",
+      "mobilePhone": "010-8613-2660",
+      "tasks": [
+        "페스티벌 대행사 직원"
+      ],
+      "staffMembers": [
+        {
+          "name": "김종명",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": "010-8613-2660"
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 1
+      },
+      "remarks": "대행사 1명"
+    },
+    {
+      "id": 11,
+      "category": "운영",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "페스티벌 대행사 직원",
+      "manager": "이정은",
+      "phone": "010-5711-3649",
+      "adminPhone": "",
+      "mobilePhone": "010-5711-3649",
+      "tasks": [
+        "페스티벌 대행사 직원"
+      ],
+      "staffMembers": [
+        {
+          "name": "이정은",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": "010-5711-3649"
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 1
+      },
+      "remarks": "대행사 1명"
+    },
+    {
+      "id": 12,
+      "category": "운영",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "무대 총괄",
+      "manager": "대행사 팀장",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "무대 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 팀장",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 1
+      },
+      "remarks": "대행사 1명"
+    },
+    {
+      "id": 13,
+      "category": "운영",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "무대 업무 담당",
+      "manager": "대행사 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "무대 업무 담당"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 1
+      },
+      "remarks": "대행사 1명"
+    },
+    {
+      "id": 14,
+      "category": "운영",
+      "deptOrOrg": "강남구체육회",
+      "role": "무대 업무 담당",
+      "manager": "체육회 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "무대 업무 담당"
+      ],
+      "staffMembers": [
+        {
+          "name": "체육회 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 4,
+        "agency": 0
+      },
+      "remarks": "체육회 4명"
+    },
+    {
+      "id": 15,
+      "category": "VIP의전",
+      "deptOrOrg": "보건행정과 보건행정팀",
+      "role": "VIP 의전 총괄",
+      "manager": "민지영",
+      "phone": "02-3423-7013",
+      "adminPhone": "02-3423-7013",
+      "mobilePhone": "010-8763-9696",
+      "tasks": [
+        "VIP 의전 총괄",
+        "VIP 접견, 자리 안내 및 의전 동선 관리 등"
+      ],
+      "staffMembers": [
+        {
+          "name": "민지영",
+          "role": "",
+          "adminPhone": "02-3423-7013",
+          "mobilePhone": "010-8763-9696"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 16,
+      "category": "VIP의전",
+      "deptOrOrg": "보건행정과 보건행정팀",
+      "role": "VIP 의전 담당",
+      "manager": "김하나",
+      "phone": "02-3423-7017",
+      "adminPhone": "02-3423-7017",
+      "mobilePhone": "010-4316-2001",
+      "tasks": [
+        "VIP 의전 담당"
+      ],
+      "staffMembers": [
+        {
+          "name": "김하나",
+          "role": "",
+          "adminPhone": "02-3423-7017",
+          "mobilePhone": "010-4316-2001"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 17,
+      "category": "VIP의전",
+      "deptOrOrg": "보건행정과 보건행정팀",
+      "role": "VIP 의전 담당",
+      "manager": "김하은",
+      "phone": "02-3423-7014",
+      "adminPhone": "02-3423-7014",
+      "mobilePhone": "010-4117-0432",
+      "tasks": [
+        "VIP 의전 담당"
+      ],
+      "staffMembers": [
+        {
+          "name": "김하은",
+          "role": "",
+          "adminPhone": "02-3423-7014",
+          "mobilePhone": "010-4117-0432"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 18,
+      "category": "VIP의전",
+      "deptOrOrg": "보건행정과 보건행정팀",
+      "role": "보건소장 의전 담당",
+      "manager": "염지연",
+      "phone": "02-3423-7003",
+      "adminPhone": "02-3423-7003",
+      "mobilePhone": "010-3281-0277",
+      "tasks": [
+        "보건소장 의전 담당"
+      ],
+      "staffMembers": [
+        {
+          "name": "염지연",
+          "role": "",
+          "adminPhone": "02-3423-7003",
+          "mobilePhone": "010-3281-0277"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 19,
+      "category": "VIP의전",
+      "deptOrOrg": "보건행정과 건강증진팀",
+      "role": "VIP 대기실 케이터링 총괄",
+      "manager": "왕지영",
+      "phone": "02-3423-7113",
+      "adminPhone": "02-3423-7113",
+      "mobilePhone": "010-8572-5937",
+      "tasks": [
+        "VIP 대기실 케이터링 총괄",
+        "음료·다과 세팅 및 대기실 환경 유지"
+      ],
+      "staffMembers": [
+        {
+          "name": "왕지영",
+          "role": "",
+          "adminPhone": "02-3423-7113",
+          "mobilePhone": "010-8572-5937"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 20,
+      "category": "VIP의전",
+      "deptOrOrg": "강남구체육회",
+      "role": "행사 지원",
+      "manager": "체육회 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [],
+      "staffMembers": [
+        {
+          "name": "체육회 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 12,
+        "agency": 0
+      },
+      "remarks": "체육회 12명"
+    },
+    {
+      "id": 21,
+      "category": "VIP의전",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "출발 의전",
+      "manager": "대행사 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "출발 의전"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 2
+      },
+      "remarks": "대행사 2명"
+    },
+    {
+      "id": 22,
+      "category": "VIP의전",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "VIP 내빈 경호 업무",
+      "manager": "대행사 경호팀",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "VIP 내빈 경호 업무",
+        "접근 통제 및 이동 동선 확보"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 경호팀",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 7
+      },
+      "remarks": "대행사 7명"
+    },
+    {
+      "id": 23,
+      "category": "운영",
+      "deptOrOrg": "보건행정과 건강증진팀",
+      "role": "운영 부스 총괄",
+      "manager": "서승오",
+      "phone": "02-3423-7034",
+      "adminPhone": "02-3423-7034",
+      "mobilePhone": "010-4907-9127",
+      "tasks": [
+        "운영 부스 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "서승오",
+          "role": "",
+          "adminPhone": "02-3423-7034",
+          "mobilePhone": "010-4907-9127"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 24,
+      "category": "운영",
+      "deptOrOrg": "강남구체육회",
+      "role": "운영 부스 업무",
+      "manager": "체육회 직원",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "운영 부스 업무"
+      ],
+      "staffMembers": [
+        {
+          "name": "체육회 직원",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 2,
+        "agency": 0
+      },
+      "remarks": "체육회 2명"
+    },
+    {
+      "id": 25,
+      "category": "운영",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "운영 부스 업무",
+      "manager": "대행사 팀장",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "운영 부스 업무"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 팀장",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 1
+      },
+      "remarks": "대행사 1명"
+    },
+    {
+      "id": 26,
+      "category": "운영",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "운영 부스 업무",
+      "manager": "대행사 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "운영 부스 업무",
+        "접수, 인센티브 배부"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 2
+      },
+      "remarks": "대행사 2명"
+    },
+    {
+      "id": 27,
+      "category": "운영",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "골인 동선 인센티브 배부",
+      "manager": "대행사 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "골인 동선 인센티브 배부"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 6
+      },
+      "remarks": "대행사 6명"
+    },
+    {
+      "id": 28,
+      "category": "운영",
+      "deptOrOrg": "보건행정과 보건행정팀",
+      "role": "응급의료부스 운영 총괄",
+      "manager": "임석훤",
+      "phone": "02-3423-7012",
+      "adminPhone": "02-3423-7012",
+      "mobilePhone": "010-7467-0830",
+      "tasks": [
+        "응급의료부스 운영 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "임석훤",
+          "role": "",
+          "adminPhone": "02-3423-7012",
+          "mobilePhone": "010-7467-0830"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 29,
+      "category": "운영",
+      "deptOrOrg": "보건행정과 보건행정팀",
+      "role": "응급의료부스 구급차 운행",
+      "manager": "이주원",
+      "phone": "02-3423-7015",
+      "adminPhone": "02-3423-7015",
+      "mobilePhone": "010-9981-1415",
+      "tasks": [
+        "응급의료부스 구급차 운행"
+      ],
+      "staffMembers": [
+        {
+          "name": "이주원",
+          "role": "",
+          "adminPhone": "02-3423-7015",
+          "mobilePhone": "010-9981-1415"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 30,
+      "category": "코스",
+      "deptOrOrg": "보건행정과 건강증진팀",
+      "role": "걷기 코스 운영 총괄",
+      "manager": "김민솔",
+      "phone": "02-3423-7033",
+      "adminPhone": "02-3423-7033",
+      "mobilePhone": "010-7199-2152",
+      "tasks": [
+        "걷기 코스 운영 총괄",
+        "코스 안전요원 배치 및 구간별 통행 흐름 관리"
+      ],
+      "staffMembers": [
+        {
+          "name": "김민솔",
+          "role": "",
+          "adminPhone": "02-3423-7033",
+          "mobilePhone": "010-7199-2152"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 31,
+      "category": "코스",
+      "deptOrOrg": "보건행정과 건강증진팀",
+      "role": "반환점 스탬프 날인 및 코스 안전 관리",
+      "manager": "금연단속원",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "반환점 스탬프 날인 및 코스 안전 관리"
+      ],
+      "staffMembers": [
+        {
+          "name": "금연단속원",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 7,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 7명"
+    },
+    {
+      "id": 32,
+      "category": "코스",
+      "deptOrOrg": "보건행정과 민원서비스팀",
+      "role": "코스 안전 통제",
+      "manager": "곽혜연",
+      "phone": "02-3423-7018",
+      "adminPhone": "02-3423-7018",
+      "mobilePhone": "010-3633-6439",
+      "tasks": [
+        "코스 안전 통제"
+      ],
+      "staffMembers": [
+        {
+          "name": "곽혜연",
+          "role": "",
+          "adminPhone": "02-3423-7018",
+          "mobilePhone": "010-3633-6439"
+        }
+      ],
+      "headcount": {
+        "bogun": 2,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 2명"
+    },
+    {
+      "id": 33,
+      "category": "코스",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "코스 안전 통제",
+      "manager": "대행사 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "코스 안전 통제"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 12
+      },
+      "remarks": "대행사 12명"
+    },
+    {
+      "id": 34,
+      "category": "부스",
+      "deptOrOrg": "보건행정과 건강증진팀",
+      "role": "체험 부스 및 행사장 운영 총괄",
+      "manager": "심다영, 부스운영담당",
       "phone": "02-3423-7018",
       "adminPhone": "02-3423-7018",
       "mobilePhone": "010-3912-3269",
       "tasks": [
-        "18개 건강체험 부스(검진버스 2대 포함) 설치 및 집기 세팅",
-        "체력측정, CPR, 대사증후군, 한방·치과·척추 검진 진행",
-        "부스별 담당자 배치 및 대기 구민 동선 관리",
-        "체험 완료 확인 스탬프 날인 및 홍보물 배부"
-      ]
+        "체험 부스 및 행사장 운영 총괄",
+        "/ 간식·식수 구매",
+        "부스별 전력 공급 점검, 시작·종료 통제 등"
+      ],
+      "staffMembers": [
+        {
+          "name": "심다영, 부스운영담당",
+          "role": "",
+          "adminPhone": "02-3423-7018",
+          "mobilePhone": "010-3912-3269"
+        }
+      ],
+      "headcount": {
+        "bogun": 110,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 110명"
     },
     {
-      "id": 6,
-      "category": "유관부서",
-      "deptOrOrg": "공원녹지과, 치수과, 도시계획과, 주민자치과",
-      "role": "행정 지원 및 행사장 시설 협조",
-      "manager": "행정지원 총괄",
-      "phone": "02-3423-7116",
-      "adminPhone": "02-3423-7116",
+      "id": 35,
+      "category": "부스",
+      "deptOrOrg": "보건행정과 민원서비스팀",
+      "role": "행사장 안전관리",
+      "manager": "황정은",
+      "phone": "02-3423-7018",
+      "adminPhone": "02-3423-7018",
+      "mobilePhone": "010-6371-3827",
+      "tasks": [
+        "행사장 안전관리"
+      ],
+      "staffMembers": [
+        {
+          "name": "황정은",
+          "role": "",
+          "adminPhone": "02-3423-7018",
+          "mobilePhone": "010-6371-3827"
+        }
+      ],
+      "headcount": {
+        "bogun": 2,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 2명"
+    },
+    {
+      "id": 36,
+      "category": "부스",
+      "deptOrOrg": "강남구체육회",
+      "role": "행사장 안전관리",
+      "manager": "체육회 스태프",
+      "phone": "",
+      "adminPhone": "",
       "mobilePhone": "",
       "tasks": [
-        "출발마당(포이공원) 장소·전기 사용 및 볼라드 개폐(공원녹지과)",
-        "양재천 수변문화쉼터 시설 사용 및 안전관리(치수과)",
-        "교량 및 산책로 행사 홍보 현수막 게첨 협조(도시계획과)",
-        "정례반상회 홍보 및 22개 동 주민센터 포스터 부착(주민자치과)"
-      ]
+        "행사장 안전관리"
+      ],
+      "staffMembers": [
+        {
+          "name": "체육회 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 10,
+        "agency": 0
+      },
+      "remarks": "체육회 10명"
+    },
+    {
+      "id": 37,
+      "category": "부스",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "행사장 안전관리",
+      "manager": "대행사 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "행사장 안전관리"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 3
+      },
+      "remarks": "대행사 3명"
+    },
+    {
+      "id": 38,
+      "category": "부스",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "월 30일 야간 경호",
+      "manager": "대행사 경호팀",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "월 30일 야간 경호"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 경호팀",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 2
+      },
+      "remarks": "대행사 2명"
+    },
+    {
+      "id": 39,
+      "category": "직원식사",
+      "deptOrOrg": "보건행정과 건강증진팀",
+      "role": "중식 도시락 및 간식·식수 관리 총괄",
+      "manager": "신진성",
+      "phone": "02-3423-7282",
+      "adminPhone": "02-3423-7282",
+      "mobilePhone": "010-2757-0015",
+      "tasks": [
+        "중식 도시락 및 간식·식수 관리 총괄"
+      ],
+      "staffMembers": [
+        {
+          "name": "신진성",
+          "role": "",
+          "adminPhone": "02-3423-7282",
+          "mobilePhone": "010-2757-0015"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 40,
+      "category": "직원식사",
+      "deptOrOrg": "보건행정과 건강증진팀",
+      "role": "중식 도시락 및 간식·식수 관리 보조",
+      "manager": "조혜영",
+      "phone": "02-3423-7036",
+      "adminPhone": "02-3423-7036",
+      "mobilePhone": "010-9456-7850",
+      "tasks": [
+        "중식 도시락 및 간식·식수 관리 보조"
+      ],
+      "staffMembers": [
+        {
+          "name": "조혜영",
+          "role": "",
+          "adminPhone": "02-3423-7036",
+          "mobilePhone": "010-9456-7850"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": "40-1",
+      "category": "직원식사",
+      "deptOrOrg": "보건행정과 민원서비스팀",
+      "role": "중식 도시락 및 간식·식수 관리 보조",
+      "manager": "전은선",
+      "phone": "02-3423-7018",
+      "adminPhone": "02-3423-7018",
+      "mobilePhone": "010-9567-3580",
+      "tasks": [
+        "중식 도시락 및 간식·식수 관리 보조"
+      ],
+      "staffMembers": [
+        {
+          "name": "전은선",
+          "role": "",
+          "adminPhone": "02-3423-7018",
+          "mobilePhone": "010-9567-3580"
+        }
+      ],
+      "headcount": {
+        "bogun": 1,
+        "sports": 0,
+        "agency": 0
+      },
+      "remarks": "보건소 1명"
+    },
+    {
+      "id": 41,
+      "category": "직원식사",
+      "deptOrOrg": "강남구체육회",
+      "role": "중식 도시락 및 간식·식수 관리 보조",
+      "manager": "체육회 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "중식 도시락 및 간식·식수 관리 보조"
+      ],
+      "staffMembers": [
+        {
+          "name": "체육회 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 2,
+        "agency": 0
+      },
+      "remarks": "체육회 2명"
+    },
+    {
+      "id": 42,
+      "category": "직원식사",
+      "deptOrOrg": "커넥트디(대행사)",
+      "role": "중식 도시락 및 간식·식수 관리 보조",
+      "manager": "대행사 스태프",
+      "phone": "",
+      "adminPhone": "",
+      "mobilePhone": "",
+      "tasks": [
+        "중식 도시락 및 간식·식수 관리 보조"
+      ],
+      "staffMembers": [
+        {
+          "name": "대행사 스태프",
+          "role": "",
+          "adminPhone": "",
+          "mobilePhone": ""
+        }
+      ],
+      "headcount": {
+        "bogun": 0,
+        "sports": 0,
+        "agency": 2
+      },
+      "remarks": "대행사 2명"
     }
   ]
 }
