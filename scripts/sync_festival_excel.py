@@ -858,7 +858,12 @@ if __name__ == '__main__':
         print(f"RESULT_VER={ver}")
     elif mode in ['--to-frontend', '-f']:
         src = sys.argv[2] if len(sys.argv) > 2 else None
-        import_excel_to_json(src)
+        success = import_excel_to_json(src)
+        if success and any(arg in sys.argv for arg in ['--cloud', '--sync', '-c']):
+            import subprocess
+            print("[Cloud-Sync] Automatically triggering Cloudflare Pages & KV sync...")
+            subprocess.run(["node", "scripts/prepare-pages-output.js"], check=False)
+            subprocess.run(["node", "scripts/sync-festival-to-cloud.js"], check=False)
     elif mode in ['--archive-legacy', '-a']:
         cnt = archive_legacy_versions()
         print(f"ARCHIVED_COUNT={cnt}")
@@ -871,4 +876,4 @@ if __name__ == '__main__':
             print(f"Sheets in Excel: {wb.sheetnames}")
     else:
         print(f"Unknown mode: {mode}")
-        print("Usage: python scripts/sync_festival_excel.py [--to-excel | --to-frontend | --archive-legacy | --status]")
+        print("Usage: python scripts/sync_festival_excel.py [--to-excel | --to-frontend [--cloud] | --archive-legacy | --status]")

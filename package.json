@@ -13,7 +13,9 @@
     "test": "jest --maxWorkers=2 --testTimeout=15000",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",
-    "restore": "node scripts/restore.js"
+    "restore": "node scripts/restore.js",
+    "sync:cloud": "node scripts/prepare-pages-output.js && node scripts/sync-festival-to-cloud.js",
+    "watch:cloud": "node scripts/watch-and-sync-cloud.js"
   },
   "dependencies": {
     "@blocknote/core": "^0.47.3",

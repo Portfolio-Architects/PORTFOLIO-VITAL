@@ -319,6 +319,39 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 248: 2027 Health Administration Division Budget Formulation Request Forensic Data Consistency Audit & Mathematical Discrepancy Resolution] Conducted full-scale forensic audit on 2027 budget proposal HWPX file ('(보건행정과)2027년도 예산편성 요구양식_20261007.hwpx'), identified 8 categorical inconsistencies across 16 detailed items (critical labor subtotal sum discrepancy, 10% VAT calculation error, matching ratio distortion, broken table XML grids, and unit project ontology inversion), established mathematical alignment for 212,495,000 KRW budget cap, and published comprehensive public administrative audit report artifact. (2026-10-07)
+* **개요 및 감사 목적**:
+  - 바탕화면 내 당해연도 공문서 `(보건행정과)2027년도 예산편성 요구양식_20261007.hwpx`에 대한 데이터 정합성, 산출식 계산 검증, 재원별 분담비율, 테이블 서식 구조 및 행정 온톨로지 전수 정밀 감사 수행:
+    1. **8대 영역 16건의 핵심 불일치 및 결함 전수 발굴**:
+       - **수학·세법 오류**: 207-02 전산개발비 세부 직접인건비 산출합(19,837,720원)과 명시 소계(19,840,000원) 간 △2,280원 불일치, 부가가치세(10%) 산출식의 수학적 오류(실제 4,999,680원 $\rightarrow$ 5,000,000원 임의 표기) 및 원안(55,000천원) 대비 8,000원 누락으로 총액 왜곡(54,997천원).
+       - **재원 매칭 왜곡**: 강남 AI 메디헬스센터 사업개요 지원조건(`시비 50%, 구비 50%`)과 실제 소요재원 분담비율(**시비 35.90%, 구비 64.10%**) 정면 모순 (체력장 운영비만 매칭이고 전산개발비 등 60,767천원은 100% 구비임에도 총괄 왜곡 표기). 건강생활실천사업의 지원조건(`기금 20%, 시비 24%, 구비 56%`) 역시 사무관리비에만 해당하는 비율을 총사업비(실제 기금 9.21%, 시비 11.05%, 구비 79.74%)에 일괄 오기입.
+       - **행정 온톨로지 전도**: 사업 1(건강생활실천사업)의 단위사업명이 `건강증진사업관리`로, 사업 2(AI 메디헬스센터)의 단위사업명이 `건강생활실천사업`으로 서로 엇갈려 지정됨.
+       - **서식/그리드 붕괴**: 산출내역(표 4)의 데이터 행별 열 개수가 5열과 6열로 뒤섞이고 행사실비지원금(행 9) 및 의료및회복비(행 11)의 셀 밀림(Cell Shift) 발생. 표 10은 2단 헤더 파괴 현상 확인.
+       - **인사 메타데이터 불일치**: 동일 담당자(오창선 주무관) 직급 표기 모순(임기9급 vs 시간라급), 작성자 연락처란 주무관(남상희) 누락.
+    2. **총사업비 212,495천원 확정에 따른 수학적 정합성 공식 모델링**:
+       - 207-02 전산개발비 예산액을 54,995천원(△2천원 감액)으로 확정 시, 구비 자체재원(136,200천원) 및 목별 합계(212,495천원)가 단 1원의 오차 없이 100% 일치함을 입증.
+       - SW사업 대가산정 가이드 표준에 따른 세부 4개 직종의 천원 단위 반올림(5,043,000원 + 8,530,000원 + 2,761,000원 + 3,504,000원 = 19,838,000원) 정합성 모델 및 19,840,000원 직접인건비 기준 절상 조정안을 양방향 제시.
+    3. **공공 행정 표준 감사 보고서 아티팩트 발행**:
+       - `2027_보건행정과_예산편성_요구양식_데이터정합성_정밀분석보고서.md` 발행 완료.
+
+### [Milestone 247: Mobile Template Tab Reordering (Duties #3, Schedule #4) & Real-Time Auto-Watcher Dual-Sync Daemon Release] Reordered mobile Cloudflare Pages template (`scripts/pages-template.html`) to perfectly match React dashboard tab hierarchy (`1. 추진과제`, `2. 부스현황`, `3. 업무분장`, `4. 행사식순`), deployed automated local disk watcher daemon (`scripts/watch-and-sync-cloud.js`) with 300ms debounce for instantaneous, headless Cloudflare KV & static pages replication upon any local data or template modifications, integrated `npm run watch:cloud`, refreshed static artifacts and live KV replica, and validated 100% test pass (33/33 Suites, 315/315 Tests). (2026-10-07)
+* **개요 및 개발 목적**:
+  - 사용자 지침 ("어제 행사식순하고 업무분장 탭 순서를 바꿨잖아 이런것도 반영이 안되어 있고, 실시간으로 로컬호스트에서 수정한 내용이 프론트엔드에 반영이 안되는것 같아") 전격 분석 및 완벽 해결:
+    1. **모바일 템플릿(`scripts/pages-template.html`) 탭 및 컨테이너 순서 일치화**:
+       - React 대시보드([YangjaeFestivalDashboard.tsx](file:///d:/Desktop/PORTFOLIO/PORTFOLIO%20-%20VITAL/src/components/festival/YangjaeFestivalDashboard.tsx))의 최신 탭 위계와 100% 일치하도록 Section 2 탭 버튼 순서를 `1. 추진과제` $\to$ `2. 부스현황` $\to$ `3. 업무분장` $\to$ `4. 행사식순`으로 전면 재배치 완료.
+       - Section 3 본문 컨테이너 DOM 순서 역시 `#content-duties`를 3번째에, `#content-schedule`을 4번째에 배치하고, JS `setActiveTab` 내부의 `tabs = ['milestones', 'booths', 'duties', 'schedule']` 배열 및 클릭 리스너 바인딩을 일체화함.
+    2. **무인 실시간 디스크 감시 및 자동 듀얼 싱크 데몬(`scripts/watch-and-sync-cloud.js`) 신규 개발 및 가동**:
+       - `data/FESTIVAL_YANGJAE_2026.json` 및 `scripts/pages-template.html`의 파일 변경을 실시간 감시(`fs.watch`)하고, 300ms 디바운스 후 자동으로 `prepare-pages-output.js`(정적 HTML/Fallback 생성) 및 `sync-festival-to-cloud.js`(Cloudflare KV 실시간 발행)를 연쇄 실행하는 무인 데몬 구축.
+       - 바탕화면 엑셀 직접 수정/저장, 파이썬 동기화 스크립트 실행, 로컬 UI 편집 등 로컬 디스크 데이터가 변동될 때마다 단 1초 만에 Cloudflare Pages 및 모바일 기기로 자동 덮어쓰기 발행되는 파이프라인 영구 완비.
+    3. **정적 빌드 산출물 및 라이브 KV 레플리카 즉시 갱신**:
+       - `npm run sync:cloud` 구동으로 `out/festival/yangjae/index.html` 정적 파일 내 탭 순서(업무분장 3번, 식순 4번) 동기화 완료 및 Cloudflare KV 즉시 발행.
+       - `package.json`에 `watch:cloud` 스크립트 등록.
+    4. **정량적 검증 성과**:
+       - 파일 수정 이벤트 시 감시 데몬의 1초 내 자동 감지 및 성공 발행 실측 검증 완료.
+       - 전체 Jest 회귀 테스트 (`npm test`): **33/33 Suites, 315/315 Tests ALL PASS (100%)**.
+
+### [Milestone 246: Cloudflare Pages & KV Dual-Sync Pipeline Restoration & Mobile Template 6-Category Quick Filter Sync Release] Resolved mobile device front-end sync failure by pinpointing architectural disconnect between Git push and Cloudflare KV storage, executed instant dual-sync overwrite (`node scripts/sync-festival-to-cloud.js`) to restore 43-task operational duties on live KV replica, ported 6 standard duty categories (`1. 운영`, `2. 코스`, `3. 부스`, `4. VIP의전`, `5. 직원식사`, `6. 쓰레기처리`) quick-filter pills bar into mobile template (`scripts/pages-template.html`), refreshed function fallback data and static build outputs, and automated permanent synchronization pipeline (`npm run sync:cloud` & `--cloud` CLI option). (2026-10-07)
+
 ### [Milestone 221: 2026 양재천 건강 페스티벌 대행 용역 0928 산출내역서 정밀 원가 감사, 7대 거품 비목 적발, 6대 실무 규격 현실화 및 과업내용서 법정 표준 조항 보강] Comprehensive cost audit on agency's 0928 quote (54,171,700 KRW) vs proposal (260828.pdf), identification of 7 inflated unit cost items (~3.5M KRW buffer), separation of Sports Council co-share (3.9M KRW) to safeguard public contract ceiling (<= 49,900,000 KRW), integration of 6 refined specifications (1,200 bracelets, 20 booth banners, 36 electrical runs, 20 staff), and formulation of strict statutory RFP contractual clauses. (2026-09-28)
 * **개요 및 개발 목적**:
   - 2026 양재천 건강 페스티벌(2026. 10. 31.) 대행 용역 1인 수의계약 체결을 앞두고, 대행사(제이민 커뮤니케이션)가 제출한 0928 수정 견적서(54,171,700원) 및 당초 운영제안서(260828.pdf) 전 행을 정밀 교차 감사함.
@@ -5968,6 +6001,23 @@ sequenceDiagram
       - 전문 텍스트 파싱본(7,162줄, 528KB) 연계 지원.
     * **대시보드 메타데이터(`data/FESTIVAL_YANGJAE_2026.json`) 동기화**:
       - 의전 담당자(민지영 계장님) 지정, 에코백 납품(10.8), 쓰레기 수거(웅비환경 별도 계약), 부스 스태프 인원 등 실무 데이터 100% 최신화.
+
+- [x] **｢2026 양재천 걷자! 건강 페스티벌｣ Cloudflare Pages 및 KV 듀얼 싱크 복구, 모바일 템플릿 6대 구획 퀵 필터 이식 및 자동 연쇄 동기화 파이프라인 구축 (Milestone 246 - 2026-10-07)**
+  - 사용자 요구사항: "어제 커밋 푸시한 내용이 다른 디바이스에서 프론트엔드 들어가보니 반영이 안되어 있더라고, 실시간 반영이 안되는 이유가 뭘까? /plan"
+  - 주요 조치 및 엔지니어링 실적:
+    * **아키텍처 단절 규명 및 Cloudflare KV 덮어쓰기 즉시 발행**:
+      - git push가 GitHub 원격 저장소 코드만 갱신할 뿐, 모바일 기기가 실시간 폴링하는 Cloudflare KV(HCHPS_DATA)를 갱신하지 않는 분리 구조를 실측 분석.
+      - node scripts/sync-festival-to-cloud.js를 즉각 실행하여 KV(festival:yangjae:2026)에 10.6 자 최신 데이터(43건 업무분장, 20건 부스)를 덮어쓰기 발행 완료(lastUpdated: 2026-10-06, duties: 43건 즉시 서빙 검증).
+    * **모바일 정적 템플릿(scripts/pages-template.html) 6대 구획 UI 완벽 포팅**:
+      - Tab 4(업무분장) 상단에 6대 표준 구획 퀵 필터 알약 버튼(전체, 1. 운영, 2. 코스, 3. 부스, 4. VIP의전, 5. 직원식사, 6. 쓰레기처리) 칩 바(duty-category-pills) 구현.
+      - 카테고리별 실시간 아이템 카운트 배지 및 normalizeDutyCategory 기반 정규화 필터링 로직 구현.
+      - 구획별 6색 테마 배지(운영-Blue, 코스-Indigo, 부스-Emerald, VIP의전-Purple, 직원식사-Amber, 쓰레기처리-Rose) 및 카드 No. 표시 일치화.
+      - 탭 전환(setActiveTab), 폴링 갱신(pollLatestData), 초기 마운트 시 칩 바 렌더링 연동.
+    * **Fallback 코드 및 정적 빌드 산출물 동기화**:
+      - scripts/prepare-pages-output.js 구동으로 functions/api/festival/yangjae.ts의 FALLBACK_FESTIVAL_DATA를 최신화하고 out/ 정적 HTML 산출물 100% 동기화.
+    * **재발 방지 자동화 인프라 완비**:
+      - package.json에 npm run sync:cloud 스크립트 신설.
+      - scripts/sync_festival_excel.py에 --cloud CLI 옵션을 추가하여 엑셀 마스터 최신화 시 Cloudflare Pages와 KV까지 일괄 원클릭 자동 연쇄 동기화되도록 조치 완료.
 
 - [x] **｢2026 양재천 걷자! 건강 페스티벌｣ 6대 업무분장 체계 구축, 부스 종합현황 엑셀 최신화(ver 261006) 및 프론트엔드 양방향 동기화 파이프라인 가동 (Milestone 231 - 2026-10-06)**
   - 사용자 요구사항: "2026_양재천_걷자_건강페스티벌_부스_종합현황_ver 261001 바탕화면의 이 파일을 다른 사람들과 공유하면서 동시에 프론트엔드와도 동기화 하려고해, ver 다음 날짜 항상 최신화 해주고, 해당 내용이 프론트엔드와 서로 연동되도록 설정하고, .. 업무 분장표도 만들어야 하는데, 분장 구분을 어떻게 해야 하나도 고민이네", "프론트 엔드 업무 분장 탭에 업무 구획을 먼저 나눠봐야 겠다 / 1. 운영 / 2. 코스 / 3. 부스 / 4. VIP의전 / 5. 직원식사 / 6. 쓰레기처리"

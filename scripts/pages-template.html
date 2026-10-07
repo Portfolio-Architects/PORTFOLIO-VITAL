@@ -112,11 +112,11 @@
         <button id="tab-booths" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
           2. 부스현황
         </button>
-        <button id="tab-schedule" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
-          3. 행사식순
-        </button>
         <button id="tab-duties" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
-          4. 업무분장
+          3. 업무분장
+        </button>
+        <button id="tab-schedule" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
+          4. 행사식순
         </button>
       </div>
 
@@ -165,7 +165,57 @@
         <div id="booths-list" class="space-y-2.5"></div>
       </div>
 
-      <!-- Content 3: Schedule -->
+      <!-- Content 3: Duties -->
+      <div id="content-duties" class="space-y-3.5 hidden">
+        <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
+          <!-- Header Bar: Clean 1-Row Layout -->
+          <div class="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+            <h3 class="text-sm font-extrabold text-slate-900 tracking-tight whitespace-nowrap">
+              <span>업무분장 및 비상연락망</span>
+            </h3>
+            <button
+              id="btn-toggle-duty-mobile"
+              type="button"
+              onclick="handleSwitchToggleClick()"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none shrink-0"
+              title="비상연락망(폰번호) 스위치 - 관계자 보안 인증"
+            >
+              <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
+                <span>📱 비상연락망</span>
+              </span>
+              <!-- Toggle Track -->
+              <span id="duty-switch-track" class="w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center bg-slate-300">
+                <!-- Toggle Knob -->
+                <span id="duty-switch-knob" class="w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out translate-x-0"></span>
+              </span>
+              <span id="duty-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 whitespace-nowrap">OFF (숨김)</span>
+            </button>
+          </div>
+
+          <!-- Duty Category Filter Pills (6대 표준 구획) -->
+          <div id="duty-category-pills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x"></div>
+
+          <!-- Search Bar -->
+          <div class="relative">
+            <input
+              id="input-duty-search"
+              type="text"
+              placeholder="부서명, 담당자, 전화번호, 과업 내용 검색 (예: 오창선, 체육회, 구급차, 제이민...)"
+              class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900"
+            />
+            <button
+              id="btn-clear-duty-search"
+              type="button"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer hidden text-xs font-bold"
+            >✕</button>
+          </div>
+        </div>
+
+        <!-- Roster Table Grid -->
+        <div id="duties-table-container" class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs"></div>
+      </div>
+
+      <!-- Content 4: Schedule -->
       <div id="content-schedule" class="space-y-2.5 hidden">
         <div class="bg-white border-2 border-slate-300 rounded-xl p-3 shadow-2xs space-y-2.5">
           <div class="flex items-center justify-between gap-2">
@@ -197,54 +247,6 @@
 
         <!-- Timetable Table Grid -->
         <div id="schedule-table-container" class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs"></div>
-      </div>
-
-      <!-- Content 4: Duties -->
-      <div id="content-duties" class="space-y-3.5 hidden">
-        <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
-          <!-- Header Bar: Clean 1-Row Layout -->
-          <div class="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
-            <h3 class="text-sm font-extrabold text-slate-900 tracking-tight whitespace-nowrap">
-              <span>업무분장 및 비상연락망</span>
-            </h3>
-            <button
-              id="btn-toggle-duty-mobile"
-              type="button"
-              onclick="handleSwitchToggleClick()"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none shrink-0"
-              title="비상연락망(폰번호) 스위치 - 관계자 보안 인증"
-            >
-              <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
-                <span>📱 비상연락망</span>
-              </span>
-              <!-- Toggle Track -->
-              <span id="duty-switch-track" class="w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out inline-flex items-center bg-slate-300">
-                <!-- Toggle Knob -->
-                <span id="duty-switch-knob" class="w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out translate-x-0"></span>
-              </span>
-              <span id="duty-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 whitespace-nowrap">OFF (숨김)</span>
-            </button>
-          </div>
-
-
-          <!-- Search Bar -->
-          <div class="relative">
-            <input
-              id="input-duty-search"
-              type="text"
-              placeholder="부서명, 담당자, 전화번호, 과업 내용 검색 (예: 오창선, 체육회, 구급차, 제이민...)"
-              class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900"
-            />
-            <button
-              id="btn-clear-duty-search"
-              type="button"
-              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer hidden text-xs font-bold"
-            >✕</button>
-          </div>
-        </div>
-
-        <!-- Roster Table Grid -->
-        <div id="duties-table-container" class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs"></div>
       </div>
     </div>
   </div>
@@ -1060,6 +1062,56 @@
       renderSchedule();
     };
 
+    const DUTY_CATEGORIES = ['전체', '운영', '코스', '부스', 'VIP의전', '직원식사', '쓰레기처리'];
+
+    function normalizeDutyCategory(cat) {
+      if (!cat) return '기타';
+      if (cat.includes('운영')) return '운영';
+      if (cat.includes('코스')) return '코스';
+      if (cat.includes('부스')) return '부스';
+      if (cat.includes('VIP') || cat.includes('의전')) return 'VIP의전';
+      if (cat.includes('식사') || cat.includes('직원')) return '직원식사';
+      if (cat.includes('쓰레기') || cat.includes('환경')) return '쓰레기처리';
+      return cat;
+    }
+
+    function renderDutyPills() {
+      const container = document.getElementById('duty-category-pills');
+      if (!container) return;
+
+      const duties = appData.duties || [];
+      const pillsHtml = DUTY_CATEGORIES.map((cat, idx) => {
+        const isSelected = activeDutyCategory === cat;
+        const count = cat === '전체'
+          ? duties.length
+          : duties.filter(d => normalizeDutyCategory(d.category) === cat).length;
+
+        const btnBg = isSelected
+          ? 'bg-slate-900 text-white shadow-xs'
+          : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-300';
+
+        const numBadgeBg = isSelected
+          ? 'bg-white/20 text-white'
+          : 'bg-slate-100 text-slate-600';
+
+        const prefix = cat !== '전체' ? '<span class="opacity-60 text-[10px]">' + idx + '.</span>' : '';
+
+        return '<button type="button" onclick="selectDutyCategory(\'' + cat + '\')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black whitespace-nowrap transition-all cursor-pointer shadow-3xs active:scale-95 ' + btnBg + '">' +
+          prefix +
+          '<span>' + cat + '</span>' +
+          '<span class="text-[10px] font-mono px-1.5 py-0.2 rounded-full ' + numBadgeBg + '">' + count + '</span>' +
+        '</button>';
+      }).join('');
+
+      container.innerHTML = pillsHtml;
+    }
+
+    window.selectDutyCategory = function(cat) {
+      activeDutyCategory = cat;
+      renderDutyPills();
+      renderDuties();
+    };
+
     function renderDuties() {
       const container = document.getElementById('duties-table-container');
       if (!container) return;
@@ -1067,6 +1119,9 @@
       const duties = appData.duties || [];
 
       let filtered = duties;
+      if (activeDutyCategory !== '전체') {
+        filtered = filtered.filter(d => normalizeDutyCategory(d.category) === activeDutyCategory);
+      }
       if (dutySearchQuery.trim()) {
         const q = dutySearchQuery.trim().toLowerCase();
         filtered = filtered.filter(d =>
@@ -1076,7 +1131,8 @@
           (d.phone && d.phone.toLowerCase().includes(q)) ||
           (d.adminPhone && d.adminPhone.toLowerCase().includes(q)) ||
           (d.mobilePhone && d.mobilePhone.toLowerCase().includes(q)) ||
-          (d.tasks && d.tasks.some(t => t.toLowerCase().includes(q)))
+          (d.tasks && d.tasks.some(t => t.toLowerCase().includes(q))) ||
+          (d.category && d.category.toLowerCase().includes(q))
         );
       }
 
@@ -1086,12 +1142,27 @@
       }
 
       const cardsHtml = filtered.map(duty => {
-        const isHQ = duty.category === '총괄기획';
-        const isSports = duty.category === '체육회';
-        const isSafety = duty.category === '응급안전';
-        const isAgency = duty.category === '대행용역';
+        const normCat = normalizeDutyCategory(duty.category);
+        const isOps = normCat === '운영';
+        const isCourse = normCat === '코스';
+        const isBooth = normCat === '부스';
+        const isVIP = normCat === 'VIP의전';
+        const isMeal = normCat === '직원식사';
+        const isWaste = normCat === '쓰레기처리';
 
-        const catBadgeClass = isHQ ? 'bg-blue-100 text-blue-800 border-blue-200' : (isSports ? 'bg-indigo-100 text-indigo-800 border-indigo-200' : (isSafety ? 'bg-red-100 text-red-800 border-red-200' : (isAgency ? 'bg-amber-100 text-amber-900 border-amber-200' : 'bg-slate-100 text-slate-700 border-slate-200')));
+        const catBadgeClass = isOps
+          ? 'bg-blue-100 text-blue-900 border-blue-300'
+          : (isCourse
+            ? 'bg-indigo-100 text-indigo-900 border-indigo-300'
+            : (isBooth
+              ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+              : (isVIP
+                ? 'bg-purple-100 text-purple-900 border-purple-300'
+                : (isMeal
+                  ? 'bg-amber-100 text-amber-900 border-amber-300'
+                  : (isWaste
+                    ? 'bg-rose-100 text-rose-900 border-rose-300'
+                    : 'bg-slate-100 text-slate-800 border-slate-300')))));
 
         const adminNo = formatAutoHyphen((duty.adminPhone || (!duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
         const mobileNo = formatAutoHyphen((duty.mobilePhone || (duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
@@ -1127,10 +1198,13 @@
           ? '<div class="text-xs font-bold text-slate-900 leading-snug break-keep">' + duty.role + '</div>'
           : '<div class="text-slate-400 italic font-normal text-xs leading-snug">(담당 역할 설정 대기)</div>';
 
+        const noBadge = duty.id ? '<span class="font-mono font-black text-slate-500 text-[11px] shrink-0">No.' + duty.id + '</span>' : '';
+
         return '<div class="bg-white border-2 border-slate-300 rounded-xl p-3.5 space-y-2.5 shadow-2xs transition-all hover:border-slate-400">' +
           '<div class="flex items-center justify-between pb-1.5 border-b border-slate-200 gap-2">' +
             '<div class="flex items-center gap-1.5 flex-wrap min-w-0">' +
-              '<span class="text-[11px] font-extrabold px-2 py-0.5 rounded border shrink-0 ' + catBadgeClass + '">' + duty.category + '</span>' +
+              noBadge +
+              '<span class="text-[11px] font-black px-2 py-0.5 rounded border shrink-0 ' + catBadgeClass + '">' + (duty.category || '일반') + '</span>' +
               deptDisplay +
             '</div>' +
           '</div>' +
@@ -1149,11 +1223,6 @@
       container.innerHTML = '<div class="space-y-3">' + cardsHtml + '</div>';
     }
 
-    window.selectDutyCategory = function(cat) {
-      activeDutyCategory = cat;
-      renderDuties();
-    };
-
     function setActiveTab(tab) {
       activeTab = tab;
 
@@ -1162,7 +1231,7 @@
         appRoot.className = 'w-full sm:max-w-md bg-white sm:rounded-2xl sm:border-2 sm:shadow-lg overflow-hidden flex flex-col min-h-screen text-slate-900 transition-all sm:border-slate-300';
       }
 
-      const tabs = ['milestones', 'booths', 'schedule', 'duties'];
+      const tabs = ['milestones', 'booths', 'duties', 'schedule'];
       tabs.forEach(t => {
         const btn = document.getElementById('tab-' + t);
         const content = document.getElementById('content-' + t);
@@ -1177,14 +1246,14 @@
 
       if (tab === 'milestones') renderMilestones();
       else if (tab === 'booths') renderBooths();
+      else if (tab === 'duties') { renderDutyPills(); renderDuties(); }
       else if (tab === 'schedule') renderSchedule();
-      else if (tab === 'duties') renderDuties();
     }
 
     document.getElementById('tab-milestones').onclick = function() { setActiveTab('milestones'); };
     document.getElementById('tab-booths').onclick = function() { setActiveTab('booths'); };
-    document.getElementById('tab-schedule').onclick = function() { setActiveTab('schedule'); };
     document.getElementById('tab-duties').onclick = function() { setActiveTab('duties'); };
+    document.getElementById('tab-schedule').onclick = function() { setActiveTab('schedule'); };
 
     document.getElementById('btn-toggle-all-tasks').onclick = function() {
       const allIds = (appData.milestones || []).filter(m => m.id !== 2).map(m => m.id);
@@ -1297,7 +1366,7 @@
               if (activeTab === 'milestones') renderMilestones();
               else if (activeTab === 'booths') renderBooths();
               else if (activeTab === 'schedule') renderSchedule();
-              else if (activeTab === 'duties') renderDuties();
+              else if (activeTab === 'duties') { renderDutyPills(); renderDuties(); }
             }
           }
         }
@@ -1311,6 +1380,7 @@
     renderMilestones();
     renderBooths();
     renderSchedule();
+    renderDutyPills();
     renderDuties();
   </script>
 </body>
