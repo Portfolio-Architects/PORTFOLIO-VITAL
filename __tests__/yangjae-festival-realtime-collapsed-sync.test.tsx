@@ -280,7 +280,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       });
 
       const sharePayload = shareMock.mock.calls[0][0];
-      expect(sharePayload.title).toContain('제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌');
+      expect(sharePayload.title).toContain('2026 양재천 걷자! 건강 페스티벌');
       expect(sharePayload.text).toBe('https://portfolio-hchps.pages.dev/festival/yangjae');
       expect(sharePayload.url).toBeUndefined();
     });
@@ -530,7 +530,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(screen.queryByText(/대행용역 3,695만/)).not.toBeInTheDocument();
 
       // Staff compensatory leave note should be rendered at the bottom of overview
-      expect(screen.getByText('행사 참여 직원 대체휴무 시행 예정 (전 직원 참여, 금연단속원 포함)')).toBeInTheDocument();
+      expect(screen.getByText('행사 참여 직원 대체휴무 시행 예정 (전 직원 참여)')).toBeInTheDocument();
     });
   });
 
@@ -730,7 +730,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('applies eye-catching blue font color to the staff substitute holiday row in Section 1 overview', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const noteText = await screen.findByText('행사 참여 직원 대체휴무 시행 예정 (전 직원 참여, 금연단속원 포함)');
+      const noteText = await screen.findByText('행사 참여 직원 대체휴무 시행 예정 (전 직원 참여)');
       expect(noteText).toBeInTheDocument();
       expect(noteText).toHaveClass('text-blue-600');
       expect(noteText).toHaveClass('font-bold');
@@ -970,7 +970,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       fireEvent.click(scheduleTabBtn);
 
       // 2. Verify reading mode schedule items are present
-      expect(screen.getByText('직원 출근 및 사전 준비')).toBeInTheDocument();
+      expect(screen.getByText('직원 출근 체크')).toBeInTheDocument();
 
       // 3. Find edit buttons and click the first one
       const editButtons = screen.getAllByTitle('식순명 및 세부내용 수정');
@@ -981,12 +981,12 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       const titleInput = screen.getByPlaceholderText('식순명 입력') as HTMLInputElement;
       const noteInput = screen.getByPlaceholderText('세부내용 입력 (예: 참가자 집결, 주요 내용)') as HTMLInputElement;
       expect(titleInput).toBeInTheDocument();
-      expect(titleInput.value).toBe('직원 출근 및 사전 준비');
-      expect(noteInput.value).toContain('행사 참여 직원 현장 도착');
+      expect(titleInput.value).toBe('행사 홍보 현수막 게첩');
+      expect(noteInput.value).toContain('12개');
 
       // 5. Change title and note
-      fireEvent.change(titleInput, { target: { value: '직원 집결 및 비상 사전 점검' } });
-      fireEvent.change(noteInput, { target: { value: '전 직원 현장 집결 및 무대 장비 최종 점검' } });
+      fireEvent.change(titleInput, { target: { value: '행사 홍보 현수막 사전 게첩' } });
+      fireEvent.change(noteInput, { target: { value: '14개 지정 게시대' } });
 
       // 6. Click Save button
       const saveBtn = screen.getByTitle('저장 (Enter)');
@@ -998,7 +998,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
           '/api/festival/yangjae',
           expect.objectContaining({
             method: 'POST',
-            body: expect.stringContaining('직원 집결 및 비상 사전 점검'),
+            body: expect.stringContaining('행사 홍보 현수막 사전 게첩'),
           })
         );
       });
@@ -1022,7 +1022,8 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
       // Verify returned to reading mode
       expect(screen.queryByPlaceholderText('식순명 입력')).toBeNull();
-      expect(screen.getByText('직원 출근 및 사전 준비')).toBeInTheDocument();
+      expect(screen.getByText('행사 홍보 현수막 게첩')).toBeInTheDocument();
+      expect(screen.getByText('직원 출근 체크')).toBeInTheDocument();
     });
 
     it('adds a new schedule item box and immediately enters edit mode', async () => {

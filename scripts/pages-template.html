@@ -981,7 +981,7 @@
 
       const countBadge = document.getElementById('schedule-count-badge');
       if (countBadge) {
-        countBadge.textContent = schedule.length + '개 식순 · 07:30~14:30';
+        countBadge.textContent = schedule.length + '개 식순 · 10.17.(토)~10.31.(토)';
       }
 
       let filtered = schedule;
@@ -991,7 +991,8 @@
           (s.title && s.title.toLowerCase().includes(q)) ||
           (s.lead && s.lead.toLowerCase().includes(q)) ||
           (s.note && s.note.toLowerCase().includes(q)) ||
-          (s.time && s.time.toLowerCase().includes(q))
+          (s.time && s.time.toLowerCase().includes(q)) ||
+          (s.date && s.date.toLowerCase().includes(q))
         );
       }
 
@@ -1018,11 +1019,21 @@
           ? '<span class="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-1.5 py-0.2 rounded cursor-help shrink-0 whitespace-nowrap" title="수변문화쉼터 ↔ 영동4교 2km 코스 완주 (12:30 인센티브 배부 마감)">📍 2km 왕복 (마감 12:30)</span>'
           : '';
 
-        const phaseBadgeClass = item.phase === '공식행사'
+        const dateBadge = item.date
+          ? '<span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded border whitespace-nowrap ' +
+            (item.date.includes('31')
+              ? 'bg-sky-100 text-sky-900 border-sky-300'
+              : (item.date.includes('30')
+                ? 'bg-amber-100 text-amber-900 border-amber-300'
+                : 'bg-indigo-100 text-indigo-900 border-indigo-300')) +
+            '">' + item.date + '</span>'
+          : '';
+
+        const phaseBadgeClass = (item.phase === '공식행사' || item.phase === '개회식')
           ? 'bg-blue-50 text-blue-800 border-blue-200'
           : (item.phase === '걷기대회'
             ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-            : (item.phase === '식전·준비'
+            : (item.phase === '식전·준비' || item.phase === '식전' || item.phase === '행사전날'
               ? 'bg-slate-100 text-slate-700 border-slate-200'
               : 'bg-purple-50 text-purple-800 border-purple-200'));
 
@@ -1038,6 +1049,7 @@
           '<div class="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-200">' +
             '<div class="flex items-center gap-1.5 flex-wrap">' +
               '<span class="font-mono font-black text-slate-700 text-xs">No.' + item.id + '</span>' +
+              dateBadge +
               '<span class="text-[11px] font-bold px-2 py-0.5 rounded border ' + phaseBadgeClass + '">' + item.phase + '</span>' +
               '<span class="inline-flex items-center gap-1 font-mono text-[11px] text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">' +
                 '<span>⏱</span><span>' + item.time + '</span>' +

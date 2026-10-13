@@ -35,7 +35,7 @@ NAVY_PRIMARY = "1F4E79"
 NAVY_DARK = "0D2B45"
 ZEBRA_FILL = "F2F5F9"
 
-MASTER_EXCEL_FILENAME = "2026_양재천_걷자_건강페스티벌_종합현황_ver 261006_SSOT.xlsx"
+MASTER_EXCEL_FILENAME = "2026_양재천_걷자_건강페스티벌_종합현황_ver 261012_SSOT.xlsx"
 MASTER_EXCEL_PATH = os.path.join(DESKTOP_DIR, MASTER_EXCEL_FILENAME)
 BACKUP_DIR = os.path.join(DESKTOP_DIR, "양재천페스티벌_이전버전")
 
@@ -415,19 +415,19 @@ def export_json_to_excel(target_path=None):
     ws2.freeze_panes = "D6"
 
     # =========================================================================
-    # SHEET 3: 당일_식순타임테이블 (7 Columns, Standard SSOT Layout)
+    # SHEET 3: 타임테이블 (8 Columns, Standard SSOT Layout)
     # =========================================================================
     if schedules:
-        ws3 = wb.create_sheet(title="당일_식순타임테이블")
+        ws3 = wb.create_sheet(title="타임테이블")
         ws3.views.sheetView[0].showGridLines = True
 
-        ws3.merge_cells("A2:G2")
+        ws3.merge_cells("A2:H2")
         ws3["A2"] = "｢2026 양재천 걷자! 건강 페스티벌｣ 행사 당일 타임테이블 (식순)"
         ws3["A2"].font = font_title
         ws3["A2"].alignment = Alignment(horizontal="left", vertical="center")
         ws3.row_dimensions[2].height = 28
 
-        headers_s3 = ["연번", "식순 구분", "시간대", "소요시간", "프로그램 / 행사 내용", "주관 / 담당", "비고"]
+        headers_s3 = ["연번", "일자", "식순 구분", "시간대", "소요시간", "프로그램 / 행사 내용", "주관 / 담당", "비고"]
         ws3.row_dimensions[4].height = 26
         for c_idx, h in enumerate(headers_s3, 1):
             cell = ws3.cell(row=4, column=c_idx, value=h)
@@ -444,6 +444,7 @@ def export_json_to_excel(target_path=None):
 
             vals = [
                 s.get("id", idx + 1),
+                s.get("date", "31일(토)"),
                 s.get("phase", ""),
                 s.get("time", ""),
                 s.get("duration", "-"),
@@ -457,18 +458,18 @@ def export_json_to_excel(target_path=None):
                 cell.font = font_data
                 cell.fill = fill_curr
                 cell.border = border_cell
-                if c_idx in [1, 2, 3, 4]:
+                if c_idx in [1, 2, 3, 4, 5]:
                     cell.alignment = align_center
-                elif c_idx == 5:
+                elif c_idx == 6:
                     cell.alignment = align_left
                     cell.font = font_data_bold
                 else:
                     cell.alignment = align_left
 
-        col_widths_s3 = [6, 14, 16, 12, 45, 24, 28]
+        col_widths_s3 = [6, 12, 14, 16, 12, 45, 24, 32]
         for idx, w in enumerate(col_widths_s3, 1):
             ws3.column_dimensions[get_column_letter(idx)].width = w
-        ws3.freeze_panes = "C5"
+        ws3.freeze_panes = "D5"
 
     # Save to disk (SSOT: strictly overwrite the master file)
     os.makedirs(os.path.dirname(target_path), exist_ok=True)
@@ -708,6 +709,9 @@ def import_excel_to_json(excel_path=None):
             col_task = str(ws2.cell(row=r, column=header_map2["task_summary"]).value or "").strip() if "task_summary" in header_map2 else ""
             col_subtask = str(ws2.cell(row=r, column=header_map2["tasks"]).value or "").strip() if "tasks" in header_map2 else ""
 
+            if "클린플래너" in dept or "환정 정비" in col_task or "환경 정비" in col_task or "환경정비" in col_task:
+                cat = "쓰레기처리"
+
             tasks = []
             if col_task and col_task != "-":
                 for line in col_task.split("\n"):
@@ -797,35 +801,85 @@ def import_excel_to_json(excel_path=None):
                 for c, v in cols.items():
                     v_clean = v.replace("\n", "").strip()
                     if "연번" in v_clean: header_map3["id"] = c
+                    elif "일자" in v_clean or "날짜" in v_clean: header_map3["date"] = c
                     elif "식순" in v_clean or "구분" in v_clean: header_map3["phase"] = c
-                    elif "시간대" in v_clean or "시간" in v_clean: header_map3["time"] = c
                     elif "소요" in v_clean: header_map3["duration"] = c
+                    elif "시간대" in v_clean or "시간" in v_clean: header_map3["time"] = c
                     elif "프로그램" in v_clean or "내용" in v_clean: header_map3["title"] = c
                     elif "주관" in v_clean or "담당" in v_clean: header_map3["lead"] = c
                     elif "비고" in v_clean: header_map3["note"] = c
                 break
 
         schedule_list = []
+        last_date = "10.31.(토)"
+        last_phase = "사전준비"
         for r in range(header_row3 + 1, ws3.max_row + 1):
             no = ws3.cell(row=r, column=header_map3.get("id", 1)).value
-            title = ws3.cell(row=r, column=header_map3.get("title", 5)).value
-            if no is None and title is None:
+            title = ws3.cell(row=r, column=header_map3.get("title", 6 if "date" in header_map3 else 5)).value
+            lead_col = header_map3.get("lead", 7 if "date" in header_map3 else 6)
+            lead_val = str(ws3.cell(row=r, column=lead_col).value or "").strip()
+            note_col = header_map3.get("note", 8 if "date" in header_map3 else 7)
+            note_val = str(ws3.cell(row=r, column=note_col).value or "").strip()
+
+            raw_title = str(title or "").strip()
+            if no is None and not raw_title and not lead_val and not note_val:
                 continue
-            s_id = int(no) if no is not None and str(no).strip().isdigit() else len(schedule_list) + 1
-            phase = str(ws3.cell(row=r, column=header_map3.get("phase", 2)).value or "").strip()
-            time_val = str(ws3.cell(row=r, column=header_map3.get("time", 3)).value or "").strip()
-            duration = str(ws3.cell(row=r, column=header_map3.get("duration", 4)).value or "").strip()
-            title_val = str(title or "").strip()
-            lead_val = str(ws3.cell(row=r, column=header_map3.get("lead", 6)).value or "").strip()
-            note_val = str(ws3.cell(row=r, column=header_map3.get("note", 7)).value or "").strip()
+
+            # Forward-fill date
+            if "date" in header_map3:
+                raw_date = str(ws3.cell(row=r, column=header_map3["date"]).value or "").strip()
+                if raw_date and raw_date != "-":
+                    last_date = raw_date
+            date_val = last_date
+
+            # Forward-fill phase
+            phase_col = header_map3.get("phase", 3 if "date" in header_map3 else 2)
+            raw_phase = str(ws3.cell(row=r, column=phase_col).value or "").strip()
+            if raw_phase and raw_phase != "-":
+                last_phase = raw_phase
+            elif not raw_phase:
+                if any(d in date_val for d in ['10.17', '10.23', '10.24']):
+                    last_phase = '사전준비'
+                elif '10.30' in date_val:
+                    last_phase = '행사전날'
+            phase_val = last_phase
+
+            time_col = header_map3.get("time", 4 if "date" in header_map3 else 3)
+            time_val = str(ws3.cell(row=r, column=time_col).value or "").strip()
+
+            dur_col = header_map3.get("duration", 5 if "date" in header_map3 else 4)
+            raw_duration = str(ws3.cell(row=r, column=dur_col).value or "").strip()
+            dur_clean = raw_duration.replace("'", "").strip()
+            if dur_clean and dur_clean.isdigit():
+                duration_val = f"{dur_clean}분"
+            elif dur_clean:
+                duration_val = dur_clean
+            else:
+                duration_val = "-"
+
+            title_val = raw_title
             if not title_val:
-                continue
+                if '소장님' in note_val:
+                    title_val = '보건소장 의전 지원'
+                elif '좌석' in note_val:
+                    title_val = 'VIP 의전 (내빈 좌석 세팅 및 에스코트)'
+                elif '사회자 대본' in note_val:
+                    title_val = 'VIP 의전 (대본 업데이트 및 무대 동선)'
+                elif note_val and note_val != "-":
+                    title_val = note_val.split(',')[0].strip()
+                elif lead_val and lead_val != "-":
+                    title_val = f'행사 지원 ({lead_val})'
+                else:
+                    title_val = '세부 행사 지원'
+
+            s_id = len(schedule_list) + 1
 
             schedule_list.append({
                 "id": s_id,
-                "phase": phase,
+                "date": date_val,
+                "phase": phase_val,
                 "time": time_val,
-                "duration": duration if duration else "-",
+                "duration": duration_val,
                 "title": title_val,
                 "lead": lead_val if lead_val else "-",
                 "status": "예정",

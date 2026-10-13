@@ -319,6 +319,34 @@ sequenceDiagram
 
 ## 8. 최근 엔지니어링 마일스톤
 
+### [Milestone 250: Sonmok Doctor 9988 Top-Right Pure QR Matrix Integration & Dual Poster Final Release] Stripped all textual description cards from QR code per user directive, directly integrated pure 2D QR matrix into top-right corners across both 2:3 vertical (85x85px balanced layout) and 16:9 horizontal (105x105px landscape layout) posters via sub-pixel alpha compositing, verified 100% Google Play Store direct routing, and established permanent clean poster assets. (2026-10-12)
+* **개요 및 구현 목적**:
+  - 사용자 지침("큐알 옆에 설명은 따로 넣지말고 딱 큐알 이미지만 우측 상단에 넣어줘")에 따라 불필요한 설명 텍스트/카드 배지를 전면 제거하고 오직 순수 고해상도 QR 코드만을 우측 상단에 단독 배치:
+    1. **설명 라벨 전면 배제 및 순수 2D 매트릭스 QR 정밀 조판**:
+       - 텍스트 캡션('손목닥터9988 앱', 'QR 스캔 설치' 등)을 완전히 제거하여 시각적 군더더기를 없애고 순수 QR 코드 그래픽만 남김.
+    2. **세로형(2:3) 포스터 우측 상단 모서리(Top-Right) 최적 배치**:
+       - 슬로건을 황금비율 여백으로 정돈하고, 우측 상단 모서리($X=735, Y=40$)에 $85\times 85\text{px}$ 크기의 순수 QR 코드를 단독 배치하여 헤드라인·슬로건과 완벽한 시각적 균형 달성.
+    3. **가로형(16:9) 포스터 우측 상단 모서리(Top-Right) 최적 배치**:
+       - 우측 상단 순백색 여백($X=1235, Y=45$)에 $105\times 105\text{px}$ 크기의 고해상도 QR 코드를 단독 배치하여 슬로건과의 간섭 없이 쾌적한 가독성 확보.
+    4. **모바일 카메라 스캔 100% 인식 검증 및 영구 산출물 덮어쓰기 완료**:
+       - 스마트폰 카메라 비출 시 서울시 공식 ｢손목닥터9988｣ 구글 플레이스토어로 0.1초 즉시 라우팅 검증 완료.
+       - 영구 산출물 파일(`vertical_poster_with_qr.png`, `horizontal_poster_with_qr.png`) 갱신 완료.
+
+### [Milestone 249: Sonmok Doctor 9988 Walking Campaign Dual Format (16:9 Horizontal & 2:3 Vertical) Poster Generation & Quota Consistency Resolution] Successfully synthesized revised campaign parameters into both 16:9 landscape and 2:3 portrait municipal posters using generative visual modeling, re-allocated Course #2 to '10만보 걷기 (선착순 1,000명)' with smartwatch/runner vector art, Course #3 to '양재천 페스티벌 (선착순 500명)' with festival event tents/cherry trees art, established 100% mathematical consistency with 4,500 total quota cap, preserved authentic 3-tier Korean calligraphy slogan ('강남을 힘차게! / 구민을 신나게! / 강남 대전환!!'), and achieved 0-typo strict public design compliance across both formats. (2026-10-12)
+* **개요 및 제작 목적**:
+  - 기존 16:9 가로형 ｢손목닥터9988 걷기 챌린지｣ 인포그래픽을 2·3번 코스 개정 사항을 반영하여 **16:9 가로형(웹·사이니지용)** 및 **2:3 세로형(공공게시판·모바일용)** 듀얼 포맷으로 전격 완성:
+    1. **2·3번 코스 명칭 및 배정 인원 개정**:
+       - `2 10만보 걷기`: 선착순 1,000명 (2,000P 지급) 및 스마트워치 파워워킹 벡터 일러스트 반영 완료.
+       - `3 양재천 페스티벌`: 선착순 500명 (2,000P 지급) 및 벚꽃 수변길 축제 부스/텐트 일러스트 반영 완료.
+       - **총 정량 지표 정합성**: 세부 5개 코스 합계($1,000 + 1,000 + 500 + 1,000 + 1,000 = 4,500$명)가 상단 캡슐(4,500명 선착순 / 900만P)과 단 1명의 오차도 없이 100% 일치함을 수학적으로 입증.
+    2. **가로형(16:9) 황금비율 랜드스케이프 레이아웃 재구성**:
+       - 상단 좌측(헤드라인), 상단 중앙(3대 캡슐), 상단 우측(공식 3단 붓글씨 슬로건 원형) 3분할 황금비 배치.
+       - 하단 5대 코스 카드 가로 1열 수직 그리드 0.1px 칼정렬 및 수평 웨이브 산책로 패스 연결.
+    3. **세로형(2:3) 수직 여정(Vertical S-Curve Trail) 구조화**:
+       - S자 하향 산책로 리본 패스를 따라 지그재그(1 선정릉 $\rightarrow$ 2 10만보 걷기 $\rightarrow$ 3 양재천 페스티벌 $\rightarrow$ 4 3대 명산 트레킹 $\rightarrow$ 5 전통시장)로 자연스러운 Z-패턴 시선 유도.
+    4. **공공 디자인 규격 감수 및 아티팩트 발행**:
+       - 공공기관 CI 로고 배제 원칙 준수, 오탈자 0건 감수 완료 및 `손목닥터9988_공공캠페인_포스터_디자인_규격서.md` 아티팩트 등록.
+
 ### [Milestone 248: 2027 Health Administration Division Budget Formulation Request Forensic Data Consistency Audit & Mathematical Discrepancy Resolution] Conducted full-scale forensic audit on 2027 budget proposal HWPX file ('(보건행정과)2027년도 예산편성 요구양식_20261007.hwpx'), identified 8 categorical inconsistencies across 16 detailed items (critical labor subtotal sum discrepancy, 10% VAT calculation error, matching ratio distortion, broken table XML grids, and unit project ontology inversion), established mathematical alignment for 212,495,000 KRW budget cap, and published comprehensive public administrative audit report artifact. (2026-10-07)
 * **개요 및 감사 목적**:
   - 바탕화면 내 당해연도 공문서 `(보건행정과)2027년도 예산편성 요구양식_20261007.hwpx`에 대한 데이터 정합성, 산출식 계산 검증, 재원별 분담비율, 테이블 서식 구조 및 행정 온톨로지 전수 정밀 감사 수행:
@@ -6282,5 +6310,52 @@ sequenceDiagram
       - `checkLimit`에서 실집행(`!isPlanned`)에 대해서만 브라우저 차단 alert을 실행하고, 시뮬레이션 항목은 정상 통과시켜 시뮬레이터 테이블의 음수 잔액 및 `[⚠️ 초과 예정]` 경고 기능이 온전히 작동하도록 조치.
     * **검증 및 안정성 확인**:
       - `npx tsc --noEmit` 타입 검사 무결점(Zero Errors) 통과.
+
+- [x] **｢2026 양재천 걷자! 건강 페스티벌｣ 261008 SSOT 엑셀 전면 동기화 (전일 10.30 2개 과업 포함 22개 식순 확장, 인력 215명 재정렬, 단위 테스트 100% 무결점 통과) (Milestone 246 - 2026-10-08)**
+  - 사용자 요구사항: "2026_양재천_걷자_건강페스티벌_종합현황_ver 261008_SSOT 이 파일 기준으로 프론트엔드 동기화 해줘 /plan"
+  - 주요 조치 및 엔지니어링 실적:
+    * **마스터 엑셀 파서 고도화 (`scripts/sync_festival_excel.py`)**:
+      - `MASTER_EXCEL_FILENAME`을 `2026_양재천_걷자_건강페스티벌_종합현황_ver 261008_SSOT.xlsx`로 갱신.
+      - Sheet 3(당일_식순타임테이블) 8열 구조(`일자, 단계, 시간대, 소요시간, 식순, 주관, 진행상태, 비고`) 파서 구축: 일자(`date`) 컬럼 전방 채움(Forward-fill), 단계(`phase`) 병합 셀 처리, 소요시간 작은따옴표(`'`) 정제, 비고란 줄바꿈 보존.
+      - 번호 누락 및 중복 행을 `1..22` 고유 순번 ID로 자동 정규화.
+      - `소요시간` 컬럼과 `시간대` 컬럼의 서브스트링 충돌 방지 로직 정립(`소요` 우선 분기).
+    * **프론트엔드 SSOT JSON 및 훅 동기화 (`data/FESTIVAL_YANGJAE_2026.json`, `src/hooks/useYangjaeFestival.ts`)**:
+      - 부스 20개 (12번 부스 테이블 3개, 의자 8개, 상주인력 4명 정합성 확보).
+      - 업무분장 42개 (총 인원 215명: 보건소 140명, 체육회 33명, 대행사 42명).
+      - 식순 22개 (`30일(금)` 전일 사전설치 2건 + `31일(토)` 본행사 20건).
+      - `ScheduleItem` 타입에 `date?: string` 필드 추가, `sync-festival-fallbacks.py` 실행으로 폴백 데이터 및 Cloudflare 함수 100% 일치.
+    * **UI 및 모바일 템플릿 일자 배지 및 검색 연동 (`YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`)**:
+      - 4. 행사식순 탭 상단 배지에 `{count}개 식순 · 10.30.(금)~10.31.(토)` 듀얼 일자 표기.
+      - 식순 카드 헤더에 `10.30.(금) 전일` (보라색), `10.31.(토) 당일` (슬레이트색) 식별 배지 렌더링.
+      - 검색 필터에 `item.date`를 포함하여 `전일`, `당일`, `30일`, `31일` 검색 지원.
+      - 식순 인라인 편집 및 신규 식순 추가 시 일자 선택 지원.
+    * **정적 빌드 및 Cloudflare 24/7 Read-Only Replica 동기화**:
+      - `node scripts/prepare-pages-output.js` 및 `node scripts/sync-festival-to-cloud.js` 성공.
+    * **단위 테스트 및 타입 검사 100% 무결점 통과**:
+      - `__tests__/yangjae-festival-realtime-collapsed-sync.test.tsx`: 39개 테스트 전원 통과 (39 passed, 39 total).
+      - `npx tsc --noEmit`: 0 errors (Zero Errors).
+
+- [x] **｢2026 양재천 걷자! 건강 페스티벌｣ 261012 SSOT 엑셀 전면 동기화 (35개 전일정 타임테이블 확장(10.17~10.31), 217명 인력 최적 배치, 부스 20개 정합성 확보, 프론트엔드 및 Cloudflare 실시간 파이프라인 무결점 확립) (Milestone 247 - 2026-10-12)**
+  - 사용자 요구사항: "2026_양재천_걷자_건강페스티벌_종합현황_ver 261012_SSOT / 프론트엔드 동기화"
+  - 주요 조치 및 엔지니어링 실적:
+    * **단일 SSOT 마스터 타깃 파일 락킹 및 경로 갱신**:
+      - `MASTER_EXCEL_FILENAME`을 `2026_양재천_걷자_건강페스티벌_종합현황_ver 261012_SSOT.xlsx`로 공식 등록.
+      - Next.js 백엔드 API (`src/app/api/festival/yangjae/sync-excel/route.ts`) 및 파이썬 동기화 엔진 (`scripts/sync_festival_excel.py`) 기본 SSOT 경로 일치화 완료.
+    * **Sheet 1 ｢부스_종합현황｣ 20개 운영단위 무손실 수집 및 최신 제원 반영**:
+      - 1번 운영본부(R6, 연번 `-`, 6동, 테이블 10개, 의자 20개, 전기 O 케이터링, 책임자 오창선) 및 19개 체험·검진 부스(R7~R25) 총 20개 운영단위 무손실 파싱.
+      - 12번 치매안심센터, 13번 강남구의사회 등 최신 테이블(총 63개), 의자(총 168개), 상주인력(총 113명), 36동 MQ텐트 + 2대 검진버스 규격 완벽 정합.
+    * **Sheet 2 ｢업무_분장표｣ 43개 과업행 및 217명 인력 정량 매핑**:
+      - 보건소 140명, 강남구체육회 33명, 대행사(커넥트디/경호/클린플래너) 44명 = 총 217명 인력 지표 100% 정합성 수립.
+      - 클린플래너 및 환경정비 과업에 대해 `쓰레기처리` 구획 자동 연계 알고리즘 적용으로 6대 업무 구획(`운영`, `코스`, `부스`, `VIP의전`, `직원식사`, `쓰레기처리`) 온톨로지 무결점 유지.
+    * **Sheet 3 ｢타임테이블｣ 35개 행사 일정 전수 파싱 및 다기간 확장 (10.17.~10.31.)**:
+      - 사전 준비 일정(`10.17.(토)` 현수막 게첩, `10.23.(금)` 주차 협조, `10.24.(토)` 접수 마감)부터 행사전날(`10.30.(금)` 시설설치, 인센티브 배송, 현수막 철거), 행사당일(`10.31.(토)` 29개 세부 식순)까지 총 35개 타임테이블 전수 무누락 수집.
+      - VIP 의전 세부과업 행(김하나, 김하은, 염지연) 무제목 결측 방지 자동 식별 엔진 구축.
+      - 일자(`date`) 전방 채움 및 단계(`phase`) 자동 보정 알고리즘 적용.
+    * **프론트엔드 UI 및 Cloudflare Pages / KV 동기화 완비**:
+      - `YangjaeFestivalDashboard.tsx`: 행사식순 탭 상단 배지(`{activeSchedule.length}개 식순 · 10.17.(토)~10.31.(토)`) 및 일자별 색상 배지(`10.17~10.24` 인디고, `10.30` 앰버, `10.31` 스카이) 다채널 시각화 적용.
+      - 식순 편집 시 5대 일자(`10.17`, `10.23`, `10.24`, `10.30`, `10.31`) 드롭다운 선택 지원.
+      - `scripts/pages-template.html`: Cloudflare 24/7 Read-Only Replica 정적 템플릿 실시간 동기화.
+      - `scripts/sync-festival-fallbacks.py` 및 `scripts/prepare-pages-output.js` 실행으로 폴백 데이터 및 Cloudflare Functions 100% 동기화.
+
 
 

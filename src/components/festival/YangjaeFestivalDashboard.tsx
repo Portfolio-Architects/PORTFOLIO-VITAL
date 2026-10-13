@@ -1348,7 +1348,8 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         item.title.toLowerCase().includes(q) ||
         (item.lead && item.lead.toLowerCase().includes(q)) ||
         (item.note && item.note.toLowerCase().includes(q)) ||
-        (item.time && item.time.toLowerCase().includes(q))
+        (item.time && item.time.toLowerCase().includes(q)) ||
+        (item.date && item.date.toLowerCase().includes(q))
       );
     }
     return list;
@@ -1842,6 +1843,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     const nextId = (Number.isFinite(maxId) ? maxId : 0) + 1;
     const newScheduleItem: ScheduleItem = {
       id: nextId,
+      date: '31일(토)',
       phase: '공식행사',
       time: '12:00 ~ 12:30',
       duration: '30분',
@@ -3562,7 +3564,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       <span>행사 식순</span>
                     </h3>
                     <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
-                      {activeSchedule.length}개 식순 · 07:30~14:30
+                      {activeSchedule.length}개 식순 · 10.17.(토)~10.31.(토)
                     </span>
                   </div>
 
@@ -3648,28 +3650,59 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             </span>
 
                             {isEditingThis ? (
-                              <select
-                                value={editScheduleData?.phase || '식전·준비'}
-                                onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, phase: e.target.value } : null)}
-                                className="px-1.5 py-0.5 text-xs font-bold border border-blue-400 rounded bg-white text-slate-800 cursor-pointer"
-                              >
-                                <option value="식전·준비">식전·준비</option>
-                                <option value="공식행사">공식행사</option>
-                                <option value="걷기대회">걷기대회</option>
-                                <option value="공연·폐회">공연·폐회</option>
-                              </select>
+                              <>
+                                <select
+                                  value={editScheduleData?.date || '10.31.(토)'}
+                                  onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, date: e.target.value } : null)}
+                                  className="px-1.5 py-0.5 text-xs font-bold border border-blue-400 rounded bg-white text-slate-800 cursor-pointer"
+                                >
+                                  <option value="10.17.(토)">10.17.(토)</option>
+                                  <option value="10.23.(금)">10.23.(금)</option>
+                                  <option value="10.24.(토)">10.24.(토)</option>
+                                  <option value="10.30.(금)">10.30.(금) 전일</option>
+                                  <option value="10.31.(토)">10.31.(토) 당일</option>
+                                </select>
+                                <select
+                                  value={editScheduleData?.phase || '식전'}
+                                  onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, phase: e.target.value } : null)}
+                                  className="px-1.5 py-0.5 text-xs font-bold border border-blue-400 rounded bg-white text-slate-800 cursor-pointer"
+                                >
+                                  <option value="사전준비">사전준비</option>
+                                  <option value="행사전날">행사전날</option>
+                                  <option value="식전">식전</option>
+                                  <option value="공연">공연</option>
+                                  <option value="부스운영">부스운영</option>
+                                  <option value="개회식">개회식</option>
+                                  <option value="공식행사">공식행사</option>
+                                  <option value="걷기대회">걷기대회</option>
+                                  <option value="마감">마감</option>
+                                </select>
+                              </>
                             ) : (
-                              <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-bold px-2 py-0.5 rounded border ${
-                                item.phase === '공식행사'
-                                  ? 'bg-blue-50 text-blue-800 border-blue-200'
-                                  : item.phase === '걷기대회'
-                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                  : item.phase === '식전·준비'
-                                  ? 'bg-slate-100 text-slate-700 border-slate-200'
-                                  : 'bg-purple-50 text-purple-800 border-purple-200'
-                              }`}>
-                                {item.phase}
-                              </span>
+                              <>
+                                {item.date && (
+                                  <span className={`${isLargeFont ? 'text-xs' : 'text-[10px]'} font-extrabold px-1.5 py-0.5 rounded border whitespace-nowrap ${
+                                    item.date.includes('31')
+                                      ? 'bg-sky-100 text-sky-900 border-sky-300'
+                                      : item.date.includes('30')
+                                      ? 'bg-amber-100 text-amber-900 border-amber-300'
+                                      : 'bg-indigo-100 text-indigo-900 border-indigo-300'
+                                  }`}>
+                                    {item.date}
+                                  </span>
+                                )}
+                                <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-bold px-2 py-0.5 rounded border ${
+                                  item.phase === '공식행사' || item.phase === '개회식'
+                                    ? 'bg-blue-50 text-blue-800 border-blue-200'
+                                    : item.phase === '걷기대회'
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                    : item.phase === '식전·준비' || item.phase === '식전' || item.phase === '행사전날'
+                                    ? 'bg-slate-100 text-slate-700 border-slate-200'
+                                    : 'bg-purple-50 text-purple-800 border-purple-200'
+                                }`}>
+                                  {item.phase}
+                                </span>
+                              </>
                             )}
 
                             {!isEditingThis && (

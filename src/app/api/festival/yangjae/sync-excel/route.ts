@@ -6,7 +6,7 @@ import fs from 'fs';
 export const dynamic = 'force-dynamic';
 
 const DESKTOP_DIR = 'D:\\Desktop';
-const MASTER_FILENAME = '2026_양재천_걷자_건강페스티벌_종합현황_ver 261006_SSOT.xlsx';
+const MASTER_FILENAME = '2026_양재천_걷자_건강페스티벌_종합현황_ver 261012_SSOT.xlsx';
 const MASTER_PATH = path.join(DESKTOP_DIR, MASTER_FILENAME);
 
 function getMasterExcelStatus(): { path: string; filename: string; version: string; mtime: Date; isMaster: boolean } | null {
