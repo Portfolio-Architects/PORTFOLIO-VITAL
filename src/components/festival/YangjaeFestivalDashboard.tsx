@@ -236,7 +236,7 @@ const YANGJAE_REPORT_TABS: { id: YangjaeReportTab; label: string }[] = [
   { id: 'schedule', label: '4. 행사식순' },
 ];
 
-const SCHEDULE_PHASES = ['전체', '식전·준비', '공식행사', '걷기대회', '공연·폐회'];
+export const SCHEDULE_PHASES = ['전체', '식전·준비', '공식행사', '걷기대회', '공연·폐회'] as const;
 export const DUTY_CATEGORIES = ['전체', '운영', '코스', '부스', 'VIP의전', '직원식사', '쓰레기처리'] as const;
 
 export interface BoothScaleParsed {

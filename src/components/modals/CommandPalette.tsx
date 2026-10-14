@@ -106,9 +106,9 @@ function CommandPaletteComponent({
     }
   }, [isOpen]);
 
-  // Aggregate all searchable items
-  // Aggregate all searchable items
+  // Aggregate all searchable items (short-circuit when modal is closed)
   const allItems = useMemo<CommandItem[]>(() => {
+    if (!isOpen) return [];
     const items: CommandItem[] = [];
 
     // 1. Navigation items
@@ -243,10 +243,11 @@ function CommandPaletteComponent({
     }
 
     return items;
-  }, [onSelectModule, tasks, budgetEntries, budgetCategories, inventoryItems, contacts, projects, meetings]);
+  }, [isOpen, onSelectModule, tasks, budgetEntries, budgetCategories, inventoryItems, contacts, projects, meetings]);
 
   // Instant multi-token search filtering (Single-pass index loop with early-break)
   const filteredItems = useMemo(() => {
+    if (allItems.length === 0) return allItems;
     const query = searchQuery.trim().toLowerCase();
     if (!query) {
       return allItems;

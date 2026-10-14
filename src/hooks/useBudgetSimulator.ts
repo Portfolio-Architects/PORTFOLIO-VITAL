@@ -161,11 +161,13 @@ const getSimSnapshot = (): SimulationEntry[] => {
 };
 
 const getSimServerSnapshot = () => emptySimEntries;
+const EMPTY_BUDGET_CATEGORIES: BudgetCategory[] = [];
+const EMPTY_BUDGET_ENTRIES: BudgetEntry[] = [];
 
 export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   const budget = useBudget();
-  const categories = budget?.categories || [];
-  const budgetEntries = budget?.entries || [];
+  const categories = budget?.categories ?? EMPTY_BUDGET_CATEGORIES;
+  const budgetEntries = budget?.entries ?? EMPTY_BUDGET_ENTRIES;
   const addBudgetEntry = budget?.addEntry;
   const updateBudgetEntry = budget?.updateEntry;
   const deleteBudgetEntry = budget?.deleteEntry;

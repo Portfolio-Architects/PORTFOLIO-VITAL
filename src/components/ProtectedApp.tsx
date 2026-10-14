@@ -448,18 +448,20 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
         />
       )}
 
-      <CommandPalette
-        isOpen={isCommandPaletteOpen}
-        onClose={handleCloseCommandPalette}
-        onSelectModule={handleModuleChange}
-        tasks={tasks}
-        budgetEntries={budgetEntries}
-        budgetCategories={budgetCategories}
-        inventoryItems={inventoryItems}
-        contacts={contacts}
-        projects={projects}
-        meetings={meetings}
-      />
+      {isCommandPaletteOpen && (
+        <CommandPalette
+          isOpen={isCommandPaletteOpen}
+          onClose={handleCloseCommandPalette}
+          onSelectModule={handleModuleChange}
+          tasks={tasks}
+          budgetEntries={budgetEntries}
+          budgetCategories={budgetCategories}
+          inventoryItems={inventoryItems}
+          contacts={contacts}
+          projects={projects}
+          meetings={meetings}
+        />
+      )}
 
       <div className="fixed bottom-24 sm:bottom-8 right-4 sm:right-8 z-50 flex flex-col items-end gap-3">
         {isQuickInputOpen && (

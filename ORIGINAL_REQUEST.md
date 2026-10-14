@@ -465,3 +465,71 @@ Integrity mode: development
 ### 독립 검증 자동화
 - [ ] 단일 명령(예: `pytest` 또는 `npm test` 등)으로 모의 데이터 생성, 스캔, 분류, Dry-run 검증, 이동, 롤백 무결성 전 과정의 테스트를 자동 완주하고 종료 코드 0(Exit Code 0)으로 통과할 것.
 
+
+
+## Follow-up — 2026-10-14T10:00:36Z
+
+Mine the user's accumulated conversation history (`C:\Users\user\.gemini\antigravity\brain\*\transcript.jsonl` and artifacts) and 262+ engineering milestones in `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL` to codify the user's empirical work style, decision heuristics, and optimization goals, and comprehensively upgrade `PORTFOLIO VITAL - Engineering Report.md`, `AGENTS.md`, and modular Markdown skillset files (`.agents/skills/*/SKILL.md` and `docs/`) to maximize future administrative and engineering workflow efficiency.
+
+Working directory: d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL
+Integrity mode: development
+
+## Verification Resources
+
+- `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\AGENTS.md` — Current AI Agent Manifest (5-Pillar Objective Function $\mathcal{J}(\Theta)$, Rules A–S, Toolchain Map, Synced Milestones).
+- `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\PORTFOLIO VITAL - Engineering Report.md` — Master Engineering Report (6,444 lines, Sections 1–9, 262 Milestones).
+- `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\PORTFOLIO VITAL - Engineering Milestones.md` — Synced Milestone Mirror.
+- `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\scripts\sync-rules.js` — Automated 3-Way synchronization CLI between `Engineering Report.md`, `Engineering Milestones.md`, and `AGENTS.md`.
+- `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\scripts\privacy_guard.py` — PIPA PII scanner and sanitizer CLI.
+- `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\scripts\run-harness.js` — Zod & ESLint architectural quality gatekeeper.
+- `C:\Users\user\.gemini\antigravity\brain\` — Historical conversation transcripts (`transcript.jsonl`) and artifacts across prior work sessions.
+- `C:\Users\user\.gemini\antigravity\builtin\skills\agy-customizations\SKILL.md` — Antigravity Customization System specification for `.agents/skills/<name>/SKILL.md` and `.agents/rules/*.md`.
+
+## Requirements
+
+### R1. Empirical Conversation History Mining & Operational Persona Codification
+Analyze the user's historical conversation transcripts (`C:\Users\user\.gemini\antigravity\brain\*\transcript.jsonl`), brain artifacts, and 262+ project milestones (`PORTFOLIO VITAL - Engineering Report.md`, `scratch/*.md`, `docs/*.md`) to extract a rigorous, evidence-backed profile of the user's work style and optimization goals. At minimum, synthesize:
+1. **Core Cognitive & Operational Traits**: 1-KRW mathematical perfectionism in public budgeting, statutory/archive RAG empiricism, zero-psychological-ventriloquism administrative bulleted tone (Rule M & Rule P), mobile-first (`448px`) field ergonomics, and zero-data-loss/zero-stall runtime engineering.
+2. **Recurring Correction Triggers & Anti-Patterns**: Historical friction points where the user corrected the agent (e.g., sub-item vs. header rounding discrepancies in labor/social insurance budgets, `daily_expense` double-counting, colloquial/emotive phrasing, unauthorized desktop file movement, horizontal clipping on mobile cards, incomplete 4-Way cloud sync, or typographic errors in posters/HWPX).
+3. **Proactive Action Heuristics (Pre-Flight & Post-Flight Checklists)**: Concrete decision trees and automatic verification protocols the agent must execute proactively before and after handling each task category so the user does not need to repeat recurring instructions.
+
+### R2. Modular On-Demand Skillset Architecture (`.agents/skills/*/SKILL.md` & Reference Docs)
+Following the Antigravity Customization Specification (`agy-customizations`), establish a modular suite of progressive-disclosure skills under `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\.agents\skills\<skill-name>\SKILL.md` (each with valid YAML frontmatter `name` and `description`, trigger conditions, step-by-step runbooks, verification commands, and anti-pattern checklists) and permanent reference documentation under `docs/`:
+1. `vital-budget-audit` (`.agents/skills/vital-budget-audit/SKILL.md`): e-Hojo general vs. `daily_expense` dual-pipeline verification, Tri-Layer Total Reconciliation (Overview = Resource Allocation = Calculation Items to 1-KRW), 101-04 labor/severance/annual-leave/5-major-insurance exact 1-KRW vs. 1,000-KRW rounding rules, and provisional subsidy cap matching.
+2. `vital-hwpx-docgen` (`.agents/skills/vital-hwpx-docgen/SKILL.md`): 4-Step non-destructive HWPX generation pipeline (`scratch/generate_new_hwpx.py`), archive/statutory RAG grounding (`D:\Desktop\공공문서 폴더\2026년`, `F:\_Organized_Archive`, `/api/law`), hierarchical bullet symbols (`󰏚` -> `▢` -> `❍` -> `-` and `1.` -> `가.` -> `1)`), spacing/punctuation rules, and a permanent workspace guideline file (`docs/HWP_GENERATION_GUIDELINES.md`) replacing the broken external brain path previously referenced in `AGENTS.md`.
+3. `vital-festival-4way-sync` (`.agents/skills/vital-festival-4way-sync/SKILL.md`): 4-Way synchronization runbook for public field events (Local SSOT `data/FESTIVAL_YANGJAE_2026.json` & Excel master `sync_festival_excel.py` <-> React `YangjaeFestivalDashboard.tsx`/`useYangjaeFestival.ts` <-> Standalone `scripts/pages-template.html` via `prepare-pages-output.js` <-> Cloudflare Edge Function & KV `sync-festival-to-cloud.js`), plus `448px` mobile viewport zero-clipping guards.
+4. `vital-public-infographic` (`.agents/skills/vital-public-infographic/SKILL.md`): 16:9 landscape and 2:3 vertical public campaign poster design standards, 0.1px vertical grid alignment, minimal text impact, NO-CI-logo rule, calligraphy preservation, and Korean glyph anti-typo QA checklist.
+5. `vital-governance-ops` (`.agents/skills/vital-governance-ops/SKILL.md`): Administrative Communication & Hyper-Clinical Tone Charter (Rules M & P), National Ceremony Protocol (Presidential Directive No. 438 Simplified Procedure 1), PIPA pre-ingestion de-identification (`scripts/privacy_guard.py`), Natural Language Schedule dual-storage (`SCHEDULE.md` & `data/SCHEDULES.json` + Google Calendar/iCal feed), and Zero-Data-Loss performance optimization standards.
+
+### R3. `PORTFOLIO VITAL - Engineering Report.md` Enhancement
+Upgrade `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\PORTFOLIO VITAL - Engineering Report.md` without losing any existing architectural data or milestone history:
+1. Add a dedicated section codifying the **User Operational Persona, Decision Taxonomy & AI Execution Optimization Framework** (derived from R1) and the **Modular Skillset & Playbook Architecture** (derived from R2).
+2. Record a new milestone entry (`### [Milestone 263: ...]`) at the top of `## 8. 최근 엔지니어링 마일스톤` detailing the conversation-history-driven persona analysis, modular `.agents/skills/*/SKILL.md` suite creation, `docs/HWP_GENERATION_GUIDELINES.md` restoration, and `AGENTS.md` governance upgrade.
+3. Update codebase/documentation metrics tables if file counts or script/skill counts changed.
+
+### R4. `AGENTS.md` Manifest Refinement & 3-Way Synchronization
+Upgrade `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\AGENTS.md`:
+1. Integrate a concise **User Operational Persona & Proactive Optimization Charter** section and a **Skill Routing Matrix** linking directly to `.agents/skills/*/SKILL.md` and `docs/HWP_GENERATION_GUIDELINES.md`.
+2. Fix all broken or ephemeral external brain file links (specifically replacing `file:///C:/Users/user/.gemini/antigravity/brain/dd5595a2-5ca7-474f-b260-2c04417f5905/hwp_generation_guidelines.md` with the permanent workspace path `file:///d:/Desktop/PORTFOLIO/PORTFOLIO - VITAL/docs/HWP_GENERATION_GUIDELINES.md`).
+3. Preserve all core behavioral rules (Rules A through S) and run `node scripts/sync-rules.js` so that `PORTFOLIO VITAL - Engineering Report.md`, `PORTFOLIO VITAL - Engineering Milestones.md`, and `AGENTS.md` (`## 4. 최신 동기화된 마일스톤`) are 100% synchronized.
+
+### R5. Strict Workspace, Data, and Desktop Safety Constraints
+1. **Desktop & Archive Immunity (Rule O)**: Never move, rename, modify, or delete any files on `D:\Desktop` (outside `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL`) or `F:\_Organized_Archive`. Read-only inspection is permitted.
+2. **SSOT Data & Code Preservation**: Do not corrupt or delete `data/*.json` or existing `src/` TypeScript components.
+3. **PIPA Compliance (Rule Q) & Administrative Style (Rules M & P)**: All newly authored Korean documentation must strictly follow the administrative bulleted style (`󰏚`, `▢`, `❍`, `-`, noun/concise endings `-함`, `-됨`, `-임`) with zero emotive/conversational filler and zero raw PII exposure.
+
+## Acceptance Criteria
+
+### Conversation Analysis & Persona Codification
+- [ ] Historical transcripts in `C:\Users\user\.gemini\antigravity\brain\` and the 262 milestones in `PORTFOLIO VITAL - Engineering Report.md` are systematically analyzed, and the resulting User Operational Persona, Recurring Correction Triggers, and Pre-/Post-Flight Checklists are documented in both `PORTFOLIO VITAL - Engineering Report.md` and `AGENTS.md`.
+
+### Modular Skillset Completeness & Link Integrity
+- [ ] All 5 workspace skill files exist under `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\.agents\skills\<skill-name>\SKILL.md` (`vital-budget-audit`, `vital-hwpx-docgen`, `vital-festival-4way-sync`, `vital-public-infographic`, `vital-governance-ops`), each containing valid YAML frontmatter (`name`, `description`) and comprehensive domain runbooks.
+- [ ] `d:\Desktop\PORTFOLIO\PORTFOLIO - VITAL\docs\HWP_GENERATION_GUIDELINES.md` exists and contains the complete HWPX layout, margin, font size, hierarchical bullet, 2-space indentation, and punctuation standards.
+- [ ] Every `file:///` and relative markdown link inside `AGENTS.md`, `PORTFOLIO VITAL - Engineering Report.md`, and `.agents/skills/*/SKILL.md` resolves to an existing file on disk (0 broken links).
+
+### 3-Way Synchronization & Gatekeeper Verification
+- [ ] `node scripts/sync-rules.js` executes with exit code 0, and `Milestone 263` appears in `PORTFOLIO VITAL - Engineering Report.md`, `PORTFOLIO VITAL - Engineering Milestones.md`, and `AGENTS.md`.
+- [ ] `python scripts/privacy_guard.py --scan` across `AGENTS.md`, `PORTFOLIO VITAL - Engineering Report.md`, `docs/HWP_GENERATION_GUIDELINES.md`, and `.agents/skills/` detects 0 unmasked PII violations.
+- [ ] `npx tsc --noEmit` and `node scripts/run-harness.js` pass with 0 errors and 0 warnings.
+- [ ] All documentation is written in strict compliance with Rule M & Rule P (Korean public-sector administrative bulleted report style, zero colloquialisms, zero apologies/disclaimers).

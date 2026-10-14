@@ -1,12 +1,45 @@
 # VITAL Work & Wealth Architecture - AI 에이전트 매니페스트 (AGENTS.md)
 
 
-## 1. 시스템 온톨로지 (M-V-C)
-이 저장소는 MVC 온톨로지가 혼합된 수정된 FSD(Feature-Sliced Design) 아키텍처를 엄격하게 따릅니다:
-- **모델 (스토리지)**: `src/app/api/data/route.ts` (로컬 PC 디스크 `data/*.json`)가 단일 진실 공급원(SSOT)입니다. 최근 20개 변경 이력 자동 백업 및 60ms 디바운스 쓰기를 보장합니다. `localStorage`는 오직 휘발성 오프라인 캐시 역할만 수행하며 절대 주 데이터 소스로 사용되지 않습니다.
-- **뷰 (UI)**: `src/components/dashboard` 및 기능별 서브 컴포넌트(41개 UI 모듈)입니다. React 19.2.7 및 TailwindCSS v4 표준 고대비 다크 테마 시스템을 적용합니다.
-- **컨트롤러 (Hooks)**: 데이터 페칭 및 뮤테이션은 반드시 `src/hooks/` 내부의 React Query 커스텀 훅(예: `useTasks`, `useBudget`, `useInventory`)을 통해서만 수행되어야 합니다. 컴포넌트 내에서의 직접적인 fetch/API 호출은 엄격히 금지됩니다.
-- **실시간 CRDT & 영속성**: PartyKit + Yjs CRDT 세션 및 `y-indexeddb`를 결합하여 다중 디바이스 간 오프라인 지원 및 실시간 무충돌 상태 동기화를 구현합니다.
+## 0. 시스템 목적 함수 (System Objective Function $\mathcal{J}(\Theta)$)
+본 아키텍처와 AI 에이전트의 모든 추론·코드 합성·문서 생성·데이터 검증은 다음 **5대 목적 함수(5-Pillar Objective Function)**를 동시에 극대화하도록 수렴한다:
+1. **공공 재정·예산 수리적 정합성 및 시뮬레이션 무결성 ($\mathcal{J}_{\text{Budget}}$)**:
+   - e-호조 공공회계 기준에 부합하는 본청 일반지출과 일상경비(`daily_expense`)의 엄격한 파이프라인 분리, 불용 위험 번다운 시뮬레이션(`useBudgetSimulator`), 그리고 예산편성 요구서·사업설명서(HWPX/Excel) 내 사업개요 총사업비 = 소요재원(기금·시비·구비) = 산출내역 목·세목 원단위/천원단위 합계 간 **오차 0원(100% 수학적 일치)**을 달성함.
+2. **현장 행사 모바일 퍼스트 관제 및 24/7 하이브리드 엣지 복원력 ($\mathcal{J}_{\text{FieldSync}}$)**:
+   - 대규모 공공행사(｢2026 양재천 건강 페스티벌｣ 등)의 448px(`max-w-md`) 모바일 뷰포트 무결점 관제 UI를 제공하고, 로컬 PC SSOT(`data/*.json`) $\leftrightarrow$ 행정 엑셀 마스터 $\leftrightarrow$ Cloudflare Pages 정적 템플릿(`scripts/pages-template.html`) 및 Cloudflare KV(`HCHPS_DATA`) 간 **300ms 무인 실시간 듀얼 싱크**를 보장함.
+3. **법령·아카이브 RAG 기반 HWPX 공문서 및 공공 디자인 자동화 ($\mathcal{J}_{\text{DocAuto}}$)**:
+   - 당해연도 실무 워크스페이스(`D:\Desktop\공공문서 폴더\2026년`), 전사 마스터 아카이브(`F:\_Organized_Archive`), 국가법령·자치법규 OpenAPI(`/api/law`)를 결합하여 법적·실증적 근거가 완비된 **4단계 HWPX 공문서 자동 빌드** 및 **무오탈자 공공 인포그래픽 포스터** 산출을 달성함.
+4. **시맨틱 온톨로지 그래프 및 업무 암묵지·스케줄 자산화 ($\mathcal{J}_{\text{Ontology}}$)**:
+   - `OntologyCanvasEngine`(Dirty Flag, LOD, 32비트 정수 인코딩, Zero-Allocation) 기반 인물·부서·업무 관계망 시각화, `TaskWisdomView` 업무 암묵지 자산화, 자연어 스케줄러 및 Google Calendar / RFC 5545 iCal(`/api/calendar/feed.ics`) 실시간 양방향 연동을 수행함.
+5. **개인정보 보호법(PIPA) 가드레일 및 Zero-Trust 하네스 무결성 ($\mathcal{J}_{\text{Security}}$)**:
+   - `privacy_guard.py` 기반 고유식별·민감정보 사전 비식별화(Rule Q), PBKDF2 WebCrypto 인증 미들웨어(`src/middleware.ts`), Zod Loud-Failure 스키마 검증(`schemas.ts`), 33개 Jest 테스트 스위트(315+ 테스트) 및 무결점 정적 타입 게이트키퍼 통과를 강제함.
+
+## 1. 시스템 온톨로지 (M-V-C & Hybrid Edge)
+이 저장소는 MVC 온톨로지와 하이브리드 엣지 레플리카가 결합된 수정된 FSD(Feature-Sliced Design) 아키텍처를 엄격하게 따른다 (전체 `src/` **168개 TS/TSX 파일, 54,035 LOC**):
+- **모델 (스토리지 & SSOT)**: `src/app/api/data/route.ts` 등 **14개 로컬 API 라우트** 및 로컬 PC 디스크 `data/*.json`이 단일 진실 공급원(SSOT)이다. 최근 20개 변경 이력 자동 백업, 글로벌 툼스톤 방어, 60ms 디바운스 쓰기를 보장한다. `localStorage`는 오직 휘발성 오프라인 캐시 역할만 수행하며 절대 주 데이터 소스로 사용되지 않는다.
+- **뷰 (UI)**: `src/components/` 산하 12개 도메인 서브 디렉토리 및 루트 모듈로 구성된 **총 64개 UI 컴포넌트(28,867 LOC)**이다. React 19.2.7 및 TailwindCSS v4 표준 고대비 테마 및 모바일 퍼스트 반응형 시스템을 적용한다.
+- **컨트롤러 (Hooks)**: 데이터 페칭, 시뮬레이션 및 뮤테이션은 반드시 `src/hooks/` 내부의 **40개 React Query 및 도메인 커스텀 훅(9,598 LOC)**(예: `useTasks`, `useBudget`, `useBudgetSimulator`, `useYangjaeFestival`, `useInventory`)을 통해서만 수행되어야 한다. 컴포넌트 내에서의 직접적인 fetch/API 호출은 엄격히 금지된다.
+- **실시간 CRDT & 24/7 클라우드 엣지 레플리카**: 로컬 다중 탭·디바이스 간에는 PartyKit + Yjs CRDT 세션 및 `y-indexeddb`로 무충돌 동기화를 수행하며, 대외 모바일 행사 관제판은 `functions/api/`(**5개 Cloudflare Pages Functions, 2,739 LOC**) 및 Cloudflare KV(`HCHPS_DATA`)를 통해 로컬 PC 전원 오프 시에도 24시간 무중단 읽기 전용 레플리카 서비스를 제공한다.
+
+## 1-1. 사용자 운영 페르소나 및 선제적 최적화 헌장 (User Operational Persona & Proactive Optimization Charter)
+사용자의 누적 508개 대화 세션 및 262개 엔지니어링 마일스톤에 대한 포렌식 마이닝 결과, 사용자의 본질적 페르소나는 **｢공공 행정 정밀 실무관 겸 무결점 시스템 아키텍트(Public Administrative Perfectionist & Zero-Defect Systems Architect)｣**로 정의된다. 모든 에이전트는 사용자의 다음 5대 핵심 인지 특성을 선제적으로 준수하여 추론·코드 합성·문서 생성을 집행한다:
+
+1. **공공 예산 단 1원 무결점 포렌식 회계 (1-KRW Forensic Accounting Empiricism - $\mathcal{J}_{\text{Budget}}$)**:
+   - 총사업비 = 소요재원 합계(기금·시비·구비) = 산출내역 목·세목 원단위/천원단위 합계 간 오차 0원 엄수.
+   - 상위 대항목 `1)` 천원 단위 절상액 $\ge \sum$ 하위 부기 `2)` 1원 단위 산출식 합계의 수학적 정합성을 상시 입증함.
+   - e-호조 본청 일반지출과 일상경비(`daily_expense`) 듀얼 파이프라인의 이중 차감/합산 0건을 보장함.
+2. **실무 아카이브 및 현행 법령 RAG 실증주의 (Statutory & Master Archive RAG - $\mathcal{J}_{\text{DocAuto}}$)**:
+   - 가상 데이터 작성을 엄격히 금지하고, 당해연도 실무 워크스페이스(`D:\Desktop\공공문서 폴더\2026년`) 및 전사 마스터 아카이브(`F:\_Organized_Archive`)의 실제 기안문·견적서·과업지시서를 직접 스캔·인용함.
+   - 국가법령정보센터 현행 법조문 번호와 항·호·목 및 자치구 조례를 정확히 명시함.
+3. **심리 묘사·감정 배제 공문서 개조식 어조 (Zero Psychological Ventriloquism - Rule M & Rule P)**:
+   - 사용자 내면 심리(예: "주무관님이 화가 났다", "답답한 심정")나 상대방 감정을 소설화·대변하는 일체의 문체를 전면 배제함.
+   - 오직 계약 조항, 과업지시서, 공문서 표준 개조식 문체(`󰏚`, `▢`, `❍`, `-`, `-함`, `-됨`, `-임`), 2타 띄기, 두괄식 핵심 서술로만 보고하며, 사과나 면책성 발언을 일체 생성하지 않음.
+4. **모바일 퍼스트 448px 현장 인체공학 관제 (Mobile-First 448px Field Ergonomics - Rule S & $\mathcal{J}_{\text{FieldSync}}$)**:
+   - 스마트폰 한 손 파지(`max-w-md` 448px) 환경에서 가로 스크롤 및 텍스트·버튼 잘림을 원천 차단함.
+   - 4대 탭 위계(`1. 추진과제` $\to$ `2. 부스현황` $\to$ `3. 업무분장` $\to$ `4. 행사식순`)를 유지하며, 로컬 PC 전원 오프 시에도 Cloudflare Pages/KV를 통해 24/7 300ms 엣지 레플리카를 제공함.
+5. **무손실·무정지 런타임 엔지니어링 (Zero-Data-Loss & Zero-Stall Runtime Engineering - Rule O & $\mathcal{J}_{\text{Security}}$)**:
+   - 사용자 명시 지시 없는 `D:\Desktop` 파일 이동/삭제/수정을 영구 금지함(Rule O).
+   - 평문 JSON 고속 I/O 환경에서 원자적 쓰기(`fs.rename`), 최대 20개 순환 백업, 글로벌 툼스톤, Zod Loud-Failure를 강제하며, 탭 이탈 시 3D 물리 틱·폴링 일시정지로 롱 태스크 스톨 0ms를 보장함.
 
 ## 2. AI 에이전트 행동 수칙 (Rules of Engagement)
 
@@ -51,11 +84,11 @@
        - 확보된 실무 아카이브 팩트와 법적 근거를 융합하여 격식 있고 전문적인 공공기관 개조식 문체로 작성된 기안서/사업계획서 초안 마크다운 파일(`.md`)을 scratch 또는 아티팩트 디렉토리에 우선 생성합니다.
      * **3단계 (HWPX 한글 파일 신규 변환 및 빌드)**:
        - 생성된 초안 마크다운 파일을 지정된 한글 템플릿 서식(제목 `󰏚`, 대항목 `▢`, 소항목 `❍`, 세부 사항 `-` 등)에 매핑하여 완전히 새로운 독립 HWPX 결과물 파일로 신규 빌드합니다.
-       - 변환 시에는 [generate_new_hwpx.py](file:///d:/Desktop/PORTFOLIO/PORTFOLIO - VITAL/scratch/generate_new_hwpx.py) 유틸리티 스크립트를 사용하여 다음과 같은 파라미터 포맷으로 구동합니다:
+       - 변환 시에는 [generate_new_hwpx.py](scratch/generate_new_hwpx.py) 유틸리티 스크립트를 사용하여 다음과 같은 파라미터 포맷으로 구동합니다:
          `python scratch/generate_new_hwpx.py --template <템플릿경로> --output <신규출력경로> --markdown <초안마크다운경로>`
        - 기존 원본 템플릿 한글 파일을 직접 수정하거나 덮어쓰지 않고 항상 지정한 템플릿 문서를 복제하여 완전히 새로운 HWPX 결과물 파일로 신규 빌드하여 안전을 보장합니다.
      * **4단계 (한글(HWPX) 표준 준거 지침 준수)**:
-       - HWPX 파일 변환 및 마크다운 기획 시, 반드시 [hwp_generation_guidelines.md](file:///C:/Users/user/.gemini/antigravity/brain/dd5595a2-5ca7-474f-b260-2c04417f5905/hwp_generation_guidelines.md)에 정립된 문서 유형별 레이아웃(정책/상황/회의/행사), 용지 여백(위/아래 15mm, 좌/우 20mm), 서체 크기(대제목 22pt, 일반 15pt, 참고 13pt), 다단계 항목 기호 분류(`Ⅰ.` -> `가.` -> `1)` -> `가)`), 2타 띄기 규칙(기호 후, 붙임 후, "끝." 앞) 및 문장부호 표기법(날짜, 시간, 금액, 낫표 구분)을 철저히 준수해야 합니다.
+       - HWPX 파일 변환 및 마크다운 기획 시, 반드시 [docs/HWP_GENERATION_GUIDELINES.md](docs/HWP_GENERATION_GUIDELINES.md)에 정립된 문서 유형별 레이아웃(정책/상황/회의/행사), 용지 여백(위/아래 15mm, 좌/우 20mm), 서체 크기(대제목 22pt, 일반 15pt, 참고 13pt), 다단계 항목 기호 분류(`Ⅰ.` -> `가.` -> `1)` -> `가)`), 2타 띄기 규칙(기호 후, 붙임 후, "끝." 앞) 및 문장부호 표기법(날짜, 시간, 금액, 낫표 구분)을 철저히 준수해야 합니다.
 
 ### H. 서버 하이드레이션 및 청크 격리 규격 (Initial Server Hydration & Staggered Chunk Isolation)
 1. **Dynamic Import 필수 적용**: Next.js SSR 하이드레이션 불일치를 영구 차단하고 초기 JavaScript 청크 용량을 줄이기 위해 대용량 컴포넌트(`MindMap3D`, `PortfolioDashboardView`, `WorkspaceView`, `ProjectManagementPage`, `SecurityLockScreen`, `AppLogModal`, `AIAssistantModal` 등)는 반드시 `dynamic(() => import(...), { ssr: false })`로 동적 임포트합니다.
@@ -204,28 +237,67 @@
    - 기안서, 사업계획서, 행사 식순 대본, HWPX 문서 생성 시 특정 공무원이나 민간 참여자의 실명 기재를 지양하고 공식 직제명(`총괄주무관`, `건강증진과장`, `의전담당관`) 또는 가명(`구민 대표 A`)을 적용합니다.
    - 건강검진 결과, 질환명, 장애등급 등 민감정보(법 제23조)는 개인별 명단 형태로 기안하지 않고 반드시 총괄 통계 수치(건수, 비율)로 변환하여 수록합니다.
 3. **로컬 비식별화 도구 연동 의무 (Local Tool Interoperability)**:
-   - 대규모 인적사항 또는 서식이 포함된 문서를 AI 컨텍스트에 투입하기 전, 로컬 비식별화 CLI 도구([privacy_guard.py](file:///d:/Desktop/PORTFOLIO/PORTFOLIO%20-%20VITAL/scripts/privacy_guard.py))의 `--scan` 또는 `--sanitize` 명령을 활용하여 비식별화 복제본을 우선 생성·검증해야 합니다.
+   - 대규모 인적사항 또는 서식이 포함된 문서를 AI 컨텍스트에 투입하기 전, 로컬 비식별화 CLI 도구([privacy_guard.py](scripts/privacy_guard.py))의 `--scan` 또는 `--sanitize` 명령을 활용하여 비식별화 복제본을 우선 생성·검증해야 합니다.
 4. **목적 외 이용 방지 및 임시 파일 관리 (Storage Limitation & Safe Cleanup)**:
    - 당초 공고되거나 승인된 사업 목적 외의 타 업무로 개인정보를 전용하거나 임의 열람하지 않으며, 업무 종료 후 불필요한 임시 마스킹 파일이나 로그는 잔류하지 않도록 안전하게 정리 지원합니다.
 
-## 3. 다중 에이전트 파이프라인 맵
-- `src/lib/agents/planner.ts`: 작업 분해 및 컨텍스트 검색.
-- `src/lib/agents/generator.ts`: 실행 및 코드 합성.
-- `src/lib/agents/evaluator.ts`: Zod 스키마 및 TypeScript 검증 피드백 루프.
+### R. 공공예산·사업설명서 수리적 정합성 및 e-호조 회계 검증 규격 (Public Budget & Mathematical Integrity Standard)
+1. **3중 총액 무결성 대조 의무 (Tri-Layer Total Reconciliation)**:
+   - 예산편성 요구서 및 사업설명서(HWPX/Excel/JSON)를 작성·수정·감사할 때 반드시 **① 사업개요 총사업비 = ② 소요재원 표 합계(기금+시비+구비) = ③ 산출내역 표 목·세목 실합계**가 단 1원의 오차도 없이 100% 일치하는지 전수 검산해야 합니다.
+2. **원단위 산출 부기와 천원단위 편성액 간 절상·절사 정합성 (Sub-Item Exactness & Rounding Policy)**:
+   - 인건비(기본급, 법정퇴직적립금, 연차유급휴가 미사용수당, 복지수당, 명절휴가비, 근무복) 및 5대 사회보험(국민연금 5.0%, 건강보험 3.595%, 장기요양 건보료의 13.14%, 고용보험 1.75%, 산재보험 1.05%) 기관부담금 산정 시, 하위 부기(`2)`)의 원단위 실산출식 결과값과 상위 대항목(`1)`)의 천원단위 절상(올림) 또는 절사(버림) 편성액 간 산술적 관계가 명확히 일치해야 하며, 수식 피승수 오기를 원천 차단합니다.
+3. **보조금 가내시 상한 엄수 및 매칭 단수 구비 부담 원칙 (Subsidy Cap & District Share Matching)**:
+   - 국·시비 보조사업은 상급기관 가내시 통보액(시비·기금 한도)을 1원 단위까지 엄수하며, 천원단위 절상/절사 과정에서 발생하는 1~2천원 단수는 자치구 자체재원(구비)에 배분하여 총사업비 정합성을 맞춥니다. 또한 매칭 대상 비목(예: 인건비·사무관리비 50:50)과 100% 구비 자체사업 비목(예: 전산개발비, 자산취득비 등)이 혼합된 경우 사업개요 지원조건에 실제 총사업비 분담비율과 비목별 매칭 조건을 구분 표기하여 왜곡을 방지합니다.
+4. **e-호조 일상경비(`daily_expense`) 이중 합산·차감 차단 원칙 (Zero Double-Counting Guard)**:
+   - 예산 시뮬레이터(`useBudgetSimulator`) 및 백엔드 API(`src/app/api/data/route.ts`)에서 이미 교부되어 집행액(`spent`)에 반영된 일상경비 교부액(`dailyExpenseIssued`)과 시뮬레이션 일상경비 예정내역(`isPlanned && actionType === 'daily_expense'`)이 본청 일반지출 가용잔액에서 이중 차감되지 않도록 듀얼 파이프라인 격리 연산을 엄격히 유지합니다.
+
+### S. 하이브리드 클라우드 레플리카(Cloudflare Pages & KV) 4-Way 동기화 규격 (Hybrid Cloud Replica Sync Standard)
+1. **모바일 관제 대시보드 4-Way 일체화 의무**:
+   - ｢2026 양재천 건강 페스티벌｣ 등 외부 모바일 공유 대시보드의 데이터, 탭 구조, 필터, 카드 UI를 변경할 때는 반드시 다음 4개 계층을 동시에 동기화해야 합니다:
+     * ① **로컬 디스크 SSOT**: `data/FESTIVAL_YANGJAE_2026.json` (및 연동 엑셀 마스터 `sync_festival_excel.py`)
+     * ② **로컬 React 뷰 및 훅**: `src/components/festival/YangjaeFestivalDashboard.tsx` 및 `src/hooks/useYangjaeFestival.ts`
+     * ③ **무프레임워크 모바일 정적 템플릿**: `scripts/pages-template.html` (`node scripts/prepare-pages-output.js` 실행으로 `out/festival/yangjae/index.html` 빌드)
+     * ④ **Cloudflare Edge Function 폴백 및 KV 라이브 스토리지**: `functions/api/festival/yangjae.ts` 및 `node scripts/sync-festival-to-cloud.js` (`npm run sync:cloud` 또는 무인 감시 데몬 `npm run watch:cloud`)
+2. **모바일 뷰포트(`max-w-md` 448px) 가로 클리핑 제로 보장**:
+   - 모바일 전용 관제 뷰는 360~448px 폭에서 버튼·배지·검색창의 가로 잘림(Clipping)이 발생하지 않도록 헤더 2행(2-Row) 분리 배치 및 전폭 카드 스택 레이아웃을 유지해야 합니다.
+
+## 3. 다중 에이전트 및 자동화 파이프라인 맵 (Multi-Agent & Automation Toolchain Map)
+- **온디맨드 모듈형 스킬셋 라우팅 매트릭스 (Skill Routing Matrix)**:
+  에이전트는 사용자의 지시문 및 도메인 요구사항에 따라 다음 5대 모듈형 작업공간 스킬(`.agents/skills/`) 및 영구 가이드라인 문서를 즉시 호출·연동하여 표준 SOP를 이행해야 합니다:
+  | 스킬명 / 가이드라인 | 대상 파일 경로 | 핵심 목적 및 활성화 트리거 | 연계 규격 및 SOP |
+  |:---|:---|:---|:---|
+  | **vital-budget-audit** | `.agents/skills/vital-budget-audit/SKILL.md` | 공공예산·사업설명서 3중 총액 일치성 대조, 101-04 법정 인건비 계산식 검증, e-호조 일상경비 듀얼 파이프라인 무충돌 감사 | Rule R, `useBudgetSimulator.ts`, `scratch/verify_complete_integrity.py` |
+  | **vital-hwpx-docgen** | `.agents/skills/vital-hwpx-docgen/SKILL.md` | 당해연도 실무 및 전사 아카이브 RAG 기반 기안서 초안 작성, 비파괴 HWPX 복제 빌드, 공문서 개조식 조판 | Rule G, Rule M, `scratch/generate_new_hwpx.py`, `docs/HWP_GENERATION_GUIDELINES.md` |
+  | **vital-festival-4way-sync** | `.agents/skills/vital-festival-4way-sync/SKILL.md` | 양재천 건강 페스티벌 448px 모바일 관제, 로컬 SSOT ↔ 마스터 엑셀 ↔ 정적 HTML ↔ Cloudflare KV 4-Way 듀얼 싱크 | Rule S, Rule L, `YangjaeFestivalDashboard.tsx`, `scripts/watch-and-sync-cloud.js` |
+  | **vital-public-infographic** | `.agents/skills/vital-public-infographic/SKILL.md` | 16:9 가로형 및 2:3 세로형 듀얼 포맷 공공 캠페인 포스터 설계, 순수 2D QR 매트릭스 합성, 4,500명 쿼터 수리 검증 | Rule N, Milestones 160~162, 249~250 |
+  | **vital-governance-ops** | `.agents/skills/vital-governance-ops/SKILL.md` | 엔지니어링 마일스톤 패치 로깅, 3-Way 동기화(`sync-rules.js`), PIPA 비식별화 CLI, Zod 런타임 하네스 게이트키퍼 | Rule A, B, E, O, Q, `scripts/sync-rules.js`, `scripts/privacy_guard.py` |
+  | **HWP_GENERATION_GUIDELINES** | `docs/HWP_GENERATION_GUIDELINES.md` | 공공기관 한글(HWPX) 표준 서식 지침 (A4 15/20/10mm 여백, 22/18/15/13/11pt 폰트 위계, 2타 띄기, 행정 문장부호) | Rule G.4, 영구 참조 가이드라인 (외부 브레인 링크 영구 대체) |
+
+- **코어 에이전트 오케스트레이션 (`src/lib/agents/`)**:
+  - `src/lib/agents/planner.ts`: 작업 분해, 법령·아카이브 컨텍스트 검색 및 계획 수립.
+  - `src/lib/agents/generator.ts`: 도메인 실행, 컴포넌트·훅 코드 합성 및 문서 초안 생성.
+  - `src/lib/agents/evaluator.ts`: Zod 스키마(`schemas.ts`), TypeScript 컴파일 및 수리적 정합성 검증 피드백 루프.
+- **자동화·동기화·보안 CLI 파이프라인 (`scripts/` & `scratch/`)**:
+  - `scripts/sync-rules.js`: `PORTFOLIO VITAL - Engineering Report.md` $\leftrightarrow$ `PORTFOLIO VITAL - Engineering Milestones.md` $\leftrightarrow$ `AGENTS.md` 3-Way 마일스톤 자동 동기화기.
+  - `scripts/run-harness.js`: Zod 스키마 런타임 무결성 및 ESLint/TypeScript 정적 품질 게이트키퍼.
+  - `scripts/prepare-pages-output.js` & `scripts/sync-festival-to-cloud.js` & `scripts/watch-and-sync-cloud.js`: 로컬 JSON SSOT $\to$ Cloudflare Pages 정적 번들 및 Cloudflare KV(`HCHPS_DATA`) 300ms 디바운스 실시간 듀얼 싱크 파이프라인.
+  - `scripts/sync-schedules.js`: `SCHEDULE.md` $\leftrightarrow$ `data/SCHEDULES.json` 양방향 스케줄 동기화기.
+  - `scripts/privacy_guard.py`: ｢개인정보 보호법｣ 준수 다중 포맷(`.txt`, `.md`, `.json`, `.csv`, `.hwpx`) 고유식별·민감정보 스캔(`--scan`) 및 마스킹(`--sanitize`) 엔진.
+  - `scratch/generate_new_hwpx.py`: 공공기관 표준 마크다운 초안 기반 한글(`.hwpx`) 문서 비파괴 복제·조판 빌더.
 
 ## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)
-- **최신 동기화 일자:** 2026-10-13
+- **최신 동기화 일자:** 2026-10-14
 - **동기화된 마일스톤:**
-  - [Milestone 248: 2027 Health Administration Division Budget Formulation Request Forensic Data Consistency Audit & Mathematical Discrepancy Resolution] Conducted full-scale forensic audit on 2027 budget proposal HWPX file ('(보건행정과)2027년도 예산편성 요구양식_20261007.hwpx'), identified 8 categorical inconsistencies across 16 detailed items (critical labor subtotal sum discrepancy, 10% VAT calculation error, matching ratio distortion, broken table XML grids, and unit project ontology inversion), established mathematical alignment for 212,495,000 KRW budget cap, and published comprehensive public administrative audit report artifact. (2026-10-07)
-  - [Milestone 247: Mobile Template Tab Reordering (Duties #3, Schedule #4) & Real-Time Auto-Watcher Dual-Sync Daemon Release] Reordered mobile Cloudflare Pages template (`scripts/pages-template.html`) to perfectly match React dashboard tab hierarchy (`1. 추진과제`, `2. 부스현황`, `3. 업무분장`, `4. 행사식순`), deployed automated local disk watcher daemon (`scripts/watch-and-sync-cloud.js`) with 300ms debounce for instantaneous, headless Cloudflare KV & static pages replication upon any local data or template modifications, integrated `npm run watch:cloud`, refreshed static artifacts and live KV replica, and validated 100% test pass (33/33 Suites, 315/315 Tests). (2026-10-07)
-  - [Milestone 246: Cloudflare Pages & KV Dual-Sync Pipeline Restoration & Mobile Template 6-Category Quick Filter Sync Release] Resolved mobile device front-end sync failure by pinpointing architectural disconnect between Git push and Cloudflare KV storage, executed instant dual-sync overwrite (`node scripts/sync-festival-to-cloud.js`) to restore 43-task operational duties on live KV replica, ported 6 standard duty categories (`1. 운영`, `2. 코스`, `3. 부스`, `4. VIP의전`, `5. 직원식사`, `6. 쓰레기처리`) quick-filter pills bar into mobile template (`scripts/pages-template.html`), refreshed function fallback data and static build outputs, and automated permanent synchronization pipeline (`npm run sync:cloud` & `--cloud` CLI option). (2026-10-07)
-  - [Milestone 245: Server API Daily Expense Double Counting Elimination & Zero-Trust Simulation Deficit Authorization Hotfix] Purged double-counting vulnerability on server API (`src/app/api/data/route.ts`) where issued daily expenses and planned daily expenses were simultaneously added to main budget usage triggering false 409 errors, aligned server and client planned expenditure algorithms, and authorized simulation deficit analysis without blocking. (2026-10-06)
-  - [Milestone 244: Budget Simulator Daily Expense Planned Entry Restriction Resolution & Dual-Pipeline Architecture Overhaul] Resolved blocking validation errors when entering planned daily expenses, introduced dual expenditure selection (general vs. daily expense) in simulation input form, eliminated double deduction accounting conflicts with e-호조 public budgeting standards, and integrated daily expense badges across all list, table, and modal views with 100% zero TypeScript errors. (2026-10-06)
-  - [Milestone 230: Yangjaecheon Festival Bulk-Volume Incentive Package Analysis, Full Logistics Master Excel Release & Archive Research Report Recovery] Formulated 8-item public incentive evaluation model with bulk-volume lightweight focus, released comprehensive 2-tab administrative logistics Excel master (`2026_양재천_건강페스티벌_인센티브_및_물품리스트.xlsx`), synchronized dashboard operational duties, and recovered official Seoul Fitness Research Report PDF (`51-6110000-003662-01`, 55.6MB) from Master Archive to Desktop. (2026-10-01)
-  - [Milestone 229: Yangjaecheon Festival 36 Booths Master Excel & 4-Tab Administrative Operations Pipeline Release] Built comprehensive administrative Excel master workbook (`2026_양재천_걷자_건강페스티벌_부스_종합현황.xlsx`) integrating 19 operating entities, 36 MQ booths, 2 mobile clinic buses, equipment quotas (64 tables, 166 chairs), 6-zone layout, logistics, and emergency response hotlines. (2026-10-01)
-  - [Milestone 226: Personal Information Protection (PIPA) Compliance Framework & Local Privacy Guard CLI Integration Release] Established comprehensive 3-tier privacy compliance architecture for public administration, deployed automated multi-format de-identification CLI (`scripts/privacy_guard.py`), enacted AGENTS.md Rule Q guardrail, and authored practical 10-point compliance checklist (`docs/PERSONAL_INFO_PROTECTION_GUIDE.md`). (2026-09-29)
-  - [Milestone 224: Yangjae Festival Milestone Task Attendees Capsule & Edit Control Full Purge Release] Completely purged attendees capsule badges (both grey department badge and yellow phone number badge) from Milestone Tasks tab reading view, removed attendees input field and state from inline edit mode (`DetailEditRow`), and batch-cleaned 33 residual `[참여:...]` legacy tags from `FESTIVAL_YANGJAE_2026.json`, achieving 100% Jest pass (39/39 tests) and zero TypeScript errors. (2026-09-28)
-  - [Milestone 223: Yangjae Festival Mobile-First Viewport (max-w-md 448px) Locking & Full-Width Duties Card/Spreadsheet View Release] Reverted desktop wide container expansion to fixed mobile viewport (`sm:max-w-md`, 448px) and redesigned Duties tab (Tab 4) from a 900px desktop table into a mobile-first card stack view (view mode) and mobile card spreadsheet editor (edit mode), eliminating 1,000px vertical inflation and horizontal clipping with 100% Jest pass (39/39 tests) and zero TypeScript errors. (2026-09-28)
-  - [Milestone 220: Yangjae Festival Booth Staff Count (인원수) Field Integration & Dynamic Aggregation Pipeline Release] Integrated staff count (`staffCount`) field across individual booth cards (reading & editing modes), updated hero banner summary bar with real-time total personnel aggregation, unified local JSON storage (`FESTIVAL_YANGJAE_2026.json`), React dashboard (`YangjaeFestivalDashboard.tsx`), and Cloudflare Pages static template (`scripts/pages-template.html`), achieving 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-28)
-  - [Milestone 219: Yangjae Festival Emergency Contact PIN Authentication Hint Purge Release] Completely purged security hints ('(행사일: 1031)' in authentication failure error message and '(예: 행사일)' in password input placeholder) across React dashboard and Cloudflare Pages static templates, enforcing strict zero-disclosure confidentiality for emergency contact phone numbers with 100% Jest pass (35/35 tests) and zero TypeScript errors. (2026-09-28)
-  - 그 외 과거 누적 마일스톤 총 276건 통합 요약 (초기 ~ 2026-09-28 이전 패치 내역)
+  - [Milestone 263: 5대 모듈형 작업공간 스킬셋 아키텍처 구축, 대화 이력 마이닝 기반 사용자 운영 페르소나 코드화, 한글(HWP) 가이드라인 영구 복원 및 3-Way 거버넌스 매니페스트 동기화] Conducted comprehensive forensic mining across 508 historical conversation logs, 222 explicit user directives, and 262 engineering milestones, codified the User Operational Persona (Public Administrative Perfectionist & Zero-Defect Systems Architect) and Proactive Optimization Charter, established 5 modular on-demand workspace skills (.agents/skills/*/SKILL.md) across public budget audit, HWPX docgen, festival 4-way sync, public infographics, and governance ops, permanently restored docs/HWP_GENERATION_GUIDELINES.md in workspace root eliminating broken brain links, and executed 3-way synchronization across Engineering Report, Engineering Milestones, and AGENTS.md. (2026-10-14)
+  - [Milestone 262: Zero-Data-Loss Localhost Startup & Runtime Performance Optimization (5-Pillar I/O, Incremental Zod, Lazy PBKDF2, Conditional CommandPalette & Zero Lint Warnings)] Eliminated duplicate `fs.stat` syscalls and $O(N)$ full-array Zod re-validation on single-row mutations in `/api/data/route.ts`, introduced row-level Zod validation memoization and `mtime`/`size` fast-path in `sheets-api.ts`, implemented lazy PBKDF2 `masterKey` derivation and `sessionStorage` auth token caching in `crypto.ts` alongside `optimizePackageImports` in `next.config.ts`, conditionally mounted `CommandPalette` to eliminate idle background item aggregation, and stabilized hook fallback references to achieve 0 ESLint warnings and 0 errors with 100% SSOT data preservation. (2026-10-14)
+  - [Milestone 261: System Objective Function (5-Pillar) Formalization, Empirical Codebase Metrics Synchronization (168 Files / 54,035 LOC) & 3-Way Milestone Pipeline Upgrade] Formalized the 5-Pillar System Objective Function across `PORTFOLIO VITAL - Engineering Report.md` and `AGENTS.md`, synchronized all architectural tables with empirical codebase metrics (168 TS/TSX files, 54,035 LOC, 64 UI components, 40 hooks, 14 API routes, 5 Cloudflare Edge Functions, 33 Jest test suites / 315+ tests), enacted Rules R (Public Budget Mathematical Integrity) and S (Hybrid Cloud Replica 4-Way Sync), normalized Milestones 248-261, and upgraded `scripts/sync-rules.js` for automated 3-Way synchronization. (2026-10-14)
+  - [Milestone 260: 101-04 Welfare Allowance (12 Months 480,000 KRW) & Work Uniform (180,000 KRW) Re-Alignment & Seoul City Provisional Notice (102,641,000 KRW) 100% Match Verification] Normalized welfare allowance to 12 full months (480,000 KRW) and work uniform unit cost/quantity (180,000 KRW), corrected long-term care insurance multiplicand (2,967,685 KRW), and achieved 100.0% 1-KRW precision alignment with Seoul City official provisional notice (102,641,000 KRW: City 51,320,000 KRW, District 51,321,000 KRW). (2026-10-13)
+  - [Milestone 259: 2027 Physical Activity Project Specification v2 (`신체활동2.hwpx`) Full-Scale Financial Integrity Audit & Provisional Notice Reconciliation] Audited Project 1 (142,180,000 KRW) and Project 2 (189,254,000 KRW) across all overview, resource allocation, and calculation tables, confirming 100.0% consistency with Seoul City provisional notice (Labor 102,641,000 KRW) and identifying the long-term care insurance multiplicand typo (`2,968,000` -> `2,967,685`). (2026-10-13)
+  - [Milestone 258: 101-04 Severance Pay & Annual Leave Allowance Sub-Item (`2)`) Exact 1-KRW Calculation (6,879,196 KRW & 2,633,180 KRW) Synchronization] Calculated exact 1-KRW unit formulas for severance reserve (`3,439,598 × 2 × 1 = 6,879,196 KRW`) and unused annual leave allowance (`131,659 × 10 × 2 = 2,633,180 KRW`, subtotal `9,512,376 KRW`), reconciling with rounded header item `1)` (`9,513,000 KRW`). (2026-10-13)
+  - [Milestone 257: 101-04 Employer Social Insurance Burden Sub-Item (`2)`) Exact 1-KRW Unit Formula (9,796,567 KRW) Specification & HWPX Sync] Formulated 1-KRW unit statutory calculations across all 5 social insurances for 12 months (National Pension 4,127,518 KRW, Health 2,967,685 KRW, Long-Term Care 389,954 KRW, Employment 1,444,631 KRW, Industrial Accident 866,779 KRW; exact sum 9,796,567 KRW) and synchronized HWPX XML cells. (2026-10-13)
+  - [Milestone 256: 101-04 Work Uniform Sub-Item Separation (220,000 KRW) & Severance/Annual Leave Header Correction (9,513,000 KRW)] Corrected severance and annual leave header from 9,733,000 KRW to 9,513,000 KRW by purging duplicate 220,000 KRW reserve after separating work uniform expense (220,000 KRW), preserving the 102,642,000 KRW total ceiling. (2026-10-13)
+  - [Milestone 255: 101-04 Welfare Allowance & Holiday Bonus Restoration (560,000 KRW) & 10-Day Annual Leave Rebalancing] Restored treatment improvement welfare allowance (440,000 KRW) and holiday bonus (120,000 KRW), adjusted annual leave allowance to 10 days (2,634,000 KRW) with 220,000 KRW reserve to preserve the 102,642,000 KRW labor cost ceiling. (2026-10-13)
+  - [Milestone 254: 101-04 Severance, Annual Leave & Insurance Reserve Consolidation (10,293,000 KRW) & 3-Tier Sub-Item Optimization] Consolidated statutory severance pay (6,879,000 KRW), 11-day annual leave allowance (2,897,000 KRW), and social insurance settlement reserve (517,000 KRW) into a unified 10,293,000 KRW line item alongside 12-month base salary (82,551,000 KRW) and actual insurance requirement (9,798,000 KRW). (2026-10-13)
+  - [Milestone 253: 101-04 Transition to 12-Month Full-Service Structure with Statutory Severance & Max Annual Leave Allowance (102,642,000 KRW)] Transitioned contract structure from 11 months to 12 full months (Base salary 82,551,000 KRW + Severance 6,879,000 KRW + 11-day max annual leave allowance 2,897,000 KRW + 12-month social insurance 10,315,000 KRW = 102,642,000 KRW). (2026-10-13)
+  - [Milestone 252: 101-04 Employer Social Insurance 11-Month Actual Cost Calculation (8,983,000 KRW) & Settlement Reserve (4,229,000 KRW) Allocation] Calculated 11-month statutory employer burden across 5 social insurances rounded up to 1,000 KRW units (8,983,000 KRW) and allocated remaining 4,229,000 KRW as settlement reserve to match the 13,212,000 KRW provisional ceiling. (2026-10-13)
+  - 그 외 과거 누적 마일스톤 총 278건 통합 요약 (2026-07-16 ~ 2026-10-13 이전 패치 내역)

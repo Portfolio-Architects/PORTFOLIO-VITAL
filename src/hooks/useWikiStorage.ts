@@ -88,8 +88,9 @@ export function useWikiStorage(
 
   // Auto-flush any pending debounce sync saves on unmount
   useEffect(() => {
+    const timers = syncTimersRef.current;
+    const pending = pendingBlocksRef.current;
     return () => {
-      const timers = syncTimersRef.current;
       for (const k in timers) {
         if (Object.prototype.hasOwnProperty.call(timers, k)) {
           clearTimeout(timers[k]);
@@ -97,7 +98,6 @@ export function useWikiStorage(
       }
 
       // Flush pending blocks to disk immediately so navigating away never loses edits
-      const pending = pendingBlocksRef.current;
       for (const canonicalId in pending) {
         if (Object.prototype.hasOwnProperty.call(pending, canonicalId)) {
           const item = pending[canonicalId];

@@ -594,18 +594,6 @@
   },
   {
     "categoryId": "mnrcir0vhyhg1xb87",
-    "amount": 49800000,
-    "date": "2026-09-09",
-    "purpose": "양재천 걷자! 건강 페스티벌 용역 계약",
-    "memo": "[시뮬레이션] ",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general",
-    "simulationEntryId": "mtth4xibhnjspzqqi",
-    "id": "mtth4xibmmeynyj29"
-  },
-  {
-    "categoryId": "mnrcir0vhyhg1xb87",
     "amount": 2880000,
     "date": "2026-09-09",
     "purpose": "중년여성 비만예방 프로그램 강사비",
@@ -638,18 +626,6 @@
     "actionType": "daily_expense",
     "isPlanned": false,
     "id": "mu2jspzoiwczhe0cn"
-  },
-  {
-    "categoryId": "mnrcir0vl18vfnb68",
-    "amount": 3300000,
-    "date": "2026-09-17",
-    "purpose": "서울체력장 리플릿",
-    "memo": "[시뮬레이션] ",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "daily_expense",
-    "simulationEntryId": "mu4vbhgvugf2fdtxm",
-    "id": "mu4vbhgvktvxsqwqq"
   },
   {
     "categoryId": "mnrcir0vbxmmvztoq",
@@ -686,18 +662,6 @@
     "actionType": "general",
     "simulationEntryId": "mu4yrmo4pu5k9x484",
     "id": "mu4yrmo4hl8d0bvkr"
-  },
-  {
-    "categoryId": "mnrcir0v56b8pixdb",
-    "amount": 580000,
-    "date": "2026-09-17",
-    "purpose": "서울체력장 동계복 구매",
-    "memo": "[시뮬레이션] 단가 ₩580,000 × 1개",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general",
-    "simulationEntryId": "mu5a96jyhvwoixsfn",
-    "id": "mu5a96jz174njnr4b"
   },
   {
     "categoryId": "mnrcir0v0vx5ae1qd",
@@ -813,5 +777,50 @@
     "actionType": "general",
     "simulationEntryId": "muwlf8vlqle9ejhqg",
     "id": "muwlf8vlka6c2lmft"
+  },
+  {
+    "categoryId": "mnrcir0vl18vfnb68",
+    "amount": 3300000,
+    "date": "2026-10-08",
+    "purpose": "(일상경비) 서울체력장 강남센터, 안내 리플릿 제작비 지급",
+    "memo": "",
+    "docRegNum": "보건행정과-12597",
+    "actionType": "daily_expense",
+    "isPlanned": false,
+    "id": "mv60gi7xvg5k1tw57"
+  },
+  {
+    "categoryId": "mnrcir0v56b8pixdb",
+    "amount": 580000,
+    "date": "2026-10-08",
+    "purpose": "서울체력장 운영인력 근무복(동절기) 구매비 지급",
+    "memo": "",
+    "docRegNum": "보건행정과-12598",
+    "actionType": "general",
+    "isPlanned": false,
+    "id": "mv60hn94qeqqauseu"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 49800000,
+    "date": "2026-10-13",
+    "purpose": "2026 양재천 걷자! 건강 페스티벌 행사시설 설치 및 운영 용역 계약",
+    "memo": "",
+    "docRegNum": "보건행정과-12706",
+    "actionType": "general",
+    "isPlanned": false,
+    "id": "mv60ipkfm4tcao84w"
+  },
+  {
+    "categoryId": "mnrcir0vl18vfnb68",
+    "amount": 3300000,
+    "date": "2026-10-13",
+    "purpose": "서울체력장 바닥 스티커 작업",
+    "memo": "[시뮬레이션] 단가 ₩3,300,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mv6f9ti9b1yy0m2ih",
+    "id": "mv6f9ti9ox3k21yi0"
   }
 ]

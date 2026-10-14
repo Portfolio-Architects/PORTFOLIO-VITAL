@@ -95,16 +95,23 @@ interface CacheEntry {
 }
 const apiCache = new Map<string, CacheEntry>();
 
-async function readData(sheet: string, retries = 5, delay = 50): Promise<any[]> {
+async function readData(sheet: string, retries = 5, delay = 50, knownMtimeMs?: number): Promise<any[]> {
   const filePath = getFilePath(sheet);
   
   let currentMtime = 0;
-  try {
-    const stats = await fs.stat(filePath);
-    currentMtime = stats.mtimeMs;
-  } catch (err: any) {
-    if (err.code === 'ENOENT') {
+  if (typeof knownMtimeMs === 'number') {
+    if (knownMtimeMs === 0) {
       return [];
+    }
+    currentMtime = knownMtimeMs;
+  } else {
+    try {
+      const stats = await fs.stat(filePath);
+      currentMtime = stats.mtimeMs;
+    } catch (err: any) {
+      if (err.code === 'ENOENT') {
+        return [];
+      }
     }
   }
 
@@ -123,9 +130,6 @@ async function readData(sheet: string, retries = 5, delay = 50): Promise<any[]> 
         throw new Error('File is empty');
       }
       const parsed = JSON.parse(data);
-      if (sheet === 'BUDGET_CATEGORIES') {
-        console.log(`[API] Returning ${parsed.length} categories for BUDGET_CATEGORIES!`);
-      }
       if (currentMtime > 0) {
         apiCache.set(sheet, { data: parsed, mtimeMs: currentMtime });
       }
@@ -176,7 +180,7 @@ function getWeekNumber(d: Date): number {
   return weekNo;
 }
 
-// Zod 스키마 게이트키퍼 유효성 검증 함수
+// Zod 스키마 게이트키퍼 유효성 검증 함수 (전체 배열 O(N) 검증 - replace 시 사용)
 function validateDataPayload(sheet: string, data: any[]): boolean {
   const schema = getDomainSchema(sheet);
   
@@ -188,6 +192,19 @@ function validateDataPayload(sheet: string, data: any[]): boolean {
         console.error(`[Zod Gatekeeper Error] Invalid data item in sheet ${sheet} at index ${i}:`, parsed.error.format());
         return false;
       }
+    }
+  }
+  return true;
+}
+
+// 단일 행 O(1) 증분 Zod 스키마 유효성 검증 함수 (add / update 시 사용)
+function validateSingleItemPayload(sheet: string, item: any): boolean {
+  const schema = getDomainSchema(sheet);
+  if (schema && typeof (schema as any).safeParse === 'function') {
+    const parsed = (schema as any).safeParse(item);
+    if (!parsed.success) {
+      console.error(`[Zod Gatekeeper Error] Invalid single item in sheet ${sheet}:`, parsed.error.format());
+      return false;
     }
   }
   return true;
@@ -273,9 +290,13 @@ async function backupDataFile(sheet: string, data: any[]): Promise<void> {
   }
 }
 
-async function writeDataToFile(sheet: string, data: any[]): Promise<void> {
+async function writeDataToFile(
+  sheet: string,
+  data: any[],
+  skipFullValidation = false
+): Promise<{ mtimeMs: number; size: number }> {
   // 1. Zod 유효성 검사 적용 (무결성 깨진 데이터 디스크 쓰기 방지)
-  if (!validateDataPayload(sheet, data)) {
+  if (!skipFullValidation && !validateDataPayload(sheet, data)) {
     throw new Error(`[Zod validation failed] Data structure is invalid for sheet: ${sheet}`);
   }
 
@@ -285,16 +306,21 @@ async function writeDataToFile(sheet: string, data: any[]): Promise<void> {
   // 2. 직접 안전 파일 쓰기 (재시도 및 지연 내장)
   await safeWriteFile(filePath, dataStr);
   
-  // 캐시 메모리 직렬화 업데이트 (디스크 재읽기 방지)
+  // 캐시 메모리 직렬화 업데이트 (디스크 재읽기 및 중복 fs.stat 방지)
+  let mtimeMs = 0;
+  let size = 0;
   try {
     const stats = await fs.stat(filePath);
-    apiCache.set(sheet, { data, mtimeMs: stats.mtimeMs });
+    mtimeMs = stats.mtimeMs;
+    size = stats.size;
+    apiCache.set(sheet, { data, mtimeMs });
   } catch {
     apiCache.delete(sheet);
   }
   
   // Trigger backup asynchronously in background so client response is instant (0ms) and not blocked by disk IO
   backupDataFile(sheet, data).catch(err => console.error('[Backup Error]:', err));
+  return { mtimeMs, size };
 }
 
 export async function GET(request: Request) {
@@ -341,7 +367,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: true, notModified: true, mtime: stats.mtimeMs, size: stats.size });
     }
 
-    const data = await readData(sheet);
+    const data = await readData(sheet, 5, 50, stats.mtimeMs);
     return NextResponse.json({ success: true, data, mtime: stats.mtimeMs, size: stats.size });
   } catch (e) {
     console.error(`[API GET Error] Failed to read data for sheet ${sheet}:`, e);
@@ -519,6 +545,8 @@ export async function POST(request: Request) {
       }
     }
 
+    let skipFullValidation = false;
+
     switch (action) {
       case 'add': {
         if (!data || Array.isArray(data)) {
@@ -527,7 +555,11 @@ export async function POST(request: Request) {
         const cleanData = typeof data === 'object' && data !== null && '_enc' in data 
           ? (() => { const copy = { ...data }; delete (copy as any)._enc; return copy; })()
           : data;
+        if (!validateSingleItemPayload(sheet, cleanData)) {
+          throw new Error(`[Zod validation failed] Data structure is invalid for sheet: ${sheet}`);
+        }
         rows.push(cleanData);
+        skipFullValidation = true;
         break;
       }
       case 'update': {
@@ -543,7 +575,12 @@ export async function POST(request: Request) {
           : data;
         const targetRow = { ...rows[idx] };
         if ('_enc' in targetRow) delete targetRow._enc;
-        rows[idx] = { ...targetRow, ...cleanData };
+        const updatedRow = { ...targetRow, ...cleanData };
+        if (!validateSingleItemPayload(sheet, updatedRow)) {
+          throw new Error(`[Zod validation failed] Data structure is invalid for sheet: ${sheet}`);
+        }
+        rows[idx] = updatedRow;
+        skipFullValidation = true;
         break;
       }
       case 'delete': {
@@ -555,6 +592,7 @@ export async function POST(request: Request) {
         if (rows.length === before) {
           return NextResponse.json({ success: false, error: 'ID not found' }, { status: 404 });
         }
+        skipFullValidation = true;
         break;
       }
       case 'replace': {
@@ -566,24 +604,14 @@ export async function POST(request: Request) {
           }
           return item;
         }) : [];
+        skipFullValidation = false;
         break;
       }
       default:
         return NextResponse.json({ success: false, error: 'Unknown action' }, { status: 400 });
     }
 
-
-    await writeDataToFile(sheet, rows);
-
-    let mtime = 0;
-    let size = 0;
-    try {
-      const stats = await fs.stat(getFilePath(sheet));
-      mtime = stats.mtimeMs;
-      size = stats.size;
-    } catch (statsErr) {
-      console.warn(`[API POST] Failed to fetch stats for ${sheet} after write:`, statsErr);
-    }
+    const { mtimeMs: mtime, size } = await writeDataToFile(sheet, rows, skipFullValidation);
 
     // RAG 임베딩 자동 색인 트리거 (sheet가 WIKI_DOC_로 시작하는 경우)
     if (sheet.startsWith('WIKI_DOC_')) {

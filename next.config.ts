@@ -13,6 +13,18 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: 'top-right',
   },
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'recharts',
+      'date-fns',
+      '@mantine/core',
+      '@mantine/hooks',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      '@dnd-kit/utilities',
+    ],
+  },
   turbopack: {},
   webpack: (config) => {
     if (config.watchOptions) {

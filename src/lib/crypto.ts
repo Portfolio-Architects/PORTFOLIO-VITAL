@@ -1,5 +1,6 @@
 let masterKey: CryptoKey | null = null;
 let sessionAuthToken: string | null = null;
+let currentPin: string | null = null;
 
 const getEncoder = () => {
   if (typeof TextEncoder !== 'undefined') return new TextEncoder();
@@ -10,23 +11,56 @@ const getEncoder = () => {
 };
 
 const SALT = getEncoder().encode('HCHPS-E2EE-SALT');
+const SESSION_TOKEN_CACHE_PREFIX = 'hchps_session_auth_token_v1_';
+
+async function getOrDeriveMasterKey(): Promise<CryptoKey> {
+  if (masterKey) return masterKey;
+  if (!currentPin) {
+    throw new Error('CryptoContext not initialized. Legacy encrypted data cannot be decrypted.');
+  }
+  const encoder = getEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(currentPin),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
+  masterKey = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: SALT, iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+  return masterKey;
+}
 
 export const initCryptoContext = async (pin: string) => {
-  const encoder = new TextEncoder();
+  currentPin = pin;
+  masterKey = null; // Lazy on-demand derivation only if legacy ciphertext is encountered
+
+  const cacheKey = `${SESSION_TOKEN_CACHE_PREFIX}${pin}`;
+  if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
+    try {
+      const cachedToken = sessionStorage.getItem(cacheKey);
+      if (cachedToken && cachedToken.length === 64) {
+        sessionAuthToken = cachedToken;
+        window.dispatchEvent(new Event('crypto-ready'));
+        return;
+      }
+    } catch {
+      // sessionStorage unavailable, fall through to PBKDF2 derivation
+    }
+  }
+
+  const encoder = getEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
     encoder.encode(pin),
     { name: 'PBKDF2' },
     false,
-    ['deriveBits', 'deriveKey']
-  );
-  
-  masterKey = await crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: SALT, iterations: 100000, hash: 'SHA-256' },
-    keyMaterial,
-    { name: 'AES-GCM', length: 256 },
-    false, // extractable = false prevents JS from reading raw key bits
-    ['encrypt', 'decrypt']
+    ['deriveBits']
   );
   
   // Create an auth token for API headers (different from encryption key)
@@ -37,13 +71,17 @@ export const initCryptoContext = async (pin: string) => {
   );
   sessionAuthToken = Array.from(new Uint8Array(tokenBits)).map(b => b.toString(16).padStart(2, '0')).join('');
   
-  // Sharing token in memory only is safer.
   if (typeof window !== 'undefined') {
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(cacheKey, sessionAuthToken);
+      }
+    } catch {}
     window.dispatchEvent(new Event('crypto-ready'));
   }
 };
 
-export const isCryptoReady = () => masterKey !== null;
+export const isCryptoReady = () => sessionAuthToken !== null || masterKey !== null || currentPin !== null;
 
 
 function base64ToArrayBuffer(base64: string) {
@@ -71,10 +109,13 @@ export const decryptPayload = async <T = unknown>(encryptedBase64: string): Prom
     // ignore JSON parse error, move forward to legacy SubtleCrypto decrypt for backward compatibility
   }
   
-  if (!masterKey) throw new Error('CryptoContext not initialized. Legacy encrypted data cannot be decrypted.');
+  if (!masterKey && !currentPin) {
+    throw new Error('CryptoContext not initialized. Legacy encrypted data cannot be decrypted.');
+  }
   
-  // 2. 구 암호화 데이터 유입 대비 하위 호환 복호화 폴백 (AES-GCM-256)
+  // 2. 구 암호화 데이터 유입 대비 하위 호환 복호화 폴백 (AES-GCM-256 지연 파생)
   try {
+    const key = await getOrDeriveMasterKey();
     const payloadBuffer = base64ToArrayBuffer(encryptedBase64);
     const payload = new Uint8Array(payloadBuffer);
     
@@ -85,7 +126,7 @@ export const decryptPayload = async <T = unknown>(encryptedBase64: string): Prom
     
     const decryptedBuffer = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv },
-      masterKey,
+      key,
       ciphertext
     );
     
@@ -105,6 +146,12 @@ export const getAuthToken = () => {
 };
 
 export const clearCryptoContext = () => {
+  if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined' && currentPin) {
+    try {
+      sessionStorage.removeItem(`${SESSION_TOKEN_CACHE_PREFIX}${currentPin}`);
+    } catch {}
+  }
   masterKey = null;
   sessionAuthToken = null;
+  currentPin = null;
 };

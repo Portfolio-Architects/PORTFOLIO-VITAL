@@ -48,8 +48,9 @@ next-env.d.ts
 /data/backups/
 /data/.diagnose_cache.json
 
-# agents and scratch
-/.agents/
+# agents and scratch (keep .agents/skills/ tracked in VCS)
+/.agents/*
+!/.agents/skills/
 /scratch/
 scratch_*.txt
 temp_plan_text.txt

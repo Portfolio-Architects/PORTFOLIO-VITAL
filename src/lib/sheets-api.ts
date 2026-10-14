@@ -43,6 +43,7 @@ interface CacheEntry {
 
 const clientCache = new Map<string, CacheEntry>();
 const inFlightRequests = new Map<string, Promise<any>>();
+const rowValidationCache = new Map<string, Map<string, { rawSig: string; validated: Record<string, unknown> }>>();
 
 export async function readSheet<T>(sheetName: string): Promise<T[]> {
   const cached = clientCache.get(sheetName);
@@ -77,6 +78,18 @@ export async function readSheet<T>(sheetName: string): Promise<T[]> {
       }
       if (!json.success || !Array.isArray(json.data)) {
         throw new Error(json.error || 'API returned success=false or invalid data');
+      }
+      if (
+        cached &&
+        typeof json.mtime === 'number' &&
+        json.mtime > 0 &&
+        typeof json.size === 'number' &&
+        json.size > 0 &&
+        cached.mtime === json.mtime &&
+        cached.size === json.size
+      ) {
+        cached.lastMetaCheck = Date.now();
+        return cached.data as T[];
       }
 
       // E2EE Decryption
@@ -205,15 +218,36 @@ export async function readSheet<T>(sheetName: string): Promise<T[]> {
       // Global Tombstone: Filter out deleted items to prevent Cloudflare KV eventual consistency zombie data
       const deletedIdSet = new Set(getTombstones().map(t => t.id));
       
-      // Zod Runtimes Validation (Fail-Safe)
+      // Zod Runtimes Validation (Fail-Safe + Incremental Row Memoization)
       const schema = getDomainSchema(sheetName);
+      let sheetRowCache = rowValidationCache.get(sheetName);
+      if (!sheetRowCache) {
+        sheetRowCache = new Map();
+        rowValidationCache.set(sheetName, sheetRowCache);
+      }
+      const nextSheetRowCache = new Map<string, { rawSig: string; validated: Record<string, unknown> }>();
       const validRows: Record<string, unknown>[] = [];
       for (const row of rawRows) {
         if (deletedIdSet.has(row.id)) continue; // 🚀 Kill Zombies (O(1) lookup)
         if ('safeParse' in schema) {
+          const rowId = typeof row?.id === 'string' ? row.id : '';
+          let rawSig = '';
+          if (rowId) {
+            rawSig = JSON.stringify(row);
+            const prevValidated = sheetRowCache.get(rowId);
+            if (prevValidated && prevValidated.rawSig === rawSig) {
+              nextSheetRowCache.set(rowId, prevValidated);
+              validRows.push(prevValidated.validated);
+              continue;
+            }
+          }
           const result = schema.safeParse(row);
           if (result.success) {
-            validRows.push(result.data);
+            const validatedData = result.data as Record<string, unknown>;
+            if (rowId && rawSig) {
+              nextSheetRowCache.set(rowId, { rawSig, validated: validatedData });
+            }
+            validRows.push(validatedData);
           } else {
             // HARNESS SYSTEM: Loud Failure for Self-Reinforcing AI loops
             console.error(`\n======================================================`);
@@ -242,6 +276,7 @@ export async function readSheet<T>(sheetName: string): Promise<T[]> {
           validRows.push(row);
         }
       }
+      rowValidationCache.set(sheetName, nextSheetRowCache);
       const finalData = validRows as T[];
       const mtime = json.mtime || Date.now();
       const size = json.size || 0;

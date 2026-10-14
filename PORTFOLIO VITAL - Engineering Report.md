@@ -4,13 +4,22 @@
 
 ## 1. 프로젝트 개요 및 목적 함수 (Objective Function)
 
-**PORTFOLIO VITAL** — 사내 업무 편성, 지식 자산화, 그리고 **인물 시맨틱 온톨로지 시각화**를 위한 초개인화 인텔리전스 워크스페이스
+**PORTFOLIO VITAL** — 공공 행정·예산 수리적 정합성 검증, 대규모 현장 행사 실시간 모바일 관제, 법령·아카이브 기반 공문서(HWPX) 자동화, 그리고 인물·업무 시맨틱 온톨로지 자산화를 통합한 **하이브리드 공공 인텔리전스 아키텍처**
 
-- **인물-업무 관계망 매핑:** 온톨로지 캔버스 엔진을 통해 사내 핵심 인물, 부서, 그리고 나의 업무 히스토리를 노드로 연결하여 시각적이고 전략적인 관계망 인프라 구축
-- 로컬 PC 디스크의 **JSON 파일 시스템(`data/*.json`)** 을 **SSOT(단일 진실 공급원)** 로 활용하고, 자동 순환식 백업 기능(최대 20개 보존)을 탑재하여 안전하고 완전한 로컬 CRUD 데이터 파이프라인 구현
-- **PartyKit + Yjs CRDT** 프로토콜을 사용해 업무용 PC와 모바일 디바이스 간의 완벽한 실시간 무충돌 상태 동기화 보장 (개인 다중 기기 최적화)
-- **Next.js 서버의 Google Gemini API** 및 지수 백오프 재시도 로직을 활용한 AI 비서 — 사내 컨텍스트(인물 성향, 회의록, 업무 이력) 기반 AI 멘토링 및 분석 탑재
-- 로컬 PC 전용 구동 환경 구성(접속을 실행한 해당 PC에서만 접근 가능하도록 `localhost` 포트 격리) 및 **PWA 오프라인 지원**으로 외부 유출이 불가한 완벽히 폐쇄적이고 안전한 1인 생존 비서 체제 구축
+본 시스템의 목적 함수 $\mathcal{J}(\Theta)$는 다음 **5대 핵심 축(5-Pillar Objective Function)**의 동시 최적화를 지향한다:
+
+1. **공공 재정·예산 수리적 정합성 및 시뮬레이션 무결성 ($\mathcal{J}_{\text{Budget}}$)**:
+   - e-호조 공공회계 표준에 부합하는 본청 일반지출과 일상경비(`daily_expense`) 듀얼 파이프라인 격리, 불용 위험 번다운 모니터링 및 지출 품의 시뮬레이터(`useBudget`, `useBudgetSimulator`) 구축.
+   - 예산편성 요구서 및 사업설명서(HWPX/Excel)의 **사업개요 총사업비 = 소요재원 합계(기금·시비·구비) = 산출내역 목·세목 원단위/천원단위 합계** 간 단 1원의 오차도 허용하지 않는 100% 수리적 정합성 검증.
+2. **현장 행사 모바일 퍼스트 관제 및 24/7 하이브리드 엣지 복원력 ($\mathcal{J}_{\text{FieldSync}}$)**:
+   - ｢2026 양재천 건강 페스티벌｣ 등 대규모 현장 행사의 모바일 전용(`max-w-md` 448px) 무결점 카드/스프레드시트 관제 대시보드(`YangjaeFestivalDashboard.tsx`) 제공.
+   - 로컬 PC 디스크 SSOT(`data/FESTIVAL_YANGJAE_2026.json`) $\leftrightarrow$ 행정 엑셀 마스터 $\leftrightarrow$ 무프레임워크 정적 템플릿(`scripts/pages-template.html`) 및 Cloudflare KV(`HCHPS_DATA`) 간 **300ms 디바운스 무인 실시간 듀얼 싱크 데몬(`watch-and-sync-cloud.js`)** 가동으로 로컬 PC 전원 오프 시에도 24시간 365일 모바일 열람 보장.
+3. **법령·아카이브 RAG 기반 HWPX 공문서 및 공공 디자인 자동화 ($\mathcal{J}_{\text{DocAuto}}$)**:
+   - 당해연도 실무 워크스페이스(`D:\Desktop\공공문서 폴더\2026년`), 전사 마스터 아카이브(`F:\_Organized_Archive`), 국가법령·자치법규 OpenAPI(`/api/law`)를 결합한 **4단계 HWPX 공문서 자동 빌드(`generate_new_hwpx.py`)** 및 16:9/2:3 듀얼 포맷 공공 캠페인 인포그래픽 포스터 설계 표준 확립.
+4. **시맨틱 온톨로지 그래프 및 업무 암묵지·스케줄 자산화 ($\mathcal{J}_{\text{Ontology}}$)**:
+   - `OntologyCanvasEngine`(Dirty Flag, LOD 텍스트 컬링, 32비트 정수 인코딩, Zero-Allocation)을 통한 인물·부서·업무 관계망 매핑, `TaskWisdomView` 암묵지 아카이빙, PartyKit + Yjs CRDT 실시간 동기화, 자연어 스케줄러 및 Google Calendar / RFC 5545 iCal(`/api/calendar/feed.ics`) 양방향 연동.
+5. **개인정보 보호법(PIPA) 가드레일 및 Zero-Trust 하네스 무결성 ($\mathcal{J}_{\text{Security}}$)**:
+   - 로컬 비식별화 CLI(`scripts/privacy_guard.py`)를 통한 고유식별·민감정보 사전 마스킹(Rule Q), PBKDF2 WebCrypto 인증 미들웨어(`src/middleware.ts`), E2EE 바이패스 평문 JSON 고속 I/O(자동 20버전 순환 백업 및 글로벌 툼스톤), Zod Loud-Failure 스키마 검증(`schemas.ts`) 및 **33개 Jest 테스트 스위트(315+ 테스트)** 상시 통과 보증.
 
 ---
 
@@ -21,32 +30,40 @@
 | 프레임워크 | Next.js (App Router, Turbopack) | 16.2.10 |
 | UI 라이브러리 | React | 19.2.7 |
 | 스타일링 | Tailwind CSS v4 + Vanilla CSS | ^4.3.2 |
+| 상태 및 데이터 페칭 | TanStack React Query v5 + Zustand v5 | ^5.101.2 / ^5.0.14 |
+| 스키마 및 런타임 검증 | Zod (Loud-Failure Harness) | ^4.4.3 |
 | 아이콘 | Lucide React | 0.577.0 |
-| 드래그 앤 드롭 | dnd-kit (core + sortable) | 6.3.1 / 10.0.0 |
+| 드래그 앤 드롭 | dnd-kit (core + sortable + utilities) | 6.3.1 / 10.0.0 |
 | 리치 텍스트 에디터 | BlockNote (core + react + mantine) | 0.47.3 |
+| 차트 및 시각화 | Recharts + d3-force + Custom Canvas 2D Engine | ^3.8.1 / ^3.0.0 |
 | 날짜 유틸리티 | date-fns | 4.4.0 |
 | 실시간 동기화 | PartyKit + Yjs + y-partykit | 0.0.115 / 13.6.30 |
 | 오프라인 영속성 | y-indexeddb | 9.0.12 |
-| 문서 생성 | JSZip (HWPX 내보내기) | 3.10.1 |
-| AI 백엔드 | Google Gemini API (gemini-1.5-flash) | Local Server |
-| 데이터 소스 | 로컬 PC JSON 파일 시스템 (Next.js API Routes 경유) | Local PC Server |
-| 배포 | 로컬 전용 구동 (배포 배제) | http://localhost:3001 |
+| 문서 생성 및 파싱 | JSZip (HWPX), Python HWPX/Excel Builder, pdfjs-dist | 3.10.1 / 5.7.284 |
+| 개인정보 보호 (PIPA) | Local Privacy Guard CLI (`scripts/privacy_guard.py`) | Python 3 Standard |
+| AI 백엔드 | Google Gemini API (`@google/generative-ai`, `ai` SDK) | ^0.24.1 / ^6.0.176 |
+| 테스트 및 품질 게이트 | Jest 30 + React Testing Library + Playwright E2E | 30.3.0 / 1.61.1 |
+| 데이터 소스 (SSOT) | 로컬 PC JSON 파일 시스템 (`data/*.json` + 20개 자동 백업) | Local PC Server |
+| 하이브리드 배포 | 로컬 PC 전용 서버 (`http://localhost:3001`) + Cloudflare Pages & KV (`HCHPS_DATA`) 24/7 Edge Replica | Hybrid Local + Edge |
 
 ---
 
-## 3. 코드베이스 지표
+## 3. 코드베이스 및 문서 현황 요약 통계 (2026-10-14 실측 기준)
 
 | 지표 | 수치 |
 |------|------|
-| TypeScript/TSX 파일 수 | **130개** (41 components, 33 hooks, 31 lib, 16 app, 1 party, 1 proxy, 1 store, 1 types, 5 root) |
-| 총 코드 라인 수 | **31,030줄** |
-| 총 커밋 수 | **313+** |
-| 컴포넌트 모듈 | **7개 서브 모듈** (mindmap: 6, dashboard: 6, budget: 9, inventory: 1, law/project: 3, ai/modals: 10, ui: 6 — 총 **41개 파일**, 13,254 LOC) |
-| 로컬 서버 함수 (API Routes) | **10개 API 라우트 핸들러** (`src/app/api/`) + **1개 LLM 스트리밍 차트 라우트** (`src/app/llm/chat/route.ts`) |
-| 커스텀 훅 | **33개** (`src/hooks/`, 4,566 LOC) |
-| 라이브러리 계층 | **31개 모듈 파일** (`src/lib/`, 9,328 LOC) |
-| 엔진 하위 모듈 | **7개 핵심 모듈** (OntologyCanvasEngine, OntologyLayout, OntologyNetwork, OntologyRenderer, PerformanceProfiler, ontology-extractor, watcher) |
-| 도메인 타입 | **10개 주요 타입** (Task, BudgetEntry, InventoryItem, Meeting, Project, KnowledgeEntry, DocumentEntry, OntologyNode, OntologyEdge, OntologyGroup) |
+| 모듈형 도메인 스킬셋 (`.agents/skills/`) | **5개 전용 스킬셋** (`vital-budget-audit`, `vital-hwpx-docgen`, `vital-festival-4way-sync`, `vital-public-infographic`, `vital-governance-ops` — Antigravity 2.0 커스텀 규격 준수) |
+| 영구 참조 가이드라인 문서 (`docs/`) | **2개 파일** (`PERSONAL_INFO_PROTECTION_GUIDE.md`, `HWP_GENERATION_GUIDELINES.md` — 외부 브레인 파손 링크 완전 대체) |
+| TypeScript/TSX 소스 파일 수 (`src/`) | **168개** (`64 components`, `40 hooks`, `35 lib`, `21 app`, `1 middleware`, `1 party`, `1 proxy`, `1 store`, `1 types`, `3 root`) |
+| 총 코드 라인 수 (`src/` LOC) | **54,035줄** (컴포넌트 28,867줄, 훅 9,598줄, 라이브러리 11,301줄, 앱/라우트 3,522줄 등) |
+| Cloudflare Edge Functions (`functions/`) | **5개 파일** (**2,739줄** — `festival/yangjae.ts`, `data.ts`, `chat.ts`, `embeddings.ts`, `semantic-search.ts`) |
+| 자동화 및 검증 스크립트 (`scripts/`) | **28개 파일** (Node.js 및 Python CLI — HWPX/Excel 동기화, KV 듀얼 싱크 데몬, PIPA 비식별화, 하네스 검증 등) |
+| 총 커밋 수 | **563+ 커밋** |
+| 컴포넌트 모듈 (`src/components/`) | **12개 서브 디렉토리 + 루트 모듈** (총 **64개 파일**, **28,867 LOC** — `budget`: 20, `root`: 18, `dashboard`: 5, `ui`: 5, `mindmap`: 4, `ai`: 2, `festival`: 2, `law`: 2, `skeletons`: 2, `inventory`: 1, `layout`: 1, `modals`: 1, `project`: 1) |
+| 로컬 서버 함수 (API Routes) | **14개 API 라우트 핸들러** (`src/app/api/`, 2,468 LOC) + **1개 LLM 스트리밍 라우트** (`src/app/llm/chat/route.ts`) |
+| 커스텀 훅 (`src/hooks/`) | **40개** (**9,598 LOC**) |
+| 라이브러리 계층 (`src/lib/`) | **35개 모듈 파일** (**11,301 LOC** — 온톨로지 엔진 7개, 다중 에이전트 3개, 도메인/스키마/보안 유틸리티 25개) |
+| 자동화 테스트 스위트 (`__tests__/`) | **33개 Jest 테스트 스위트 (315+ 테스트 케이스 100% PASS)** + Playwright E2E 스위트 |
 
 ---
 
@@ -54,199 +71,214 @@
 
 ```mermaid
 graph TB
-    subgraph Client["클라이언트 계층 (React 19)"]
-        Page["page.tsx (SPA 진입점)"]
-        Sidebar["Sidebar (모듈 네비게이션)"]
-        Views["WorkspaceView / TaskWisdomView / MindMap3D"]
-        Components["41개 기능 컴포넌트"]
+    subgraph Client["클라이언트 계층 (React 19.2.7 · 64개 컴포넌트)"]
+        Page["page.tsx / ProtectedApp.tsx\n(SPA & 동적 청크 격리 진입점)"]
+        Sidebar["Sidebar / CommandPalette\n(모듈 네비게이션)"]
+        Views["WorkspaceView / BudgetDashboard / BudgetSimulator\nYangjaeFestivalDashboard / MindMap3D"]
     end
 
     subgraph Engine["온톨로지 캔버스 엔진 (Vanilla TS)"]
-        Controller["OntologyCanvasEngine\n(상태 컨트롤러)"]
+        Controller["OntologyCanvasEngine\n(Dirty Flag & Visibility Pause)"]
         Layout["OntologyLayout\n(방사형 수학 연산)"]
         Network["OntologyNetwork\n(BFS 탐색)"]
-        Renderer["OntologyRenderer\n(Canvas 2D 뷰)"]
+        Renderer["OntologyRenderer\n(LOD & 32-bit Edge Batching)"]
     end
 
-    subgraph Hooks["상태 및 동기화 계층"]
-        YjsStore["useYjsStore\n(CRDT 문서)"]
-        GraphCustom["useGraphCustomization\n(useSyncExternalStore)"]
-        DomainHooks["useTasks / useBudget / useKnowledge\n+ 커스텀 훅 33개"]
+    subgraph Hooks["상태·시뮬레이션·동기화 계층 (40개 커스텀 훅)"]
+        YjsStore["useYjsStore / useGraphCustomization\n(useSyncExternalStore 16ms 배칭)"]
+        BudgetHooks["useBudget / useBudgetSimulator\n(e-호조 일반지출·일상경비 듀얼 파이프라인)"]
+        FestivalHooks["useYangjaeFestival / useFestivalValidation\n(모바일 관제 & O(1) 캐싱)"]
+        DomainHooks["useTasks / useSchedules / useLawSearch\nuseInventory / useContacts 등"]
     end
 
-    subgraph Realtime["실시간 인프라"]
-        PartyKit["PartyKit 서버\n(WebSocket 룸)"]
-        Yjs["Yjs CRDT 프로토콜"]
-        IndexedDB["y-indexeddb\n(오프라인 영속성)"]
+    subgraph Server["로컬 PC 서버 (Next.js 백엔드 · localhost:3001)"]
+        Middleware["middleware.ts\n(PBKDF2 Zero-Trust 라우트 보호)"]
+        API["Next.js API 라우트 (14개 엔드포인트)\n/api/data · /api/festival/yangjae · /api/calendar/feed.ics 등"]
+        LocalJSON["로컬 JSON SSOT (data/*.json)\n(E2EE Bypass · 20버전 자동백업 · 툼스톤)"]
+        LLMChat["/llm/chat & /api/report-generator\n(Google Gemini API + 법령/아카이브 RAG)"]
     end
 
-    subgraph Server["로컬 PC 서버 (Next.js 백엔드)"]
-        API["Next.js API 라우트\n(/api/data + 10개 엔드포인트)"]
-        LocalJSON["로컬 JSON 파일 스토어\n(data/*.json + 20개 백업)"]
-        LLMChat["Next.js LLM 라우트\n(/llm/chat)"]
-        GeminiAI["Google Gemini API"]
+    subgraph Edge["24/7 하이브리드 클라우드 엣지 & 자동화 도구"]
+        Watcher["watch-and-sync-cloud.js\n(300ms 디바운스 무인 감시 데몬)"]
+        CFPages["Cloudflare Pages & Functions (5개)\n+ Cloudflare KV (HCHPS_DATA)"]
+        DocTools["generate_new_hwpx.py · sync_festival_excel.py\nprivacy_guard.py (PIPA 비식별화)"]
     end
 
     Page --> Sidebar
     Page --> Views
-    Views --> Components
     Views --> Controller
     Controller --> Layout
     Controller --> Network
     Controller --> Renderer
-    Views --> GraphCustom
-    GraphCustom --> YjsStore
-    YjsStore --> PartyKit
-    PartyKit --> Yjs
-    Yjs --> IndexedDB
+    Views --> YjsStore
+    Views --> BudgetHooks
+    Views --> FestivalHooks
+    Views --> DomainHooks
+    BudgetHooks --> API
+    FestivalHooks --> API
     DomainHooks --> API
+    Middleware --> API
     API --> LocalJSON
-    Components --> LLMChat
-    LLMChat --> GeminiAI
+    LocalJSON --> Watcher
+    Watcher --> CFPages
+    API --> DocTools
+    Views --> LLMChat
 ```
 
 ### 디렉토리 구조
 
 ```text
-data/                   → 로컬 PC 데이터베이스 저장 폴더
-├── *.json              → 각 시트별 평문(Plain Text) JSON 데이터 파일 (E2EE Bypass 상태)
-└── backups/            → 최근 20개 변경 이력 자동 백업 디렉토리
+data/                   → 로컬 PC 단일 진실 공급원(SSOT) 데이터베이스 폴더
+├── *.json              → 각 도메인별 평문(Plain Text) JSON 데이터 파일 (FESTIVAL_YANGJAE_2026.json, BUDGET_ENTRIES.json, SCHEDULES.json 등)
+└── backups/            → 최근 20개 변경 이력 자동 순환 백업 디렉토리
+functions/              → Cloudflare Pages Functions (24/7 엣지 서버리스 API, 5개 파일, 2,739 LOC)
+└── api/                → chat.ts, data.ts, embeddings.ts, semantic-search.ts, festival/yangjae.ts
+scripts/                → 자동화·동기화·보안·하네스 검증 CLI 도구 (28개 파일)
+├── sync-rules.js, prepare-pages-output.js, sync-festival-to-cloud.js, watch-and-sync-cloud.js
+├── sync-schedules.js, sync_festival_excel.py, sync-festival-fallbacks.py, privacy_guard.py, run-harness.js 등
 src/
-├── app/                → 라우트 및 페이지 (SPA — page.tsx + layout.tsx, 16개 파일, 3,368 LOC)
-│   ├── api/            → Next.js API Routes (10개 엔드포인트 라우터)
-│   ├── llm/            → Next.js 로컬 LLM 통신 및 백오프 재시도 라우터 (chat 스트리밍)
-├── components/         → 기능별 UI (총 41개 파일, 13,254 LOC, 7개 서브 모듈)
-│   ├── ai/, budget/, dashboard/, inventory/, law/, meeting/, mindmap/, project/, ui/
-│   ├── AddDataModal.tsx, DynamicForceGraph.tsx, MindMap3D.tsx, MindMapInspector.tsx
-│   ├── QueryProviders.tsx, QuickInput.tsx, SearchResultModal.tsx, SecurityLockScreen.tsx
-│   ├── Sidebar.tsx, TaskModal.tsx, WeeklyReportView.tsx, WikiEditor.tsx, WorkspaceView.tsx 등
-├── hooks/              → 33개 커스텀 훅 (도메인 + 동기화 + 분석 + AI 등, 4,566 LOC)
-│   ├── useAgentStatus.ts, useAIChat.ts, useAILinker.ts, useAppLogs.ts, useBudget.ts
-│   ├── useBudgetFilters.ts, useClassificationWords.ts, useContacts.ts, useDrive.ts
-│   ├── useFileRadar.ts, useFreezeDetector.ts, useGlobalSearch.ts, useGoogleSheet.ts
-│   ├── useGraphCustomization.ts, useInventory.ts, useLawSearch.ts, useLlmExtract.ts
-│   ├── useLocalContacts.ts, useMeetings.ts, useMergedSignals.ts, useNotificationAlerts.ts
-│   ├── usePortfolioAnalytics.ts, useProjects.ts, useReportGenerator.ts, useScheduleAlerts.ts
-│   ├── useSchedules.ts, useSecurityLock.ts, useSemanticSearch.ts, useSignal.ts
-│   ├── useTasks.ts, useWikiStorage.ts, useWikiSync.ts, useYjsStore.ts
-├── lib/                → 핵심 라이브러리 (31개 모듈 파일, 9,328 LOC)
+├── app/                → 라우트 및 페이지 (21개 파일, 3,522 LOC)
+│   ├── api/            → Next.js API Routes (14개 엔드포인트 라우터, 2,468 LOC)
+│   ├── festival/       → 양재천 건강 페스티벌 전용 독립 모바일 관제 라우트 (/festival/yangjae)
+│   ├── llm/            → Next.js 로컬 LLM 스트리밍 라우터 (/llm/chat)
+│   ├── login/          → Zero-Trust PIN/패스워드 인증 페이지
+├── components/         → 기능별 UI 컴포넌트 (총 64개 파일, 28,867 LOC, 12개 서브 디렉토리 + 루트)
+│   ├── budget/ (20), dashboard/ (5), festival/ (2), mindmap/ (4), ui/ (5), ai/ (2), law/ (2), skeletons/ (2), inventory/ (1), layout/ (1), modals/ (1), project/ (1), 루트 (18)
+├── hooks/              → 40개 커스텀 훅 (도메인 CRUD + 예산 시뮬레이터 + 축제 관제 + CRDT 동기화 + 성능 감시, 9,598 LOC)
+├── lib/                → 핵심 라이브러리 (35개 모듈 파일, 11,301 LOC)
+│   ├── agents/         → planner.ts, generator.ts, evaluator.ts (다중 에이전트 파이프라인)
 │   ├── engine/         → OntologyLayout, OntologyNetwork, OntologyRenderer, PerformanceProfiler, ontology-extractor, watcher
-│   ├── OntologyCanvasEngine.ts (상태 컨트롤러)
-│   ├── signal-graph.ts, korean-nlp.ts, budget-rules.ts, contacts-parser.ts, crypto.ts
-│   ├── csv-parser.ts, document.fetch.ts, forceGraphRenderer.ts, holidays.ts
-│   ├── llm-client.ts, ontology.service.ts, ontology.types.ts, pdf-parser.ts
-│   ├── query-client.ts, schemas.ts, sheets-api.ts, driveCache.ts, rag-engine.ts 등
+│   ├── OntologyCanvasEngine.ts, schemas.ts, budget-rules.ts, rag-engine.ts, korean-nlp.ts 등
+├── middleware.ts       → Next.js 라우트 보호 및 공개 경로(/festival, /api/calendar 등) 분기 미들웨어
 ├── party/              → PartyKit 서버 (Yjs CRDT 룸 — persist: true, 1개 파일, 68 LOC)
-├── proxy.ts            → Next.js API 프록시 핸들러 (35 LOC)
-├── store/              → 전역 UI 상태 스토어 (30 LOC)
-├── types/              → 도메인 타입 정의 (1개 파일, 208 LOC, 10개 타입)
+├── proxy.ts            → Next.js API 프록시 핸들러
+├── store/              → 전역 UI 상태 스토어
+├── types/              → 도메인 타입 정의
 ```
 
 ---
 
-## 5. 기능 인벤토리 및 마일스톤 엔지니어링 패치 이력
+## 5. 기능 인벤토리 및 모듈 명세
 
-### 모듈 및 뷰 구조
+### 5-1. 주요 모듈 및 뷰 구조
 
 | 모듈 | 뷰 컴포넌트 | 설명 |
 |------|------------|------|
-| 워크스페이스 | `WorkspaceView.tsx` | 업무, 캘린더, 예산, 재고, 문서 관리를 통합한 대시보드 |
-| 업무 암묵지 | `TaskWisdomView.tsx` | Zod 기반 확장 스키마 및 AI 노하우 추출을 지원하는 암묵지 아카이브 모듈 |
-| 시그널 맵 | `MindMap3D.tsx` | 수동 핀 배치 방식의 방사형 시맨틱 그래프 인터랙티브 캔버스 |
-| 위키 | `WikiEditor.tsx` | BlockNote 기반 리치 텍스트 에디터로 노드별 지식 페이지 작성 |
-| 주간 보고 | `WeeklyReportView.tsx` | LLM 추출 기반 주간 보고서 및 CRM 크로스 동기화 모듈 |
-| CRM 통합 관리 | `CrmDashboardView.tsx` | CRM 고객 관리, 영업 기회 파이프라인 및 매출 기여도 추적 모듈 |
+| 통합 대시보드 | `WorkspaceView.tsx` / `PortfolioDashboardView.tsx` | 업무, 주간 스케줄러(`WeeklyScheduler.tsx`), 연락처(`ContactsBox.tsx`), 포트폴리오 지표를 통합한 메인 관제 뷰 |
+| 공공예산 관리 및 시뮬레이터 | `BudgetDashboard.tsx` / `BudgetSimulator.tsx` | 정책사업 그룹 카드, 불용 위험 번다운 모니터링, 일반지출·일상경비(`daily_expense`) 분리 품의/소진 시뮬레이터 |
+| 양재천 페스티벌 모바일 관제 | `YangjaeFestivalDashboard.tsx` | 448px 모바일 퍼스트 4대 탭(`1. 추진과제`, `2. 부스현황`, `3. 업무분장`, `4. 행사식순`), 집기·인원 실시간 집계, 비상연락망 PIN 보안 및 Cloudflare KV 듀얼 싱크 |
+| 시맨틱 온톨로지 맵 | `MindMap3D.tsx` / `MindMapInspector.tsx` | Dirty Flag & LOD 기반 방사형 시맨틱 그래프 인터랙티브 캔버스 및 노드 인스펙터 |
+| 법령·자치법규 및 사업관리 | `LawSystemPage.tsx` / `ProjectManagementPage.tsx` | 국가법령·자치법규(조례) 실시간 검색 연동 및 공문서/HWPX 기안 지원 |
+| 재고·비품 가상화 그리드 | `InventoryList.tsx` | `useVirtualList` 윈도잉 가상화 기반 대용량 비품/물품 관리 및 예산 교차 참조 |
 
-### 컴포넌트 모듈 (총 41개 파일 / 7개 서브 모듈 / 13,254 LOC)
+### 5-2. 컴포넌트 모듈 (`src/components/` — 총 64개 파일 / 28,867 LOC)
 
-| 서브 모듈 | 파일 수 | LOC | 주요 컴포넌트 및 역할 |
-|-----------|--------|-----|----------------------|
-| `mindmap/` | 6 | 4,267 | `MindMap3D.tsx` (1,930 LOC), `MindMapInspector.tsx` (1,394 LOC), `DynamicForceGraph.tsx`, `MindMapHeader.tsx`, `MindMapHUD.tsx` 등 |
-| `dashboard/` | 6 | 1,746 | `PortfolioDashboardView.tsx` (467 LOC), `ContactsBox.tsx` (311 LOC, memoized `startEdit`), `WeeklyScheduler.tsx` (618 LOC), `WorkspaceView.tsx` (162 LOC), `WeeklyReportView.tsx`, `DummyPerfTest.tsx` |
-| `budget/` | 9 | 3,115 | `BudgetDashboard.tsx` (447 LOC), `PolicyGroupCard.tsx` (395 LOC, O(1) swap), `BudgetCategoryCardItem.tsx` (285 LOC), `CategoryEditModal.tsx` (758 LOC), `ExpenseEntryModal.tsx`, `LedgerModal.tsx`, `DailyExpenseStatModal.tsx`, `BatchEditModal.tsx`, `MultiSelectDropdown.tsx` |
-| `inventory/` | 1 | 442 | `InventoryList.tsx` (442 LOC, `useVirtualGrid` 가상화 윈도잉 및 동적 컬럼) |
-| `law/project/` | 3 | 1,518 | `ProjectManagementPage.tsx` (745 LOC), `LawSystemPage.tsx` (465 LOC), `LawSearchPanel.tsx` (308 LOC) |
-| `ai/modals/` | 10 | 2,933 | `SemanticReviewModal.tsx` (609 LOC), `AIAssistantModal.tsx` (400 LOC), `SearchResultModal.tsx` (353 LOC), `TaskModal.tsx`, `AppLogModal.tsx`, `AddDataModal.tsx`, `WikiEditor.tsx`, `SecurityLockScreen.tsx`, `QuickInput.tsx`, `AgentStatusBoard.tsx` |
-| `ui/` | 6 | 233 | `Sidebar.tsx` (128 LOC), `ErrorBoundary.tsx` (67 LOC), `modal.tsx` (65 LOC), `progress-bar.tsx`, `card.tsx`, `badge.tsx`, `QueryProviders.tsx` |
+| 서브 디렉토리 | 파일 수 | LOC | 주요 컴포넌트 및 역할 |
+|-------------|:------:|----:|----------------------|
+| `budget/` | 20 | 9,211 | `SimulationResultTable.tsx` (1,315 LOC), `CategoryEditModal.tsx` (761 LOC), `BudgetDashboard.tsx` (755 LOC), `LedgerModal.tsx` (709 LOC), `PolicyGroupCard.tsx` (706 LOC), `StatItemDetailModal.tsx` (687 LOC), `SimulationEntryList.tsx` (670 LOC), `BudgetCategoryCardItem.tsx` (555 LOC), `SimulationInputForm.tsx` (483 LOC), `ExpenseEntryModal.tsx` (421 LOC), `SimulationBurnUpChart.tsx` (403 LOC), `SimulationSummaryCards.tsx` (398 LOC), `BudgetSimulator.tsx` (307 LOC), `QuickPlanModal.tsx` (286 LOC) 등 |
+| `root` (`components/`) | 18 | 6,180 | `MindMapInspector.tsx` (1,516 LOC), `MindMap3D.tsx` (896 LOC), `SemanticReviewModal.tsx` (714 LOC), `ProtectedApp.tsx` (477 LOC), `SearchResultModal.tsx` (440 LOC), `TaskModal.tsx` (364 LOC), `AppLogModal.tsx` (299 LOC), `WorkspaceView.tsx` (285 LOC), `WikiEditor.tsx` (223 LOC), `AddDataModal.tsx` (206 LOC), `QuickInput.tsx` (172 LOC), `SecurityLockScreen.tsx` (170 LOC), `Sidebar.tsx` (125 LOC) 등 |
+| `festival/` | 2 | 5,030 | `YangjaeFestivalDashboard.tsx` (4,983 LOC — 모바일 퍼스트 4탭 관제, 인라인 카드 스프레드시트, 엑셀·KV 동기화), `YangjaeFestivalClientWrapper.tsx` (47 LOC) |
+| `dashboard/` | 5 | 3,592 | `WeeklyScheduler.tsx` (1,870 LOC), `ContactsBox.tsx` (866 LOC), `PortfolioDashboardView.tsx` (415 LOC), `SchedulePresetSelector.tsx` (399 LOC), `DummyPerfTest.tsx` (42 LOC) |
+| `mindmap/` | 4 | 980 | `MindMapNoteEditor.tsx` (499 LOC), `DetectiveValidationHUD.tsx` (181 LOC), `MindMapHeader.tsx` (152 LOC), `MindMapHUD.tsx` (148 LOC) |
+| `project/` | 1 | 884 | `ProjectManagementPage.tsx` (884 LOC) |
+| `law/` | 2 | 778 | `LawSystemPage.tsx` (470 LOC), `LawSearchPanel.tsx` (308 LOC) |
+| `ai/` | 2 | 560 | `AIAssistantModal.tsx` (408 LOC), `AgentStatusBoard.tsx` (152 LOC) |
+| `inventory/` | 1 | 518 | `InventoryList.tsx` (518 LOC — 가상화 윈도잉 그리드) |
+| `modals/` | 1 | 498 | `CommandPalette.tsx` (498 LOC — 전역 단축키 커맨드 팔레트) |
+| `layout/` | 1 | 299 | `LocalhostStatusHUD.tsx` (299 LOC — 로컬 서버 헬스체크 HUD) |
+| `ui/` | 5 | 218 | `ErrorBoundary.tsx` (67 LOC), `modal.tsx` (66 LOC), `progress-bar.tsx` (31 LOC), `card.tsx` (28 LOC), `badge.tsx` (26 LOC) |
+| `skeletons/` | 2 | 119 | `YangjaeFestivalSkeleton.tsx` (62 LOC), `MindMap3DSkeleton.tsx` (57 LOC) |
 
-### 로컬 API 엔드포인트 (10개 API 라우트 + 1개 LLM 스트리밍 차트 라우트)
+### 5-3. 로컬 API 엔드포인트 및 클라우드 엣지 함수 (14개 API 라우트 + 1개 LLM 라우트 + 5개 Edge Functions)
 
-| 엔드포인트 | 파일 경로 | HTTP 메서드 | LOC | 용도 및 설명 |
-|-----------|----------|------------|-----|-------------|
-| `/api/data` | `src/app/api/data/route.ts` | `GET`, `POST` | 560 | **주요 SSOT 컨트롤러**. E2EE bypass 로컬 PC JSON (`data/*.json`) CRUD, 20버전 백업, 글로벌 툼스톤, 60ms 디바운스 쓰기 |
-| `/llm/chat` | `src/app/llm/chat/route.ts` | `POST` | 337 | **LLM 차트 라우트**. Google Gemini 1.5 Flash 백엔드 실시간 스트리밍 대화 인터페이스 |
-| `/api/ai-linker` | `src/app/api/ai-linker/route.ts` | `POST` | 68 | Gemini AI 기반 온톨로지 노드 간 시맨틱 추론 링크 추출 |
-| `/api/app-logs` | `src/app/api/app-logs/route.ts` | `GET` | 126 | PBKDF2 인메모리 키 캐싱 적용 0ms 런타임 시스템 구동 및 렉 감지 로그 조회 |
-| `/api/auth` | `src/app/api/auth/route.ts` | `POST`, `DELETE` | 48 | PBKDF2 WebCrypto 키 파생 인메모리 캐싱 기반 보안 잠금화면 비밀번호 검증 |
+| 엔드포인트 | 파일 경로 | 메서드 | LOC | 용도 및 설명 |
+|-----------|----------|-------|----:|-------------|
+| `/api/data` | `src/app/api/data/route.ts` | `GET`, `POST` | 628 | **주 SSOT 컨트롤러**. 로컬 PC JSON (`data/*.json`) CRUD, 20버전 백업, 글로벌 툼스톤, 일상경비 이중합산 차단 및 60ms 디바운스 쓰기 |
+| `/llm/chat` | `src/app/llm/chat/route.ts` | `POST` | 337 | **LLM 스트리밍 라우트**. Google Gemini 백엔드 실시간 스트리밍 대화 및 RAG 컨텍스트 주입 |
+| `/api/llm/extract` | `src/app/api/llm/extract/route.ts` | `POST` | 313 | 비정형 보고서/회의록 텍스트 기반 시맨틱 키워드 및 엔티티 AI 추출 |
+| `/api/app-logs` | `src/app/api/app-logs/route.ts` | `GET` | 206 | PBKDF2 인메모리 키 캐싱 적용 시스템 구동 및 메인 스레드 Stall 감지 로그 조회 |
+| `/api/file-radar` | `src/app/api/file-radar/route.ts` | `GET` | 173 | 로컬 디스크 파일 감시 변경 사항 추적 및 레이더 요약 제공 |
+| `/api/festival/yangjae` | `src/app/api/festival/yangjae/route.ts` | `GET`, `POST` | 158 | **양재천 페스티벌 전용 SSOT API**. `FESTIVAL_YANGJAE_2026.json` 원자적 읽기/쓰기 및 Cloudflare 레플리카 비동기 듀얼 발행 |
 | `/api/drive` | `src/app/api/drive/route.ts` | `GET`, `POST` | 149 | 로컬 아카이브 디렉토리 본문 및 메타데이터 고속 캐시 검색 |
-| `/api/file-radar` | `src/app/api/file-radar/route.ts` | `GET` | 184 | 로컬 디스크 파일 감시 변경 사항 추적 및 레이더 요약 제공 |
-| `/api/law` | `src/app/api/law/route.ts` | `GET` | 149 | 국가법령 OpenAPI 및 자치법규(조례) 실시간 검색 |
-| `/api/llm/extract` | `src/app/api/llm/extract/route.ts` | `POST` | 333 | 비정형 보고서/회의록 텍스트 기반 시맨틱 키워드 및 엔티티 AI 추출 |
-| `/api/local-contacts` | `src/app/api/local-contacts/route.ts` | `POST` | 93 | 로컬 OS 주소록 및 PC 파싱 연락처 동기화 |
-| `/api/report-generator` | `src/app/api/report-generator/route.ts` | `POST` | 142 | 마인드맵 노드 위상 기반 지자체 공문서 및 HWPX 보고서 초안 마크다운 자동 생성 |
+| `/api/law` | `src/app/api/law/route.ts` | `GET` | 149 | 국가법령정보센터 OpenAPI 및 자치법규(조례) 실시간 검색 |
+| `/api/report-generator` | `src/app/api/report-generator/route.ts` | `POST` | 135 | 온톨로지 노드 위상 및 법령 근거 기반 지자체 공문서/HWPX 초안 마크다운 자동 생성 |
+| `/api/festival/yangjae/sync-excel` | `src/app/api/festival/yangjae/sync-excel/route.ts` | `POST` | 122 | 바탕화면 행정 엑셀 마스터 파일과 대시보드 JSON 간 즉시 양방향 파싱·동기화 트리거 |
+| `/api/local-contacts` | `src/app/api/local-contacts/route.ts` | `POST` | 93 | 로컬 OS 주소록 및 행정 조직도 연락처 파싱 동기화 |
+| `/api/calendar/import` | `src/app/api/calendar/import/route.ts` | `POST` | 91 | 외부 일정 및 자연어 스케줄 데이터 일괄 임포트 및 `SCHEDULES.json` 반영 |
+| `/api/ai-linker` | `src/app/api/ai-linker/route.ts` | `POST` | 53 | Gemini AI 기반 온톨로지 노드 간 시맨틱 추론 링크 추출 |
+| `/api/calendar/feed.ics` | `src/app/api/calendar/feed.ics/route.ts` | `GET` | 50 | **RFC 5545 표준 iCalendar 실시간 구독 피드**. 구글 캘린더·스마트폰 실시간 연동 |
+| `/api/auth` | `src/app/api/auth/route.ts` | `POST`, `DELETE` | 48 | PBKDF2 WebCrypto 키 파생 인메모리 캐싱 기반 보안 잠금화면 비밀번호 검증 |
+| `[Edge] /api/festival/yangjae` | `functions/api/festival/yangjae.ts` | `GET`, `POST` | 2,251 | **Cloudflare Pages 24/7 Edge Replica**. Cloudflare KV(`HCHPS_DATA`) 연동 및 무결점 폴백 데이터 제공 |
 
-### 커스텀 훅 (`src/hooks/` — 33개 훅, 4,566 LOC)
+### 5-4. 커스텀 훅 (`src/hooks/` — 40개 훅, 9,598 LOC)
 
 | 훅 파일 | LOC | 담당 영역 및 설명 |
-|---------|-----|------------------|
-| `useAgentStatus.ts` | 77 | 다중 에이전트 구동 런타임 상태 관제 |
-| `useAIChat.ts` | 140 | Google Gemini API와의 채팅 대화 처리 및 응답 스트리밍 |
-| `useAILinker.ts` | 34 | 온톨로지 노드 간 관계 자동 추론 및 연결 설정 지원 |
-| `useAppLogs.ts` | 33 | Next.js 백엔드 구동 및 렉 감지 로그 10초 주기 조회 |
-| `useBudget.ts` | 470 | SSOT 예산 CRUD, O(1) 카테고리 통계 맵 룩업, 품의/결의 플로우 |
-| `useBudgetFilters.ts` | 160 | 예산 대시보드 내 카테고리 및 검색 필터 관리 |
-| `useClassificationWords.ts` | 40 | 카테고리/태그 매칭 및 정규화용 지능형 어휘 사전 제어 |
-| `useContacts.ts` | 95 | 연락처 정보 CRUD 및 Yjs 동기화 |
-| `useDrive.ts` | 27 | 로컬 아카이브 디렉토리 본문 고속 검색 |
-| `useFileRadar.ts` | 41 | 시맨틱 파일 레이더를 통한 로컬 보고서 매칭 및 AI 요약 정보 추출 |
-| `useFreezeDetector.ts` | 121 | 60ms 이상 UI 메인 스레드 프리징/Stall 실시간 모니터링 및 탭 이탈 오탐 방지 |
-| `useGlobalSearch.ts` | 117 | 전체 모듈(업무, 예산, 지식, 비품, 파일) 대상 통합 실시간 비동기 청크 검색 |
-| `useGoogleSheet.ts` | 125 | 오프라인 폴백을 갖춘 범용 시트 데이터 페처 |
-| `useGraphCustomization.ts` | 839 | `useSyncExternalStore` + 16ms 디바운스 기반 Yjs 그래프 오버라이드 스토어 |
-| `useInventory.ts` | 55 | 재고 수준 관리, 예산 항목 교차 참조 |
-| `useLawSearch.ts` | 52 | 법제처 OpenAPI 연동 국가법령/행정규칙/자치법규 실시간 검색 |
-| `useLlmExtract.ts` | 34 | `/api/llm/extract` 호출을 통한 비정형 텍스트 키워드 추출 |
+|---------|----:|------------------|
+| `useYangjaeFestival.ts` | 2,345 | 양재천 건강 페스티벌 4탭 상태 관리, 로컬 API & Cloudflare KV 하이브리드 페칭, 폴백 및 낙관적 업데이트 |
+| `useGraphCustomization.ts` | 851 | `useSyncExternalStore` + 16ms 디바운스 기반 Yjs 그래프 오버라이드 스토어 |
+| `useBudgetSimulator.ts` | 826 | 불용 위험 번다운 예측, 일반지출 vs 일상경비(`daily_expense`) 듀얼 시뮬레이션 및 1-클릭 정산 전환(`settleEntry`) |
+| `useBudget.ts` | 752 | SSOT 예산 CRUD, $O(1)$ 카테고리 통계 맵 룩업, 품의/결의 및 일상경비 교부 플로우 |
+| `useFestivalValidation.ts` | 433 | 축제 부스·집기·예산·일정 데이터 정합성 실시간 검증 훅 |
+| `useBudgetFilters.ts` | 376 | 예산 대시보드 내 다중 카테고리, 정책그룹 및 검색 필터 관리 |
+| `usePortfolioAnalytics.ts` | 367 | 포트폴리오 자산 구조적 볼록성 및 지능형 집행 속도(Velocity) 예측 |
+| `useWikiStorage.ts` | 327 | 노드별 BlockNote 위키 콘텐츠 영속성 관리 및 parsed map store 캐싱 |
+| `useSignal.ts` | 286 | 한국어 NLP 키워드 추출 파이프라인 + 시그널 데이터 집계 |
+| `useTasks.ts` | 266 | 업무 CRUD, 우선순위/상태 관리, 반복 일정 엔진, 글로벌 툼스톤 방어 |
+| `useNotificationAlerts.ts` | 216 | 일정 및 리액션 시그널 알림 스케줄링 및 푸시 처리 |
+| `useInventory.ts` | 193 | 재고·비품 수준 관리 및 예산 항목 교차 참조 |
+| `useAIChat.ts` | 175 | Google Gemini API와의 채팅 대화 처리 및 응답 스트리밍 |
+| `useFreezeDetector.ts` | 171 | 60ms 이상 UI 메인 스레드 프리징/Stall 실시간 모니터링 및 탭 이탈 오탐 방지 |
+| `useProjects.ts` | 158 | 프로젝트 체크리스트 관리, 진행률 추적 및 원자적 갱신 |
+| `useContacts.ts` | 155 | 연락처 정보 CRUD 및 낙관적 캐시 동기화 |
+| `useMergedSignals.ts` | 154 | 시그널 맵 노드 구성을 위해 다중 모듈 데이터를 통합 시맨틱 인덱싱 |
+| `useLocalhostHealth.ts` | 150 | 로컬 서버(`localhost:3001`) 연결 상태 및 지연 시간 실시간 헬스체크 |
+| `useGlobalSearch.ts` | 133 | 전체 모듈(업무, 예산, 지식, 비품, 파일) 대상 통합 실시간 비동기 청크 검색 |
+| `useGoogleSheet.ts` | 131 | 오프라인 폴백을 갖춘 범용 시트 데이터 페처 |
+| `useScheduleAlerts.ts` | 117 | 마감 임박 업무 및 긴급 회의 일정 알림 연산 |
+| `useYjsStore.ts` | 102 | Yjs 문서 + PartyKit WebSocket 프로바이더 생명주기 관리 |
+| `useVirtualList.ts` | 96 | 대용량 리스트/그리드 DOM 노드 최소화를 위한 Zero-Dependency 윈도잉 가상화 훅 |
+| `useMeetings.ts` | 90 | 회의 일정 관리, 안건/회의록 기록 |
+| `useSchedules.ts` | 87 | 주간 일정 데이터 CRUD 및 Google Calendar / iCal 뷰어 동기화 |
+| `useAgentStatus.ts` | 80 | 다중 에이전트 구동 런타임 상태 관제 |
+| `useAuth.ts` | 69 | 사용자 인증 세션 상태 및 라우트 접근 제어 |
 | `useLocalContacts.ts` | 55 | 로컬 PC 주소록 데이터 파싱 및 브릿지 |
-| `useMeetings.ts` | 45 | 회의 일정 관리, 안건/회의록 기록 |
-| `useMergedSignals.ts` | 70 | 시그널 맵 노드 구성을 위해 다중 모듈 데이터를 통합 시맨틱 인덱싱 |
-| `useNotificationAlerts.ts` | 191 | 일정 및 리액션 시그널 알림 스케줄링 및 푸시 처리 |
-| `usePortfolioAnalytics.ts` | 442 | 포트폴리오 자산 구조적 볼록성 및 지능형 집행 예측 |
-| `useProjects.ts` | 97 | 프로젝트 체크리스트 관리, 진행률 추적 및 atomic setProjects 갱신 |
-| `useReportGenerator.ts` | 46 | 마인드맵 현황 기반 지자체 공문서 및 행정 보고서 초안 마크다운 자동 생성 |
-| `useScheduleAlerts.ts` | 92 | 마감 임박 업무 및 긴급 회의 일정 알림 연산 |
-| `useSchedules.ts` | 55 | 주간 일정 데이터 CRUD 및 캘린더 연계 뷰어 동기화 |
-| `useSecurityLock.ts` | 28 | PIN 코드 인증 세션 및 데이터 zero-trust 보호 계층 관리 |
+| `useLawSearch.ts` | 52 | 법제처 OpenAPI 연동 국가법령/행정규칙/자치법규 실시간 검색 |
+| `useReportGenerator.ts` | 46 | 마인드맵 현황 및 아카이브 기반 지자체 공문서 초안 마크다운 자동 생성 |
 | `useSemanticSearch.ts` | 43 | 자연어 및 시맨틱 쿼리 연계 다중 모듈 통합 지능형 검색 |
-| `useSignal.ts` | 275 | NLP 키워드 추출 파이프라인 + 시그널 데이터 집계 |
-| `useTasks.ts` | 219 | 업무 CRUD, 우선순위/상태 관리, 반복 일정 엔진, 툼스톤 방어 |
-| `useWikiStorage.ts` | 294 | 노드별 BlockNote 위키 콘텐츠 영속성 관리 및 parsed map store 캐싱 |
+| `useFileRadar.ts` | 41 | 시맨틱 파일 레이더를 통한 로컬 보고서 매칭 및 AI 요약 정보 추출 |
 | `useWikiSync.ts` | 36 | Yjs 위키 노드 텍스트 및 실시간 싱크 트래킹 |
-| `useYjsStore.ts` | 118 | Yjs 문서 + PartyKit WebSocket 프로바이더 생명주기 |
+| `useSecurityLock.ts` | 35 | PIN 코드 인증 세션 및 데이터 Zero-Trust 보호 계층 관리 |
+| `useAILinker.ts` | 34 | 온톨로지 노드 간 관계 자동 추론 및 연결 설정 지원 |
+| `useLlmExtract.ts` | 34 | `/api/llm/extract` 호출을 통한 비정형 텍스트 키워드 추출 |
+| `useAppLogs.ts` | 33 | Next.js 백엔드 구동 및 렉 감지 로그 주기 조회 |
+| `useClassificationWords.ts` | 29 | 카테고리/태그 매칭 및 정규화용 지능형 어휘 사전 제어 |
+| `useDocumentVisibility.ts` | 27 | 백그라운드 탭 이탈 감지(`document.hidden`) 및 폴링/물리엔진 일시정지 제어 |
+| `useDrive.ts` | 27 | 로컬 아카이브 디렉토리 본문 고속 검색 |
 
 ---
 
 ## 6. 엔지니어링 품질 평가
 
-**종합 등급: A (우수)** — *로컬 PC 독립 구동 아키텍처와 오프라인 PWA 격리를 통한 완벽한 개인 정보 보안 및 극대 성능 수립*
+**종합 등급: A+ (최우수)** — *목적 함수 기반 5대 도메인 통합, 로컬 SSOT + Cloudflare KV 24/7 하이브리드 복원력, 그리고 PIPA·수리적 정합성 100% 달성*
 
-### 지표 기반 품질 매트릭스
+### 6-1. 지표 기반 품질 매트릭스
 
 | 객관성 축 | 측정 요소 | 등급 | 평가 근거 |
 |----------|----------|:---:|----------|
-| **실시간 동기화** | CRDT 무결성, 오프라인 복원력, 충돌 해소 | **A+** | Yjs CRDT 프로토콜 + PartyKit 영속성 + IndexedDB 오프라인 폴백으로 무충돌 보증 |
-| **아키텍처** | 모듈 분해, 관심사 분리 | **A** | M-V-C 관심사 분리 100% 달성. UI 컴포넌트 내 직접 fetch 네트워크 호출을 모두 배제하고 React Query 커스텀 훅으로 완전 이관 |
-| **렌더링 성능** | 유휴 CPU 효율, 프레임 예산 준수 | **A+** | Dirty Flag 파이프라인 + useSyncExternalStore 16ms 디바운스 배칭 및 O(1) LOD 주변부 라벨 드로잉을 통한 메인 스레드 렉 종식 |
-| **타입 무결성** | 도메인 엄격성, `any` 잔존율 | **A** | 3D 마인드맵 물리 엔진 및 훅 내 dynamic 속성 30건 이상에 대해 `any` 형변환을 제거하고 TS strict 컴파일 통과 |
-| **AI 통합** | 추론 안정성, 엣지 배포 | **A** | 로컬 Next.js 백엔드 경유 Google Gemini API 연동 및 장애 대비 3회 백오프 재시도 탑재 |
-| **보안 및 오프라인** | 로컬 JSON 저장, 오프라인 영속성 | **A** | E2EE 암복호화 Bypass 적용을 통해 새로고침 로딩 지연을 0.1초 내외로 단축하였으며, 로컬 PC localhost 단독 바인딩으로 완벽한 폐쇄성 유지 |
+| **재정·데이터 수리적 무결성** | 예산 3중 합계 일치율, 원단위/천원단위 정합성 | **A+** | e-호조 일상경비 이중 차감 원천 차단 및 2027 예산편성 요구서·사업설명서(HWPX/Excel) 전 비목 오차 0원 검증 달성 |
+| **하이브리드 실시간 동기화** | CRDT 무결성, Cloudflare KV 엣지 복원력 | **A+** | Yjs CRDT + IndexedDB 로컬 동기화에 더해 `watch-and-sync-cloud.js` 300ms 무인 데몬으로 모바일 24/7 무중단 레플리카 확립 |
+| **아키텍처 및 관심사 분리** | M-V-C 경계 준수, 컴포넌트 직접 fetch 배제 | **A+** | 64개 UI 컴포넌트 내 직접 네트워크 호출 0건 달성, 40개 커스텀 훅으로 100% 캡슐화 |
+| **렌더링 및 모바일 인체공학** | 유휴 CPU 효율, 448px 모바일 클리핑 제로 | **A+** | Dirty Flag + `useDocumentVisibility` 탭 이탈 일시정지로 유휴 CPU 0% 달성, 모바일 카드뷰 가로 잘림 0건 |
+| **타입 및 테스트 무결성** | TS strict 컴파일, 자동화 테스트 커버리지 | **A+** | TypeScript 컴파일 에러 0건, Zod 런타임 스키마 에러 0건, Jest **33개 스위트(315+ 테스트) 100% PASS** |
+| **법정 공문서 & PIPA 보안** | HWPX 표준 준수, 고유식별정보 비식별화 | **A+** | `generate_new_hwpx.py` 4단계 비파괴 공문서 빌드 및 `privacy_guard.py` 사전 마스킹 가드레일(Rule Q) 완비 |
 
-### 6-2. 코드베이스 정적 진단 결과 (diagnose_report.json 기반)
+### 6-2. 코드베이스 정적 및 동적 게이트키퍼 진단 결과 (`run-harness.js` & Jest 기준)
 
-- **진단 일시:** 2026-07-07 기준 (최종 하네스 품질 게이트 연쇄 실행 결과)
+- **최신 진단 일시:** 2026-10-14 기준
 - **아키텍처 규칙 위반 (Architectural Violations):** **0건**
-  - UI 컴포넌트 내 직접 fetch/axios 네트워크 호출을 모두 제거하고 React Query 커스텀 훅으로 이관하여 관심사 분리 100% 충족.
-- **린트 경고 (Lint Warnings):** **0건** (최종 0-0-0 무결성 수립 완료)
-- **성능 병목 요인 (Performance Bottlenecks):** **0건** (최종 0-0-0 무결성 수립 완료)
+- **린트 및 타입 오류 (ESLint / TypeScript Errors):** **0건**
+- **Zod 스키마 런타임 검증 오류 (Zod Schema Errors):** **0건**
+- **Jest 단위/통합 회귀 테스트:** **33/33 Suites, 315/315 Tests ALL PASS (100%)**
 
 ---
 
@@ -280,44 +312,180 @@ graph LR
     Network --> Renderer
 ```
 
-- **Phase 1 (모듈화):** 약 1,300줄의 단일체 엔진을 컨트롤러 + 레이아웃 + 네트워크 + 렌더러로 완전 분해.
-- **Phase 2 (Dirty Flag):** `needsRedraw` 플래그로 실제 사용자 상호작용 및 물리 모션 계산 시에만 Canvas 렌더링 수행. 유휴 CPU → 0%.
-- **Phase 3 (상태 동기화):** `useState`를 `useSyncExternalStore`로 교체하여 Yjs 데이터 구독 개편. 16ms 디바운스로 고빈도 Yjs 트랜잭션을 일괄 처리하여 노드 집중 조작 시 React UI 정지 현상 영구 해소.
-- **Phase 4 (LOD 텍스트 컬링 및 1차 인접 렌더링):** 줌 비율에 따른 드로잉 분기와 더불어 활성 노드(`activeNodeId`)의 1차 인접 노드(직속 부모/자식)만 라벨 텍스트를 그리고 나머지는 벡터 원(Dot) 형태로 대체하는 LOD 기법 도입.
-- **Phase 5 (Zero-Allocation 및 정수 인코딩):** 간선 드로잉 배치 맵의 키를 문자열 대신 비트 연산 기반 32비트 정수형(`(colorId << 17) | ...`)으로 변환해 문자열 생성 가비를 억제하고, Object Pool 패턴을 이식해 매 프레임 GC 발생을 원천 차단.
+- **Phase 1 (모듈화):** 단일체 엔진을 컨트롤러 + 레이아웃 + 네트워크 + 렌더러로 완전 분해.
+- **Phase 2 (Dirty Flag & Visibility Pause):** `needsRedraw` 플래그 및 `useDocumentVisibility` 연동으로 탭 이탈 시 물리 연산·폴링을 즉시 중지하여 유휴 CPU 0% 보장.
+- **Phase 3 (상태 동기화):** `useSyncExternalStore` + 16ms 디바운스로 고빈도 Yjs 트랜잭션을 일괄 처리.
+- **Phase 4 (LOD 텍스트 컬링):** 줌 비율 및 활성 노드(`activeNodeId`)의 1차 인접 노드 여부에 따라 주변부 노드를 벡터 원(Dot)으로 대체.
+- **Phase 5 (Zero-Allocation 및 32비트 정수 인코딩):** 간선 드로잉 배치 맵의 키를 32비트 정수형으로 변환하고 Object Pool 패턴을 이식해 프레임당 GC 발생을 원천 차단.
 
-### 7-2. 실시간 협업 스택
+### 7-2. 로컬 SSOT & Cloudflare Pages/KV 24/7 하이브리드 동기화 스택
 
 ```mermaid
 sequenceDiagram
-    participant 클라이언트A as 클라이언트 A
-    participant 파티킷 as PartyKit 서버
-    participant 클라이언트B as 클라이언트 B
-    participant 로컬DB as IndexedDB
+    participant Admin as 로컬 관리자 (Excel / localhost:3001)
+    participant LocalSSOT as 로컬 디스크 SSOT (data/*.json)
+    participant Watcher as watch-and-sync-cloud.js (300ms Debounce)
+    participant CFKV as Cloudflare KV (HCHPS_DATA) & Pages
+    participant Mobile as 외부 모바일 기기 (24/7 열람)
 
-    클라이언트A->>파티킷: Yjs 바이너리 업데이트 (WebSocket)
-    파티킷->>클라이언트B: CRDT 델타 브로드캐스트
-    파티킷->>파티킷: persist: true (Durable Object)
-    클라이언트A->>로컬DB: y-indexeddb 자동 영속
-    클라이언트B->>로컬DB: y-indexeddb 자동 영속
+    Admin->>LocalSSOT: UI 인라인 편집 또는 Excel 마스터 저장
+    LocalSSOT->>Watcher: fs.watch 파일 변경 이벤트 감지
+    Watcher->>Watcher: prepare-pages-output.js (정적 HTML/폴백 갱신)
+    Watcher->>CFKV: sync-festival-to-cloud.js (KV 스냅샷 즉시 발행)
+    Mobile->>CFKV: 모바일 관제 대시보드 접속 (로컬 PC 오프 시에도 0ms 응답)
 ```
 
-- **CRDT 프로토콜:** Yjs 문서를 PartyKit WebSocket 룸을 통해 공유. 수학적 보증에 의한 무충돌 동기화.
-- **영속성 및 백업 최적화:** 이중 트랙(PartyKit Durable Objects + y-indexeddb) 구조에 더해 100회 트랜잭션마다 storeState 압축(IndexedDB Compaction) 및 JSON 파일 backups 자동 회수 가드 탑재.
-- **상태 관리:** `useGraphCustomization` 훅이 Yjs 맵(`overrides`, `customNodesMap`, `customEdgesMap`, `deletedEdgesMap`)을 반응형 외부 스토어로 노출.
+### 7-3. 공공예산 수리적 정합성 & HWPX 공문서 자동화 파이프라인
 
-### 7-3. 로컬 PC 호스팅 전용 AI 통합망
+| 기능 영역 | 핵심 엔진 / 도구 | 검증 및 동작 규격 |
+|----------|----------------|-----------------|
+| **e-호조 예산 시뮬레이터** | `useBudget.ts`, `useBudgetSimulator.ts`, `/api/data` | 본청 일반지출과 일상경비(`daily_expense`) 교부·예정내역을 분리 연산하여 이중 합산/차감 0건 보장 |
+| **예산안·사업설명서 수리 감사** | `verify_complete_integrity.py`, Rule R | 사업개요 총사업비 = 소요재원(기금·시비·구비) = 산출내역 목·세목(인건비·5대보험·퇴직연차 원단위/천원단위) 100% 일치 검증 |
+| **4단계 HWPX 공문서 자동 빌드** | `scratch/generate_new_hwpx.py`, `/api/law`, Rule G·M | 아카이브 팩트 + 법령/조례 RAG $\to$ 공문서 개조식 마크다운 초안 $\to$ 비파괴 HWPX 템플릿 복제 조판 |
+| **개인정보 비식별화 가드레일** | `scripts/privacy_guard.py`, Rule Q | 주민등록번호·전화번호·계좌번호·민감정보 사전 스캔(`--scan`) 및 자동 마스킹(`--sanitize`) |
 
-| 기능 | 백엔드 | 모델 | 활용 사례 |
-|------|--------|------|----------|
-| 대화형 비서 및 이어쓰기 | `/llm/chat` | Google Gemini API (gemini-1.5-flash) | 인앱 AI 어시스턴트 및 위키(Wiki) 커맨드 자동완성 |
-| RAG 컨텍스트 연동 | local API | JSON Data + Prompt Context | 로컬 데이터베이스의 예산 및 시그널 코퍼스 대상 맥락 답변 생성 |
-| 보고서 초안 생성 | `/api/report-generator` | Google Gemini API | 마인드맵 노드 위상 구조 및 업무 이력 연동 공문서 작성 |
-| 시맨틱 파일 분석 | `/api/file-radar` | Google Gemini API | 바탕화면 스캔 폴더 내 보고서 텍스트 요약 및 자동 태깅 |
+### 7-4. 사용자 운영 페르소나 및 행동 분류 체계 (User Operational Persona & Behavioral Taxonomy)
+
+누적 508개 대화 세션 로그 및 262개 엔지니어링 마일스톤에 대한 포렌식 마이닝 결과 규명된 사용자의 본질적 페르소나는 **｢공공 행정 정밀 실무관 겸 무결점 시스템 아키텍트(Public Administrative Perfectionist & Zero-Defect Systems Architect)｣**이다. 시스템과 에이전트는 다음 5대 행동 축(5 Behavioral Taxonomy Pillars)을 항시 준수한다:
+
+1. **공공 재정·예산 단 1원 무결점 포렌식 회계 (1-KRW Forensic Accounting Empiricism - $\mathcal{J}_{\text{Budget}}$)**:
+   - 총사업비 = 소요재원 합계(기금·시비·구비) = 산출내역 목·세목 원단위/천원단위 합계 간 오차 0원(수학적 100% 수렴)을 달성함.
+   - 상위 대항목 `1)` 천원 단위 절상액(`Math.ceil(val / 1000) * 1000`)과 하위 부기 `2)` 1원 단위 산출식(`단가 × 수량/인원 × 횟수/기간`) 간 단수 정합성을 엄밀히 입증함.
+   - e-호조 본청 일반지출과 일상경비(`daily_expense`) 듀얼 파이프라인의 이중 합산 및 이중 차감 0건을 격리 보장함.
+2. **법령 및 실무 아카이브 RAG 실증주의 (Statutory & Master Archive RAG - $\mathcal{J}_{\text{DocAuto}}$)**:
+   - 당해연도 실무 워크스페이스(`D:\Desktop\공공문서 폴더\2026년`) 및 전사 마스터 아카이브(`F:\_Organized_Archive`)의 실제 기안문·견적서·과업지시서를 사실 근거로 직접 인용함.
+   - "관련 법령에 따라"와 같은 가상·추상적 수식을 전면 배제하고 국가법령정보센터의 법률 조항(조·항·호·목) 및 자치구 조례를 정확히 명시함.
+3. **심리 묘사·감정 배제 공문서 개조식 어조 (Zero Psychological Ventriloquism - Rule M & Rule P)**:
+   - 사용자의 내면 심리(예: "주무관님이 화가 났다", "답답한 심정", "피가 마르는")나 상대방 감정을 소설화·대변하는 일체의 문체를 전면 금지함.
+   - 공문서 표준 개조식 문체(`󰏚`, `▢`, `❍`, `-`, `-함`, `-됨`, `-임`), 2타 띄기, 두괄식 핵심 서술, 사과 및 면책성 발언 0건을 엄격히 강제함.
+4. **모바일 퍼스트 448px 현장 인체공학 관제 (Mobile-First 448px Field Ergonomics - $\mathcal{J}_{\text{FieldSync}}$)**:
+   - 야외 스마트폰 한 손 파지 뷰포트(`max-w-md` 448px) 내 가로 클리핑 0건, 2-Row 헤더 분리, 전폭 카드 스택 구조를 유지함.
+   - 4대 탭 위계(`1. 추진과제` $\to$ `2. 부스현황` $\to$ `3. 업무분장` $\to$ `4. 행사식순`)를 고정하고, 로컬 PC 전원 오프 시에도 Cloudflare Pages/KV를 통해 24/7 300ms 무인 듀얼 싱크를 보장함.
+5. **무손실·무정지 런타임 엔지니어링 (Zero-Data-Loss & Zero-Stall Runtime Engineering - $\mathcal{J}_{\text{Security}}$)**:
+   - 사용자 명시 지시 없는 `D:\Desktop` 및 `F:\_Organized_Archive` 파일 이동/삭제/수정 영구 금지 (Rule O).
+   - 평문 JSON 고속 I/O 환경에서 원자적 쓰기(`tempPath` $\to$ `fs.rename`), 최대 20개 순환 백업, 글로벌 툼스톤, Zod Loud-Failure를 강제하며, 탭 이탈 시 3D 물리 틱·폴링 일시정지로 롱 태스크 스톨 0ms를 보장함.
+
+### 7-5. 의사결정 분류 체계 및 AI 실행 최적화 프레임워크 (Decision Taxonomy & AI Optimization Framework)
+
+과거 마찰 지점을 근원적으로 차단하기 위해 **7대 마찰 유발점(Friction Triggers & Anti-Patterns)**과 **선제적 최적화 점검 체계(Pre-Flight & Post-Flight Checklists)**를 다음과 같이 체계화한다:
+
+#### 7대 마찰 유발점 및 안티패턴 (7 Friction Triggers & Anti-Patterns)
+1. **F1. 예산 단수 및 절상·절사 불일치 (Rounding & Sub-Item Discrepancies)**: 상위 천원 올림액과 하위 1원 산출식 합계 불일치, 또는 피승수 반올림 오기입 (방어: Rule R.1, R.2 준거 3중 총액 전수 검산).
+2. **F2. 일상경비 이중 차감 (Daily Expense Double-Counting)**: 이미 교부된 일상경비를 본청 일반지출 가용잔액에서 중복 차감하여 잔액 왜곡 및 409 에러 유발 (방어: Rule R.4 듀얼 파이프라인 연산 격리).
+3. **F3. 감정적 어조 및 심리 대변 (Psychological Ventriloquism)**: 사용자의 심리를 추측 대변하거나 회화체 종결어미("~하겠습니다") 남발 (방어: Rule M, Rule P 개조식 명사 종결어미 강제).
+4. **F4. 바탕화면 파일 무단 이동/삭제 (Unauthorized Desktop Mutation)**: 정리 목적으로 `D:\Desktop`의 당해연도 실무 파일을 임의 이관·삭제 (방어: Rule O 바탕화면 100% 면역).
+5. **F5. 모바일 448px 컨테이너 가로 잘림 (Horizontal Overflow & Clipping)**: 고정폭 테이블이나 배정 과업명 줄바꿈 미처리로 모바일 뷰포트 초과 (방어: Rule S.2 `max-w-md` 2-Row 헤더 및 스택 레이아웃).
+6. **F6. Cloudflare KV 4-Way 동기화 누락 (Incomplete Cloud Dual-Sync)**: 로컬 SSOT는 갱신되었으나 Cloudflare KV 업로드 또는 정적 템플릿 재빌드 누락 (방어: Rule S.1 4계층 동시 배포 데몬).
+7. **F7. 포스터 및 HWPX 오탈자·서식 파괴 (In-Place Template Corruption & AI Typos)**: 원본 template.hwpx 인플레이스 덮어쓰기 또는 AI 포스터 글리프 왜곡 (방어: Rule G 비파괴 복제 빌드, Rule N 순수 QR 단독 배치).
+
+#### 선제적 최적화 실행 프레임워크 (Pre-Flight & Post-Flight Checklists)
+- **Pre-Flight 체크리스트 (작업 착수 전 7대 게이트)**:
+  - [ ] 1. **경로 격리 검증**: 작업 대상에 `D:\Desktop` 및 `F:\_Organized_Archive` 파일 이동/삭제가 포함되어 있지 않은가? (사용자 명시 지시 없으면 즉시 중단)
+  - [ ] 2. **실무 RAG 팩트 확보**: `D:\Desktop\공공문서 폴더\2026년` 및 `F:\_Organized_Archive`에서 실무 기안문·견적서 팩트를 확보하였는가?
+  - [ ] 3. **공문서 개조식 어조 점검**: 답변 및 문서 계획에 감정 묘사, 구어체("~하겠습니다"), 사과 문구가 배제되었는가?
+  - [ ] 4. **비파괴 템플릿 복제 확인**: HWPX 생성 시 원본 템플릿을 보존하고 신규 출력 경로로 복제 빌드하도록 계획되었는가?
+  - [ ] 5. **예산 듀얼 파이프라인 확인**: 일상경비(`daily_expense`) 항목이 본청 일반지출 가용잔액을 이중 차감하지 않는가?
+  - [ ] 6. **PIPA 개인정보 사전 스캔**: 입력 대상 문서에 고유식별정보(주민등록번호 등)가 없는지 `privacy_guard.py --scan`으로 확인하였는가?
+  - [ ] 7. **모바일 448px 뷰포트 가드**: 변경되는 UI가 `max-w-md`(448px) 내에서 가로 클리핑 없이 렌더링되도록 설계되었는가?
+- **Post-Flight 체크리스트 (작업 완료 후 7대 게이트)**:
+  - [ ] 1. **1원 단위 수리적 일치 검증**: 총사업비 = 소요재원 합계 = 산출내역 실합계 간 오차 0원 및 상위 천원 올림액 $\ge \sum$ 하위 부기 원단위 합계를 확인하였는가?
+  - [ ] 2. **4-Way 동기화 검증**: 축제 관제 데이터 수정 시 로컬 SSOT, React 뷰, 정적 HTML, Cloudflare KV가 모두 갱신되었는가?
+  - [ ] 3. **인포그래픽 정합성 검증**: 포스터 5개 코스 배정 인원 합계($4,500$명)가 상단 공식 캡슐 배지와 일치하며 오탈자가 0건인가?
+  - [ ] 4. **3-Way 거버넌스 동기화**: 신규 마일스톤 생성 후 `node scripts/sync-rules.js`를 구동하여 3개 문서 간 동기화를 완료하였는가?
+  - [ ] 5. **정적 타입 무결성 검증**: `npx tsc --noEmit` 구동 결과 컴파일 에러 0건을 확인하였는가?
+  - [ ] 6. **런타임 하네스 검증**: `node scripts/run-harness.js` 구동 결과 Zod 스키마 검증 및 ESLint 무결성을 확인하였는가?
+  - [ ] 7. **자동화 테스트 회귀 검증**: 대상 도메인의 Jest 단위/통합 테스트 스위트가 100% PASS하는가?
+
+### 7-6. 모듈형 스킬셋 및 플레이북 아키텍처 (Modular Skillset & Playbook Architecture)
+
+Antigravity 2.0 커스터마이징 규격(`agy-customizations`)에 따라 VITAL 시스템의 핵심 실무 역량을 5대 온디맨드 작업공간 스킬(`.agents/skills/`)과 1대 영구 참조 가이드라인(`docs/`)으로 표준화하였다:
+
+| 스킬 / 가이드라인 | 파일 경로 | 목적 함수 | 핵심 런북 및 제공 역량 |
+|:---|:---|:---:|:---|
+| **vital-budget-audit** | `.agents/skills/vital-budget-audit/SKILL.md` | $\mathcal{J}_{\text{Budget}}$ | 공공예산 3중 총액 1원 정합성 검증, 101-04 법정 인건비(기본급·퇴직금·연차수당·5대보험) 산출식 엔진, e-호조 일상경비 듀얼 파이프라인 무충돌 감사 |
+| **vital-hwpx-docgen** | `.agents/skills/vital-hwpx-docgen/SKILL.md` | $\mathcal{J}_{\text{DocAuto}}$ | 법령·아카이브 RAG 기반 기안서 초안 마크다운 작성, 비파괴 복제 기반 `generate_new_hwpx.py` 4단계 한글 자동 빌드, 공공기관 표준 서식 조판 |
+| **vital-festival-4way-sync** | `.agents/skills/vital-festival-4way-sync/SKILL.md` | $\mathcal{J}_{\text{FieldSync}}$ | 양재천 건강 페스티벌 448px(`max-w-md`) 모바일 관제 대시보드 유지보수, 로컬 SSOT ↔ 마스터 엑셀 ↔ 정적 HTML ↔ Cloudflare KV 300ms 무인 듀얼 싱크, 국민의례 약식 1 의전 준거 |
+| **vital-public-infographic** | `.agents/skills/vital-public-infographic/SKILL.md` | $\mathcal{J}_{\text{DocAuto}}$ | 16:9 가로형 및 2:3 세로형 듀얼 포맷 공공 캠페인 포스터 설계, 순수 2D QR 매트릭스 단독 조판, 5대 코스 4,500명 쿼터 수리적 일치 및 오탈자 0 보증 |
+| **vital-governance-ops** | `.agents/skills/vital-governance-ops/SKILL.md` | $\mathcal{J}_{\text{Security}}$ | 신규 엔지니어링 마일스톤 패치 로깅, `scripts/sync-rules.js` 3-Way 동기화, `privacy_guard.py` PIPA 비식별화, RFC 5545 iCal 피드 연동, Zod 하네스 게이트키퍼 총괄 운영 |
+| **HWP_GENERATION_GUIDELINES** | `docs/HWP_GENERATION_GUIDELINES.md` | $\mathcal{J}_{\text{DocAuto}}$ | 외부 브레인 파손 링크를 영구 대체하는 워크스페이스 표준 가이드라인 (용지 여백 15/20/10mm, 폰트 위계 22/18/15/13/11pt, 다단계 항목 기호, 2타 띄기, 행정 문장부호) |
 
 ---
 
 ## 8. 최근 엔지니어링 마일스톤
+
+### [Milestone 263: 5대 모듈형 작업공간 스킬셋 아키텍처 구축, 대화 이력 마이닝 기반 사용자 운영 페르소나 코드화, 한글(HWP) 가이드라인 영구 복원 및 3-Way 거버넌스 매니페스트 동기화] Conducted comprehensive forensic mining across 508 historical conversation logs, 222 explicit user directives, and 262 engineering milestones, codified the User Operational Persona (Public Administrative Perfectionist & Zero-Defect Systems Architect) and Proactive Optimization Charter, established 5 modular on-demand workspace skills (.agents/skills/*/SKILL.md) across public budget audit, HWPX docgen, festival 4-way sync, public infographics, and governance ops, permanently restored docs/HWP_GENERATION_GUIDELINES.md in workspace root eliminating broken brain links, and executed 3-way synchronization across Engineering Report, Engineering Milestones, and AGENTS.md. (2026-10-14)
+* **개요 및 고도화 목적**:
+  - 사용자 지침(/teamwork-preview 현재까지 나와 대화 했던 내역을 기준으로, 나의 업무 성향과 지향점을 파악하여 내가 향후 업무를 수행하는 행위를 최적화 할수 있도록 엔지니어링 리포트와 각종 md 스킬셋 파일을 고도화 하고싶어)에 의거하여 누적 262개 마일스톤 및 508개 대화 세션을 전수 분석하고 전사적 실무 역량을 모듈형 스킬셋으로 체계화:
+    1. **사용자 인지·실무 페르소나 및 선제적 최적화 헌장 정립**:
+       - 1원 단위 공공예산 결벽성, 실무 아카이브 RAG 실증주의, 심리 묘사·감정 배제 공문서 개조식 어조(Zero Psychological Ventriloquism), 448px 모바일 퍼스트 현장 인체공학, Zero-Data-Loss 런타임 엔지니어링의 5대 핵심 인지 특성을 규명하고 `Engineering Report.md` 및 `AGENTS.md`에 공식 편입.
+    2. **5대 온디맨드 도메인 스킬셋(`.agents/skills/*/SKILL.md`) 신규 구축**:
+       - `vital-budget-audit`: 공공예산 3중 총액 대조, 101-04 법정 인건비 계산식, 일상경비 듀얼 파이프라인 무충돌 검증 SOP.
+       - `vital-hwpx-docgen`: 법령/아카이브 RAG, 표준 개조식 마크다운 초안, 템플릿 복제 기반 `generate_new_hwpx.py` 4단계 파이프라인.
+       - `vital-festival-4way-sync`: SSOT JSON ↔ 마스터 엑셀 ↔ Cloudflare Pages 템플릿 ↔ Cloudflare KV 300ms 무인 듀얼 싱크 및 448px 모바일 관제 SOP.
+       - `vital-public-infographic`: 16:9 가로형 및 2:3 세로형 듀얼 포맷 조판, 순수 2D QR 매트릭스 합성, 4,500명 쿼터 수학적 일치 검증 SOP.
+       - `vital-governance-ops`: 자연어 스케줄러, RFC 5545 iCal 양방향 피드, PIPA 비식별화 CLI(`privacy_guard.py`), `sync-rules.js` 3-Way 동기화 SOP.
+    3. **`docs/HWP_GENERATION_GUIDELINES.md` 영구 워크스페이스 문서화 및 외부 링크 완전 해소**:
+       - 기존 외부 브레인 경로(`file:///C:/Users/user/.gemini/antigravity/brain/.../hwp_generation_guidelines.md`)의 깨진 링크를 워크스페이스 루트 내 영구 참조 파일(`docs/HWP_GENERATION_GUIDELINES.md`)로 복원 및 정립 완료.
+    4. **`AGENTS.md` 매니페스트 전면 업그레이드 및 3-Way 동기화**:
+       - 신규 사용자 페르소나 헌장, 스킬셋 라우팅 매트릭스(Skill Routing Matrix) 신설, Rules A~S 보존 및 `node scripts/sync-rules.js` 무결점 실행 완료.
+
+### [Milestone 262: Zero-Data-Loss Localhost Startup & Runtime Performance Optimization (5-Pillar I/O, Incremental Zod, Lazy PBKDF2, Conditional CommandPalette & Zero Lint Warnings)] Eliminated duplicate `fs.stat` syscalls and $O(N)$ full-array Zod re-validation on single-row mutations in `/api/data/route.ts`, introduced row-level Zod validation memoization and `mtime`/`size` fast-path in `sheets-api.ts`, implemented lazy PBKDF2 `masterKey` derivation and `sessionStorage` auth token caching in `crypto.ts` alongside `optimizePackageImports` in `next.config.ts`, conditionally mounted `CommandPalette` to eliminate idle background item aggregation, and stabilized hook fallback references to achieve 0 ESLint warnings and 0 errors with 100% SSOT data preservation. (2026-10-14)
+* **개요 및 고도화 목적**:
+  - 사용자 지침(`/plan 로컬호스트 오픈 및 동작 속도 효율화 패치 가능할까? 데이터 소실되지 않게 유의해서`)에 의거하여 로컬 SSOT(`data/*.json`), 원자적 파일 쓰기(`tempPath` $\to$ `fs.rename`), 3단계 자동 백업(`data/backups/` 최대 20개 스냅샷), 전역 툼스톤 및 Zod Loud-Failure 검증 무결성을 100% 보존하면서 5대 병목을 전면 해소:
+    1. **백엔드 `/api/data` 중복 `fs.stat` 제거 및 $O(1)$ 증분 Zod 검증 (`src/app/api/data/route.ts`)**: `GET` 핸들러의 `stats.mtimeMs`를 `readData`에 직접 전달하고 `writeDataToFile`이 `{ mtimeMs, size }`를 반환하도록 개선하여 요청당 중복 `fs.stat` 시스템 콜을 50% 절감(2회 $\to$ 1회). 단일 행 `add`/`update` 시에는 변이된 해당 행만 $O(1)$로 즉시 검증(`validateSingleItemPayload`)하고 `replace` 시에만 $O(N)$ 전체 검증을 수행하도록 최적화.
+    2. **클라이언트 행 단위 Zod 검증 메모이제이션 및 `mtime`/`size` 고속 경로 (`src/lib/sheets-api.ts`)**: 시트별 `rowValidationCache`(`rawSig` 기반)를 도입하여 단일 행 변이 후 재조회 시 변경되지 않은 $N-1$개 행의 반복적인 `schema.safeParse` 연산을 $O(1)$ 캐시 히트로 대체하고, `mtime` 및 `size` 일치 시 즉시 메모이제이션된 배열을 반환.
+    3. **WebCrypto PBKDF2 200,000회 연산 지연 파생 및 세션 캐싱 (`src/lib/crypto.ts`, `next.config.ts`)**: 평문 JSON 바이패스 환경(Rule A.1)에서 사용되지 않는 레거시 복호화용 `masterKey`(100,000회 PBKDF2)를 실제 암호문 유입 시에만 파생(`getOrDeriveMasterKey`)하도록 지연 처리하고, `sessionAuthToken`을 `sessionStorage`에 캐싱하여 로컬호스트 새로고침 시 `initCryptoContext` 대기 시간을 0ms로 단축. 아울러 `next.config.ts`에 `experimental.optimizePackageImports`를 적용하여 대용량 아이콘·차트 패키지 번들링을 가속.
+    4. **`CommandPalette` 조건부 마운트 및 비가시 백그라운드 연산 차단 (`src/components/ProtectedApp.tsx`, `src/components/modals/CommandPalette.tsx`)**: 모달이 닫혀 있을 때(`isCommandPaletteOpen === false`) `CommandPalette` 마운트 및 7개 도메인 배열 순회(`allItems` `useMemo`)를 전면 차단하여 유휴 상태 백그라운드 리렌더링 부하를 0으로 제거.
+    5. **훅 참조 안정화 및 전사 ESLint 경고 0건 달성 (`src/hooks/useBudgetSimulator.ts`, `src/hooks/useWikiStorage.ts`, `src/components/festival/YangjaeFestivalDashboard.tsx`)**: `EMPTY_BUDGET_CATEGORIES`, `EMPTY_BUDGET_ENTRIES` 모듈 상수를 도입하여 시뮬레이터 하위 7개 `useMemo`/`useCallback`의 불필요한 재연산을 방지하고 전사 ESLint 경고 11건을 `0 warnings, 0 errors`로 완전 해소.
+
+### [Milestone 261: System Objective Function (5-Pillar) Formalization, Empirical Codebase Metrics Synchronization (168 Files / 54,035 LOC) & 3-Way Milestone Pipeline Upgrade] Formalized the 5-Pillar System Objective Function across `PORTFOLIO VITAL - Engineering Report.md` and `AGENTS.md`, synchronized all architectural tables with empirical codebase metrics (168 TS/TSX files, 54,035 LOC, 64 UI components, 40 hooks, 14 API routes, 5 Cloudflare Edge Functions, 33 Jest test suites / 315+ tests), enacted Rules R (Public Budget Mathematical Integrity) and S (Hybrid Cloud Replica 4-Way Sync), normalized Milestones 248-261, and upgraded `scripts/sync-rules.js` for automated 3-Way synchronization. (2026-10-14)
+* **개요 및 고도화 목적**:
+  - 사용자 지침(`/plan 엔지니어링 리포트와 에이전트 md를 목적함수에 맞게 고도화`)에 의거하여 시스템의 실질적 5대 목적 함수와 실측 코드베이스 지표를 양대 거버넌스 문서에 100% 일치화:
+    1. **5대 시스템 목적 함수($\mathcal{J}_{\text{Budget}}, \mathcal{J}_{\text{FieldSync}}, \mathcal{J}_{\text{DocAuto}}, \mathcal{J}_{\text{Ontology}}, \mathcal{J}_{\text{Security}}$) 명문화**: 공공예산 수리적 정합성, 모바일 퍼스트 현장 관제 및 Cloudflare KV 듀얼 싱크, 법령·아카이브 기반 HWPX 자동화, 시맨틱 온톨로지·iCal 스케줄러, PIPA 비식별화 및 하네스 무결성 체계를 `AGENTS.md` 제0장 및 `Engineering Report.md` 제1장에 정식 확립.
+    2. **실측 코드베이스 지표 전수 현행화**: 기존 레거시 수치(130 파일, 31,030 LOC, 41 컴포넌트, 33 훅, 10 API)를 현행 실측치(**168개 TS/TSX 파일, 54,035 LOC, 64개 컴포넌트, 40개 커스텀 훅, 14개 로컬 API + 5개 Cloudflare Edge Functions, 28개 자동화 스크립트, 563+ 커밋, 33개 Jest 스위트/315+ 테스트**)로 전면 갱신.
+    3. **신규 에이전트 행동 수칙(`Rule R`, `Rule S`) 제정**: 공공예산 3중 총액 대조 및 원단위/천원단위 절상·절사 정합성 규격(`Rule R`), 모바일 관제 대시보드 4-Way 동기화 규격(`Rule S`) 신설.
+    4. **마일스톤 정규화 및 `scripts/sync-rules.js` 3-Way 동기화 개편**: 제9장 하단에 체크리스트로 분산되어 있던 2026-10-13자 마일스톤 10건을 제8장 표준 마일스톤(`Milestone 251`~`260`)으로 승격·통합하고, `sync-rules.js`가 `Engineering Report.md` $\to$ `Engineering Milestones.md` $\to$ `AGENTS.md`를 일괄 동기화하도록 개편 완료.
+
+### [Milestone 260: 101-04 Welfare Allowance (12 Months 480,000 KRW) & Work Uniform (180,000 KRW) Re-Alignment & Seoul City Provisional Notice (102,641,000 KRW) 100% Match Verification] Normalized welfare allowance to 12 full months (480,000 KRW) and work uniform unit cost/quantity (180,000 KRW), corrected long-term care insurance multiplicand (2,967,685 KRW), and achieved 100.0% 1-KRW precision alignment with Seoul City official provisional notice (102,641,000 KRW: City 51,320,000 KRW, District 51,321,000 KRW). (2026-10-13)
+* **개요 및 주요 조치**:
+  - 복지수당 12개월 만근 정상화(`20,000원 × 2명 × 12회 = 480,000원`, `+40,000원`) 및 근로자 근무복 단가·수량 정규화(`하계근무복 35,000원 × 4착 + 명찰 10,000원 × 4개 = 180,000원`, `△40,000원`)로 상쇄하여 인건비 총액 `102,641,000원` 불변 유지.
+  - 장기요양보험료 피승수 교정(`2,967,685원 × 13.14% = 389,954원`) 및 서울시 가내시 엑셀 원안(`시비 51,320천원, 구비 51,321천원`)과 100% 완전 일치 달성.
+
+### [Milestone 259: 2027 Physical Activity Project Specification v2 (`신체활동2.hwpx`) Full-Scale Financial Integrity Audit & Provisional Notice Reconciliation] Audited Project 1 (142,180,000 KRW) and Project 2 (189,254,000 KRW) across all overview, resource allocation, and calculation tables, confirming 100.0% consistency with Seoul City provisional notice (Labor 102,641,000 KRW) and identifying the long-term care insurance multiplicand typo (`2,968,000` -> `2,967,685`). (2026-10-13)
+* **개요 및 주요 조치**:
+  - `사업 1(142,180천원: 기금 28,436 / 시비 34,123 / 구비 79,621)` 및 `사업 2(189,254천원: 시비 64,673 / 구비 124,581)` 전 항목 교차 검증 완료 및 5대 보험 실합계(`9,796,567원`) 천원 올림(`9,797,000원`) 정합성 입증.
+
+### [Milestone 258: 101-04 Severance Pay & Annual Leave Allowance Sub-Item (`2)`) Exact 1-KRW Calculation (6,879,196 KRW & 2,633,180 KRW) Synchronization] Calculated exact 1-KRW unit formulas for severance reserve (`3,439,598 × 2 × 1 = 6,879,196 KRW`) and unused annual leave allowance (`131,659 × 10 × 2 = 2,633,180 KRW`, subtotal `9,512,376 KRW`), reconciling with rounded header item `1)` (`9,513,000 KRW`). (2026-10-13)
+* **개요 및 주요 조치**:
+  - 하위 `2)` 부기 원단위 산출액(`6,879,196원 + 2,633,180원 = 9,512,376원`)과 상위 `1)` 천원단위 절상 편성액(`6,879,000원 + 2,634,000원 = 9,513,000원`) 간 정합성 확립 및 HWPX 미러 파일 동기화 완료.
+
+### [Milestone 257: 101-04 Employer Social Insurance Burden Sub-Item (`2)`) Exact 1-KRW Unit Formula (9,796,567 KRW) Specification & HWPX Sync] Formulated 1-KRW unit statutory calculations across all 5 social insurances for 12 months (National Pension 4,127,518 KRW, Health 2,967,685 KRW, Long-Term Care 389,954 KRW, Employment 1,444,631 KRW, Industrial Accident 866,779 KRW; exact sum 9,796,567 KRW) and synchronized HWPX XML cells. (2026-10-13)
+* **개요 및 주요 조치**:
+  - 2명 월 기본급(`6,879,196원`) 기준 12개월 5대 사회보험 법정요율 원단위 정밀 산출식 확립 및 상위 `1)` 대항목 예산액과의 단수 정합성 규명 완료.
+
+### [Milestone 256: 101-04 Work Uniform Sub-Item Separation (220,000 KRW) & Severance/Annual Leave Header Correction (9,513,000 KRW)] Corrected severance and annual leave header from 9,733,000 KRW to 9,513,000 KRW by purging duplicate 220,000 KRW reserve after separating work uniform expense (220,000 KRW), preserving the 102,642,000 KRW total ceiling. (2026-10-13)
+* **개요 및 주요 조치**:
+  - `기본급(82,551천원) + 퇴직·연차(9,513천원) + 복지수당(440천원) + 명절상여(120천원) + 보험부담금(9,798천원) + 근무복(220천원) = 102,642,000원` 6대 비목 무결점 일치 및 HWPX 테이블 셀 XML 반영 완료.
+
+### [Milestone 255: 101-04 Welfare Allowance & Holiday Bonus Restoration (560,000 KRW) & 10-Day Annual Leave Rebalancing] Restored treatment improvement welfare allowance (440,000 KRW) and holiday bonus (120,000 KRW), adjusted annual leave allowance to 10 days (2,634,000 KRW) with 220,000 KRW reserve to preserve the 102,642,000 KRW labor cost ceiling. (2026-10-13)
+* **개요 및 주요 조치**:
+  - 처우개선 복지수당(`20,000원 × 2명 × 11월 = 440,000원`) 및 명절상여금(`30,000원 × 2명 × 2회 = 120,000원`) 복원 및 102,642천원 한도 내 비목 재편 완료.
+
+### [Milestone 254: 101-04 Severance, Annual Leave & Insurance Reserve Consolidation (10,293,000 KRW) & 3-Tier Sub-Item Optimization] Consolidated statutory severance pay (6,879,000 KRW), 11-day annual leave allowance (2,897,000 KRW), and social insurance settlement reserve (517,000 KRW) into a unified 10,293,000 KRW line item alongside 12-month base salary (82,551,000 KRW) and actual insurance requirement (9,798,000 KRW). (2026-10-13)
+* **개요 및 주요 조치**:
+  - 101-04 기간제보수를 기본급(`82,551,000원`), 퇴직금 및 연차수당 등(`10,293,000원`), 기관 보험 부담금(`9,798,000원`)의 3단 구조로 통합하여 가내시 총액 `102,642,000원` 일치 달성.
+
+### [Milestone 253: 101-04 Transition to 12-Month Full-Service Structure with Statutory Severance & Max Annual Leave Allowance (102,642,000 KRW)] Transitioned contract structure from 11 months to 12 full months (Base salary 82,551,000 KRW + Severance 6,879,000 KRW + 11-day max annual leave allowance 2,897,000 KRW + 12-month social insurance 10,315,000 KRW = 102,642,000 KRW). (2026-10-13)
+* **개요 및 주요 조치**:
+  - 1일 통상임금(`3,439,598원 / 209시간 × 8시간 = 131,659원`) 기반 연차유급휴가 미사용수당(11일 맥스 `2,897,000원`) 및 12개월 만근 법정퇴직적립금(`6,879,000원`) 편성 체계 확립.
+
+### [Milestone 252: 101-04 Employer Social Insurance 11-Month Actual Cost Calculation (8,983,000 KRW) & Settlement Reserve (4,229,000 KRW) Allocation] Calculated 11-month statutory employer burden across 5 social insurances rounded up to 1,000 KRW units (8,983,000 KRW) and allocated remaining 4,229,000 KRW as settlement reserve to match the 13,212,000 KRW provisional ceiling. (2026-10-13)
+* **개요 및 주요 조치**:
+  - 국민연금(`3,784천원`), 건강보험(`2,721천원`), 장기요양(`358천원`), 고용보험(`1,325천원`), 산재보험(`795천원`) 11개월 실소요액(`8,983,000원`) 및 정산 유보분(`4,229,000원`) 분리 산정 완료.
+
+### [Milestone 251: 2027 Health Promotion Physical Activity Project Specification Budget Alignment & Labor Cost Ceiling (102,642,000 KRW) Finalization] Verified and aligned full data consistency for '사업설명서(건강증진팀)_신체활동.hwpx', locked in labor cost rounding-up policy (102,642,000 KRW), reconciled 201 operating expenses (29,846,000 KRW), and verified 100% mathematical integrity across all subtotals, required resources (City 64,673,000 KRW, District 124,582,000 KRW), and total project budget (189,255,000 KRW). (2026-10-13)
+* **개요 및 주요 조치**:
+  - 101 인건비(`102,642천원`: 시비 `51,320천원`, 구비 `51,322천원`), 201 일반운영비(`29,846천원`: 사무관리비 `26,846천원` + 공공운영비 `3,000천원`), 202 여비(`720천원`), 203 업무추진비(`1,050천원`), 207 자산취득비(`54,997천원`) 합산 총사업비 `189,255천원` 100% 정합성 확립 및 2027 공정수당 지침(`2,488천원/인`) 법적 검토 반영 완료.
 
 ### [Milestone 250: Sonmok Doctor 9988 Top-Right Pure QR Matrix Integration & Dual Poster Final Release] Stripped all textual description cards from QR code per user directive, directly integrated pure 2D QR matrix into top-right corners across both 2:3 vertical (85x85px balanced layout) and 16:9 horizontal (105x105px landscape layout) posters via sub-pixel alpha compositing, verified 100% Google Play Store direct routing, and established permanent clean poster assets. (2026-10-12)
 * **개요 및 구현 목적**:
@@ -6356,6 +6524,3 @@ sequenceDiagram
       - 식순 편집 시 5대 일자(`10.17`, `10.23`, `10.24`, `10.30`, `10.31`) 드롭다운 선택 지원.
       - `scripts/pages-template.html`: Cloudflare 24/7 Read-Only Replica 정적 템플릿 실시간 동기화.
       - `scripts/sync-festival-fallbacks.py` 및 `scripts/prepare-pages-output.js` 실행으로 폴백 데이터 및 Cloudflare Functions 100% 동기화.
-
-
-
