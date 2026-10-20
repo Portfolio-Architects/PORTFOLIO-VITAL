@@ -7,12 +7,14 @@ import { InventoryItem, StockChange, generateId } from '@/types';
 
 const EMPTY_STOCK_CHANGES: StockChange[] = [];
 
-export function useInventory() {
+export function useInventory(options?: { enabled?: boolean }) {
+  const enabled = options?.enabled ?? true;
   const queryClient = useQueryClient();
 
   const { data: items = [] } = useQuery({
     queryKey: ['INVENTORY'],
     queryFn: () => readSheet<InventoryItem>('INVENTORY'),
+    enabled,
     staleTime: 1000,
     refetchOnWindowFocus: true,
     refetchIntervalInBackground: false,
@@ -21,6 +23,7 @@ export function useInventory() {
   const { data: stockChanges = [] } = useQuery({
     queryKey: ['STOCK_CHANGES'],
     queryFn: () => readSheet<StockChange>('STOCK_CHANGES'),
+    enabled,
     staleTime: 1000,
     refetchOnWindowFocus: true,
     refetchIntervalInBackground: false,

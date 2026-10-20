@@ -3,6 +3,106 @@
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
 
+### [Milestone 270: 메인 페이지(통합 대시보드·글로벌 앱 셸·주소록) 및 양재천 페스티벌 페이지(React 뷰·4-Way 정적 엣지 레플리카) 미니멀리즘 디자인 전면 개편 (100% SSOT 데이터 및 인라인 관제 무결성 보존)] Extended the unified minimalist design system (clean white surfaces, 1px slate-200/80 hairline borders, low-saturation slate typography hierarchy, tabular-nums monospace alignment, and segmented tab controls) across the Main Dashboard & Global App Shell ('ProtectedApp.tsx', 'SplashView.tsx', 'Sidebar.tsx', 'LocalhostStatusHUD.tsx', 'PortfolioDashboardView.tsx', 'ContactsBox.tsx') and the Yangjae Festival 4-Way Edge Replica ('YangjaeFestivalDashboard.tsx', 'YangjaeFestivalClientWrapper.tsx', 'YangjaeFestivalSkeleton.tsx', 'scripts/pages-template.html', 'out/festival/yangjae/index.html') while preserving 100% of underlying SSOT data, KPI metrics, inline editing, and 448px mobile ergonomics. (2026-10-20)
+* **개요 및 추진 목적**:
+  - 사용자 지시(`메인페이지에도 미니멀리즘 디자인 적용해줘봐, 양재천 페스티벌 페이지도 /boost`)에 의거하여 Milestone 268(예산관리) 및 Milestone 269(예산 시뮬레이터)에서 확립한 미니멀리즘 디자인 언어를 **메인 페이지(대시보드 & 글로벌 앱 셸)**와 **양재천 페스티벌 관제 페이지(React 뷰 & Cloudflare Pages 정적 레플리카)** 전 계층에 일괄 확산 적용함:
+    1. **메인 페이지 및 글로벌 앱 셸 미니멀리즘 개편 (`ProtectedApp.tsx`, `SplashView.tsx`, `Sidebar.tsx`, `LocalhostStatusHUD.tsx`, `PortfolioDashboardView.tsx`, `ContactsBox.tsx`)**:
+       - `ProtectedApp`의 배경 데코레이션 블러 오브를 제거하고 `bg-slate-50/70` 단일 캔버스로 정돈하며, `SplashView` 초기 로딩 화면도 화이트 카드(`bg-white border-slate-200/80 rounded-xl shadow-2xs`) 및 슬레이트 스피너로 일원화함.
+       - `Sidebar` 상단 데스크톱 네비게이션을 `WorkspaceView`와 동일한 세그먼트 컨트롤(`bg-slate-100/80 p-1 rounded-xl border border-slate-200/70`) 및 활성 탭 화이트 서피스(`bg-white text-slate-900 shadow-2xs border border-slate-200/80`)로 통일하고, `LocalhostStatusHUD`를 컴팩트 `1px` 배지 및 동적 상태(`ONLINE` / `DEGRADED` / `OFFLINE`) 표시 모달로 개편함.
+       - `PortfolioDashboardView`의 기존 `glass-panel`, `rounded-[2rem]`, 호버 스케일(`hover:scale-[1.01]`)을 제거하고 `bg-white rounded-xl border border-slate-200/80 shadow-2xs` 카드, 슬레이트 팔레트 도넛·번업 차트, `font-mono tabular-nums` KPI 수치로 일원화함.
+       - `ContactsBox`의 입력 폼·검색창·가상화 그리드 카드(`ContactCard`)를 `1px` 슬레이트 헤어라인 테두리와 `tabular-nums` 전화번호 표기로 정돈함.
+    2. **양재천 페스티벌 대시보드 및 4-Way 정적 레플리카 미니멀리즘 동기화 (`YangjaeFestivalDashboard.tsx`, `YangjaeFestivalClientWrapper.tsx`, `YangjaeFestivalSkeleton.tsx`, `scripts/pages-template.html`)**:
+       - `YangjaeFestivalDashboard`의 기존 두꺼운 테두리(`border-2 border-slate-300`, `border-b-2 border-slate-900`)를 `1px` 헤어라인(`border-slate-200/80`, `border-slate-100`)으로 전면 교체하고, 상단 4대 탭(`1. 추진과제` $\to$ `2. 부스현황` $\to$ `3. 업무분장` $\to$ `4. 행사식순`)을 화이트 액티브 필 세그먼트 컨트롤(`bg-slate-100/90 p-1 rounded-xl`)로 통일하며 중복 `saveToast` 모달을 단일 미니멀 토스트로 통합함.
+       - `scripts/pages-template.html`에서 중복 선언된 `const DUTY_CATEGORIES` 구문 오류를 제거하고, `:root` CSS 변수(`--bg`, `--border`, `--shadow`)·Tailwind v4 유틸리티 호환 규칙 추가, 탭 전환 시 `is-large-font` 유지, 운영본부(`hqEntities`) 분리 집계(`총 19개 기관` + `본부 1`), 다중 담당자(`staffMembers`) 렌더링을 완비한 뒤 `node scripts/prepare-pages-output.js`로 `out/festival/yangjae/index.html`을 동기화함.
+
+
+
+### [Milestone 269: 예산 시뮬레이터 미니멀리즘 디자인 전면 개편 및 일반지출·일상경비 듀얼 파이프라인 수리 무결성 확립 (100% SSOT 데이터 보존, 9개 컴포넌트 슬레이트 단일 톤앤매너 통일, 이중 합산·자기자신 차감·0원 폴백 엣지 케이스 완전 해소)] Redesigned the entire Budget Simulator module ('BudgetSimulator.tsx', 'BudgetSimulatorSkeleton.tsx', 'SimulationSummaryCards.tsx', 'SimulationBurnUpChart.tsx', 'SimulationInputForm.tsx', 'SimulationResultTable.tsx', 'SimulationEntryList.tsx', 'StatItemDetailModal.tsx', 'QuickPlanModal.tsx') to match Milestone 268's minimalist aesthetic (unified slate palette, 1px hairline borders, tabular-nums monospace financial alignment) while preserving 100% of SSOT data and resolving dual-pipeline accounting edge cases (projectedExecutionRate double-counting prevention, effectiveDailyExpenseLimit self-deduction recovery on edit, nullish coalescing for exact 0-KRW balances, and outbound transfer direction alignment). (2026-10-20)
+* **개요 및 추진 목적**:
+  - 사용자 지시(`예산 시뮬레이터 페이지도 적용해줘 동일한 디자인 맥락 /boost`)에 의거하여 Milestone 268(예산관리 대시보드 미니멀리즘 개편)과 100% 동일한 시각적 맥락(`bg-white border-slate-200/80 rounded-xl shadow-2xs`, 슬레이트 저채도 타이포그래피, `font-mono tabular-nums` 숫자 정렬, 6px 슬림 프로그레스 바)을 예산 시뮬레이터 산하 **9개 전체 UI 컴포넌트**에 일괄 적용하고, e-호조 일반지출 vs 일상경비(`daily_expense`) 듀얼 파이프라인 수리 무결성(Rule R.3)을 강화함:
+    1. **상단 헤더·불용 위험 칩·6대 KPI 요약 카드·소진 추세 차트 미니멀리즘 일원화 (`BudgetSimulator.tsx`, `BudgetSimulatorSkeleton.tsx`, `SimulationSummaryCards.tsx`, `SimulationBurnUpChart.tsx`)**:
+       - 상단 컨트롤 바, 3분기 불용 위험 모니터링 칩 바, 정산 전환 모달 및 스켈레톤(`h-[280px]` 차트 블록 포함)을 화이트 카드와 `1px` 슬레이트 헤어라인 테두리로 정돈함.
+       - `SimulationSummaryCards` 6대 KPI 카드의 원색 그라데이션·블러 오브를 제거하고, `projectedExecutionRate` 산출 시 `projectedGeneralSpent = totalBudget - finalExpectedBalance`를 적용하여 이미 `totalSpent`(`dailyExpenseIssued` 포함)에 반영된 일상경비 시뮬레이션 예정액(`simulatedDailyExpenditure`)이 이중 합산되는 현상을 원천 차단함.
+       - `SimulationBurnUpChart`에서 예산 이체(`actionType === 'transfer'`) 누적 집행액 산출 시 `transferDirection === 'out'`(타 부서 이체 감액)과 `'in'`을 정확히 구분하여 `useBudget.ts`와 100% 수리적 일치를 달성함.
+    2. **지출 예정 입력 폼 및 시뮬레이션 결과 테이블·목록·모달 정돈 및 엣지 케이스 교정 (`SimulationInputForm.tsx`, `SimulationResultTable.tsx`, `SimulationEntryList.tsx`, `StatItemDetailModal.tsx`, `QuickPlanModal.tsx`)**:
+       - `SimulationInputForm`에서 불용 위험 칩 클릭(`editingEntry.id === ''`) 시 수정 모드가 아닌 신규 등록 모드(`onAddEntry`)로 동작하도록 분리하고, 기존 `PLANNED` 상태의 `daily_expense` 항목 수정 시 이미 `dailyExpenseRemaining`에서 차감된 본인 금액(`editingEntry.amount`)을 가산(`effectiveDailyExpenseLimit`)하여 허위 `[일상경비 한도 초과]` 차단을 방지함.
+       - `SimulationResultTable`의 통계목 그룹 헤더·세부사업 요약·합계 푸터에서 시뮬레이션 차감 후 최종 일상경비 잔액(`finalDailyExpenseRemaining`)을 일관되게 집계·표시함.
+       - `StatItemDetailModal`에서 잔액이 정확히 `0원`일 때 논리합(`||`)에 의해 차감 전 금액이나 이중 차감된 음수 적자로 폴백되던 버그를 Null 병합 연산자(`??`)로 교정하고, 기정산(`SETTLED`) 항목의 수정 버튼 노출을 차단함.
+
+
+
+### [Milestone 268: 예산관리 대시보드 미니멀리즘 디자인 및 가독성 전면 개편 (100% 데이터 무결성 보존, 슬레이트 저채도 타이포그래피 위계, 메모이제이션·인라인 편집·키보드 탐색 정합성 확립)] Redesigned the Budget Management page ('WorkspaceView.tsx', 'BudgetDashboard.tsx', 'PolicyGroupCard.tsx', 'BudgetCategoryCardItem.tsx', 'MultiSelectDropdown.tsx', 'InlineEditCell.tsx', 'DailyExpenseStatModal.tsx', 'BatchEditModal.tsx') with a minimalist high-readability aesthetic (unified slate palette, 1px hairline borders, tabular-nums monospace financial alignment, compact 2-zone headers, and 6px progress bars) while preserving 100% of underlying SSOT data, calculations, and actions, alongside fixing custom 'React.memo' comparator completeness and full keyboard 'Tab' / 'Escape' inline cell navigation. (2026-10-20)
+* **개요 및 추진 목적**:
+  - 사용자 지시(`/boost 예산관리 페이지.. 미니멀리즘 디자인 적용해서 가독성 개편해보자, 현재 너무 보기가 복잡하고 어려워.. / 데이터는 변함없이 유지하도록 하고(강조)`)에 의거하여 기존 예산 과목·지출 내역·시뮬레이션·일상경비 데이터 및 수리 연산을 단 1건의 누락이나 변형 없이 100% 보존하면서, 과도한 원색 그라데이션·다중 그림자·거대 배지로 인한 시각적 피로도를 해소하는 **미니멀리즘 가독성 개편**을 수행함:
+    1. **상단 탭·불용 위험 바·4대 KPI 요약 카드 미니멀리즘 재설계 (`WorkspaceView.tsx`, `BudgetDashboard.tsx`)**:
+       - 상단 워크스페이스 탭 전환기를 컴팩트 세그먼트 컨트롤(`bg-slate-100/80 p-1 rounded-xl`)로 정돈함.
+       - 불용 위험 모니터링 바의 원색 그라데이션·펄스 애니메이션을 제거하고 화이트 카드 기반 슬림 상태 바 및 접이식 2열 그리드로 개편함.
+       - 4대 요약 카드(`전체 예산 현황`, `일반 계좌 (e-호조 본청)`, `일상경비 이체내역`, `보건소 실질 총 가용`)를 동일한 화이트 서피스(`bg-white border-slate-200/80 rounded-xl p-4`)와 `font-mono tabular-nums` 숫자 정렬 체계로 통일하고 모든 수치(집행률·미집행률·교부원금·실지출액·가용잔액·본청/일상통장 분리 표기)를 100% 유지함.
+    2. **검색·다중 필터 바 및 3계층(정책사업 $\to$ 세부사업 $\to$ 통계목) 카드 아코디언 정돈 (`MultiSelectDropdown.tsx`, `PolicyGroupCard.tsx`, `BudgetCategoryCardItem.tsx`)**:
+       - 4단계 계층 필터(`정책사업명`, `단위사업명`, `세부사업명`, `통계목`)와 월별 필터, 검색 입력창을 단일 화이트 툴바에 배치함.
+       - `PolicyGroupCard` 및 `BudgetCategoryCardItem`의 3단 박스 중첩과 두꺼운 프로그레스 바를 제거하고, 슬림 프로그레스 바(`h-1.5`), 2-Zone 세부사업 헤더, 우측 정렬 `tabular-nums` 금액 스트립, 호버 노출 액션 버튼(`위로/아래로/수정/삭제`)으로 시각적 노이즈를 대폭 절감함.
+       - `hidePolicyHeader={true}`(세부사업 필터 활성) 시 이중 테두리·패딩 충돌을 제거하고, 하위 모달(`DailyExpenseStatModal.tsx`, `BatchEditModal.tsx`)도 동일한 슬레이트 미니멀리즘 톤앤매너로 일원화함.
+    3. **`React.memo` 비교기 완전성 및 인라인 셀(`InlineEditCell`) 키보드·이벤트 무결성 보강 (`PolicyGroupCard.tsx`, `BudgetCategoryCardItem.tsx`, `InlineEditCell.tsx`)**:
+       - `arePolicyGroupCardPropsEqual`에서 `statItem`, `formationItem`, `managementProject`, `unitProject`, `detailedProject`, `color`, `subItems`, `fundingSplits` 및 지출 내역의 `isPlanned`, `isSettled`, `actionType` 변경을 전수 감지하도록 보완하여 인라인·일괄 수정 시 즉각적인 UI 리렌더링을 보장함.
+       - `InlineEditCell` 편집 `<input>`의 `onClick`/`onDoubleClick` 이벤트 버블링을 차단하여 상위 아코디언 강제 접힘 현상을 방지하고, `Escape` 취소 시 초기값 복원 및 펼쳐진 카드 내 일반지출·일상경비 셀 간 `Tab`/`Shift+Tab` 순차 이동을 완비함.
+
+
+
+### [Milestone 267: 무손실 안전 경량화(Option A) 패치 — 미노출 모듈 백그라운드 프리로드 차단, 초기 대시보드 /api/data 동시 요청 축소(7건→2건) 및 /api/app-logs PBKDF2 100,000회 복호화 제거] Preserved all API routes and 'data/*.json' SSOT files while eliminating background idle preloads of unexposed modules ('MindMap3D', 'ProjectManagementPage', 'AIAssistantModal') in 'ProtectedApp.tsx', deferring 'TASKS', 'MEETINGS', 'PROJECTS', and 'INVENTORY' ('STOCK_CHANGES') fetching until tab switch or 'Ctrl+K' command palette activation (reducing initial '/api/data' requests from 7 to 2: 'BUDGET_CATEGORIES', 'BUDGET_ENTRIES'), and stripping legacy 'WATCHER_HISTORY.json' PBKDF2 100,000-iteration decryption from '/api/app-logs/route.ts' for instant healthcheck responses. (2026-10-19)
+* **개요 및 추진 목적**:
+  - 사용자 지시(`방안 A (안전 경량화 — 파일 삭제 없이 초기 구동·컴파일 부하만 즉시 차단) 패치 진행`)에 의거하여 기존 로컬 API 라우트 및 `data/*.json` SSOT 데이터를 100% 보존하면서 로컬 개발 서버(`localhost:3001`) 초기 구동·번들 컴파일 및 I/O 부하를 즉시 차단함:
+    1. **미노출 대용량 모듈 백그라운드 프리로드 제거 (`src/components/ProtectedApp.tsx`)**:
+       - `scheduleStaggeredPreloads()` 내 상단 네비게이션 미노출 모듈인 `MindMap3D`(+5.5s), `ProjectManagementPage`(+7.5s), `AIAssistantModal`(+7.5s)의 백그라운드 `import()` 호출을 제거하여 초기 유휴 구간 Turbopack/Webpack 청크 컴파일 부하를 차단함.
+    2. **첫 화면(대시보드) 초기 `/api/data` 동시 요청 7건 $\to$ 2건 축소 (`src/components/ProtectedApp.tsx`, `useTasks.ts`, `useInventory.ts`, `useMeetings.ts`, `useProjects.ts`, `useContacts.ts`, `useGoogleSheet.ts`)**:
+       - 도메인 훅(`useTasks`, `useInventory`, `useMeetings`, `useProjects`, `useContacts`) 및 `useGoogleSheet`에 선택적 `{ enabled?: boolean }`(기본값 `true`) 옵션을 추가하여 하위 호환성을 100% 유지함.
+       - 첫 화면(`activeModule === 'dashboard'`) 진입 시에는 `BUDGET_CATEGORIES`, `BUDGET_ENTRIES` 2건만 즉시 페칭하고, `TASKS`, `MEETINGS`, `PROJECTS`, `INVENTORY`(`STOCK_CHANGES` 포함)는 탭 전환 또는 `Ctrl+K`(`CommandPalette`) 오픈 시점에만 온디맨드 로드하도록 지연 처리함.
+    3. **`/api/app-logs` 레거시 `WATCHER_HISTORY.json` PBKDF2 100,000회 복호화 제거 (`src/app/api/app-logs/route.ts`)**:
+       - 비활성화된 파일 감시 데몬의 레거시 암호화 이력(`WATCHER_HISTORY.json`)을 매 초기 헬스체크 시 PBKDF2 100,000회 키 파생 및 AES-GCM으로 복호화하던 로직을 제거하여 `LocalhostStatusHUD` 초기 헬스체크 응답을 즉시 반환하도록 경량화함.
+
+
+
+### [Milestone 266: 2027 신체활동 사업설명서(10.15.판, 331,436천원) 전수 정합성 검증 및 하위 2)번 부기 개별 천원 올림 후 상위 1)번 합산 표준 규칙(Rule R.2 & vital-budget-audit) 명문화] Verified 100% 3-tier mathematical alignment across '(261015) 사업설명서(건강증진팀)_신체활동.hwpx' and '(261015) 사업설명서 총괄표(건강증진팀)_신체활동.xlsx' (Project 1: 142,180,000 KRW; Project 2: 189,256,000 KRW), and formally codified the mandatory 'Sub-Item 2) Individual 1,000-KRW Ceiling Before Parent 1) Aggregation Rule' ($\text{Parent } 1) \equiv \sum (\lceil \text{Sub } 2)_k / 1,000 \rceil \times 1,000)$) across '.agents/skills/vital-budget-audit/SKILL.md', 'AGENTS.md' (Rule R.2), and 'PORTFOLIO VITAL - Engineering Report.md'. (2026-10-16)
+* **개요 및 추진 목적**:
+  - 사용자 지시(`바탕화면에 (261015) 사업설명서(건강증진팀)_신체활동 파일 금액 데이터 정합성 검증해줘` 및 `처리 규칙이 2번 부기에서 올림한 뒤에 처리해야하는것을 규칙으로 지정해줘 md 파일에 앞으로 예산 관련 처리할때 활용할수 있게`)에 의거하여 2027년도 신체활동 2개 세부사업(총 `331,436천원`)의 3중 총액·총괄표 정합성을 입증하고, 향후 모든 공공예산 산출 및 감사 시 적용할 **하위 `2)` 부기 개별 천원 올림 후 상위 `1)` 합산 원칙**을 스킬셋과 거버넌스 매니페스트에 영구 규격화함:
+    1. **[(261015) 사업설명서(건강증진팀)_신체활동.hwpx](file:///d:/Desktop/(261015)%20사업설명서(건강증진팀)_신체활동.hwpx) 및 총괄표 엑셀 전수 검증 완료**:
+       - 세부사업 1 `건강생활실천사업(건강증진)`(`142,180천원`: 기금 `13,096`, 시비 `15,715`, 구비 `113,369`[매칭 `36,669` + 비매칭 `76,700`]) 및 세부사업 2 `강남 AI 메디헬스센터 운영(신규)`(`189,256천원`: 시비 `64,673`, 구비 `124,583`[매칭 `64,676` + 비매칭 `59,907`]) 간 오차 0원($\Delta = 0\text{ KRW}$) 일치 확인.
+    2. **하위 `2)` 원단위 부기 개별 천원 올림 후 상위 `1)` 합산 표준 공리 제정 (`Rule R.2` & `vital-budget-audit/SKILL.md`)**:
+       - 하위 `2)` 산출 부기 텍스트에는 1원 단위 정밀 산출식 결과를 표기하되, 상위 `1)` 편성액 산출 시에는 원단위 단순합의 1회 올림을 금지하고 **각 하위 `2)` 부기 항목별로 먼저 천원 단위 올림($\lceil \text{원단위}/1,000 \rceil \times 1,000$)을 개별 수행한 뒤 합산**하도록 명문화함.
+       - 이에 따라 `101-04 기간제근로자등보수`의 퇴직·연차수당은 $6,880,000\text{원}(\lceil 6,879,196 \rceil) + 2,634,000\text{원}(\lceil 2,633,180 \rceil) = \mathbf{9,514,000\text{원}}$, 5대 기관부담 사회보험료는 $4,128,000 + 2,968,000 + 390,000 + 1,445,000 + 867,000 = \mathbf{9,798,000\text{원}}$, 인건비 총액은 $\mathbf{102,643,000\text{원}}$(시비 `51,320천원` 상한 고정, 구비 `51,323천원` 단수 흡수)으로 표준화됨.
+    3. **3-Way 거버넌스 매니페스트 동기화 완료**:
+       - `node scripts/sync-rules.js` 구동으로 `Engineering Report.md` $\leftrightarrow$ `Engineering Milestones.md` $\leftrightarrow$ `AGENTS.md` 3-Way 동기화 및 24KB 이하 무손실 시스템 프롬프트 주입 무결성 검증 완료.
+
+
+
+### [Milestone 265: 5대 모듈형 스킬(SKILL.md)·가이드라인·AGENTS.md 개조식 문단 병합(Paragraph Collapse) 원인 규명, 마크다운 문장별 강제 엔터(- ❍ / 1문장 1줄) 규격 정립, 24KB 시스템 프롬프트 절단(Truncation) 완전 해소 및 인앱 AI 줄바꿈 파서 교정] Diagnosed and resolved the root causes of non-breaking paragraph collapse across all 5 workspace skills ('.agents/skills/*/SKILL.md'), 'docs/HWP_GENERATION_GUIDELINES.md', 'AGENTS.md' (Rule M.3), and the in-app LLM pipeline ('src/app/llm/chat/route.ts', 'src/lib/administrativeFormatter.ts') by enforcing Markdown bullet-combined dingbats ('- ❍'), mandatory 1-sentence-per-line hard breaks, preserving indented Korean bullet lines in 'cleanGemmaResponse', and optimizing 'AGENTS.md' under the 23.8KB system prompt injection threshold (0 bytes truncated). (2026-10-15)
+* **개요 및 추진 목적**:
+  - 사용자 지시(`각종 스킬 md 파일 설정 분석해주는데, 현재 답변 생성할때 전혀 개조식으로 문단이 나뉘어지지 않는데, 왜그런지 파악하고 수정해줘 / 정확하게는 문장 엔터가 안되어 있음`)에 의거하여 에이전트 스킬 설정 파일(`.agents/skills/*/SKILL.md`), 거버넌스 매니페스트(`AGENTS.md`), 한글 표준 지침(`docs/HWP_GENERATION_GUIDELINES.md`), 인앱 AI 어시스턴트(`src/app/llm/chat/route.ts`, `src/lib/administrativeFormatter.ts`)를 전수 포렌식 분석하고 4대 복합 원인을 규명·완전 교정함:
+    1. **[원인 1 규명 및 수정] 마크다운(CommonMark/GFM) 비표준 딩뱃 단일 개행 문단 병합(Lazy Paragraph Continuation Collapse) 차단**:
+       - 기존 5대 `SKILL.md` 및 `HWP_GENERATION_GUIDELINES.md`에서 `  ❍ 문장1\n  ❍ 문장2`와 같이 마크다운 표준 리스트 마커(`-`)나 빈 줄(`\n\n`) 없이 비표준 딩뱃 기호(`󰏚`, `▢`, `❍`, `•`, `※`, `가.`, `1)`)만 단일 개행(`\n`)으로 나열하여, 마크다운 파서가 이를 단일 `<p>` 문단으로 강제 병합(줄바꿈 증발)하고 에이전트 또한 이를 Few-shot 모방하여 줄바꿈 없는 답변을 출력하던 결함 확인.
+       - 5대 `SKILL.md`(`vital-budget-audit`, `vital-festival-4way-sync`, `vital-governance-ops`, `vital-hwpx-docgen`, `vital-public-infographic`) 및 `docs/HWP_GENERATION_GUIDELINES.md` 전체의 개조식 항목을 마크다운 불릿 결합(`- ❍ `, `  - `, `    - • `) 및 헤딩(`## 󰏚`, `### ▢`) + 빈 줄(`\n\n`) 구조로 전면 재구축하고, 각 스킬 제7장에 **[개조식 문단 분리 및 1문장 1줄 강제 엔터 프로토콜]**을 신설함.
+    2. **[원인 2 규명 및 수정] `AGENTS.md` 용량 초과(50,405 Bytes)로 인한 시스템 프롬프트 `<truncated 26530 bytes>` 절단 현상 완전 해소**:
+       - Antigravity IDE의 단일 `<RULE>` 시스템 프롬프트 주입 한도(약 23,875 Bytes)를 초과하여 Rule M.4 후반부~Rule S 및 제3장 스킬 매트릭스 등 26,530 Bytes가 매 턴 잘려나가던 현상 확인.
+       - `AGENTS.md`의 0장~3장(Rule A~S 전 조항 및 스킬 라우팅 매트릭스) 핵심 규격을 100% 무손실 보존하면서 고밀도 개조식으로 압축하고, `scripts/sync-rules.js`가 제4장 마일스톤 동기화 시 컴팩트 헤더 포맷을 적용하도록 개선하여 `AGENTS.md` 전체 크기를 **약 15.5KB (Truncation 0 Bytes)**로 최적화함.
+    3. **[원인 3 & 4 규명 및 수정] 인앱 AI 라우트(`src/app/llm/chat/route.ts`) 들여쓰기 삭제 버그 수정 및 행정 포매터(`src/lib/administrativeFormatter.ts`) 줄바꿈 자동 정규화**:
+       - `src/app/llm/chat/route.ts`의 `cleanGemmaResponse()` 내 `if (/^\s{2,}/.test(line)) return null;` 로직이 공백 2칸 이상 들여쓰기된 한글 하위 개조식 줄(`  ▢`, `  ❍`, `  -`, `  가.`)을 전부 삭제하던 버그를 수정하여 한글 및 개조식 기호 포함 들여쓰기 줄을 100% 보존하도록 개선함.
+       - `src/lib/administrativeFormatter.ts`에 `formatAdministrativeLineBreaks()` 함수를 신설하여 한 문단 내에 줄바꿈 없이 이어진 개조식 기호(`󰏚`, `▢`, `❍`, `•`, `※`) 및 종결어미(`-함.`, `-됨.`, `-임.`, `-음.`) 뒤 후속 항목을 자동으로 줄바꿈(`\n`) 분리하도록 구현하고 Jest 단위 테스트(`__tests__/administrative-formatter.test.ts`) 검증을 완료함.
+
+
+
+### [Milestone 264: 2026 양재천 걷자! 건강페스티벌 운영계획서(10.14.판) 20면 포렌식 정합성 감사 및 강남·양재천 랜드마크(타워팰리스·수변문화쉼터) 기반 신규 키비주얼 초안(시안 A·B 및 무대 목업) 합성] Conducted a full 20-page forensic audit on '2026 양재천 걷자! 건강페스티벌_운영계획서 1014.pdf' identifying 6 categories of numerical/logical discrepancies (tent/furniture count mismatch between 8p and 15p, layout icon errors on 4p, disabled detour staff count conflict between 10p and 13p, P8/P9 task swap, missing photo on 11p, and 6 typos), cross-reconciled against VITAL SSOT ('FESTIVAL_YANGJAE_2026.json'), and synthesized two high-resolution 16:9 key visual drafts (Concept A & Concept B) plus stage backdrop/skirt mockups ('scratch/build_yangjae_keyvisuals.py') featuring Tower Palace, Yangjaecheon Waterside Cultural Shelter, autumn foliage, and health/medical festival booths with zero-halo alpha logo compositing. (2026-10-15)
+* **개요 및 추진 목적**:
+  - 바탕화면 `2026 양재천 걷자! 건강페스티벌_운영계획서 1014.pdf`(총 20면)에 대한 수리·논리적 정합성 전수 감사 및 과장님 지시사항(강남구·양재천 주변부 랜드마크인 수변문화쉼터·타워팰리스 특징 반영, 가을 정취, 건강·의료 페스티벌 정체성 시각화)을 반영한 대행사 전달용 신규 키비주얼 초안 구축:
+    1. **운영계획서(10.14.판, 20면) 포렌식 감사 및 6대 보완사항 도출**:
+       - **물자·도면 수량 불일치**: 8p 물자 총괄표(텐트 37동, 운영본부 7동) vs 15p 부스 종합현황(36동+2대, 보건행정과 6동) 간 1동 차이 및 4p 배치도 내 04번(한의사회 3동 오작도)·17번(건강증진팀 2동 오작도) 적발.
+       - **코스 인력·업무 상충**: 10p 교통약자 우회 인력(P13~P15 총 4명) vs 13p 우회 안내문(6명) 불일치 및 10p P8(영동3,4교 중간)·P9(계단 상단) 업무명 오기재 교정 지시.
+       - **식순·안전·시각자료·오탈자**: 7p 시간표 순서 역전(`10:15` 하단 `10:10` 배치) 및 부스 시작 시각 상충(`08:40` vs `09:40`), 11p ①번 현장 사진 백지 누락, 14p·17p 구급차 2호차 운영방식 상충 및 오탈자 6건(`구문`, `차매안심센터`, `상책로` 2건, `응급처지`, `통선 확보`, `협조체재`) 전수 색출.
+    2. **강남구·양재천 랜드마크 기반 신규 키비주얼 2종 및 무대 목업 2종 합성 (`scratch/build_yangjae_keyvisuals.py`)**:
+       - **시안 A (감성 수채·벡터 하이브리드 조감도형)** 및 **시안 B (모던 파노라마 & 메디컬 부스 강조형)** 16:9 고해상도(`2752×1536`) 아트워크 생성.
+       - 도곡동 타워팰리스 마천루 스카이라인, 양재천 수변문화쉼터(통유리 파빌리온·계단식 우드데크), 아치형 보행자교(밀미리교), 단풍·은행나무·억새밭 산책로 걷기 행렬, 수변 의료·건강 체험부스(의료진 상담·바이탈 심볼) 통합 구현.
+       - PDF 내장 원본 로고(`xref 25` + 알파 마스크 `xref 26` 강남구보건소, `xref 27` 강남구체육회) 무손실 추출 및 `H2GTRE.TTF`(HY견고딕) 타이포그래피·무대 스커트(18p 규격) 시뮬레이션 조판 완료.
+
+
+
 ### [Milestone 263: 5대 모듈형 작업공간 스킬셋 아키텍처 구축, 대화 이력 마이닝 기반 사용자 운영 페르소나 코드화, 한글(HWP) 가이드라인 영구 복원 및 3-Way 거버넌스 매니페스트 동기화] Conducted comprehensive forensic mining across 508 historical conversation logs, 222 explicit user directives, and 262 engineering milestones, codified the User Operational Persona (Public Administrative Perfectionist & Zero-Defect Systems Architect) and Proactive Optimization Charter, established 5 modular on-demand workspace skills (.agents/skills/*/SKILL.md) across public budget audit, HWPX docgen, festival 4-way sync, public infographics, and governance ops, permanently restored docs/HWP_GENERATION_GUIDELINES.md in workspace root eliminating broken brain links, and executed 3-way synchronization across Engineering Report, Engineering Milestones, and AGENTS.md. (2026-10-14)
 * **개요 및 고도화 목적**:
   - 사용자 지침(/teamwork-preview 현재까지 나와 대화 했던 내역을 기준으로, 나의 업무 성향과 지향점을 파악하여 내가 향후 업무를 수행하는 행위를 최적화 할수 있도록 엔지니어링 리포트와 각종 md 스킬셋 파일을 고도화 하고싶어)에 의거하여 누적 262개 마일스톤 및 508개 대화 세션을 전수 분석하고 전사적 실무 역량을 모듈형 스킬셋으로 체계화:

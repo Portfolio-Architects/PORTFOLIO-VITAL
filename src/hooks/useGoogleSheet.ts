@@ -14,7 +14,8 @@ import { readSheet, addRow, updateRow, deleteRow } from '@/lib/sheets-api';
 export function useGoogleSheet<T extends { id: string }>(
   sheetName: string,
   localStorageKey: string,
-  initialValue: T[] = []
+  initialValue: T[] = [],
+  enabled: boolean = true
 ): [T[], React.Dispatch<React.SetStateAction<T[]>>, boolean] {
   const [data, setData] = useState<T[]>(() => {
     if (typeof window === 'undefined') return initialValue;
@@ -26,11 +27,13 @@ export function useGoogleSheet<T extends { id: string }>(
     } catch { /* ignore */ }
     return initialValue;
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const initialLoadDone = useRef(false);
 
   // Initial load from Google Sheets
   useEffect(() => {
+    if (!enabled) return;
+
     // Only load if it's the first time OR we received a crypto-ready event
     const attemptLoadKV = async () => {
       const { isCryptoReady } = await import('@/lib/crypto');
@@ -38,6 +41,7 @@ export function useGoogleSheet<T extends { id: string }>(
       
       if (initialLoadDone.current) return;
       initialLoadDone.current = true;
+      setLoading(true);
 
       try {
         const rows = await readSheet<T>(sheetName);
@@ -84,14 +88,15 @@ export function useGoogleSheet<T extends { id: string }>(
     attemptLoadKV();
 
     const onCryptoReady = () => {
-      initialLoadDone.current = false; // Reset to allow fetching now that crypto is available
-      attemptLoadKV();
+      if (!initialLoadDone.current) {
+        attemptLoadKV();
+      }
     };
 
     window.addEventListener('crypto-ready', onCryptoReady);
     return () => window.removeEventListener('crypto-ready', onCryptoReady);
     
-  }, [sheetName, localStorageKey]);
+  }, [sheetName, localStorageKey, enabled]);
 
   // Sync to localStorage on change
   useEffect(() => {

@@ -6,8 +6,16 @@ import { useTasks } from '@/hooks/useTasks';
 import { useBudget } from '@/hooks/useBudget';
 import { useInventory } from '@/hooks/useInventory';
 import { useContacts } from '@/hooks/useContacts';
+import { useMeetings } from '@/hooks/useMeetings';
+import { useProjects } from '@/hooks/useProjects';
+import { readSheet } from '@/lib/sheets-api';
 import { useLocalhostHealth } from '@/hooks/useLocalhostHealth';
 import { LocalhostStatusHUD } from '@/components/layout/LocalhostStatusHUD';
+
+jest.mock('@/lib/crypto', () => ({
+  isCryptoReady: jest.fn(() => true),
+  initCryptoContext: jest.fn(() => Promise.resolve()),
+}));
 
 jest.mock('@/lib/sheets-api', () => ({
   readSheet: jest.fn().mockImplementation((sheetName: string) => {
@@ -17,6 +25,8 @@ jest.mock('@/lib/sheets-api', () => ({
     if (sheetName === 'INVENTORY') return Promise.resolve([{ id: 'inv-1', name: 'Item 1', currentStock: 10, targetStock: 20, minStock: 5, category: 'General', unit: 'ea', unitPrice: 1000, isLentOut: false }]);
     if (sheetName === 'STOCK_CHANGES') return Promise.resolve([{ id: 'sc-1', itemId: 'inv-1', change: 5, reason: 'Restock', date: new Date().toISOString() }]);
     if (sheetName === 'CONTACTS') return Promise.resolve([{ id: 'contact-1', name: 'Contact 1', phone: '010-1234-5678', email: 'test@example.com', notes: '' }]);
+    if (sheetName === 'MEETINGS') return Promise.resolve([{ id: 'meet-1', title: 'Meeting 1', agenda: 'Agenda', notes: 'Notes', attendees: ['A'], datetime: '2026-10-19T10:00:00Z' }]);
+    if (sheetName === 'PROJECTS') return Promise.resolve([{ id: 'proj-1', name: 'Project 1', description: 'Desc', color: '#3b82f6', checklistItems: [] }]);
     return Promise.resolve([]);
   }),
   addRow: jest.fn().mockImplementation((sheetName, data) => Promise.resolve(data)),
@@ -149,6 +159,57 @@ describe('R1 & R2 Empirical Challenger Verification Suite', () => {
         expect(contactsInCache?.some(c => c.name === 'New Contact')).toBe(true);
       });
       expect(invalidateSpy).not.toHaveBeenCalled();
+    });
+
+    it('Option A: defers TASKS, MEETINGS, PROJECTS, INVENTORY on initial dashboard (only 2 budget requests) and fetches once when enabled', async () => {
+      localStorage.setItem('hchps-meetings', JSON.stringify([{ id: 'cached-m', title: 'Cached Meeting', agenda: '', notes: '', attendees: [], datetime: '2026-10-18T09:00:00Z' }]));
+      const { Wrapper } = createWrapper();
+      const readSheetMock = readSheet as jest.Mock;
+      readSheetMock.mockClear();
+
+      const { result, rerender } = renderHook(
+        ({ deferredEnabled }) => {
+          const budget = useBudget();
+          const tasks = useTasks({ enabled: deferredEnabled });
+          const inventory = useInventory({ enabled: deferredEnabled });
+          const meetings = useMeetings({ enabled: deferredEnabled });
+          const projects = useProjects({ enabled: deferredEnabled });
+          const contacts = useContacts({ enabled: deferredEnabled });
+          return { budget, tasks, inventory, meetings, projects, contacts };
+        },
+        { wrapper: Wrapper, initialProps: { deferredEnabled: false } }
+      );
+
+      await waitFor(() => expect(result.current.budget.categories.length).toBeGreaterThan(0));
+      await waitFor(() => expect(result.current.budget.entries.length).toBeGreaterThan(0));
+
+      // Initial Dashboard load: only 2 /api/data requests (BUDGET_CATEGORIES, BUDGET_ENTRIES)
+      const initialSheetsRequested = readSheetMock.mock.calls.map(c => c[0]);
+      expect(initialSheetsRequested).toEqual(expect.arrayContaining(['BUDGET_CATEGORIES', 'BUDGET_ENTRIES']));
+      expect(initialSheetsRequested).toHaveLength(2);
+      expect(result.current.meetings.meetings[0]?.id).toBe('cached-m');
+
+      // Enable deferred hooks (simulating tab switch or Ctrl+K)
+      rerender({ deferredEnabled: true });
+
+      await waitFor(() => {
+        expect(result.current.tasks.tasks.length).toBeGreaterThan(0);
+        expect(result.current.inventory.items.length).toBeGreaterThan(0);
+        expect(result.current.meetings.meetings[0]?.id).toBe('meet-1');
+        expect(result.current.projects.projects.length).toBeGreaterThan(0);
+        expect(result.current.contacts.contacts.length).toBeGreaterThan(0);
+      });
+
+      const callsBeforeCryptoEvent = readSheetMock.mock.calls.filter(c => c[0] === 'MEETINGS' || c[0] === 'PROJECTS').length;
+      expect(callsBeforeCryptoEvent).toBe(2);
+
+      // Dispatching crypto-ready after initial load must NOT trigger duplicate readSheet calls
+      await act(async () => {
+        window.dispatchEvent(new Event('crypto-ready'));
+      });
+
+      const callsAfterCryptoEvent = readSheetMock.mock.calls.filter(c => c[0] === 'MEETINGS' || c[0] === 'PROJECTS').length;
+      expect(callsAfterCryptoEvent).toBe(2);
     });
   });
 

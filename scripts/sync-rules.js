@@ -48,6 +48,16 @@ function extractMilestoneBlocks(reportContent) {
   return { headings, blocks };
 }
 
+function compactMilestoneHeading(rawHeading) {
+  const bracketMatch = rawHeading.match(/^(\[Milestone\s+\d+:[^\]]+\])/);
+  const dateMatch = rawHeading.match(/\((\d{4}-\d{2}-\d{2})\)\s*$/);
+  if (bracketMatch) {
+    const dateSuffix = dateMatch ? ` (${dateMatch[1]})` : '';
+    return `${bracketMatch[1]}${dateSuffix}`;
+  }
+  return rawHeading;
+}
+
 function syncMilestonesMirror(blocks) {
   if (!fs.existsSync(MILESTONES_MIRROR_PATH)) {
     return;
@@ -95,8 +105,8 @@ function updateAgentsManifest(milestones) {
 
   const marker = '## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)';
 
-  const LIMIT = 12;
-  const recentMilestones = milestones.slice(0, LIMIT);
+  const LIMIT = 5;
+  const recentMilestones = milestones.slice(0, LIMIT).map(compactMilestoneHeading);
   const olderCount = milestones.length - LIMIT;
 
   let milestoneList = recentMilestones.map(m => `  - ${m}`).join('\n');
@@ -110,7 +120,7 @@ function updateAgentsManifest(milestones) {
     const borderDateMatch = borderMilestone.match(/\((\d{4}-\d{2}-\d{2})\)/);
     const borderDateStr = borderDateMatch ? borderDateMatch[1] : '최근';
 
-    milestoneList += `\n  - 그 외 과거 누적 마일스톤 총 ${olderCount}건 통합 요약 (${oldestDateStr} ~ ${borderDateStr} 이전 패치 내역)`;
+    milestoneList += `\n  - 그 외 과거 누적 마일스톤 총 ${olderCount}건 통합 보존 (${oldestDateStr} ~ ${borderDateStr} 상세 내역은 Engineering Report.md 및 Engineering Milestones.md 참조)`;
   }
 
   const newSectionContent = `${marker}
@@ -131,6 +141,9 @@ ${milestoneList ? milestoneList : '- (동기화된 내역 없음)'}
   } else {
     agentsContent = agentsContent.trimEnd() + '\n\n' + newSectionContent;
   }
+
+  const byteSize = Buffer.byteLength(agentsContent, 'utf8');
+  console.log(`  ↳ 📏 [SIZE] AGENTS.md UTF-8 size: ${byteSize.toLocaleString()} bytes (Limit: 23,800 bytes)`);
 
   const existingContent = fs.readFileSync(AGENTS_PATH, 'utf8');
   if (existingContent === agentsContent) {
@@ -171,8 +184,8 @@ function main() {
     const reportContent = fs.readFileSync(sourcePath, 'utf8');
     const { headings: milestones, blocks } = extractMilestoneBlocks(reportContent);
 
-    console.log(`📝 엔지니어링 리포트에서 추출한 전체 마일스톤 (${milestones.length}개 중 상위 12개 동기화):`);
-    milestones.slice(0, 12).forEach((m, idx) => console.log(`   [${idx + 1}] ${m}`));
+    console.log(`📝 엔지니어링 리포트에서 추출한 전체 마일스톤 (${milestones.length}개 중 상위 8개 컴팩트 동기화):`);
+    milestones.slice(0, 8).forEach((m, idx) => console.log(`   [${idx + 1}] ${compactMilestoneHeading(m)}`));
     console.log('');
 
     syncMilestonesMirror(blocks);
@@ -192,4 +205,3 @@ function main() {
 }
 
 main();
-

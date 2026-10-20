@@ -2246,35 +2246,35 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       
       {/* Floating Copy Success Toast Modal */}
       {copied && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 border border-slate-700">
-          <Check className="w-5 h-5 text-emerald-400 stroke-[3]" />
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 border border-slate-800">
+          <Check className="w-4 h-4 text-emerald-400 stroke-[2.5] shrink-0" />
           <div>
-            <div className="font-bold text-sm">페스티벌 대시보드 링크가 복사되었습니다!</div>
-            <div className="text-xs text-slate-300">원하는 곳(카카오톡·문자 등)에 바로 붙여넣기(Ctrl+V) 하세요.</div>
+            <div className="font-bold text-xs sm:text-sm">페스티벌 대시보드 링크가 복사되었습니다!</div>
+            <div className="text-[11px] text-slate-300">원하는 곳(카카오톡·문자 등)에 바로 붙여넣기(Ctrl+V) 하세요.</div>
           </div>
         </div>
       )}
 
       {/* Floating Save Success Toast Modal */}
       {saveToast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 border border-emerald-600">
-          <Check className="w-5 h-5 text-emerald-300 stroke-[3]" />
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 border border-slate-800">
+          <Check className="w-4 h-4 text-emerald-400 stroke-[2.5] shrink-0" />
           <div>
-            <div className="font-bold text-sm">{toastMessage}</div>
-            <div className="text-xs text-emerald-200">로컬 DB에 성공적으로 반영되었습니다.</div>
+            <div className="font-bold text-xs sm:text-sm">{toastMessage}</div>
+            <div className="text-[11px] text-slate-300">로컬 DB에 성공적으로 반영되었습니다.</div>
           </div>
         </div>
       )}
 
       <div 
-        className={`yangjae-dashboard-container w-full sm:max-w-md bg-white sm:rounded-2xl sm:border-2 sm:shadow-lg overflow-hidden flex flex-col min-h-screen text-slate-900 font-sans sm:border-slate-300 transition-all duration-200 ${
+        className={`yangjae-dashboard-container w-full sm:max-w-md bg-white sm:rounded-xl sm:border sm:border-slate-200/80 sm:shadow-2xs overflow-hidden flex flex-col min-h-screen text-slate-900 font-sans transition-all duration-200 ${
           isLargeFont ? 'is-large-font text-[16px]' : ''
         }`}
       >
         <style>{LARGE_FONT_STYLES}</style>
         
         {/* Top Sticky Header */}
-        <div className="sticky top-0 z-30 bg-slate-900 text-white px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800 shadow-sm">
+        <div className="sticky top-0 z-30 bg-slate-900 text-white px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800">
           <div className="min-w-0 flex-1">
             <div className={`${isLargeFont ? 'text-lg' : 'text-sm'} font-bold tracking-tight truncate`}>2026 양재천 건강 페스티벌</div>
           </div>
@@ -2285,14 +2285,14 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             <button
               type="button"
               onClick={() => setIsLargeFont(!isLargeFont)}
-              className={`px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black border transition-all cursor-pointer flex items-center gap-1 active:scale-95 whitespace-nowrap ${
+              className={`px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap ${
                 isLargeFont 
-                  ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md ring-2 ring-amber-300/60' 
+                  ? 'bg-white text-slate-900 border-white shadow-2xs' 
                   : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
               }`}
               title="글자 크기 확대/보통 전환"
             >
-              <span className="font-extrabold text-[12px] sm:text-[13px]">{isLargeFont ? '가-' : '가+'}</span>
+              <span className="font-bold text-[12px] sm:text-[13px]">{isLargeFont ? '가-' : '가+'}</span>
               <span>{isLargeFont ? '보통' : '큰글씨'}</span>
             </button>
 
@@ -2300,7 +2300,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             <button
               type="button"
               onClick={handleCopySummary}
-              className="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center gap-1 sm:gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all whitespace-nowrap"
+              className="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-md flex items-center gap-1 sm:gap-1.5 shadow-2xs cursor-pointer transition-colors whitespace-nowrap"
               title="대시보드 링크 공유"
             >
               <Share2 className="w-3.5 h-3.5 shrink-0" />
@@ -2310,15 +2310,15 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 p-3.5 space-y-4 bg-slate-100">
+        <div className="flex-1 p-3.5 space-y-3.5 bg-slate-50/60">
           
           {/* Section 1: Official Event Overview (Administrative Korean Document Style 󰏚 개 요) */}
-          <div className="bg-white border-2 border-slate-300 rounded-xl p-4 shadow-2xs">
+          <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs">
             {/* Header: Title + Independent Edit Buttons + D-Day Badge */}
-            <div className="flex items-center justify-between pb-2 mb-3 border-b-2 border-slate-900 gap-2">
+            <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 gap-2">
               <div className="flex items-center gap-2">
-                <span className={`inline-block ${isLargeFont ? 'w-4.5 h-4.5 border-[2.5px]' : 'w-4 h-4 border-2'} border-slate-900 rounded-[1.5px] shrink-0`} />
-                <span className={`${isLargeFont ? 'text-lg' : 'text-base'} font-black text-slate-900 tracking-tight`}>
+                <span className={`inline-block ${isLargeFont ? 'w-4 h-4 border-2' : 'w-3.5 h-3.5 border-[1.5px]'} border-slate-900 rounded-[2px] shrink-0`} />
+                <span className={`${isLargeFont ? 'text-lg' : 'text-sm sm:text-base'} font-bold text-slate-900 tracking-tight`}>
                   행사 개요
                 </span>
               </div>
@@ -2328,7 +2328,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     <button
                       onClick={handleSaveOverview}
                       disabled={saveMutation.isPending}
-                      className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded flex items-center gap-1 cursor-pointer"
+                      className="px-2 py-0.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-md flex items-center gap-1 cursor-pointer"
                       title="행사 개요 저장"
                     >
                       {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -2336,7 +2336,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     </button>
                     <button
                       onClick={handleCancelEditOverview}
-                      className="px-2 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded flex items-center gap-0.5 cursor-pointer"
+                      className="px-2 py-0.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 rounded-md flex items-center gap-0.5 cursor-pointer"
                       title="취소"
                     >
                       <X className="w-3 h-3" />
@@ -2347,13 +2347,13 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                   <button
                     type="button"
                     onClick={handleStartEditOverview}
-                    className="p-1 text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded cursor-pointer transition-colors"
+                    className="p-1 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer transition-colors"
                     title="행사 개요 수정"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                   </button>
                 ) : null}
-                <span className={`font-black ${isLargeFont ? 'text-sm px-3 py-1' : 'text-xs px-2.5 py-0.5'} bg-slate-900 text-amber-300 rounded-full border border-slate-700 shadow-xs tracking-wide shrink-0`}>
+                <span className={`font-mono tabular-nums font-bold ${isLargeFont ? 'text-sm px-2.5 py-0.5' : 'text-xs px-2 py-0.5'} bg-slate-900 text-white rounded-md border border-slate-800 shadow-2xs tracking-wide shrink-0`}>
                   D-{daysLeft}
                 </span>
               </div>
@@ -2363,8 +2363,8 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             <div className="space-y-2">
               {/* 행사명 */}
               <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 행사명</span>
-                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
+                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 행사명</span>
+                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <input
                     type="text"
@@ -2373,17 +2373,17 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
                       title: e.target.value
                     }))}
-                    className="w-full px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-bold text-slate-900"
+                    className="w-full px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-bold text-slate-900"
                   />
                 ) : (
-                  <span className="font-extrabold text-slate-900 leading-snug break-keep min-w-0">{data?.meta?.title || '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌'}</span>
+                  <span className="font-bold text-slate-900 leading-snug break-keep min-w-0">{data?.meta?.title || '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌'}</span>
                 )}
               </div>
 
               {/* 일시 */}
               <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>
-                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
+                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>
+                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <div className="flex gap-1">
                     <input
@@ -2393,7 +2393,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
                         eventDate: e.target.value
                       }))}
-                      className="w-1/2 px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-semibold text-slate-900"
+                      className="w-1/2 px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
                       placeholder="2026-10-31(토)"
                     />
                     <input
@@ -2403,19 +2403,19 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
                         eventTime: e.target.value
                       }))}
-                      className="w-1/2 px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-semibold text-slate-900"
+                      className="w-1/2 px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
                       placeholder="09:00 ~ 14:00"
                     />
                   </div>
                 ) : (
-                  <span className="font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.eventDate || ''} ({data?.meta?.eventTime || ''})</span>
+                  <span className="font-mono tabular-nums font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.eventDate || ''} ({data?.meta?.eventTime || ''})</span>
                 )}
               </div>
 
               {/* 장소 */}
               <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 장&nbsp;&nbsp;&nbsp;&nbsp;소</span>
-                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
+                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 장&nbsp;&nbsp;&nbsp;&nbsp;소</span>
+                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <input
                     type="text"
@@ -2424,7 +2424,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
                       location: e.target.value
                     }))}
-                    className="w-full px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-semibold text-slate-900"
+                    className="w-full px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
                   />
                 ) : (
                   <span className="font-semibold text-slate-800 leading-snug break-keep min-w-0">{data?.meta?.location || ''}</span>
@@ -2433,8 +2433,8 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
               {/* 코스 */}
               <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 코&nbsp;&nbsp;&nbsp;&nbsp;스</span>
-                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
+                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 코&nbsp;&nbsp;&nbsp;&nbsp;스</span>
+                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <input
                     type="text"
@@ -2443,7 +2443,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
                       course: e.target.value
                     }))}
-                    className="w-full px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-semibold text-slate-900"
+                    className="w-full px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
                   />
                 ) : (
                   <span className="font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.course || ''}</span>
@@ -2452,8 +2452,8 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
               {/* 참여 대상 */}
               <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 참&nbsp;&nbsp;&nbsp;&nbsp;여</span>
-                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
+                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 참&nbsp;&nbsp;&nbsp;&nbsp;여</span>
+                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
                 {editingOverview ? (
                   <input
                     type="text"
@@ -2462,7 +2462,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
                       targetAudience: e.target.value
                     }))}
-                    className="w-full px-2 py-1 border border-amber-400 rounded bg-amber-50/50 font-semibold text-slate-900"
+                    className="w-full px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
                   />
                 ) : (
                   <span className="font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.targetAudience || ''}</span>
@@ -2471,8 +2471,8 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
               {/* 프로그램 구성 */}
               <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-bold text-slate-600 tracking-wide whitespace-nowrap shrink-0">• 구&nbsp;&nbsp;&nbsp;&nbsp;성</span>
-                <span className="font-bold text-slate-400 text-center shrink-0">:</span>
+                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 구&nbsp;&nbsp;&nbsp;&nbsp;성</span>
+                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
                 <div className="space-y-1 min-w-0">
                   {(editingOverview ? (editOverviewData?.programStructure || []) : (data?.meta?.programStructure || [])).map((item: string, pIdx: number) => (
                     <div key={`prog-${pIdx}-${item.slice(0, 15)}`} className="flex items-start">
@@ -2489,7 +2489,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 programStructure: nextProg
                               }));
                             }}
-                            className="w-full px-2 py-0.5 border border-amber-400 rounded bg-white text-xs font-semibold text-slate-800"
+                            className="w-full px-2 py-0.5 border border-slate-300 rounded-md bg-white text-xs font-semibold text-slate-800"
                           />
                           <button
                             type="button"
@@ -2523,7 +2523,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           programStructure: nextProg
                         }));
                       }}
-                      className="mt-1 px-2 py-0.5 text-[11px] font-bold bg-amber-100 text-amber-900 rounded border border-amber-300 hover:bg-amber-200 flex items-center gap-1 cursor-pointer w-fit"
+                      className="mt-1 px-2 py-0.5 text-[11px] font-semibold bg-slate-100 text-slate-800 rounded-md border border-slate-200/80 hover:bg-slate-200 flex items-center gap-1 cursor-pointer w-fit"
                     >
                       <Plus className="w-3 h-3" />
                       <span>구성 항목 추가</span>
@@ -2544,7 +2544,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
                       staffNote: e.target.value
                     }))}
-                    className="w-full px-2 py-1 border border-blue-400 rounded bg-blue-50/50 font-bold text-blue-900"
+                    className="w-full px-2 py-1 border border-blue-400 rounded-md bg-blue-50/50 font-bold text-blue-900"
                     placeholder="행사 참여 직원 대체휴무 시행 예정"
                   />
                 ) : (
@@ -2556,16 +2556,16 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
             </div>
           </div>
 
-          {/* Section 2: Tab Navigation (Clean Public Report Tabs - 4 Cols) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-slate-200 p-1.5 rounded-xl border border-slate-300">
+          {/* Section 2: Tab Navigation (Minimalist Segmented Control - 4 Cols) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80">
             {YANGJAE_REPORT_TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleSelectTab(tab.id)}
-                className={`${isLargeFont ? 'py-3 text-base font-black' : 'py-2.5 text-xs font-bold'} rounded-lg transition-all cursor-pointer text-center ${
+                className={`${isLargeFont ? 'py-2.5 text-sm' : 'py-2 text-xs'} rounded-lg transition-all cursor-pointer text-center border ${
                   selectedTab === tab.id
-                    ? 'bg-slate-900 text-white shadow-xs font-extrabold'
-                    : 'text-slate-700 hover:bg-slate-300/70 font-bold'
+                    ? 'bg-white text-slate-900 shadow-2xs border-slate-200/80 font-extrabold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 border-transparent font-bold'
                 }`}
               >
                 {tab.label}
@@ -2575,13 +2575,13 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
           {/* TAB 1: 추진과제별 현황 (협조부서 통합) */}
           {visitedFestivalTabs.milestones && (
-            <div className={selectedTab === 'milestones' ? 'block space-y-3.5' : 'hidden'}>
+            <div className={selectedTab === 'milestones' ? 'block space-y-3' : 'hidden'}>
               {/* Top Controls: 전체 펼치기/접기 + 과제 추가 */}
               <div className="px-1 flex items-center justify-between">
                 <button
                   type="button"
                   onClick={toggleAllExpand}
-                  className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer py-1"
+                  className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer py-1 transition-colors"
                 >
                   {isAllExpanded ? (
                     <>
@@ -2600,7 +2600,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     type="button"
                     onClick={handleAddMilestone}
                     disabled={saveMutation.isPending}
-                    className="px-2.5 py-1 text-xs font-bold bg-amber-100 text-amber-900 rounded border border-amber-300 hover:bg-amber-200 flex items-center gap-1 cursor-pointer shadow-2xs"
+                    className="px-2.5 py-1 text-xs font-bold bg-amber-50 text-amber-900 rounded-lg border border-amber-200/90 hover:bg-amber-100/80 flex items-center gap-1 cursor-pointer shadow-2xs transition-colors"
                     title="신규 추진과제 추가"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -2622,17 +2622,17 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                 return (
                   <div 
                     key={`milestone-card-${item.id}`}
-                    className={`p-3.5 rounded-xl border-2 transition-all shadow-2xs ${
+                    className={`p-3.5 rounded-xl border transition-all shadow-2xs ${
                       targetItem.status === 'in-progress'
-                        ? 'bg-amber-50/70 border-amber-400 ring-1 ring-amber-300'
+                        ? 'bg-amber-50/35 border-amber-300/90'
                         : targetItem.status === 'done'
-                        ? 'bg-emerald-50/35 border-emerald-300 ring-1 ring-emerald-200/60'
-                        : 'bg-white border-slate-200 text-slate-600'
+                        ? 'bg-white border-emerald-200/90'
+                        : 'bg-white border-slate-200/80 text-slate-600'
                     }`}
                   >
                     {/* Milestone Card Top: Number, Title, Status, Edit Buttons, Accordion Toggle */}
-                    <div className={`flex items-center justify-between pb-2 mb-2 border-b gap-1.5 ${
-                      targetItem.status === 'done' ? 'border-emerald-200/80' : 'border-slate-200'
+                    <div className={`flex items-center justify-between pb-2.5 mb-2.5 border-b gap-1.5 ${
+                      targetItem.status === 'done' ? 'border-slate-100' : 'border-slate-100'
                     }`}>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         {isEditingThis ? (
@@ -2641,13 +2641,13 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               type="text"
                               value={targetItem?.number || ''}
                               onChange={(e) => setEditMilestoneData({ ...targetItem, number: e.target.value })}
-                              className="w-20 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black shrink-0"
+                              className="w-20 px-1.5 py-0.5 border border-amber-400 rounded-md bg-white text-xs font-mono font-black shrink-0"
                             />
                             <input
                               type="text"
                               value={targetItem?.title || ''}
                               onChange={(e) => setEditMilestoneData({ ...targetItem, title: e.target.value })}
-                              className="flex-1 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-extrabold text-slate-900 min-w-0"
+                              className="flex-1 px-1.5 py-0.5 border border-amber-400 rounded-md bg-white text-xs font-extrabold text-slate-900 min-w-0"
                               placeholder="추진과제 제목"
                             />
                           </div>
@@ -2657,13 +2657,13 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             onClick={() => toggleTaskExpand(item.id)}
                             className="flex items-center text-left cursor-pointer flex-1 min-w-0 group"
                           >
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white shadow-2xs group-hover:bg-slate-800 transition-colors max-w-full">
-                              <span className={`font-black text-[11px] shrink-0 ${
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-900 text-white shadow-2xs group-hover:bg-slate-800 transition-colors max-w-full">
+                              <span className={`font-mono tabular-nums font-black text-[11px] shrink-0 ${
                                 item.status === 'done' ? 'text-emerald-400' : 'text-amber-300'
                               }`}>
                                 {item?.number || ''}
                               </span>
-                              <span className="w-[1px] h-3 bg-slate-600 shrink-0" />
+                              <span className="w-[1px] h-3 bg-slate-700 shrink-0" />
                               <span className={`${isLargeFont ? 'text-sm' : 'text-xs'} font-extrabold text-slate-50 tracking-tight truncate`}>
                                 {item?.title || ''}
                               </span>
@@ -2682,7 +2682,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 ...(prev || {}),
                                 status: e.target.value as 'done' | 'in-progress' | 'todo'
                               }))}
-                              className="px-1.5 py-0.5 text-xs font-bold border border-amber-400 rounded bg-white"
+                              className="px-1.5 py-0.5 text-xs font-bold border border-amber-400 rounded-md bg-white"
                             >
                               <option value="done">✓ 완료</option>
                               <option value="in-progress">▶ 진행중</option>
@@ -2692,7 +2692,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               type="button"
                               onClick={handleSaveMilestone}
                               disabled={saveMutation.isPending}
-                              className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded flex items-center gap-0.5 cursor-pointer"
+                              className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-md flex items-center gap-0.5 cursor-pointer"
                               title="과제 저장"
                             >
                               {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -2701,7 +2701,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             <button
                               type="button"
                               onClick={handleCancelEditMilestone}
-                              className="px-2 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded flex items-center gap-0.5 cursor-pointer"
+                              className="px-2 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded-md flex items-center gap-0.5 cursor-pointer"
                               title="취소"
                             >
                               <X className="w-3 h-3" />
@@ -2709,7 +2709,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             <button
                               type="button"
                               onClick={() => handleDeleteMilestone(item.id)}
-                              className="p-1 text-red-500 hover:bg-red-50 rounded cursor-pointer"
+                              className="p-1 text-red-500 hover:bg-red-50 rounded-md cursor-pointer"
                               title="과제 삭제"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -2717,12 +2717,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           </>
                         ) : (
                           <>
-                            <span className={`${isLargeFont ? 'text-xs px-2.5 py-1' : 'text-[11px] px-2 py-0.5'} font-bold rounded border ${
+                            <span className={`${isLargeFont ? 'text-xs px-2.5 py-1' : 'text-[11px] px-2 py-0.5'} font-bold rounded-md border ${
                               item.status === 'done'
-                                ? 'bg-emerald-100 text-emerald-900 border-emerald-400 font-black shadow-3xs'
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200/90 font-extrabold'
                                 : item.status === 'in-progress'
-                                ? 'bg-amber-100 text-amber-900 border-amber-400 font-black'
-                                : 'bg-slate-50 text-slate-400 border-slate-200'
+                                ? 'bg-amber-50 text-amber-800 border-amber-200/90 font-extrabold'
+                                : 'bg-slate-50 text-slate-400 border-slate-200/80'
                             }`}>
                               {item.status === 'done' ? '✓ 완료' : item.status === 'in-progress' ? '▶ 진행중' : '○ 예정'}
                             </span>
@@ -2730,7 +2730,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               <button
                                 type="button"
                                 onClick={() => handleStartEditMilestone(item)}
-                                className="p-1 text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded cursor-pointer transition-colors"
+                                className="p-1 text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-md cursor-pointer transition-colors"
                                 title="과제 수정"
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
@@ -2739,7 +2739,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             <button
                               type="button"
                               onClick={() => toggleTaskExpand(item.id)}
-                              className="p-1 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded cursor-pointer transition-colors"
+                              className="p-1 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer transition-colors"
                               aria-label={isExpanded ? "과제 접기" : "과제 펼치기"}
                               title={isExpanded ? "과제 접기" : "과제 펼치기"}
                             >
@@ -2752,7 +2752,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
                     {/* Expandable Body: Cooperation Departments & Detailed Task List */}
                     {isExpanded && (
-                      <div className="pt-1 space-y-2.5">
+                      <div className="pt-0.5 space-y-2.5">
                         {/* Cooperation Departments Tags (Integrated) */}
                         <div className="flex items-center flex-wrap gap-1.5">
                           <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-bold text-slate-500`}>협조부서:</span>
@@ -2770,14 +2770,14 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 }));
                               }}
                               placeholder="부서명 쉼표(,) 구분 (예: 치수과, 공원녹지과)"
-                              className="flex-1 px-2 py-0.5 border border-amber-400 rounded bg-white text-xs"
+                              className="flex-1 px-2 py-0.5 border border-amber-400 rounded-md bg-white text-xs"
                             />
                           ) : (
                             targetItem?.cooperationDepts && targetItem.cooperationDepts.length > 0 ? (
                               targetItem.cooperationDepts.map((dept: string, dIdx: number) => (
                                 <span
                                   key={`${targetItem?.id}-dept-${dept}-${dIdx}`}
-                                  className={`${isLargeFont ? 'text-xs px-2 py-0.5' : 'text-[10px] px-1.5 py-0.5'} font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 rounded-md`}
+                                  className={`${isLargeFont ? 'text-xs px-2 py-0.5' : 'text-[10px] px-1.5 py-0.5'} font-bold bg-indigo-50/80 text-indigo-800 border border-indigo-200/80 rounded-md`}
                                 >
                                   {dept}
                                 </span>
@@ -2789,11 +2789,11 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         {/* Detailed Task List: 구분선, 맨 앞 날짜 뱃지, 완료/예정 상태 뱃지, 참여자 태그 */}
                         <div className="space-y-1">
                           {isEditingThis ? (
-                            <div className="space-y-2 p-2 bg-slate-100/70 rounded-xl border border-slate-300">
+                            <div className="space-y-2 p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/80">
                               <div className="text-[11px] font-bold text-slate-600 mb-1 flex items-center justify-between">
                                 <span className="flex items-center gap-1.5 text-amber-900 font-extrabold">
                                   <span>세부 실행 과업</span>
-                                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300/80">
+                                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100/80 px-1.5 py-0.5 rounded border border-amber-200/80">
                                     날짜 오름차순 자동 정렬
                                   </span>
                                 </span>
@@ -2835,7 +2835,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                         setDetailDrafts(next);
                                         setEditMilestoneData((prev) => (prev ? { ...prev, details: next.map((d) => d.raw) } : null));
                                       }}
-                                      className="mt-1 px-2.5 py-1 text-[11px] font-bold bg-amber-100 text-amber-900 rounded border border-amber-300 hover:bg-amber-200 flex items-center gap-1 cursor-pointer"
+                                      className="mt-1 px-2.5 py-1 text-[11px] font-bold bg-amber-50 text-amber-900 rounded-lg border border-amber-200/90 hover:bg-amber-100/80 flex items-center gap-1 cursor-pointer"
                                     >
                                       <Plus className="w-3.5 h-3.5" />
                                       <span>세부 과업 추가</span>
@@ -2845,7 +2845,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               })()}
                             </div>
                           ) : (
-                              <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-200/90 shadow-2xs">
+                              <div className="bg-slate-50/60 rounded-xl border border-slate-200/80 overflow-hidden divide-y divide-slate-200/70 shadow-2xs">
                                 {sortDetailsAscending(item.details || []).map((detail: string, dIdx: number) => {
                                   const parsed = parseDetail(detail);
                                   const isCoopTask = parsed.text.includes('[협조') || detail.includes('[협조');
@@ -2858,19 +2858,19 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                       key={`${item.id}-detail-row-${dIdx}-${detail.slice(0, 20)}`} 
                                       className={`p-3 flex items-start gap-3 transition-colors ${
                                         isCoopTask 
-                                          ? 'bg-indigo-50/40 hover:bg-indigo-50/70' 
-                                          : 'hover:bg-white bg-white/70'
+                                          ? 'bg-indigo-50/35 hover:bg-indigo-50/60' 
+                                          : 'hover:bg-white bg-white/80'
                                       }`}
                                     >
-                                      {/* 1. 세로 한 열(Column) 캘린더형 상태 타일: 날짜 크기 대폭 확대 및 시각성 극대화 */}
-                                      <div className={`date-tile shrink-0 flex flex-col items-center justify-center rounded-xl border-2 overflow-hidden shadow-xs font-mono min-w-[70px] sm:min-w-[76px] text-center mt-0.5 bg-white transition-all ${
+                                      {/* 1. 세로 한 열(Column) 캘린더형 상태 타일 */}
+                                      <div className={`date-tile shrink-0 flex flex-col items-center justify-center rounded-lg border overflow-hidden shadow-2xs font-mono tabular-nums min-w-[70px] sm:min-w-[76px] text-center mt-0.5 bg-white transition-all ${
                                         parsed.status === 'done'
-                                          ? 'border-emerald-500'
+                                          ? 'border-emerald-300'
                                           : parsed.status === 'in-progress'
-                                          ? 'border-amber-500'
-                                          : 'border-slate-400'
+                                          ? 'border-amber-300'
+                                          : 'border-slate-300'
                                       }`}>
-                                        <span className={`date-text w-full bg-slate-50 text-slate-950 font-black px-1 py-1.5 tracking-tight border-b border-slate-200 break-all leading-snug ${
+                                        <span className={`date-text w-full bg-slate-50 text-slate-900 font-black px-1 py-1.5 tracking-tight border-b border-slate-200/80 break-all leading-snug ${
                                           isTimeRange ? 'text-[10.5px] sm:text-[11px]' : isShortDate ? 'text-[14.5px] sm:text-[15px]' : 'text-[13px] sm:text-[13.5px]'
                                         }`}>
                                           {displayDate}
@@ -2924,17 +2924,17 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
           {/* TAB 2: 부스 현황 */}
           {visitedFestivalTabs.booths && (
-            <div className={selectedTab === 'booths' ? 'block space-y-3.5' : 'hidden'}>
+            <div className={selectedTab === 'booths' ? 'block space-y-3' : 'hidden'}>
               <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-2 px-1">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <h3 className={`${isLargeFont ? 'text-base' : 'text-sm'} font-extrabold text-slate-900 flex items-center gap-1.5 whitespace-nowrap shrink-0`}>
-                    <span className={`inline-block ${isLargeFont ? 'w-3.5 h-3.5 border-2' : 'w-3 h-3 border-[1.5px]'} border-slate-900 rounded-[1px] shrink-0`} />
+                    <span className={`inline-block ${isLargeFont ? 'w-3.5 h-3.5 border-2' : 'w-3 h-3 border-[1.5px]'} border-slate-900 rounded-[2px] shrink-0`} />
                     <span>부스 배치 계획</span>
                   </h3>
-                  <span className={`inline-flex items-center gap-1 ${isLargeFont ? 'text-xs' : 'text-[11px] sm:text-xs'} font-bold text-slate-700 bg-slate-100 border border-slate-200/90 px-2.5 py-1 rounded-full whitespace-nowrap shadow-3xs shrink-0`}>
+                  <span className={`inline-flex items-center gap-1 ${isLargeFont ? 'text-xs' : 'text-[11px] sm:text-xs'} font-bold text-slate-700 bg-slate-100/90 border border-slate-200/80 px-2.5 py-1 rounded-full whitespace-nowrap shadow-3xs shrink-0 font-mono tabular-nums`}>
                     <span>확정 <strong className="font-black text-slate-900">{boothMetrics.confirmedEntities}</strong> / 총 <strong className="font-black text-slate-900">{boothMetrics.totalEntities}개</strong></span>
                     <span className="text-slate-400 mx-0.5">·</span>
-                    <span className="font-black text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] border border-emerald-300/60">
+                    <span className="font-black text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] border border-emerald-200/80">
                       필요 {boothMetrics.totalDong}동
                     </span>
                   </span>
@@ -2964,7 +2964,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           }
                         ]);
                       }}
-                      className="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-900 rounded border border-amber-300 hover:bg-amber-200 flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
+                      className="px-2 py-0.5 text-xs font-bold bg-amber-50 text-amber-900 rounded-md border border-amber-200/90 hover:bg-amber-100/80 flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
                       title="부스 추가"
                     >
                       <Plus className="w-3 h-3" />
@@ -2974,7 +2974,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       type="button"
                       onClick={handleSaveBooths}
                       disabled={saveMutation.isPending}
-                      className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
+                      className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-md flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
                       title="부스 저장"
                     >
                       {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -2983,7 +2983,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     <button
                       type="button"
                       onClick={handleCancelEditBooths}
-                      className="px-2 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
+                      className="px-2 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded-md flex items-center gap-0.5 cursor-pointer whitespace-nowrap"
                       title="취소"
                     >
                       <X className="w-3 h-3" />
@@ -2994,7 +2994,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     <button
                       type="button"
                       onClick={handleSwitchToggle}
-                      className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none"
+                      className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200/80 bg-slate-100/80 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none"
                       title={showPrivateMobile ? "비상연락망 켜짐 (클릭 시 끄기)" : "비상연락망 꺼짐 (클릭 시 비밀번호 인증 후 켜기)"}
                     >
                       <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1">
@@ -3006,7 +3006,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         {/* Toggle Knob */}
                         <span className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${showPrivateMobile ? 'translate-x-3.5' : 'translate-x-0'}`} />
                       </span>
-                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
+                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border ${showPrivateMobile ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' : 'bg-slate-200/80 text-slate-600 border-slate-300/80'}`}>
                         {showPrivateMobile ? 'ON (보임)' : 'OFF (숨김)'}
                       </span>
                     </button>
@@ -3014,7 +3014,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       <button
                         type="button"
                         onClick={handleStartEditBooths}
-                        className="px-2.5 py-1 text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-lg border border-amber-300 flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap shrink-0"
+                        className="px-2.5 py-1 text-xs font-extrabold bg-amber-50 hover:bg-amber-100/80 text-amber-950 rounded-lg border border-amber-200/90 flex items-center gap-1 cursor-pointer transition-colors shadow-3xs whitespace-nowrap shrink-0"
                         title="부스 순서 변경 및 현황 수정"
                       >
                         <ArrowUpDown className="w-3.5 h-3.5 text-amber-700 shrink-0" />
@@ -3025,15 +3025,15 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                 )}
               </div>
 
-              {/* Booth Summary Metrics Card (행렬 정렬 & 프리미엄 다크 카드) */}
-              <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-950 text-white rounded-xl shadow-xs border border-slate-700 p-3 sm:p-3.5 space-y-3">
+              {/* Booth Summary Metrics Card (미니멀 다크 슬레이트 요약 카드) */}
+              <div className="bg-slate-900 text-white rounded-xl shadow-2xs border border-slate-800 p-3 sm:p-3.5 space-y-3">
                 <div className="grid grid-cols-2 divide-x divide-slate-800 gap-x-3 sm:gap-x-4">
                   {/* Col 1: 총 부스 참여 주체 */}
                   <div className="flex flex-col justify-between pr-1">
                     {/* Row 1: Header / Label */}
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5">
-                      <div className="w-6 h-6 rounded-md bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center shrink-0">
-                        <Building2 className="w-3.5 h-3.5 text-indigo-300" />
+                      <div className="w-6 h-6 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">
+                        <Building2 className="w-3.5 h-3.5 text-slate-300" />
                       </div>
                       <span className="text-[11px] sm:text-xs font-bold text-slate-300 whitespace-nowrap">
                         총 부스 참여 주체
@@ -3042,23 +3042,23 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
                     {/* Row 2: Primary Big Metric */}
                     <div className="py-0.5">
-                      <div className={`${isLargeFont ? 'text-2xl' : 'text-xl sm:text-2xl'} font-black text-white tracking-tight whitespace-nowrap`}>
+                      <div className={`${isLargeFont ? 'text-2xl' : 'text-xl sm:text-2xl'} font-mono tabular-nums font-black text-white tracking-tight whitespace-nowrap`}>
                         총 {boothMetrics.totalEntities}개 기관
                       </div>
                     </div>
 
                     {/* Row 3: Aligned Status Chips */}
-                    <div className="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap">
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-indigo-950/80 text-indigo-300 border border-indigo-700/60 whitespace-nowrap">
+                    <div className="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap font-mono tabular-nums">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-slate-800 text-slate-200 border border-slate-700 whitespace-nowrap">
                         확정 {boothMetrics.confirmedEntities}
                       </span>
                       {boothMetrics.pendingEntities > 0 && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-800/90 text-slate-300 border border-slate-700 whitespace-nowrap">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-800/80 text-slate-300 border border-slate-700 whitespace-nowrap">
                           협의 {boothMetrics.pendingEntities}
                         </span>
                       )}
                       {boothMetrics.hqEntities > 0 && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-amber-950/80 text-amber-300 border border-amber-700/60 whitespace-nowrap" title="보건행정팀 운영본부 1개소">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-amber-950/70 text-amber-300 border border-amber-800/60 whitespace-nowrap" title="보건행정팀 운영본부 1개소">
                           본부 {boothMetrics.hqEntities}
                         </span>
                       )}
@@ -3069,8 +3069,8 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                   <div className="flex flex-col justify-between pl-3 sm:pl-4">
                     {/* Row 1: Header / Label */}
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5">
-                      <div className="w-6 h-6 rounded-md bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shrink-0">
-                        <Tent className="w-3.5 h-3.5 text-emerald-300" />
+                      <div className="w-6 h-6 rounded-md bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center shrink-0">
+                        <Tent className="w-3.5 h-3.5 text-emerald-400" />
                       </div>
                       <span className="text-[11px] sm:text-xs font-bold text-slate-300 whitespace-nowrap">
                         총 필요 부스 규모
@@ -3079,23 +3079,23 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
                     {/* Row 2: Primary Big Metric */}
                     <div className="py-0.5">
-                      <div className={`${isLargeFont ? 'text-2xl' : 'text-xl sm:text-2xl'} font-black text-emerald-400 tracking-tight whitespace-nowrap`}>
+                      <div className={`${isLargeFont ? 'text-2xl' : 'text-xl sm:text-2xl'} font-mono tabular-nums font-black text-emerald-400 tracking-tight whitespace-nowrap`}>
                         총 {boothMetrics.totalDong}동
                       </div>
                     </div>
 
                     {/* Row 3: Aligned Status Chips */}
-                    <div className="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap">
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 whitespace-nowrap">
+                    <div className="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap font-mono tabular-nums">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-emerald-950/70 text-emerald-300 border border-emerald-800/60 whitespace-nowrap">
                         확정 {boothMetrics.confirmedDong}동
                       </span>
                       {boothMetrics.pendingDong > 0 && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-amber-950/70 text-amber-300 border border-amber-700/60 whitespace-nowrap">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-amber-950/60 text-amber-300 border border-amber-800/60 whitespace-nowrap">
                           협의 {boothMetrics.pendingDong}동
                         </span>
                       )}
                       {boothMetrics.totalBus > 0 && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-sky-950/80 text-sky-300 border border-sky-700/60 whitespace-nowrap">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-sky-950/70 text-sky-300 border border-sky-800/60 whitespace-nowrap">
                           버스 {boothMetrics.totalBus}대
                         </span>
                       )}
@@ -3105,17 +3105,17 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                   {/* Row 4: 물품 소요 (필요 집기 및 인원 총계) */}
                   <div className="col-span-2 mt-2.5 pt-2 border-t border-slate-800/90 flex items-center justify-between gap-2 flex-wrap">
                     <span className="text-[11px] sm:text-xs font-bold text-slate-400">필요 집기 및 인원 총계</span>
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-indigo-950/70 text-indigo-300 border border-indigo-700/60 shadow-3xs">
-                        <Users className="w-3 h-3 text-indigo-300 shrink-0" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 font-mono tabular-nums">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-slate-800 text-slate-300 border border-slate-700 shadow-3xs">
+                        <Users className="w-3 h-3 text-slate-400 shrink-0" />
                         <span>인원</span>
                         <strong className="text-white font-black">{boothMetrics.totalStaff}명</strong>
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-amber-950/70 text-amber-300 border border-amber-700/60 shadow-3xs">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-slate-800 text-slate-300 border border-slate-700 shadow-3xs">
                         <span>테이블</span>
                         <strong className="text-white font-black">{boothMetrics.totalTables}개</strong>
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-teal-950/70 text-teal-300 border border-teal-700/60 shadow-3xs">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-slate-800 text-slate-300 border border-slate-700 shadow-3xs">
                         <span>의자</span>
                         <strong className="text-white font-black">{boothMetrics.totalChairs}개</strong>
                       </span>
@@ -3130,10 +3130,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                   <button
                     key={cat}
                     onClick={() => handleSelectCategory(cat)}
-                    className={`${isLargeFont ? 'px-3 py-1.5 text-sm' : 'px-2.5 py-1 text-xs'} rounded-lg font-bold whitespace-nowrap border cursor-pointer ${
+                    className={`${isLargeFont ? 'px-3 py-1.5 text-sm' : 'px-2.5 py-1 text-xs'} rounded-lg font-bold whitespace-nowrap border cursor-pointer transition-colors ${
                       selectedCategory === cat
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                        : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
                     {cat}
@@ -3143,9 +3143,9 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
               {/* Editing Guidance Banner */}
               {editingBooths && (
-                <div className="bg-amber-50 border border-amber-300 rounded-lg p-2.5 text-xs text-amber-950 flex items-center justify-between shadow-3xs">
+                <div className="bg-amber-50/80 border border-amber-200/90 rounded-lg p-2.5 text-xs text-amber-950 flex items-center justify-between shadow-3xs">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-extrabold bg-amber-200/90 text-amber-900 px-1.5 py-0.5 rounded text-[10.5px]">순서 변경</span>
+                    <span className="font-extrabold bg-amber-200/80 text-amber-900 px-1.5 py-0.5 rounded text-[10.5px]">순서 변경</span>
                     <span>각 부스 카드의 <strong>▲ / ▼</strong> 버튼을 눌러 순서를 조정한 후 상단 <strong>[저장]</strong>을 눌러주세요.</span>
                   </div>
                 </div>
@@ -3204,24 +3204,24 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                   return (
                     <div 
                       key={`booth-card-${booth.id}`}
-                      className={`p-3.5 bg-white border-2 rounded-xl transition-all ${
+                      className={`p-3.5 bg-white border rounded-xl transition-all ${
                         isHQ
-                          ? 'border-amber-400 bg-amber-50/20'
+                          ? 'border-amber-300/90 bg-amber-50/15 shadow-2xs'
                           : isEditingSingle
-                          ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50/10 shadow-md'
+                          ? 'border-emerald-500 ring-1 ring-emerald-200 bg-emerald-50/10 shadow-sm'
                           : editingBooths
-                          ? 'border-amber-300 ring-1 ring-amber-200 shadow-2xs'
-                          : 'border-slate-300 shadow-2xs'
+                          ? 'border-amber-300 ring-1 ring-amber-200/80 shadow-2xs'
+                          : 'border-slate-200/80 hover:border-slate-300 shadow-2xs'
                       }`}
                     >
-                      <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-200">
+                      <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100">
                         <div className="flex items-center gap-1.5">
                           {isHQ ? (
-                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-extrabold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 shadow-3xs`}>
+                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-extrabold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/90 shadow-3xs`}>
                               운영본부
                             </span>
                           ) : (
-                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-mono font-black text-slate-700`}>
+                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-mono tabular-nums font-black text-slate-700`}>
                               No.{displayNo}
                             </span>
                           )}
@@ -3230,7 +3230,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               type="text"
                               value={targetBooth.category}
                               onChange={(e) => updateBoothField('category', e.target.value)}
-                              className="px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-bold w-24"
+                              className="px-1.5 py-0.5 border border-amber-400 rounded-md bg-white text-xs font-bold w-24"
                               placeholder="카테고리"
                             />
                           )}
@@ -3242,7 +3242,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               <select
                                 value={targetBooth.status}
                                 onChange={(e) => updateBoothField('status', e.target.value)}
-                                className="px-1.5 py-0.5 text-xs font-bold border border-emerald-400 rounded bg-white cursor-pointer"
+                                className="px-1.5 py-0.5 text-xs font-bold border border-emerald-400 rounded-md bg-white cursor-pointer"
                               >
                                 <option value="확정">확정</option>
                                 <option value="협의중">협의중</option>
@@ -3252,7 +3252,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 type="button"
                                 onClick={handleSaveSingleBooth}
                                 disabled={saveMutation.isPending}
-                                className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                className="px-2 py-0.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-md flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
                                 title="부스 저장"
                               >
                                 {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -3261,7 +3261,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               <button
                                 type="button"
                                 onClick={handleCancelEditSingleBooth}
-                                className="px-1.5 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                className="px-1.5 py-0.5 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white rounded-md flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
                                 title="취소"
                               >
                                 <X className="w-3 h-3" />
@@ -3271,7 +3271,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           ) : editingBooths ? (
                             <div className="flex items-center gap-1">
                               {/* 순서 변경 버튼 그룹 (▲ 위로 / ▼ 아래로) */}
-                              <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-md border border-slate-200">
+                              <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-md border border-slate-200/80">
                                 <button
                                   type="button"
                                   disabled={!canMoveUp}
@@ -3305,7 +3305,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               <select
                                 value={targetBooth.status}
                                 onChange={(e) => updateBoothField('status', e.target.value)}
-                                className="px-1.5 py-0.5 text-xs font-bold border border-amber-400 rounded bg-white cursor-pointer"
+                                className="px-1.5 py-0.5 text-xs font-bold border border-amber-400 rounded-md bg-white cursor-pointer"
                               >
                                 <option value="확정">확정</option>
                                 <option value="협의중">협의중</option>
@@ -3317,7 +3317,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                   const next = editBoothsData.filter((b) => b.id !== booth.id);
                                   setEditBoothsData(next);
                                 }}
-                                className="p-1 text-red-500 hover:bg-red-50 rounded cursor-pointer"
+                                className="p-1 text-red-500 hover:bg-red-50 rounded-md cursor-pointer"
                                 title="부스 삭제"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -3325,10 +3325,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             </div>
                           ) : (
                             <div className="flex items-center gap-1.5">
-                              <span className={`${isLargeFont ? 'text-xs px-2.5 py-1' : 'text-[11px] px-2 py-0.5'} font-bold rounded border ${
+                              <span className={`${isLargeFont ? 'text-xs px-2.5 py-1' : 'text-[11px] px-2 py-0.5'} font-bold rounded-md border ${
                                 booth.status === '확정'
-                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                                  : 'bg-amber-50 text-amber-800 border-amber-300'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200/90'
+                                  : 'bg-amber-50 text-amber-800 border-amber-200/90'
                               }`}>
                                 {booth.status}
                               </span>
@@ -3336,10 +3336,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 <button
                                   type="button"
                                   onClick={() => handleStartEditSingleBooth(booth)}
-                                  className="px-2 py-0.5 text-xs font-bold bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-900 border border-slate-300 hover:border-amber-300 rounded-md flex items-center gap-1 cursor-pointer transition-colors shadow-3xs"
+                                  className="px-2 py-0.5 text-xs font-bold bg-slate-50 hover:bg-amber-50 text-slate-600 hover:text-amber-900 border border-slate-200/80 hover:border-amber-300 rounded-md flex items-center gap-1 cursor-pointer transition-colors shadow-3xs"
                                   title="부스 정보 수정"
                                 >
-                                  <Edit3 className="w-3 h-3 text-slate-600" />
+                                  <Edit3 className="w-3 h-3 text-slate-500" />
                                   <span>수정</span>
                                 </button>
                               )}
@@ -3354,10 +3354,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           type="text"
                           value={targetBooth.name}
                           onChange={(e) => updateBoothField('name', e.target.value)}
-                          className="w-full px-2 py-1 border border-amber-400 rounded bg-white text-sm font-extrabold mb-1.5"
+                          className="w-full px-2 py-1 border border-amber-400 rounded-md bg-white text-sm font-extrabold mb-1.5"
                           placeholder="부스 이름"
                         />
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 bg-amber-50/60 p-2 rounded-lg border border-amber-200/80 mb-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 bg-amber-50/50 p-2 rounded-lg border border-amber-200/80 mb-2">
                           {/* 1. 담당자 */}
                           <div className="flex items-center gap-1.5 min-w-0">
                             <User className="w-3.5 h-3.5 text-slate-600 shrink-0" />
@@ -3366,7 +3366,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               type="text"
                               value={targetBooth.manager ?? ''}
                               onChange={(e) => updateBoothField('manager', e.target.value)}
-                              className="px-2 py-0.5 border border-amber-400 rounded bg-white text-xs flex-1 font-bold text-slate-900 min-w-0"
+                              className="px-2 py-0.5 border border-amber-400 rounded-md bg-white text-xs flex-1 font-bold text-slate-900 min-w-0"
                               placeholder="예: 오창선 주무관"
                             />
                           </div>
@@ -3379,7 +3379,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               type="text"
                               value={targetBooth.adminPhone ?? (!targetBooth.phone?.startsWith('010') ? targetBooth.phone : '') ?? ''}
                               onChange={(e) => updateBoothField('adminPhone', e.target.value)}
-                              className="px-2 py-0.5 border border-amber-400 rounded bg-white text-xs flex-1 font-mono font-bold text-slate-900 min-w-0"
+                              className="px-2 py-0.5 border border-amber-400 rounded-md bg-white text-xs flex-1 font-mono font-bold text-slate-900 min-w-0"
                               placeholder="예: 02-3423-7116"
                             />
                           </div>
@@ -3392,7 +3392,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               type="text"
                               value={targetBooth.mobilePhone ?? (targetBooth.phone?.startsWith('010') ? targetBooth.phone : '') ?? ''}
                               onChange={(e) => updateBoothField('mobilePhone', e.target.value)}
-                              className="px-2 py-0.5 border border-amber-400 rounded bg-white text-xs flex-1 font-mono font-bold text-slate-900 min-w-0"
+                              className="px-2 py-0.5 border border-amber-400 rounded-md bg-white text-xs flex-1 font-mono font-bold text-slate-900 min-w-0"
                               placeholder="예: 010-8494-0544"
                             />
                           </div>
@@ -3414,7 +3414,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap overflow-x-auto no-scrollbar mb-2 whitespace-nowrap py-0.5">
                               {/* 담당자 뱃지 */}
                               {booth.manager && (
-                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold shrink-0 shadow-3xs`}>
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100/90 text-slate-800 border border-slate-200/80 ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold shrink-0 shadow-3xs`}>
                                   <User className="w-3 h-3 text-slate-500 shrink-0" />
                                   <span>담당: {showPrivateMobile ? booth.manager : maskPersonName(booth.manager)}</span>
                                 </span>
@@ -3424,12 +3424,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               {adminNo && (
                                 <a
                                   href={`tel:${adminNo.replace(/[^0-9]/g, '')}`}
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold bg-blue-50 hover:bg-blue-100 text-blue-950 border border-blue-200 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0`}
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold bg-blue-50/80 hover:bg-blue-100/80 text-blue-950 border border-blue-200/80 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0`}
                                   title={`행정전화 걸기: ${adminNo}`}
                                 >
                                   <Phone className="w-2.5 h-2.5 text-blue-700 shrink-0" />
                                   <span className="font-extrabold text-blue-900">행정:</span>
-                                  <span className="font-mono font-bold tracking-tight text-blue-950">
+                                  <span className="font-mono tabular-nums font-bold tracking-tight text-blue-950">
                                     {adminNo}
                                   </span>
                                 </a>
@@ -3439,12 +3439,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               {isMobileVisible && (
                                 <a
                                   href={`tel:${mobileNo.replace(/[^0-9]/g, '')}`}
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0`}
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${isLargeFont ? 'text-xs' : 'text-[10.5px] sm:text-[11px]'} font-bold bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-950 border border-emerald-200/80 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0`}
                                   title={`휴대전화 걸기: ${mobileNo}`}
                                 >
                                   <Smartphone className="w-2.5 h-2.5 text-emerald-700 shrink-0" />
                                   <span className="font-extrabold text-emerald-900">폰:</span>
-                                  <span className="font-mono font-bold tracking-tight text-emerald-950">
+                                  <span className="font-mono tabular-nums font-bold tracking-tight text-emerald-950">
                                     {mobileNo}
                                   </span>
                                 </a>
@@ -3456,17 +3456,17 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     )}
 
                     {isEditingThis ? (
-                      <div className="space-y-1 bg-slate-50 p-2.5 rounded border border-slate-200 mb-1.5">
+                      <div className="space-y-1 bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/80 mb-1.5">
                         <span className="font-bold text-xs text-slate-600">내용:</span>
                         <textarea
                           value={targetBooth.program}
                           onChange={(e) => updateBoothField('program', e.target.value)}
-                          className="w-full px-2 py-1 border border-amber-400 rounded bg-white text-xs leading-relaxed"
+                          className="w-full px-2 py-1 border border-amber-400 rounded-md bg-white text-xs leading-relaxed"
                           rows={2}
                         />
                       </div>
                     ) : (
-                      <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-700 bg-slate-50 p-2.5 rounded border border-slate-200 leading-relaxed mb-1.5`}>
+                      <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-700 bg-slate-50/70 p-2.5 rounded-lg border border-slate-200/80 leading-relaxed mb-1.5`}>
                         <span className="font-bold text-slate-600">내용: </span>{booth.program}
                       </div>
                     )}
@@ -3479,11 +3479,11 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             type="text"
                             value={targetBooth.scale}
                             onChange={(e) => updateBoothField('scale', e.target.value)}
-                            className="px-2 py-0.5 border border-amber-400 rounded bg-white text-xs flex-1 font-bold"
+                            className="px-2 py-0.5 border border-amber-400 rounded-md bg-white text-xs flex-1 font-bold"
                             placeholder="예: 2동, 1동 + 검진버스"
                           />
                         </div>
-                        <div className="grid grid-cols-3 gap-2 bg-amber-50/70 p-2 rounded-lg border border-amber-300/80">
+                        <div className="grid grid-cols-3 gap-2 bg-amber-50/60 p-2 rounded-lg border border-amber-200/80 font-mono tabular-nums">
                           <div className="flex items-center gap-1.5">
                             <Users className="w-3.5 h-3.5 text-indigo-800 shrink-0" />
                             <span className="text-xs font-bold text-slate-800 whitespace-nowrap shrink-0">인원:</span>
@@ -3493,7 +3493,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               max="99"
                               value={targetBooth.staffCount ?? 0}
                               onChange={(e) => updateBoothField('staffCount', Math.max(0, parseInt(e.target.value, 10) || 0))}
-                              className="w-12 sm:w-14 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-indigo-950 text-right"
+                              className="w-12 sm:w-14 px-1.5 py-0.5 border border-amber-400 rounded-md bg-white text-xs font-black text-indigo-950 text-right"
                             />
                             <span className="text-xs font-bold text-slate-600">명</span>
                           </div>
@@ -3506,7 +3506,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               max="99"
                               value={targetBooth.tables ?? 0}
                               onChange={(e) => updateBoothField('tables', Math.max(0, parseInt(e.target.value, 10) || 0))}
-                              className="w-12 sm:w-14 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-amber-950 text-right"
+                              className="w-12 sm:w-14 px-1.5 py-0.5 border border-amber-400 rounded-md bg-white text-xs font-black text-amber-950 text-right"
                             />
                             <span className="text-xs font-bold text-slate-600">개</span>
                           </div>
@@ -3519,28 +3519,28 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               max="99"
                               value={targetBooth.chairs ?? 0}
                               onChange={(e) => updateBoothField('chairs', Math.max(0, parseInt(e.target.value, 10) || 0))}
-                              className="w-12 sm:w-14 px-1.5 py-0.5 border border-amber-400 rounded bg-white text-xs font-black text-sky-950 text-right"
+                              className="w-12 sm:w-14 px-1.5 py-0.5 border border-amber-400 rounded-md bg-white text-xs font-black text-sky-950 text-right"
                             />
                             <span className="text-xs font-bold text-slate-600">개</span>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-600 font-medium flex flex-wrap items-center justify-between gap-y-1.5 gap-x-2 pt-1 border-t border-slate-100`}>
+                      <div className={`${isLargeFont ? 'text-sm' : 'text-xs'} text-slate-600 font-medium flex flex-wrap items-center justify-between gap-y-1.5 gap-x-2 pt-1.5 border-t border-slate-100`}>
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span>부스규모: <strong className="text-slate-900">{booth.scale}</strong></span>
+                          <span>부스규모: <strong className="text-slate-900 font-mono tabular-nums">{booth.scale}</strong></span>
                         </div>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] sm:text-xs font-bold bg-indigo-50 text-indigo-900 border border-indigo-200/90 shadow-3xs">
-                            <Users className="w-3 h-3 text-indigo-700 shrink-0" />
+                        <div className="flex items-center gap-1.5 flex-wrap font-mono tabular-nums">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold bg-slate-100/80 text-slate-800 border border-slate-200/80 shadow-3xs">
+                            <Users className="w-3 h-3 text-slate-600 shrink-0" />
                             <span>인원 <strong>{booth.staffCount ?? 0}</strong>명</span>
                           </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] sm:text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/90 shadow-3xs">
-                            <Table className="w-3 h-3 text-amber-700 shrink-0" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold bg-slate-100/80 text-slate-800 border border-slate-200/80 shadow-3xs">
+                            <Table className="w-3 h-3 text-slate-600 shrink-0" />
                             <span>테이블 <strong>{booth.tables ?? 0}</strong>개</span>
                           </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] sm:text-xs font-bold bg-sky-50 text-sky-900 border border-sky-200/90 shadow-3xs">
-                            <Armchair className="w-3 h-3 text-sky-700 shrink-0" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold bg-slate-100/80 text-slate-800 border border-slate-200/80 shadow-3xs">
+                            <Armchair className="w-3 h-3 text-slate-600 shrink-0" />
                             <span>의자 <strong>{booth.chairs ?? 0}</strong>개</span>
                           </span>
                         </div>
@@ -3556,14 +3556,14 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
           {visitedFestivalTabs.schedule && (
             <div className={selectedTab === 'schedule' ? 'block space-y-2.5' : 'hidden'}>
               {/* Header Bar: Clean 2-Row Layout (Zero-Clipping Alignment) */}
-              <div className="bg-white border-2 border-slate-300 rounded-xl p-3 shadow-2xs space-y-2.5">
+              <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs space-y-2.5">
                 {/* Row 1: Title, Count Badge & Add Schedule Button */}
-                <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+                <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
                   <div className="flex items-center gap-2 min-w-0">
                     <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 tracking-tight whitespace-nowrap`}>
                       <span>행사 식순</span>
                     </h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
+                    <span className="text-[11px] font-mono tabular-nums font-bold px-2 py-0.5 rounded-full bg-slate-100/90 text-slate-700 border border-slate-200/80 whitespace-nowrap">
                       {activeSchedule.length}개 식순 · 10.17.(토)~10.31.(토)
                     </span>
                   </div>
@@ -3573,7 +3573,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       type="button"
                       onClick={handleAddSchedule}
                       disabled={saveMutation.isPending}
-                      className="px-2.5 py-1 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-1 cursor-pointer transition-all shadow-3xs active:scale-95 shrink-0 whitespace-nowrap"
+                      className="px-2.5 py-1 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-lg flex items-center gap-1 cursor-pointer transition-all shadow-2xs active:scale-95 shrink-0 whitespace-nowrap"
                       title="새 행사 식순 추가"
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -3590,7 +3590,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     value={scheduleSearchQuery}
                     onChange={(e) => setScheduleSearchQuery(e.target.value)}
                     placeholder="식순명, 담당자, 내용 검색..."
-                    className="w-full pl-8 pr-7 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
+                    className="w-full pl-8 pr-7 py-1.5 text-xs font-medium border border-slate-200/80 rounded-lg bg-slate-50/80 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900/15 focus:border-slate-300 text-slate-900 transition-colors"
                   />
                   {scheduleSearchQuery && (
                     <button
@@ -3606,7 +3606,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
               {/* Schedule Box Cards List (부스현황과 동일한 규격의 박스 형태) */}
               {filteredSchedule.length === 0 ? (
-                <div className="p-8 text-center text-xs text-slate-500 font-medium bg-white border-2 border-slate-300 rounded-xl shadow-2xs space-y-3">
+                <div className="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-200/80 rounded-xl shadow-2xs space-y-3">
                   <div>검색 조건과 일치하는 행사 식순이 없습니다.</div>
                   {isLocalAdmin && (
                     <div>
@@ -3614,7 +3614,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         type="button"
                         onClick={handleAddSchedule}
                         disabled={saveMutation.isPending}
-                        className="px-3 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg inline-flex items-center gap-1 cursor-pointer transition-all shadow-3xs active:scale-95"
+                        className="px-3 py-1.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-lg inline-flex items-center gap-1 cursor-pointer transition-all shadow-2xs active:scale-95"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>새 행사 식순 추가</span>
@@ -3632,20 +3632,20 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     return (
                       <div
                         key={`schedule-card-${item.id}`}
-                        className={`p-3.5 bg-white border-2 rounded-xl transition-all ${
+                        className={`p-3.5 bg-white border rounded-xl transition-all ${
                           isEditingThis
-                            ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50/15 shadow-md'
+                            ? 'border-blue-400 ring-1 ring-blue-200 bg-blue-50/10 shadow-sm'
                             : isCeremony
-                            ? 'border-blue-300 bg-blue-50/20 shadow-2xs'
+                            ? 'border-blue-200/90 bg-blue-50/15 shadow-2xs'
                             : isWalkingStart
-                            ? 'border-emerald-300 bg-emerald-50/20 shadow-2xs'
-                            : 'border-slate-300 shadow-2xs'
+                            ? 'border-emerald-200/90 bg-emerald-50/15 shadow-2xs'
+                            : 'border-slate-200/80 hover:border-slate-300 shadow-2xs'
                         }`}
                       >
                         {/* Card Header: 순번, 구분, 시간 / 관리 버튼 */}
-                        <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-200">
+                        <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-100">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-mono font-black text-slate-700`}>
+                            <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-mono tabular-nums font-black text-slate-700`}>
                               No.{item.id}
                             </span>
 
@@ -3654,7 +3654,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 <select
                                   value={editScheduleData?.date || '10.31.(토)'}
                                   onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, date: e.target.value } : null)}
-                                  className="px-1.5 py-0.5 text-xs font-bold border border-blue-400 rounded bg-white text-slate-800 cursor-pointer"
+                                  className="px-1.5 py-0.5 text-xs font-bold border border-blue-400 rounded-md bg-white text-slate-800 cursor-pointer"
                                 >
                                   <option value="10.17.(토)">10.17.(토)</option>
                                   <option value="10.23.(금)">10.23.(금)</option>
@@ -3665,7 +3665,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 <select
                                   value={editScheduleData?.phase || '식전'}
                                   onChange={(e) => setEditScheduleData((prev) => prev ? { ...prev, phase: e.target.value } : null)}
-                                  className="px-1.5 py-0.5 text-xs font-bold border border-blue-400 rounded bg-white text-slate-800 cursor-pointer"
+                                  className="px-1.5 py-0.5 text-xs font-bold border border-blue-400 rounded-md bg-white text-slate-800 cursor-pointer"
                                 >
                                   <option value="사전준비">사전준비</option>
                                   <option value="행사전날">행사전날</option>
@@ -3681,24 +3681,24 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             ) : (
                               <>
                                 {item.date && (
-                                  <span className={`${isLargeFont ? 'text-xs' : 'text-[10px]'} font-extrabold px-1.5 py-0.5 rounded border whitespace-nowrap ${
+                                  <span className={`${isLargeFont ? 'text-xs' : 'text-[10px]'} font-mono tabular-nums font-extrabold px-1.5 py-0.5 rounded-md border whitespace-nowrap ${
                                     item.date.includes('31')
-                                      ? 'bg-sky-100 text-sky-900 border-sky-300'
+                                      ? 'bg-sky-50 text-sky-900 border-sky-200/90'
                                       : item.date.includes('30')
-                                      ? 'bg-amber-100 text-amber-900 border-amber-300'
-                                      : 'bg-indigo-100 text-indigo-900 border-indigo-300'
+                                      ? 'bg-amber-50 text-amber-900 border-amber-200/90'
+                                      : 'bg-indigo-50 text-indigo-900 border-indigo-200/90'
                                   }`}>
                                     {item.date}
                                   </span>
                                 )}
-                                <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-bold px-2 py-0.5 rounded border ${
+                                <span className={`${isLargeFont ? 'text-xs' : 'text-[11px]'} font-bold px-2 py-0.5 rounded-md border ${
                                   item.phase === '공식행사' || item.phase === '개회식'
-                                    ? 'bg-blue-50 text-blue-800 border-blue-200'
+                                    ? 'bg-blue-50 text-blue-800 border-blue-200/80'
                                     : item.phase === '걷기대회'
-                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
                                     : item.phase === '식전·준비' || item.phase === '식전' || item.phase === '행사전날'
-                                    ? 'bg-slate-100 text-slate-700 border-slate-200'
-                                    : 'bg-purple-50 text-purple-800 border-purple-200'
+                                    ? 'bg-slate-100/80 text-slate-700 border-slate-200/80'
+                                    : 'bg-purple-50 text-purple-800 border-purple-200/80'
                                 }`}>
                                   {item.phase}
                                 </span>
@@ -3706,7 +3706,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             )}
 
                             {!isEditingThis && (
-                              <span className="inline-flex items-center gap-1 font-mono text-[11px] text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                              <span className="inline-flex items-center gap-1 font-mono tabular-nums text-[11px] text-slate-700 font-bold bg-slate-100/80 px-2 py-0.5 rounded-md border border-slate-200/80">
                                 <Clock className="w-3 h-3 text-slate-500 shrink-0" />
                                 <span>{item.time}</span>
                                 {item.duration && (
@@ -3723,7 +3723,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                   type="button"
                                   onClick={handleSaveSchedule}
                                   disabled={saveMutation.isPending}
-                                  className="px-2 py-0.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                  className="px-2 py-0.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-md flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
                                   title="저장 (Enter)"
                                 >
                                   {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -3732,7 +3732,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 <button
                                   type="button"
                                   onClick={handleCancelEditSchedule}
-                                  className="px-1.5 py-0.5 text-xs font-bold bg-slate-500 hover:bg-slate-400 text-white rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                  className="px-1.5 py-0.5 text-xs font-bold bg-slate-500 hover:bg-slate-400 text-white rounded-md flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
                                   title="취소 (Esc)"
                                 >
                                   <X className="w-3 h-3" />
@@ -3742,7 +3742,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                   type="button"
                                   onClick={() => handleDeleteSchedule(item.id)}
                                   disabled={saveMutation.isPending}
-                                  className="px-1.5 py-0.5 text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-900 border border-rose-300 rounded flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                  className="px-1.5 py-0.5 text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-900 border border-rose-200/90 rounded-md flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
                                   title="식순 항목 삭제"
                                 >
                                   <Trash2 className="w-3 h-3" />
@@ -3754,7 +3754,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 <button
                                   type="button"
                                   onClick={() => handleStartEditSchedule(item)}
-                                  className="px-2 py-0.5 text-xs font-bold bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-900 border border-slate-300 hover:border-blue-300 rounded flex items-center gap-1 cursor-pointer transition-colors shadow-3xs"
+                                  className="px-2 py-0.5 text-xs font-bold bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-900 border border-slate-200/80 hover:border-blue-300 rounded-md flex items-center gap-1 cursor-pointer transition-colors shadow-3xs"
                                   title="식순명 및 세부내용 수정"
                                 >
                                   <Edit3 className="w-3 h-3 text-blue-600" />
@@ -3779,7 +3779,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                   if (e.key === 'Escape') handleCancelEditSchedule();
                                 }}
                                 placeholder="식순명 입력"
-                                className="w-full text-sm font-extrabold border-2 border-blue-400 rounded-lg p-1.5 bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xs"
+                                className="w-full text-sm font-extrabold border border-blue-400 rounded-lg p-1.5 bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xs"
                                 autoFocus
                               />
                             </div>
@@ -3799,7 +3799,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                       if (e.key === 'Escape') handleCancelEditSchedule();
                                     }}
                                     placeholder="07:30 ~ 08:00"
-                                    className="w-full pl-6 pr-2 py-1 text-xs font-mono font-bold border border-blue-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    className="w-full pl-6 pr-2 py-1 text-xs font-mono tabular-nums font-bold border border-blue-300 rounded-md bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                   />
                                 </div>
                               </div>
@@ -3816,7 +3816,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                       if (e.key === 'Escape') handleCancelEditSchedule();
                                     }}
                                     placeholder="주관/담당"
-                                    className="w-full pl-6 pr-2 py-1 text-xs font-bold border border-blue-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    className="w-full pl-6 pr-2 py-1 text-xs font-bold border border-blue-300 rounded-md bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                   />
                                 </div>
                               </div>
@@ -3853,7 +3853,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               <div className="flex items-center gap-1 shrink-0">
                                 {isCeremony && (
                                   <span
-                                    className="inline-flex items-center gap-1 text-[9.5px] font-bold text-blue-800 bg-blue-100/90 border border-blue-300 px-1.5 py-0.2 rounded cursor-help whitespace-nowrap"
+                                    className="inline-flex items-center gap-1 text-[9.5px] font-bold text-blue-800 bg-blue-50 border border-blue-200/90 px-1.5 py-0.2 rounded cursor-help whitespace-nowrap"
                                     title="대통령훈령 제438호 약식절차 1 준용: ① 국기에 대한 경례(전주 없는 애국가 1절 반주, 맹세문 미낭송) ② 묵념(묵념곡 10~15초) ※ '애국가 제창 등 이하 생략' 발언 규정상 엄격 금지"
                                   >
                                     <Shield className="w-2.5 h-2.5 text-blue-700 shrink-0" />
@@ -3862,7 +3862,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 )}
                                 {isWalkingStart && (
                                   <span
-                                    className="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-1.5 py-0.2 rounded cursor-help whitespace-nowrap"
+                                    className="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-1.5 py-0.2 rounded cursor-help whitespace-nowrap"
                                     title="수변문화쉼터 ↔ 영동4교 2km 코스 완주 (12:30 인센티브 배부 마감)"
                                   >
                                     <MapPin className="w-2.5 h-2.5 text-emerald-700 shrink-0" />
@@ -3883,7 +3883,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             {/* 세부내용 박스 (부스현황의 "내용:" 박스와 동일한 스타일) */}
                             {item.note && (
                               <div
-                                className={`text-xs text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200 leading-relaxed ${isLocalAdmin ? 'cursor-pointer hover:bg-slate-100/80 hover:border-blue-200' : ''}`}
+                                className={`text-xs text-slate-700 bg-slate-50/70 p-2.5 rounded-lg border border-slate-200/80 leading-relaxed ${isLocalAdmin ? 'cursor-pointer hover:bg-slate-100/80 hover:border-blue-200' : ''}`}
                                 onClick={() => isLocalAdmin && handleStartEditSchedule(item)}
                                 title={isLocalAdmin ? "클릭하여 세부내용 수정" : undefined}
                               >
@@ -3902,10 +3902,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       type="button"
                       onClick={handleAddSchedule}
                       disabled={saveMutation.isPending}
-                      className="w-full py-2.5 text-xs font-bold text-blue-700 hover:text-blue-800 bg-blue-50/60 hover:bg-blue-100/70 border-2 border-dashed border-blue-300 hover:border-blue-400 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-3xs active:scale-[0.99]"
+                      className="w-full py-2.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-dashed border-slate-300 hover:border-slate-400 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-2xs active:scale-[0.99]"
                       title="새 행사 식순 박스 추가"
                     >
-                      <Plus className="w-4 h-4 text-blue-600" />
+                      <Plus className="w-4 h-4 text-slate-500" />
                       <span>새 행사 식순 박스 추가</span>
                     </button>
                   )}
@@ -3916,21 +3916,21 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
           {/* TAB 3: 업무분장 (실무 과업 및 비상연락망) */}
           {visitedFestivalTabs.duties && (
-            <div className={selectedTab === 'duties' ? 'block space-y-3.5' : 'hidden'}>
+            <div className={selectedTab === 'duties' ? 'block space-y-3' : 'hidden'}>
               {/* Header Stats Bar */}
-              <div className="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
+              <div className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
                 {/* Header Bar: Clean 1-Row Layout */}
-                <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5 flex-wrap">
+                <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5 flex-wrap">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className={`${isLargeFont ? 'text-base font-black' : 'text-sm font-extrabold'} text-slate-900 tracking-tight whitespace-nowrap flex items-center gap-1.5`}>
                       <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>업무분장 및 비상연락망</span>
                     </h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                    <span className="text-[11px] font-mono tabular-nums font-bold px-2 py-0.5 rounded-full bg-slate-100/90 text-slate-700 border border-slate-200/80">
                       총 {editingDuties ? editDutiesData.length : activeDuties.length}개 항목
                     </span>
                     {editingDuties && (
-                      <span className="text-[10.5px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 animate-pulse">
+                      <span className="text-[10.5px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 flex items-center gap-1 animate-pulse">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
                         엑셀 편집 중
                       </span>
@@ -3942,7 +3942,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     <button
                       type="button"
                       onClick={handleSwitchToggle}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none shrink-0"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200/80 bg-slate-100/80 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none shrink-0"
                       title={showPrivateMobile ? "비상연락망 켜짐 (클릭 시 끄기)" : "비상연락망 꺼짐 (클릭 시 비밀번호 인증 후 켜기)"}
                     >
                       <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
@@ -3954,7 +3954,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         {/* Toggle Knob */}
                         <span className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out ${showPrivateMobile ? 'translate-x-3.5' : 'translate-x-0'}`} />
                       </span>
-                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border whitespace-nowrap ${showPrivateMobile ? 'bg-emerald-100 text-emerald-800 border-emerald-300/80' : 'bg-slate-200 text-slate-600 border-slate-300/80'}`}>
+                      <span className={`text-[10px] font-black px-1.5 py-0.2 rounded border whitespace-nowrap ${showPrivateMobile ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' : 'bg-slate-200/80 text-slate-600 border-slate-300/80'}`}>
                         {showPrivateMobile ? 'ON' : 'OFF'}
                       </span>
                     </button>
@@ -3964,7 +3964,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       type="button"
                       onClick={handleSyncDesktopExcel}
                       disabled={isSyncingExcel}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-400 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-black transition-all shadow-3xs cursor-pointer active:scale-95 disabled:opacity-50 shrink-0"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-200/90 bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-900 text-xs font-black transition-all shadow-3xs cursor-pointer active:scale-95 disabled:opacity-50 shrink-0"
                       title="바탕화면 단일 마스터 엑셀(SSOT) 덮어쓰기 동기화"
                     >
                       {isSyncingExcel ? (
@@ -3979,7 +3979,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     <button
                       type="button"
                       onClick={handleExportDutiesCsv}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
                       title="업무분장 엑셀(CSV) 다운로드"
                     >
                       <Download className="w-3.5 h-3.5 text-slate-600" />
@@ -3992,7 +3992,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         <button
                           type="button"
                           onClick={handleAddDutyRow}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-200/90 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
                           title="새 업무분장 행 추가"
                         >
                           <Plus className="w-3.5 h-3.5 text-emerald-700" />
@@ -4003,7 +4003,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           type="button"
                           onClick={handleSaveDuties}
                           disabled={saveMutation.isPending}
-                          className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50 shrink-0"
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50 shrink-0"
                           title="업무분장 저장"
                         >
                           {saveMutation.isPending ? (
@@ -4018,7 +4018,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           type="button"
                           onClick={handleCancelEditDuties}
                           disabled={saveMutation.isPending}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
                           title="편집 취소"
                         >
                           <X className="w-3.5 h-3.5 text-slate-500" />
@@ -4032,7 +4032,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           <button
                             type="button"
                             onClick={handleAddDutyRow}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-95 shrink-0"
                             title="새 업무분장 행 추가 및 편집"
                           >
                             <Plus className="w-3.5 h-3.5 text-emerald-600" />
@@ -4042,7 +4042,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           <button
                             type="button"
                             onClick={handleStartEditDuties}
-                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
                             title="스프레드시트 엑셀 편집 모드 시작"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -4056,7 +4056,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
                 {/* Search Bar (View Mode) vs Excel Mode Banner (Edit Mode) */}
                 {editingDuties ? (
-                  <div className="bg-emerald-50/90 border border-emerald-300/80 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+                  <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
                     <div className="flex items-start gap-2">
                       <FileSpreadsheet className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                       <div className="text-xs text-emerald-950 font-medium leading-relaxed">
@@ -4066,7 +4066,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       </div>
                     </div>
                     <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                      <span className="text-[11px] font-bold text-emerald-800 bg-white/80 px-2 py-0.5 rounded border border-emerald-200">
+                      <span className="text-[11px] font-bold text-emerald-800 bg-white/90 px-2 py-0.5 rounded border border-emerald-200/80">
                         전화번호 자동 하이픈 연동
                       </span>
                     </div>
@@ -4079,7 +4079,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       value={dutySearchQuery}
                       onChange={(e) => setDutySearchQuery(e.target.value)}
                       placeholder="부서명, 담당자, 전화번호, 과업 내용 검색 (예: 오창선, 체육회, 구급차, 제이민...)"
-                      className="w-full pl-9 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900"
+                      className="w-full pl-9 pr-8 py-1.5 text-xs font-medium border border-slate-200/80 rounded-lg bg-slate-50/80 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900/15 focus:border-slate-300 text-slate-900 transition-colors"
                     />
                     {dutySearchQuery && (
                       <button
@@ -4111,7 +4111,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       <button
                         type="button"
                         onClick={toggleDutyPillsWrap}
-                        className="inline-flex items-center gap-1 text-[10.5px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 shadow-3xs shrink-0"
+                        className="inline-flex items-center gap-1 text-[10.5px] font-bold text-slate-700 bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200/80 px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 shadow-3xs shrink-0"
                         title={isDutyPillsWrapped ? '1줄 가로 스크롤 모드로 변경' : '2줄 전체 펼침 모드로 변경 (스크롤 불필요)'}
                       >
                         {isDutyPillsWrapped ? (
@@ -4135,7 +4135,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         <button
                           type="button"
                           onClick={handleScrollDutyPillsLeft}
-                          className="absolute -left-1.5 z-10 p-1 rounded-full bg-white/95 border border-slate-300 shadow-md text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer active:scale-90 transition-all shrink-0"
+                          className="absolute -left-1.5 z-10 p-1 rounded-full bg-white/95 border border-slate-200/90 shadow-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer active:scale-90 transition-all shrink-0"
                           title="왼쪽으로 스크롤"
                         >
                           <ChevronLeft className="w-3.5 h-3.5" />
@@ -4162,15 +4162,15 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               key={`duty-cat-${cat}`}
                               type="button"
                               onClick={() => setSelectedDutyCategory(cat)}
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black whitespace-nowrap transition-all cursor-pointer shadow-3xs active:scale-95 ${
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all cursor-pointer shadow-3xs active:scale-95 ${
                                 isSelected
-                                  ? 'bg-slate-900 text-white shadow-xs'
-                                  : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-300'
+                                  ? 'bg-slate-900 text-white shadow-2xs'
+                                  : 'bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-slate-200/80'
                               }`}
                             >
-                              {cat !== '전체' && <span className="opacity-60 text-[10px]">{cIdx}.</span>}
+                              {cat !== '전체' && <span className="opacity-60 text-[10px] font-mono">{cIdx}.</span>}
                               <span>{cat}</span>
-                              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                              <span className={`text-[10px] font-mono tabular-nums px-1.5 py-0.2 rounded-full ${
                                 isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                               }`}>
                                 {count}
@@ -4185,7 +4185,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         <button
                           type="button"
                           onClick={handleScrollDutyPillsRight}
-                          className="absolute -right-1.5 z-10 p-1 rounded-full bg-white/95 border border-slate-300 shadow-md text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer active:scale-90 transition-all shrink-0"
+                          className="absolute -right-1.5 z-10 p-1 rounded-full bg-white/95 border border-slate-200/90 shadow-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer active:scale-90 transition-all shrink-0"
                           title="오른쪽으로 스크롤"
                         >
                           <ChevronRight className="w-3.5 h-3.5" />
@@ -4220,12 +4220,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                     return (
                       <div
                         key={`edit-duty-card-${duty.id}`}
-                        className="bg-white border-2 border-emerald-300/90 rounded-xl p-3 sm:p-3.5 space-y-2.5 shadow-2xs"
+                        className="bg-white border border-emerald-300/90 rounded-xl p-3 sm:p-3.5 space-y-2.5 shadow-2xs"
                       >
                         {/* 카드 상단 헤더: No, 구분, 순서이동/삭제 관리 */}
                         <div className="flex items-center justify-between gap-2 pb-2 border-b border-emerald-100">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="font-mono font-black text-xs text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
+                            <span className="font-mono tabular-nums font-black text-xs text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/90 shrink-0">
                               #{idx + 1}
                             </span>
                             <div className="flex-1 max-w-[130px]">
@@ -4235,7 +4235,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 value={duty.category || ''}
                                 onChange={(e) => updateDutyField(duty.id, 'category', e.target.value)}
                                 placeholder="구분"
-                                className="w-full text-xs font-bold px-2 py-1 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                className="w-full text-xs font-bold px-2 py-1 border border-slate-200/80 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                               />
                             </div>
                           </div>
@@ -4246,7 +4246,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               type="button"
                               onClick={() => handleMoveDutyUp(duty.id)}
                               disabled={isFirst}
-                              className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 disabled:hover:bg-slate-100 cursor-pointer transition-all active:scale-95"
+                              className="p-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 disabled:hover:bg-slate-100 cursor-pointer transition-all active:scale-95"
                               title="위로 이동"
                             >
                               <ArrowUp className="w-3.5 h-3.5" />
@@ -4255,7 +4255,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               type="button"
                               onClick={() => handleMoveDutyDown(duty.id)}
                               disabled={isLast}
-                              className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 disabled:hover:bg-slate-100 cursor-pointer transition-all active:scale-95"
+                              className="p-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 disabled:hover:bg-slate-100 cursor-pointer transition-all active:scale-95"
                               title="아래로 이동"
                             >
                               <ArrowDown className="w-3.5 h-3.5" />
@@ -4263,7 +4263,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             <button
                               type="button"
                               onClick={() => handleDeleteDutyRow(duty.id)}
-                              className="p-1 rounded bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 cursor-pointer transition-all active:scale-95 ml-0.5"
+                              className="p-1 rounded-md bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 cursor-pointer transition-all active:scale-95 ml-0.5"
                               title="행 삭제"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -4280,7 +4280,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               value={duty.deptOrOrg || ''}
                               onChange={(e) => updateDutyField(duty.id, 'deptOrOrg', e.target.value)}
                               placeholder="예: 보건행정과"
-                              className="w-full text-xs font-semibold px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                              className="w-full text-xs font-semibold px-2 py-1.5 border border-slate-200/80 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                             />
                           </div>
                           <div>
@@ -4290,7 +4290,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               value={duty.role || ''}
                               onChange={(e) => updateDutyField(duty.id, 'role', e.target.value)}
                               placeholder="예: 총괄 기획 및 예산"
-                              className="w-full text-xs font-medium px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                              className="w-full text-xs font-medium px-2 py-1.5 border border-slate-200/80 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                             />
                           </div>
                         </div>
@@ -4307,19 +4307,19 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               }];
 
                           return (
-                            <div className="bg-slate-50/90 border border-slate-200 rounded-lg p-2.5 space-y-2">
-                              <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
+                            <div className="bg-slate-50/70 border border-slate-200/80 rounded-lg p-2.5 space-y-2">
+                              <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/80">
                                 <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
                                   <Users className="w-3.5 h-3.5 text-emerald-600" />
                                   <span>배정 인력 구성</span>
-                                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-200">
+                                  <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.2 rounded-full bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200/80">
                                     {staffList.length}명
                                   </span>
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => handleAddDutyStaff(duty.id)}
-                                  className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-white hover:bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded shadow-3xs cursor-pointer active:scale-95 transition-all"
+                                  className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-white hover:bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 rounded-md shadow-3xs cursor-pointer active:scale-95 transition-all"
                                   title="이 업무에 담당자 추가"
                                 >
                                   <Plus className="w-3 h-3 text-emerald-600" />
@@ -4333,7 +4333,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                   return (
                                     <div
                                       key={`duty-${duty.id}-staff-${sIdx}`}
-                                      className="bg-white border border-slate-200/90 rounded-md p-2 shadow-3xs space-y-1.5"
+                                      className="bg-white border border-slate-200/80 rounded-md p-2 shadow-3xs space-y-1.5"
                                     >
                                       <div className="flex items-center justify-between">
                                         <span className="text-[10.5px] font-black text-slate-700 flex items-center gap-1">
@@ -4360,7 +4360,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                             value={stf.name || ''}
                                             onChange={(e) => handleUpdateDutyStaff(duty.id, sIdx, 'name', e.target.value)}
                                             placeholder="예: 오창선"
-                                            className="w-full text-xs font-semibold px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                            className="w-full text-xs font-semibold px-2 py-1.5 border border-slate-200/80 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                                           />
                                         </div>
                                         <div>
@@ -4370,7 +4370,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                             value={stf.role || ''}
                                             onChange={(e) => handleUpdateDutyStaff(duty.id, sIdx, 'role', e.target.value)}
                                             placeholder="예: 총괄, 주무관"
-                                            className="w-full text-xs font-medium px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                            className="w-full text-xs font-medium px-2 py-1.5 border border-slate-200/80 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                                           />
                                         </div>
                                         <div>
@@ -4380,7 +4380,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                             value={stf.adminPhone || ''}
                                             onChange={(e) => handleUpdateDutyStaff(duty.id, sIdx, 'adminPhone', e.target.value)}
                                             placeholder="02-3423-7116"
-                                            className="w-full text-xs font-mono px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                            className="w-full text-xs font-mono tabular-nums px-2 py-1.5 border border-slate-200/80 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                                           />
                                         </div>
                                         <div>
@@ -4390,7 +4390,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                             value={stf.mobilePhone || ''}
                                             onChange={(e) => handleUpdateDutyStaff(duty.id, sIdx, 'mobilePhone', e.target.value)}
                                             placeholder="010-XXXX-XXXX"
-                                            className="w-full text-xs font-mono px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                            className="w-full text-xs font-mono tabular-nums px-2 py-1.5 border border-slate-200/80 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                                           />
                                         </div>
                                       </div>
@@ -4410,7 +4410,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             value={rawTasksText}
                             onChange={(e) => updateDutyField(duty.id, 'tasks', e.target.value)}
                             placeholder="과업 내용을 입력하세요 (줄바꿈 시 각 줄이 개조식 목록으로 저장됩니다)"
-                            className="w-full text-xs leading-relaxed px-2 py-1.5 border border-slate-300 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-y"
+                            className="w-full text-xs leading-relaxed px-2 py-1.5 border border-slate-200/80 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-y"
                           />
                         </div>
                       </div>
@@ -4418,11 +4418,11 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                   })}
 
                   {/* 하단 행 추가 및 저장 바 */}
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between gap-2 flex-wrap">
+                  <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-2.5 flex items-center justify-between gap-2 flex-wrap">
                     <button
                       type="button"
                       onClick={handleAddDutyRow}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-dashed border-emerald-300 hover:border-emerald-400 bg-emerald-50/60 hover:bg-emerald-100/70 text-emerald-800 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-98"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-emerald-300 hover:border-emerald-400 bg-emerald-50/50 hover:bg-emerald-100/60 text-emerald-800 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-98"
                     >
                       <Plus className="w-4 h-4 text-emerald-600" />
                       <span>+ 새 업무분장 행 추가</span>
@@ -4433,7 +4433,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         type="button"
                         onClick={handleCancelEditDuties}
                         disabled={saveMutation.isPending}
-                        className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg shadow-3xs cursor-pointer transition-all active:scale-95"
+                        className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200/80 rounded-lg shadow-3xs cursor-pointer transition-all active:scale-95"
                       >
                         취소
                       </button>
@@ -4441,7 +4441,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                         type="button"
                         onClick={handleSaveDuties}
                         disabled={saveMutation.isPending}
-                        className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-2xs cursor-pointer transition-all active:scale-95 disabled:opacity-50"
                       >
                         {saveMutation.isPending ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -4455,9 +4455,9 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                 </div>
               ) : (
                 /* VIEW MODE (MOBILE CARD STACK VIEW) */
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {filteredDuties.length === 0 ? (
-                    <div className="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-300 rounded-xl shadow-2xs">
+                    <div className="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-200/80 rounded-xl shadow-2xs">
                       검색 조건과 일치하는 업무분장 항목이 없습니다.
                     </div>
                   ) : (
@@ -4475,25 +4475,25 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       return (
                         <div
                           key={`duty-card-${duty.id}`}
-                          className="bg-white border-2 border-slate-300 rounded-xl p-3.5 space-y-2.5 shadow-2xs transition-all hover:border-slate-400"
+                          className="bg-white border border-slate-200/80 rounded-xl p-3.5 space-y-2.5 shadow-2xs transition-all hover:border-slate-300"
                         >
                           {/* 카드 헤더: 구분 배지 + 부서·기관명 + (관리자일 때 수정 버튼) */}
-                          <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 gap-2">
+                          <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 gap-2">
                             <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                              <span className={`text-[11px] font-black px-2.5 py-0.5 rounded border shrink-0 ${
+                              <span className={`text-[11px] font-black px-2 py-0.5 rounded-md border shrink-0 ${
                                 isOps
-                                  ? 'bg-blue-100 text-blue-900 border-blue-300'
+                                  ? 'bg-blue-50 text-blue-900 border-blue-200/80'
                                   : isCourse
-                                  ? 'bg-indigo-100 text-indigo-900 border-indigo-300'
+                                  ? 'bg-indigo-50 text-indigo-900 border-indigo-200/80'
                                   : isBooth
-                                  ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                                  ? 'bg-emerald-50 text-emerald-900 border-emerald-200/80'
                                   : isVIP
-                                  ? 'bg-purple-100 text-purple-900 border-purple-300'
+                                  ? 'bg-purple-50 text-purple-900 border-purple-200/80'
                                   : isMeal
-                                  ? 'bg-amber-100 text-amber-900 border-amber-300'
+                                  ? 'bg-amber-50 text-amber-900 border-amber-200/80'
                                   : isWaste
-                                  ? 'bg-rose-100 text-rose-900 border-rose-300'
-                                  : 'bg-slate-100 text-slate-800 border-slate-300'
+                                  ? 'bg-rose-50 text-rose-900 border-rose-200/80'
+                                  : 'bg-slate-100 text-slate-800 border-slate-200/80'
                               }`}>
                                 {duty.category}
                               </span>
@@ -4506,7 +4506,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               <button
                                 type="button"
                                 onClick={handleStartEditDuties}
-                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 px-2 py-1 rounded shadow-3xs cursor-pointer active:scale-95 shrink-0"
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-2 py-1 rounded-md shadow-3xs cursor-pointer active:scale-95 shrink-0"
                                 title="스프레드시트 엑셀 편집 모드로 열기"
                               >
                                 <Edit3 className="w-3 h-3 text-slate-500" />
@@ -4542,7 +4542,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                     return (
                                       <div key={`duty-stf-${duty.id}-${sIdx}`} className="flex items-center gap-1.5 flex-wrap">
                                         {hasStfName && (
-                                          <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                                          <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100/90 px-2 py-0.5 rounded-md border border-slate-200/80 shrink-0">
                                             <User className="w-3 h-3 text-slate-500 shrink-0" />
                                             <span>{showPrivateMobile ? stf.name : maskPersonName(stf.name)}</span>
                                             {stf.role && (
@@ -4553,23 +4553,23 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                         {hasStfAdmin && (
                                           <a
                                             href={`tel:${stfAdmin.replace(/[^0-9]/g, '')}`}
-                                            className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                            className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50/80 hover:bg-blue-100/80 px-2 py-0.5 rounded-md border border-blue-200/80 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
                                             title={`행정전화 걸기: ${stfAdmin}`}
                                           >
                                             <Phone className="w-3 h-3 text-blue-700 shrink-0" />
                                             <span className="text-[10.5px] font-extrabold text-blue-800">행정:</span>
-                                            <span className="font-mono">{stfAdmin}</span>
+                                            <span className="font-mono tabular-nums">{stfAdmin}</span>
                                           </a>
                                         )}
                                         {hasStfMobile && (
                                           <a
                                             href={`tel:${stfMobile.replace(/[^0-9]/g, '')}`}
-                                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-200/80 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
                                             title={`휴대전화 걸기: ${stfMobile}`}
                                           >
                                             <Smartphone className="w-3 h-3 text-emerald-700 shrink-0" />
                                             <span className="text-[10.5px] font-extrabold text-emerald-800">폰:</span>
-                                            <span className="font-mono">{stfMobile}</span>
+                                            <span className="font-mono tabular-nums">{stfMobile}</span>
                                           </a>
                                         )}
                                       </div>
@@ -4588,7 +4588,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             return (
                               <div className="flex items-center gap-1.5 flex-wrap pt-0.5 pb-0.5">
                                 {hasManager && (
-                                  <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                                  <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100/90 px-2 py-0.5 rounded-md border border-slate-200/80 shrink-0">
                                     <User className="w-3 h-3 text-slate-500 shrink-0" />
                                     <span>{showPrivateMobile ? duty.manager : maskPersonName(duty.manager)}</span>
                                   </div>
@@ -4596,23 +4596,23 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                                 {hasAdmin && (
                                   <a
                                     href={`tel:${adminNo.replace(/[^0-9]/g, '')}`}
-                                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50/80 hover:bg-blue-100/80 px-2 py-0.5 rounded-md border border-blue-200/80 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
                                     title={`행정전화 걸기: ${adminNo}`}
                                   >
                                     <Phone className="w-3 h-3 text-blue-700 shrink-0" />
                                     <span className="text-[10.5px] font-extrabold text-blue-800">행정:</span>
-                                    <span className="font-mono">{adminNo}</span>
+                                    <span className="font-mono tabular-nums">{adminNo}</span>
                                   </a>
                                 )}
                                 {hasMobile && (
                                   <a
                                     href={`tel:${mobileNo.replace(/[^0-9]/g, '')}`}
-                                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-200/80 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0"
                                     title={`휴대전화 걸기: ${mobileNo}`}
                                   >
                                     <Smartphone className="w-3 h-3 text-emerald-700 shrink-0" />
                                     <span className="text-[10.5px] font-extrabold text-emerald-800">폰:</span>
-                                    <span className="font-mono">{mobileNo}</span>
+                                    <span className="font-mono tabular-nums">{mobileNo}</span>
                                   </a>
                                 )}
                               </div>
@@ -4620,7 +4620,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           })()}
 
                           {/* 배정 과업 박스 */}
-                          <div className="bg-slate-50/90 rounded-lg p-2.5 border border-slate-200">
+                          <div className="bg-slate-50/70 rounded-lg p-2.5 border border-slate-200/80">
                             <div className="text-[11px] font-bold text-slate-500 mb-1 flex items-center gap-1">
                               <span>배정 과업:</span>
                             </div>
@@ -4647,11 +4647,11 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
                   {/* 하단 관리자 도구 바 (View Mode) */}
                   {isLocalAdmin && (
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between gap-2 flex-wrap">
+                    <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-2.5 flex items-center justify-between gap-2 flex-wrap">
                       <button
                         type="button"
                         onClick={handleAddDutyRow}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-98"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-3xs cursor-pointer active:scale-98"
                       >
                         <Plus className="w-4 h-4 text-emerald-600" />
                         <span>+ 새 업무분장 행 추가</span>
@@ -4660,7 +4660,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       <button
                         type="button"
                         onClick={handleStartEditDuties}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
                       >
                         <FileSpreadsheet className="w-3.5 h-3.5" />
                         <span>스프레드시트 엑셀 편집</span>
@@ -4674,14 +4674,6 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         </div>
       </div>
 
-      {/* Floating Save / Action Toast */}
-      {saveToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 backdrop-blur-xs text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
       {/* Sub-Task Category Transfer Modal */}
       {transferTarget && (() => {
         const currentMilestones = data?.milestones || [];
@@ -4693,9 +4685,9 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         const otherMilestones = currentMilestones.filter((m) => m.id !== transferTarget.sourceMilestoneId);
 
         return (
-          <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
             <div 
-              className="bg-white rounded-2xl shadow-2xl border-2 border-slate-300 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150"
+              className="bg-white rounded-xl shadow-2xl border border-slate-200/90 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150"
               role="dialog"
               aria-modal="true"
               aria-labelledby="transfer-modal-title"
@@ -4734,15 +4726,15 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                       현재 소속: <strong className="text-amber-800 font-black">{sourceMilestone ? `${sourceMilestone.number || '추진과제'}. ${sourceMilestone.title}` : '미확인'}</strong>
                     </span>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-3 shadow-2xs">
-                    <div className={`shrink-0 flex flex-col items-center justify-center rounded-lg border overflow-hidden shadow-xs font-mono min-w-[64px] text-center bg-white ${
+                  <div className="p-3 bg-slate-50/70 rounded-xl border border-slate-200/80 flex items-start gap-3 shadow-2xs">
+                    <div className={`shrink-0 flex flex-col items-center justify-center rounded-lg border overflow-hidden shadow-2xs font-mono tabular-nums min-w-[64px] text-center bg-white ${
                       parsedPreview.status === 'done'
-                        ? 'border-emerald-500'
+                        ? 'border-emerald-300'
                         : parsedPreview.status === 'in-progress'
-                        ? 'border-amber-500'
-                        : 'border-slate-400'
+                        ? 'border-amber-300'
+                        : 'border-slate-300'
                     }`}>
-                      <span className={`w-full bg-slate-50 text-slate-950 font-black px-1 py-1 text-xs border-b border-slate-200 ${
+                      <span className={`w-full bg-slate-50 text-slate-900 font-black px-1 py-1 text-xs border-b border-slate-200/80 ${
                         isTimeRange ? 'text-[10px]' : isShortDate ? 'text-xs' : 'text-[11px]'
                       }`}>
                         {displayDate}
@@ -4791,10 +4783,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                           return (
                             <div
                               key={`transfer-dest-${m.id}`}
-                              className="p-2.5 rounded-xl border border-slate-200 bg-slate-100/80 opacity-60 flex items-center justify-between text-xs cursor-not-allowed"
+                              className="p-2.5 rounded-xl border border-slate-200/80 bg-slate-100/70 opacity-60 flex items-center justify-between text-xs cursor-not-allowed"
                             >
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className="font-bold text-slate-400 font-mono text-[11px] shrink-0">{m.number || `과제 ${m.id}`}</span>
+                                <span className="font-bold text-slate-400 font-mono tabular-nums text-[11px] shrink-0">{m.number || `과제 ${m.id}`}</span>
                                 <span className="font-medium text-slate-500 truncate">{m.title}</span>
                               </div>
                               <span className="text-[10.5px] font-bold text-slate-400 bg-slate-200 px-2 py-0.5 rounded-full shrink-0">
@@ -4810,10 +4802,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                             type="button"
                             disabled={isTransferring}
                             onClick={() => setSelectedTargetMilestoneId(m.id)}
-                            className={`w-full p-2.5 rounded-xl border-2 transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] ${
+                            className={`w-full p-2.5 rounded-xl border transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] ${
                               isSelected
-                                ? 'border-amber-500 bg-amber-50/80 shadow-xs ring-2 ring-amber-400/30'
-                                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80'
+                                ? 'border-amber-400 bg-amber-50/70 shadow-2xs ring-1 ring-amber-300/50'
+                                : 'border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/60'
                             }`}
                           >
                             <div className="flex items-center gap-2 min-w-0">
@@ -4822,14 +4814,14 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                               }`}>
                                 {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                               </div>
-                              <span className={`font-mono text-xs font-black shrink-0 ${isSelected ? 'text-amber-900' : 'text-slate-700'}`}>
+                              <span className={`font-mono tabular-nums text-xs font-black shrink-0 ${isSelected ? 'text-amber-900' : 'text-slate-700'}`}>
                                 {m.number || `과제 ${m.id}`}
                               </span>
                               <span className={`text-xs font-bold truncate ${isSelected ? 'text-amber-950 font-black' : 'text-slate-900'}`}>
                                 {m.title}
                               </span>
                             </div>
-                            <span className="text-[11px] font-medium text-slate-500 shrink-0 ml-2">
+                            <span className="text-[11px] font-mono tabular-nums font-medium text-slate-500 shrink-0 ml-2">
                               {m.details?.length || 0}개 과업
                             </span>
                           </button>
@@ -4841,12 +4833,12 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
               </div>
 
               {/* Modal Footer */}
-              <div className="bg-slate-50 px-4 py-3 border-t border-slate-200 flex items-center justify-end gap-2">
+              <div className="bg-slate-50/80 px-4 py-3 border-t border-slate-200/80 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={handleCloseTransferModal}
                   disabled={isTransferring}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 rounded-lg border border-slate-300 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200/70 rounded-lg border border-slate-200/80 transition-colors cursor-pointer"
                 >
                   취소
                 </button>
@@ -4854,10 +4846,10 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                   type="button"
                   onClick={handleExecuteTransfer}
                   disabled={isTransferring || !selectedTargetMilestoneId || selectedTargetMilestoneId === transferTarget.sourceMilestoneId}
-                  className={`px-4 py-1.5 text-xs font-black text-white rounded-lg flex items-center gap-1.5 shadow-sm transition-all ${
+                  className={`px-4 py-1.5 text-xs font-black text-white rounded-lg flex items-center gap-1.5 shadow-2xs transition-all ${
                     isTransferring || !selectedTargetMilestoneId || selectedTargetMilestoneId === transferTarget.sourceMilestoneId
                       ? 'bg-slate-400 cursor-not-allowed opacity-60'
-                      : 'bg-amber-600 hover:bg-amber-500 active:scale-95 cursor-pointer ring-1 ring-amber-700'
+                      : 'bg-slate-900 hover:bg-slate-800 active:scale-95 cursor-pointer'
                   }`}
                 >
                   {isTransferring ? (
@@ -4881,9 +4873,9 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       {/* Emergency Contact PIN Verification Modal */}
       {showPinModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl shadow-2xl border-2 border-slate-300 max-w-sm w-full p-5 space-y-4">
-            <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center shrink-0">
+          <div className="bg-white rounded-xl shadow-2xl border border-slate-200/90 max-w-sm w-full p-5 space-y-4">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/90 flex items-center justify-center shrink-0">
                 <Lock className="w-5 h-5 text-emerald-700" />
               </div>
               <div>
@@ -4902,7 +4894,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                   value={pinInput}
                   onChange={(e) => { setPinInput(e.target.value); setPinError(null); }}
                   placeholder="비밀번호 4자리 입력"
-                  className="w-full px-3.5 py-2.5 text-sm font-mono font-bold tracking-widest text-center border-2 border-slate-300 rounded-xl bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 text-slate-900"
+                  className="w-full px-3.5 py-2.5 text-sm font-mono tabular-nums font-bold tracking-widest text-center border border-slate-200/90 rounded-xl bg-slate-50/80 focus:bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 text-slate-900"
                   autoFocus
                 />
                 {pinError && (
@@ -4916,13 +4908,13 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
                 <button
                   type="button"
                   onClick={() => { setShowPinModal(false); setPinInput(''); setPinError(null); }}
-                  className="flex-1 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-300 transition-colors cursor-pointer"
+                  className="flex-1 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-xl border border-slate-200/80 transition-colors cursor-pointer"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-colors cursor-pointer active:scale-95"
+                  className="flex-1 py-2 text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-2xs transition-colors cursor-pointer active:scale-95"
                 >
                   인증 및 ON
                 </button>
@@ -4938,23 +4930,23 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 export function YangjaeFestivalSkeleton() {
   return (
     <div className="w-full flex justify-center pb-16">
-      <div className="w-full max-w-md bg-white sm:rounded-2xl sm:border-2 sm:border-slate-300 sm:shadow-lg overflow-hidden flex flex-col min-h-screen animate-pulse">
+      <div className="w-full max-w-md bg-white sm:rounded-xl sm:border sm:border-slate-200/80 sm:shadow-2xs overflow-hidden flex flex-col min-h-screen animate-pulse">
         {/* Top Header Skeleton */}
         <div className="bg-slate-900 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800">
           <div className="min-w-0 flex-1">
-            <div className="h-5 w-44 bg-slate-600 rounded" />
+            <div className="h-5 w-44 bg-slate-700 rounded" />
           </div>
           <div className="flex items-center gap-1 sm:gap-1.5">
             <div className="h-7 w-14 sm:w-16 bg-slate-800 rounded-lg" />
-            <div className="h-7 w-12 sm:w-14 bg-emerald-700/60 rounded-lg" />
+            <div className="h-7 w-12 sm:w-14 bg-slate-800 rounded-lg" />
           </div>
         </div>
         {/* Content Skeleton */}
-        <div className="flex-1 p-4 space-y-4 bg-slate-50/50">
-          <div className="bg-white border-2 border-slate-200 rounded-xl p-4 space-y-3">
-            <div className="flex items-center justify-between pb-2.5 border-b-2 border-slate-200">
+        <div className="flex-1 p-4 space-y-4 bg-slate-50/40">
+          <div className="bg-white border border-slate-200/80 rounded-xl p-4 space-y-3 shadow-2xs">
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
               <div className="h-5 w-32 bg-slate-200 rounded" />
-              <div className="h-6 w-14 bg-slate-300 rounded-md" />
+              <div className="h-6 w-14 bg-slate-200 rounded-md" />
             </div>
             <div className="space-y-2">
               <div className="h-4 bg-slate-100 rounded w-full" />
@@ -4962,13 +4954,15 @@ export function YangjaeFestivalSkeleton() {
               <div className="h-4 bg-slate-100 rounded w-4/6" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="h-10 bg-slate-200 rounded-xl" />
-            <div className="h-10 bg-slate-200 rounded-xl" />
+          <div className="grid grid-cols-4 gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80">
+            <div className="h-8 bg-white rounded-lg shadow-2xs" />
+            <div className="h-8 bg-slate-200/50 rounded-lg" />
+            <div className="h-8 bg-slate-200/50 rounded-lg" />
+            <div className="h-8 bg-slate-200/50 rounded-lg" />
           </div>
           <div className="space-y-3">
-            <div className="h-28 bg-white border border-slate-200 rounded-xl p-3" />
-            <div className="h-28 bg-white border border-slate-200 rounded-xl p-3" />
+            <div className="h-28 bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs" />
+            <div className="h-28 bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs" />
           </div>
         </div>
       </div>
@@ -4979,4 +4973,5 @@ export function YangjaeFestivalSkeleton() {
 YangjaeFestivalDashboardComponent.displayName = 'YangjaeFestivalDashboard';
 export const YangjaeFestivalDashboard = React.memo(YangjaeFestivalDashboardComponent);
 export default YangjaeFestivalDashboard;
+
 

@@ -57,15 +57,27 @@ function arePolicyGroupCardPropsEqual(
   const nCats = nextProps.group.cats;
   if (pCats.length !== nCats.length) return false;
   for (let i = 0; i < pCats.length; i++) {
-    if (
-      pCats[i].id !== nCats[i].id ||
-      pCats[i].totalBudget !== nCats[i].totalBudget ||
-      pCats[i].sortOrder !== nCats[i].sortOrder ||
-      pCats[i].name !== nCats[i].name ||
-      pCats[i].budgetType !== nCats[i].budgetType ||
-      pCats[i].fundingSource !== nCats[i].fundingSource
-    ) {
-      return false;
+    const pCat = pCats[i];
+    const nCat = nCats[i];
+    if (pCat !== nCat) {
+      if (
+        pCat.id !== nCat.id ||
+        pCat.totalBudget !== nCat.totalBudget ||
+        pCat.sortOrder !== nCat.sortOrder ||
+        pCat.name !== nCat.name ||
+        pCat.statItem !== nCat.statItem ||
+        pCat.formationItem !== nCat.formationItem ||
+        pCat.managementProject !== nCat.managementProject ||
+        pCat.unitProject !== nCat.unitProject ||
+        pCat.detailedProject !== nCat.detailedProject ||
+        pCat.color !== nCat.color ||
+        pCat.budgetType !== nCat.budgetType ||
+        pCat.fundingSource !== nCat.fundingSource ||
+        pCat.subItems !== nCat.subItems ||
+        pCat.fundingSplits !== nCat.fundingSplits
+      ) {
+        return false;
+      }
     }
   }
 
@@ -101,7 +113,10 @@ function arePolicyGroupCardPropsEqual(
         p.amount !== n.amount ||
         p.date !== n.date ||
         p.purpose !== n.purpose ||
-        p.docRegNum !== n.docRegNum
+        p.docRegNum !== n.docRegNum ||
+        p.isPlanned !== n.isPlanned ||
+        p.isSettled !== n.isSettled ||
+        p.actionType !== n.actionType
       ) {
         return false;
       }
@@ -335,83 +350,95 @@ const PolicyGroupCardComponent = ({
   }, [groupedByDetail, isVirtualizationActive, startIndex, endIndex]);
 
   return (
-    <div className={`glass-panel rounded-[2rem] mb-5 last:mb-0 transition-all duration-300 shadow-2xs ${hidePolicyHeader ? '' : 'border border-slate-200/60 hover:border-indigo-400/50 hover:shadow-md hover:shadow-indigo-500/5'}`}>
+    <div className={`mb-3 last:mb-0 transition-colors ${hidePolicyHeader ? '' : 'bg-white rounded-xl shadow-2xs border border-slate-200/80 hover:border-slate-300'}`}>
       {!hidePolicyHeader && (
         <div 
           className="px-5 py-4 flex flex-col gap-3 cursor-pointer group"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-slate-100 shadow-3xs" style={{ backgroundColor: cats[0]?.color ? `${cats[0].color}15` : '#f8fafc' }}>
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cats[0]?.color || 'var(--color-primary)' }} />
-              </div>
-              <div>
-                 <h3 className="font-bold text-[18px] text-gray-800 tracking-tight group-hover:text-[var(--color-primary)] transition-colors flex items-center gap-1.5 flex-wrap">
-                   {policyName}
-                   {groupTypes.map(t => (
-                     <span key={t} className={`text-[11px] font-semibold px-2 py-0.5 rounded-lg border ${t === '간주예산' ? 'bg-purple-50/80 text-purple-700 border-purple-200/60 shadow-3xs' : 'bg-rose-50/80 text-rose-700 border-rose-200/60 shadow-3xs'}`}>{t}</span>
-                   ))}
-                   {groupFunding.map(f => (
-                     <span key={f} className="text-[11px] font-semibold px-2 py-0.5 rounded-lg border bg-teal-50/80 text-teal-700 border-teal-200/60 shadow-3xs">{f}</span>
-                   ))}
-                 </h3>
-                 <div className="text-[12px] text-gray-500 font-semibold mt-0.5 tracking-tight">단위사업 {cats.length}개 그룹</div>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            {/* Left: Policy Title & Metadata */}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: cats[0]?.color || 'var(--color-primary)' }} />
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-[15px] text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">
+                    {policyName}
+                  </h3>
+                  <span className="text-xs text-slate-400 font-medium">단위사업 {cats.length}개 그룹</span>
+                  {groupTypes.map(t => (
+                    <span key={t} className={`text-[11px] font-medium px-1.5 py-0.5 rounded border ${t === '간주예산' ? 'bg-purple-50/60 text-purple-700 border-purple-200/60' : 'bg-rose-50/60 text-rose-700 border-rose-200/60'}`}>{t}</span>
+                  ))}
+                  {groupFunding.map(f => (
+                    <span key={f} className="text-[11px] font-medium px-1.5 py-0.5 rounded border bg-slate-50 text-slate-600 border-slate-200/80">{f}</span>
+                  ))}
+                  {planned > 0 && (
+                    <span className="text-[11px] text-amber-700 font-medium bg-amber-50/70 px-1.5 py-0.5 rounded border border-amber-200/60 font-mono tabular-nums">
+                      품의 진행/예정: {formatN(planned)}원
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-               <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isOpen ? 'bg-indigo-50 text-indigo-500' : 'bg-gray-50 text-gray-400 group-hover:bg-gray-100'}`}>
-                 {isOpen ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
-               </div>
+
+            {/* Right: Financial Metrics & Expand Toggle */}
+            <div className="flex items-center justify-between lg:justify-end gap-4 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+              <div className="flex items-center gap-4 sm:gap-6 text-xs">
+                <div className="flex flex-col lg:items-end">
+                  <div className="flex items-center gap-1.5 text-slate-400 mb-0.5">
+                    <span>총 예산 대비 사용액</span>
+                    <span className="font-mono font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded text-[11px]" title="정책사업 집행률">
+                      집행 {usageRate.toFixed(1)}%
+                    </span>
+                  </div>
+                  <span className="font-semibold text-slate-800 font-mono tabular-nums text-sm">
+                    {formatN(spent + planned)} <span className="text-slate-300 font-normal mx-0.5">/</span> <span className="text-slate-500 font-medium">{formatN(totalBudget)}</span>
+                  </span>
+                </div>
+
+                <div className="h-7 w-px bg-slate-100 hidden sm:block" />
+
+                <div className="flex flex-col items-end">
+                  <div className="flex items-center gap-1.5 text-slate-400 mb-0.5">
+                    <span className="font-mono font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px]" title="정책사업 미집행률(잔여율)">
+                      미집행 {(totalBudget > 0 ? (remaining / totalBudget * 100) : 0).toFixed(1)}%
+                    </span>
+                    <span>총 잔여액</span>
+                  </div>
+                  <span className="font-bold text-slate-900 text-sm sm:text-base font-mono tabular-nums">
+                    {formatN(remaining)}<span className="text-xs font-normal text-slate-400 ml-0.5">원</span>
+                  </span>
+                </div>
+              </div>
+
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 ${isOpen ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600'}`}>
+                {isOpen ? <ChevronUp size={15}/> : <ChevronDown size={15}/>}
+              </div>
             </div>
           </div>
           
-          <div className="bg-slate-50/60 rounded-2xl p-4 flex flex-col gap-3 border border-slate-200/20">
-            <div className="flex justify-between items-end flex-wrap gap-2">
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-slate-500 font-bold text-[14px]">총 예산 대비 사용액</span>
-                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-3xs" title="정책사업 집행률">
-                    집행 {usageRate.toFixed(1)}%
-                  </span>
-                </div>
-                <span className="font-extrabold text-slate-800 font-mono tracking-tight text-[21px]">{formatN(spent + planned)} <span className="text-[14px] text-slate-400 font-medium mx-1">/</span> <span className="text-slate-600 font-bold text-[18px]">{formatN(totalBudget)}</span></span>
-              </div>
-              <div className="flex flex-col items-end">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-3xs" title="정책사업 미집행률(잔여율)">
-                    미집행 {(totalBudget > 0 ? (remaining / totalBudget * 100) : 0).toFixed(1)}%
-                  </span>
-                  <span className="text-slate-500 font-bold text-[14px]">총 잔여액</span>
-                </div>
-                <span className="font-extrabold text-[var(--color-primary)] text-[25px] font-mono tracking-tight">{formatN(remaining)}<span className="text-[15px] font-bold ml-0.5">원</span></span>
-              </div>
-            </div>
-            <div className="h-2 w-full bg-slate-200/40 rounded-full overflow-hidden border border-slate-100 flex relative" title={`집행률: ${usageRate.toFixed(1)}% | 미집행률: ${(totalBudget > 0 ? (remaining / totalBudget * 100) : 0).toFixed(1)}%`}>
-               <div 
-                 className={`h-full transition-all duration-500 ease-out relative overflow-hidden ${
-                   usageRate >= 95 
-                     ? 'bg-gradient-to-r from-red-500 to-rose-600' 
-                     : usageRate >= 80 
-                       ? 'bg-gradient-to-r from-amber-400 to-amber-600' 
-                       : 'bg-gradient-to-r from-blue-500 to-indigo-600'
-                 }`} 
-                 style={{ width: `${Math.min(100, usageRate)}%` }} 
-               >
-                 <div className={`absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent ${isVisible ? 'animate-shimmer' : ''}`} style={{ backgroundSize: '200% 100%' }} />
-               </div>
-               <div 
-                 className="h-full bg-emerald-400/80 transition-all duration-500" 
-                 style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, usageRate), totalBudget > 0 ? (remaining / totalBudget * 100) : 0))}%` }} 
-               />
-            </div>
-            {planned > 0 && <div className="text-[11px] text-amber-700 font-bold bg-amber-50/80 px-2 py-1 rounded-lg inline-block self-start border border-amber-200/60 shadow-3xs">📋 품의 진행/예정: {formatN(planned)}원</div>}
+          {/* Minimalist Thin Progress Bar */}
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex" title={`집행률: ${usageRate.toFixed(1)}% | 미집행률: ${(totalBudget > 0 ? (remaining / totalBudget * 100) : 0).toFixed(1)}%`}>
+            <div 
+              className={`h-full ${isVisible ? 'transition-all duration-500 ease-out' : ''} ${
+                usageRate >= 95 
+                  ? 'bg-rose-500' 
+                  : usageRate >= 80 
+                    ? 'bg-amber-500' 
+                    : 'bg-slate-800'
+              }`} 
+              style={{ width: `${Math.min(100, usageRate)}%` }} 
+            />
+            <div 
+              className={`h-full bg-emerald-500/60 ${isVisible ? 'transition-all duration-500' : ''}`} 
+              style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, usageRate), totalBudget > 0 ? (remaining / totalBudget * 100) : 0))}%` }} 
+            />
           </div>
         </div>
       )}
       
       {(hidePolicyHeader || isOpen) && (
-        <div ref={containerRef} className={`px-5 py-3 transition-all duration-300 ease-in-out divide-y divide-gray-100 ${hidePolicyHeader ? 'px-1 pt-1 border border-slate-200 rounded-xl bg-white shadow-sm' : ''}`}>
+        <div ref={containerRef} className={`transition-all duration-200 divide-y divide-slate-100 ${hidePolicyHeader ? 'px-4 py-3 border border-slate-200/80 rounded-xl bg-white shadow-2xs' : 'px-5 py-3 border-t border-slate-100 bg-slate-50/30 rounded-b-xl'}`}>
           {isVirtualizationActive && topPadding > 0 && (
             <div style={{ height: `${topPadding}px` }} aria-hidden="true" />
           )}
@@ -429,134 +456,118 @@ const PolicyGroupCardComponent = ({
               detailFunding,
               detailTypes
             } = detailGroup;
+
+            const detailRemaining = detailTotalBudget - detailTotalUsed;
+            const detailRemainingRate = detailTotalBudget > 0 ? (detailRemaining / detailTotalBudget) * 100 : 0;
             
             return (
-              <div key={detailName} className="py-3 first:pt-0">
-                <div className={`flex items-center gap-2 ${hidePolicyHeader ? 'mb-4 border-b border-slate-100 pb-4 px-3 pt-2' : 'mb-2.5'}`}>
-                  <div className={`${hidePolicyHeader ? 'w-8 h-8' : 'w-5 h-5'} rounded bg-[var(--color-primary)]/10 flex items-center justify-center`}>
-                    <div className={`${hidePolicyHeader ? 'w-3.5 h-3.5' : 'w-2 h-2'} rounded-full bg-[var(--color-primary)]`} />
-                  </div>
-                  <div className={`flex items-center gap-2 font-semibold text-gray-800 flex-wrap ${hidePolicyHeader ? 'text-xl tracking-tight' : 'text-[17px]'}`}>
-                    {detailName}
+              <div key={detailName} className="py-3.5 first:pt-1 last:pb-1">
+                {/* Minimalist 2-Zone Detail Project Header */}
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 mb-2.5 pb-2 border-b border-slate-200/60">
+                  {/* Zone 1: Detail Project Name, Hierarchy Tags & Action Buttons */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="w-1.5 h-4 rounded-full bg-slate-800 shrink-0" />
+                    <span className="font-bold text-slate-900 text-sm tracking-tight">
+                      {detailName}
+                    </span>
                     {policyName && (
-                      <span className={`font-bold rounded-lg border bg-indigo-50/80 text-indigo-700 border-indigo-200/60 shadow-3xs ${hidePolicyHeader ? 'text-xs px-2 py-0.5' : 'text-[11px] px-1.5 py-0.5'}`}>
+                      <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                         정책: {policyName}
                       </span>
                     )}
                     {detailCats[0]?.unitProject && (
-                      <span className={`font-bold rounded-lg border bg-slate-50 text-slate-600 border-slate-200 shadow-3xs ${hidePolicyHeader ? 'text-xs px-2 py-0.5' : 'text-[11px] px-1.5 py-0.5'}`}>
+                      <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                         단위: {detailCats[0].unitProject}
                       </span>
                     )}
                     {detailTypes.map(t => (
-                      <span key={t} className={`font-semibold rounded-lg border shadow-3xs ${hidePolicyHeader ? 'text-xs px-2 py-0.5' : 'text-[11px] px-1.5 py-0.5'} ${t === '간주예산' ? 'bg-purple-50/80 text-purple-700 border-purple-200/60' : 'bg-rose-50/80 text-rose-700 border-rose-200/60'}`}>{t}</span>
+                      <span key={t} className={`text-[11px] font-medium px-1.5 py-0.5 rounded border ${t === '간주예산' ? 'bg-purple-50/70 text-purple-700 border-purple-200/60' : 'bg-rose-50/70 text-rose-700 border-rose-200/60'}`}>{t}</span>
                     ))}
                     {detailFunding.map(f => (
-                      <span key={f} className={`font-semibold rounded-lg border bg-teal-50/80 text-teal-700 border-teal-200/60 shadow-3xs ${hidePolicyHeader ? 'text-xs px-2 py-0.5' : 'text-[11px] px-1.5 py-0.5'}`}>{f}</span>
+                      <span key={f} className="text-[11px] font-medium px-1.5 py-0.5 rounded border bg-white text-slate-600 border-slate-200/80">{f}</span>
                     ))}
-                    <span className={`font-bold text-blue-700 bg-blue-50/80 rounded-lg border border-blue-100/60 font-mono tabular-nums shadow-3xs ${hidePolicyHeader ? 'text-sm px-2.5 py-0.5' : 'text-[13px] px-2 py-0.5'}`}>
+
+                    <div className="flex items-center gap-1 ml-1">
+                      {openAddCat && (
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            openAddCat({ 
+                              policyProject: policyName, 
+                              unitProject: detailCats[0]?.unitProject, 
+                              detailedProject: detailName,
+                              budgetType: (detailTypes[0] as '본예산' | '추경') || '본예산',
+                              fundingSource: detailFunding[0] || '구비'
+                            }); 
+                          }} 
+                          className="p-1 rounded-md cursor-pointer hover:bg-slate-200/70 text-slate-500 hover:text-slate-900 transition-colors"
+                          title="이 세부사업에 새 통계목 추가"
+                        >
+                          <FilePlus2 size={13} />
+                        </button>
+                      )}
+                      {openBatchEdit && (
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            openBatchEdit(detailName, detailCats);
+                          }} 
+                          className="text-[11px] font-medium px-2 py-0.5 rounded-md border bg-white text-slate-600 border-slate-200/90 cursor-pointer hover:bg-slate-100 hover:text-slate-900 transition-colors flex items-center gap-1"
+                          title="이 세부사업 내 모든 통계목에 동일한 재원비율 일괄 할당"
+                        >
+                          <Pencil size={10} /> 비율 일괄 설정
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Zone 2: Clean Financial Summary Strip */}
+                  <div className="flex items-center gap-2 flex-wrap text-xs font-mono tabular-nums">
+                    <span className="text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200/80">
                       예산 {formatN(detailTotalBudget)}원
                     </span>
 
-                    {/* 세부사업별 총예산 대비 사용액 & 집행률 */}
-                    <span className={`font-extrabold rounded-lg border font-mono tabular-nums shadow-3xs flex items-center gap-1.5 ${
-                      detailUsageRate >= 95 
-                        ? 'bg-rose-50 text-rose-700 border-rose-200/80' 
-                        : detailUsageRate >= 80 
-                          ? 'bg-amber-50 text-amber-700 border-amber-200/80' 
-                          : 'bg-indigo-50 text-indigo-700 border-indigo-200/80'
-                    } ${hidePolicyHeader ? 'text-xs px-2.5 py-0.5' : 'text-[12px] px-2 py-0.5'}`}>
+                    <span className="text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200/80 flex items-center gap-1.5">
                       <span>집행 {formatN(detailTotalUsed)}원</span>
-                      <span className={`font-black px-1.5 py-0.2 rounded shadow-3xs ${
-                        detailUsageRate >= 95 
-                          ? 'bg-rose-100 text-rose-800' 
-                          : detailUsageRate >= 80 
-                            ? 'bg-amber-100 text-amber-800' 
-                            : 'bg-indigo-100 text-indigo-800'
+                      <span className={`font-bold ${
+                        detailUsageRate >= 95 ? 'text-rose-600' : detailUsageRate >= 80 ? 'text-amber-600' : 'text-indigo-600'
                       }`}>
                         {detailUsageRate.toFixed(1)}%
                       </span>
                     </span>
 
-                    {/* 세부사업별 미집행액 & 잔여율 뱃지 */}
-                    {(() => {
-                      const detailRemaining = detailTotalBudget - detailTotalUsed;
-                      const detailRemainingRate = detailTotalBudget > 0 ? (detailRemaining / detailTotalBudget) * 100 : 0;
-                      return (
-                        <span className={`font-extrabold rounded-lg border font-mono tabular-nums shadow-3xs flex items-center gap-1.5 ${
-                          detailRemaining < 0 
-                            ? 'bg-rose-50 text-rose-700 border-rose-200/80' 
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
-                        } ${hidePolicyHeader ? 'text-xs px-2.5 py-0.5' : 'text-[12px] px-2 py-0.5'}`}>
-                          <span>잔여 {formatN(detailRemaining)}원</span>
-                          <span className={`font-black px-1.5 py-0.2 rounded shadow-3xs ${
-                            detailRemaining < 0 
-                              ? 'bg-rose-100 text-rose-800' 
-                              : 'bg-emerald-100 text-emerald-800'
-                          }`}>
-                            미집행 {detailRemainingRate.toFixed(1)}%
-                          </span>
-                        </span>
-                      );
-                    })()}
+                    <span className={`px-2 py-0.5 rounded-md border flex items-center gap-1.5 bg-white ${
+                      detailRemaining < 0 ? 'text-rose-700 border-rose-200' : 'text-slate-800 border-slate-200/80'
+                    }`}>
+                      <span className="font-semibold">잔여 {formatN(detailRemaining)}원</span>
+                      <span className={detailRemaining < 0 ? 'text-rose-600 font-bold' : 'text-emerald-700 font-semibold'}>
+                        미집행 {detailRemainingRate.toFixed(1)}%
+                      </span>
+                    </span>
 
-                    {/* 세부사업 투톤 듀얼 프로그래스 바 */}
-                    <div className="w-16 h-2 bg-slate-200/70 rounded-full overflow-hidden border border-slate-200/50 inline-flex items-center align-middle shrink-0 mr-1" title={`집행률: ${detailUsageRate.toFixed(1)}% | 미집행률: ${(detailTotalBudget > 0 ? ((detailTotalBudget - detailTotalUsed) / detailTotalBudget * 100) : 0).toFixed(1)}%`}>
+                    {/* Compact Progress Bar */}
+                    <div className="w-14 h-1.5 bg-slate-200/70 rounded-full overflow-hidden inline-flex items-center shrink-0" title={`집행률: ${detailUsageRate.toFixed(1)}% | 미집행률: ${detailRemainingRate.toFixed(1)}%`}>
                       <div 
                         className={`h-full transition-all duration-300 ${
-                          detailUsageRate >= 95 
-                            ? 'bg-rose-500' 
-                            : detailUsageRate >= 80 
-                              ? 'bg-amber-500' 
-                              : 'bg-indigo-500'
+                          detailUsageRate >= 95 ? 'bg-rose-500' : detailUsageRate >= 80 ? 'bg-amber-500' : 'bg-slate-800'
                         }`} 
                         style={{ width: `${Math.min(100, detailUsageRate)}%` }} 
                       />
                       <div 
-                        className="h-full bg-emerald-400 transition-all duration-300" 
-                        style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, detailUsageRate), detailTotalBudget > 0 ? ((detailTotalBudget - detailTotalUsed) / detailTotalBudget * 100) : 0))}%` }} 
+                        className="h-full bg-emerald-500/70 transition-all duration-300" 
+                        style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, detailUsageRate), detailRemainingRate))}%` }} 
                       />
                     </div>
 
                     {detailDailyIssued > 0 && (
-                      <span className={`font-bold text-amber-700 bg-amber-50 border border-amber-200 mr-2 font-mono tabular-nums shadow-3xs flex items-center gap-1 ${hidePolicyHeader ? 'text-xs px-2.5 py-0.5' : 'text-[12px] px-2 py-0.5'}`}>
-                        🪙 일상경비: 교부 {formatN(detailDailyIssued)}원 | 지출 {formatN(detailDailySpent)}원 (잔액 <strong className="text-amber-800">{formatN(detailDailyRemaining)}원</strong>)
+                      <span className="text-[11px] font-medium text-amber-800 bg-amber-50/80 border border-amber-200/70 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        일상경비: 교부 {formatN(detailDailyIssued)}원 | 지출 {formatN(detailDailySpent)}원 (잔액 <strong className="text-amber-900">{formatN(detailDailyRemaining)}원</strong>)
                       </span>
-                    )}
-                    {openAddCat && (
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          openAddCat({ 
-                            policyProject: policyName, 
-                            unitProject: detailCats[0]?.unitProject, 
-                            detailedProject: detailName,
-                            budgetType: (detailTypes[0] as '본예산' | '추경') || '본예산',
-                            fundingSource: detailFunding[0] || '구비'
-                          }); 
-                        }} 
-                        className="p-1 rounded cursor-pointer hover:bg-slate-200 text-gray-500 hover:text-blue-600 transition-colors"
-                        title="이 세부사업에 새 통계목 추가"
-                      >
-                        <FilePlus2 size={13} />
-                      </button>
-                    )}
-                    {openBatchEdit && (
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          openBatchEdit(detailName, detailCats);
-                        }} 
-                        className="ml-1 text-[11px] font-semibold px-2 py-0.5 rounded border bg-indigo-50 text-indigo-700 border-indigo-200 cursor-pointer hover:bg-indigo-100 transition-colors flex items-center gap-1 shadow-sm"
-                        title="이 세부사업 내 모든 통계목에 동일한 재원비율 일괄 할당"
-                      >
-                        <Pencil size={11} /> 비율 모괄 설정
-                      </button>
                     )}
                   </div>
                 </div>
                 
-                <div className="space-y-3 pl-2">
+                <div className="space-y-2">
                   {detailCats.map((cat, catIdx) => {
                     const stats = getCategoryStats(cat.id);
                     const isFirst = catIdx === 0;
@@ -591,38 +602,38 @@ const PolicyGroupCardComponent = ({
           
           {groupEntries.length > 0 && (
             <div className="pt-3 space-y-2 mt-2">
-              <div className="flex items-center justify-between mb-2 ml-1">
-                <div className="text-[15px] font-bold text-gray-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between mb-1.5 px-1">
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   지출 내역 {groupEntries.length > 6 ? `(총 ${groupEntries.length}건)` : ''}
                 </div>
                 {groupEntries.length > 6 && (
                   <button 
                     onClick={() => setShowAllEntries(prev => !prev)}
-                    className="text-[13px] bg-blue-50 text-blue-600 px-2.5 py-1 rounded cursor-pointer hover:bg-blue-100 hover:text-blue-800 font-bold transition-colors"
+                    className="text-xs bg-white border border-slate-200/90 text-slate-700 px-2.5 py-1 rounded-md cursor-pointer hover:bg-slate-50 font-semibold transition-colors"
                   >
                     {showAllEntries ? '간략히 보기' : '모두 보기'}
                   </button>
                 )}
               </div>
               
-              <div className={`space-y-2 ${showAllEntries ? 'max-h-[600px] overflow-y-auto pr-1 scrollbar-hide' : ''}`}>
+              <div className={`space-y-1.5 ${showAllEntries ? 'max-h-[600px] overflow-y-auto pr-1 scrollbar-hide' : ''}`}>
                 {visibleGroupEntries.map(entry => {
                   const cfg = ACTION_TYPE_CONFIG[entry.actionType || 'general'] || ACTION_TYPE_CONFIG['general'];
                   const parentCat = catMap[entry.categoryId];
                   return (
-                    <div key={entry.id} className="flex items-center text-[15px] group bg-white py-2.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-colors relative">
+                    <div key={entry.id} className="flex items-center text-xs sm:text-[13px] group bg-white py-2 px-3 rounded-lg border border-slate-200/70 hover:border-slate-300 transition-colors relative">
                       <div className="w-[70px] flex-shrink-0">
-                        <span className={`px-2 py-1 rounded-md text-[13px] font-bold border whitespace-nowrap ${cfg.badge === '경비지출' ? 'bg-teal-50 text-teal-700 border-teal-200' : cfg.badge === '교부' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{cfg.badge}</span>
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border whitespace-nowrap ${cfg.badge === '경비지출' ? 'bg-teal-50/70 text-teal-700 border-teal-200/70' : cfg.badge === '교부' ? 'bg-amber-50/70 text-amber-700 border-amber-200/70' : 'bg-slate-50 text-slate-700 border-slate-200/80'}`}>{cfg.badge}</span>
                       </div>
-                      <div className="w-[190px] hidden sm:flex flex-col justify-center flex-shrink-0 pr-3 leading-tight">
-                        <span className="text-xs font-bold text-slate-800 whitespace-nowrap truncate" title={parentCat ? `${parentCat.unitProject} > ${parentCat.detailedProject}` : ''}>
+                      <div className="w-[180px] hidden sm:flex flex-col justify-center flex-shrink-0 pr-3 leading-tight">
+                        <span className="text-xs font-semibold text-slate-800 whitespace-nowrap truncate" title={parentCat ? `${parentCat.unitProject} > ${parentCat.detailedProject}` : ''}>
                           {parentCat?.detailedProject || parentCat?.unitProject || '알수없음'}
                         </span>
-                        <span className="text-[11px] text-slate-500 font-semibold whitespace-nowrap truncate">
+                        <span className="text-[11px] text-slate-400 whitespace-nowrap truncate">
                           {parentCat?.statItem || parentCat?.name || ''}
                         </span>
                       </div>
-                      <div className="w-[90px] flex items-center flex-shrink-0 pr-3">
+                      <div className="w-[85px] flex items-center flex-shrink-0 pr-2">
                         <InlineEditCell
                           cellId={`${entry.id}:date`}
                           value={entry.date}
@@ -633,10 +644,11 @@ const PolicyGroupCardComponent = ({
                           onSave={(newVal) => updateEntry && updateEntry(entry.id, { date: String(newVal) })}
                           onNavigate={(dir) => handleCellNavigate(`${entry.id}:date`, dir)}
                           displayFormatter={(v) => String(v).replace(/-/g, '.')}
-                          className="text-[13.5px] text-gray-500 font-medium tracking-tight whitespace-nowrap"
+                          className="text-xs text-slate-500 font-mono whitespace-nowrap"
+                          inputClassName="w-full min-w-0"
                         />
                       </div>
-                      <div className="w-[140px] hidden lg:flex items-center flex-shrink-0 pr-3">
+                      <div className="w-[135px] hidden lg:flex items-center flex-shrink-0 pr-2">
                         <InlineEditCell
                           cellId={`${entry.id}:docRegNum`}
                           value={entry.docRegNum || ''}
@@ -648,13 +660,14 @@ const PolicyGroupCardComponent = ({
                           onSave={(newVal) => updateEntry && updateEntry(entry.id, { docRegNum: String(newVal) })}
                           onNavigate={(dir) => handleCellNavigate(`${entry.id}:docRegNum`, dir)}
                           displayFormatter={(v) => v ? (
-                            <span className="text-[13px] bg-indigo-50 border border-indigo-100 text-indigo-700 px-2 py-0.5 rounded-md whitespace-nowrap">
+                            <span className="text-[11px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono whitespace-nowrap">
                               {String(v)}
                             </span>
-                          ) : <span className="text-[12px] text-slate-300 font-light">+문서번호</span>}
+                          ) : <span className="text-[11px] text-slate-300">+문서번호</span>}
+                          inputClassName="w-full min-w-0"
                         />
                       </div>
-                      <div className="flex-1 min-w-[150px] pr-2">
+                      <div className="flex-1 min-w-[140px] pr-2">
                         <InlineEditCell
                           cellId={`${entry.id}:purpose`}
                           value={entry.purpose || ''}
@@ -664,10 +677,11 @@ const PolicyGroupCardComponent = ({
                           onCancelEdit={() => setActiveCellId(null)}
                           onSave={(newVal) => updateEntry && updateEntry(entry.id, { purpose: String(newVal) })}
                           onNavigate={(dir) => handleCellNavigate(`${entry.id}:purpose`, dir)}
-                          className={`${entry.purpose?.includes('(일상경비 교부)') ? 'text-red-500 font-extrabold' : 'text-gray-800 font-semibold'} tracking-tight line-clamp-1 text-[15px]`}
+                          className={`${entry.purpose?.includes('(일상경비 교부)') ? 'text-amber-700 font-semibold' : 'text-slate-800 font-medium'} tracking-tight line-clamp-1 text-[13px]`}
+                          inputClassName="w-full min-w-0"
                         />
                       </div>
-                      <div className="w-[130px] sm:w-[160px] flex items-center justify-end gap-3 flex-shrink-0">
+                      <div className="w-[130px] sm:w-[155px] flex items-center justify-end gap-2 flex-shrink-0">
                         <InlineEditCell
                           cellId={`${entry.id}:amount`}
                           value={entry.amount}
@@ -682,11 +696,12 @@ const PolicyGroupCardComponent = ({
                           }}
                           onNavigate={(dir) => handleCellNavigate(`${entry.id}:amount`, dir)}
                           displayFormatter={(v) => `${formatN(Number(v))}원`}
-                          className="font-semibold text-gray-800 tracking-tight tabular-nums whitespace-nowrap text-[15px]"
+                          className="font-semibold text-slate-900 font-mono tabular-nums whitespace-nowrap text-[13px]"
+                          inputClassName="w-full max-w-[105px] text-right"
                         />
-                        <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 absolute right-2 top-2 sm:relative sm:top-0 sm:right-0 bg-white sm:bg-transparent rounded p-1 sm:p-0 border border-slate-200 sm:border-none z-10 w-auto sm:w-[56px] justify-end flex-shrink-0">
-                          <button onClick={() => openEditEntry(entry)} className="p-1 rounded hover:bg-slate-100 text-gray-500" title="수정"><Pencil size={13} /></button>
-                          <button onClick={() => { if(window.confirm('이 지출 내역을 정말 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다.')) deleteEntry(entry.id) }} className="p-1 rounded hover:bg-red-50 text-gray-500 hover:text-red-500" title="삭제"><Trash2 size={13} /></button>
+                        <div className="flex items-center gap-0.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0">
+                          <button onClick={() => openEditEntry(entry)} className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700" title="수정"><Pencil size={12} /></button>
+                          <button onClick={() => { if(window.confirm('이 지출 내역을 정말 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다.')) deleteEntry(entry.id) }} className="p-1 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-600" title="삭제"><Trash2 size={12} /></button>
                         </div>
                       </div>
                     </div>

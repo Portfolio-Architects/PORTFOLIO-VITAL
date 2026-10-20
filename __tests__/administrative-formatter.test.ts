@@ -3,6 +3,7 @@ import {
   formatAdministrativeTime,
   numberToKoreanHanja,
   formatAdministrativeCurrency,
+  formatAdministrativeLineBreaks,
   sanitizeAdministrativeText,
   ensureAdministrativeEnding
 } from '@/lib/administrativeFormatter';
@@ -67,6 +68,12 @@ describe('VITAL 행정 공문서 표준 포매터 및 린터 테스트 (Rule M)'
       expect(sanitizeAdministrativeText('시스템 패치를 완료했습니다')).toBe('시스템 패치를 완료함');
       expect(sanitizeAdministrativeText('정상 반영하였습니다')).toBe('정상 반영함');
       expect(sanitizeAdministrativeText('결과가 확인되었습니다.')).toBe('결과가 확인됨.');
+    });
+
+    it('한 문단에 이어 붙여진 개조식 기호(❍, ▢ 등) 및 다중 문장을 줄바꿈(Enter)으로 자동 분리해야 함', () => {
+      const collapsed = '▢ 1. 추진 배경 ❍ 첫 번째 항목을 점검함. ❍ 두 번째 항목을 반영함.';
+      const formatted = formatAdministrativeLineBreaks(collapsed);
+      expect(formatted).toBe('▢ 1. 추진 배경\n❍ 첫 번째 항목을 점검함.\n❍ 두 번째 항목을 반영함.');
     });
   });
 

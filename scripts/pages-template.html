@@ -18,9 +18,19 @@
   <link rel="icon" href="/icon.png" sizes="64x64" type="image/png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif; }
+    :root {
+      --bg: #f8fafc;
+      --border: rgba(226, 232, 240, 0.85);
+      --shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif; background-color: var(--bg); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .shadow-2xs { box-shadow: var(--shadow); }
+    .shadow-3xs { box-shadow: 0 1px 1px 0 rgba(15, 23, 42, 0.02); }
+    .backdrop-blur-xs { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+    .h-4\.5 { height: 1.125rem; }
+    .py-0\.2 { padding-top: 0.05rem; padding-bottom: 0.05rem; }
     
     /* 오직 글자 크기 유틸리티만 타겟팅 (text-slate-*, text-center 등 색상/정렬 클래스 중첩 폭발 방지) */
     .is-large-font .text-\[9px\] { font-size: 11.5px !important; }
@@ -74,21 +84,21 @@
     }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-900 selection:bg-slate-800 selection:text-white pb-16 flex justify-center">
-  <div id="app-root" class="w-full max-w-md bg-white sm:rounded-2xl sm:border-2 sm:shadow-lg overflow-hidden flex flex-col min-h-screen text-slate-900 transition-all sm:border-slate-300">
+<body class="bg-slate-50/70 min-h-screen text-slate-900 selection:bg-slate-800 selection:text-white pb-16 flex justify-center">
+  <div id="app-root" class="w-full max-w-md bg-white sm:rounded-xl sm:border sm:shadow-2xs overflow-hidden flex flex-col min-h-screen text-slate-900 transition-all sm:border-slate-200/80">
     <!-- Top Sticky Header -->
-    <div class="sticky top-0 z-30 bg-slate-900 text-white px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800 shadow-sm">
+    <div class="sticky top-0 z-30 bg-slate-900 text-white px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800">
       <div class="min-w-0 flex-1">
         <div id="header-title" class="text-sm font-bold tracking-tight truncate">2026 양재천 건강 페스티벌</div>
       </div>
       <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
         <!-- Large Font Toggle Button -->
-        <button id="btn-toggle-font" type="button" class="px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black border transition-all cursor-pointer flex items-center gap-1 active:scale-95 bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700" title="글자 크기 확대/보통 전환">
+        <button id="btn-toggle-font" type="button" class="px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black border transition-all cursor-pointer flex items-center gap-1 active:scale-95 bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700 whitespace-nowrap" title="글자 크기 확대/보통 전환">
           <span id="font-icon" class="font-extrabold text-[12px] sm:text-[13px]">가+</span>
           <span id="font-label">큰글씨</span>
         </button>
         <!-- Share Button -->
-        <button id="btn-share" type="button" class="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center gap-1 sm:gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all" title="대시보드 링크 공유">
+        <button id="btn-share" type="button" class="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center gap-1 sm:gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition-all whitespace-nowrap" title="대시보드 링크 공유">
           <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
           </svg>
@@ -98,32 +108,32 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="flex-1 p-3.5 space-y-4 bg-slate-100">
+    <div class="flex-1 p-3.5 space-y-3.5 bg-slate-50/40">
       <!-- Section 1: Official Event Overview (행사 개요) -->
-      <div id="overview-container" class="bg-white border-2 border-slate-300 rounded-xl p-4 shadow-2xs">
+      <div id="overview-container" class="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs">
         <!-- Rendered via renderOverview() -->
       </div>
 
-      <!-- Section 2: Tab Buttons -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-slate-200 p-1.5 rounded-xl border border-slate-300">
-        <button id="tab-milestones" type="button" class="py-2.5 text-xs font-extrabold rounded-lg transition-all cursor-pointer text-center bg-slate-900 text-white shadow-xs">
+      <!-- Section 2: Tab Buttons (Segmented Control) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80">
+        <button id="tab-milestones" type="button" class="py-2 text-xs font-extrabold rounded-lg transition-all cursor-pointer text-center bg-white text-slate-900 shadow-2xs border border-slate-200/80">
           1. 추진과제
         </button>
-        <button id="tab-booths" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
+        <button id="tab-booths" type="button" class="py-2 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-600 hover:text-slate-900 hover:bg-white/60 border border-transparent">
           2. 부스현황
         </button>
-        <button id="tab-duties" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
+        <button id="tab-duties" type="button" class="py-2 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-600 hover:text-slate-900 hover:bg-white/60 border border-transparent">
           3. 업무분장
         </button>
-        <button id="tab-schedule" type="button" class="py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70">
+        <button id="tab-schedule" type="button" class="py-2 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-600 hover:text-slate-900 hover:bg-white/60 border border-transparent">
           4. 행사식순
         </button>
       </div>
 
       <!-- Content 1: Milestones -->
-      <div id="content-milestones" class="space-y-3.5">
+      <div id="content-milestones" class="space-y-3">
         <div class="px-1 flex items-center justify-between">
-          <button id="btn-toggle-all-tasks" type="button" class="text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer py-1 flex items-center gap-1">
+          <button id="btn-toggle-all-tasks" type="button" class="text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer py-1 flex items-center gap-1 transition-colors">
             <span id="toggle-all-icon">▼</span>
             <span id="toggle-all-text">전체 펼치기</span>
           </button>
@@ -132,10 +142,10 @@
       </div>
 
       <!-- Content 2: Booths -->
-      <div id="content-booths" class="space-y-3.5 hidden">
+      <div id="content-booths" class="space-y-3 hidden">
         <div class="flex flex-wrap items-center justify-between gap-y-2 gap-x-2 px-1">
           <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-            <span class="inline-block w-3 h-3 border-[1.5px] border-slate-900 rounded-[1px] shrink-0"></span>
+            <span class="inline-block w-3 h-3 border-[1.5px] border-slate-900 rounded-[2px] shrink-0"></span>
             <span>부스 배치 계획</span>
           </h3>
           <div class="flex items-center gap-2 shrink-0">
@@ -144,7 +154,7 @@
               id="btn-toggle-booth-mobile"
               type="button"
               onclick="handleSwitchToggleClick()"
-              class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/80 transition-all cursor-pointer shadow-3xs select-none"
+              class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200/80 bg-slate-100/80 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none"
               title="비상연락망(폰번호) 스위치 - 관계자 보안 인증"
             >
               <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1">
@@ -155,9 +165,9 @@
                 <!-- Toggle Knob -->
                 <span id="booth-switch-knob" class="w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out translate-x-0"></span>
               </span>
-              <span id="booth-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600">OFF (숨김)</span>
+              <span id="booth-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200/80 text-slate-600">OFF (숨김)</span>
             </button>
-            <span id="booth-count-badge" class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200/90 px-2.5 py-1 rounded-full whitespace-nowrap shadow-3xs shrink-0"></span>
+            <span id="booth-count-badge" class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-slate-700 bg-slate-100/90 border border-slate-200/80 px-2.5 py-1 rounded-full whitespace-nowrap shadow-3xs shrink-0 font-mono tabular-nums"></span>
           </div>
         </div>
         <div id="booth-summary-banner"></div>
@@ -166,10 +176,10 @@
       </div>
 
       <!-- Content 3: Duties -->
-      <div id="content-duties" class="space-y-3.5 hidden">
-        <div class="bg-white border-2 border-slate-300 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
+      <div id="content-duties" class="space-y-3 hidden">
+        <div class="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
           <!-- Header Bar: Clean 1-Row Layout -->
-          <div class="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+          <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
             <h3 class="text-sm font-extrabold text-slate-900 tracking-tight whitespace-nowrap">
               <span>업무분장 및 비상연락망</span>
             </h3>
@@ -177,7 +187,7 @@
               id="btn-toggle-duty-mobile"
               type="button"
               onclick="handleSwitchToggleClick()"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-300 bg-slate-100 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none shrink-0"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200/80 bg-slate-100/80 hover:bg-slate-200/70 transition-all cursor-pointer shadow-3xs select-none shrink-0"
               title="비상연락망(폰번호) 스위치 - 관계자 보안 인증"
             >
               <span class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1 whitespace-nowrap">
@@ -188,7 +198,7 @@
                 <!-- Toggle Knob -->
                 <span id="duty-switch-knob" class="w-3.5 h-3.5 rounded-full bg-white shadow-xs transform transition-transform duration-200 ease-in-out translate-x-0"></span>
               </span>
-              <span id="duty-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 whitespace-nowrap">OFF (숨김)</span>
+              <span id="duty-switch-label" class="text-[10px] font-black px-1.5 py-0.2 rounded bg-slate-200/80 text-slate-600 whitespace-nowrap">OFF (숨김)</span>
             </button>
           </div>
 
@@ -201,7 +211,7 @@
               id="input-duty-search"
               type="text"
               placeholder="부서명, 담당자, 전화번호, 과업 내용 검색 (예: 오창선, 체육회, 구급차, 제이민...)"
-              class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900"
+              class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-200/80 rounded-lg bg-slate-50/80 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900/15 focus:border-slate-300 text-slate-900 transition-colors"
             />
             <button
               id="btn-clear-duty-search"
@@ -212,18 +222,18 @@
         </div>
 
         <!-- Roster Table Grid -->
-        <div id="duties-table-container" class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs"></div>
+        <div id="duties-table-container"></div>
       </div>
 
       <!-- Content 4: Schedule -->
       <div id="content-schedule" class="space-y-2.5 hidden">
-        <div class="bg-white border-2 border-slate-300 rounded-xl p-3 shadow-2xs space-y-2.5">
-          <div class="flex items-center justify-between gap-2">
+        <div class="bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs space-y-2.5">
+          <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
             <div class="flex items-center gap-2 min-w-0">
               <h3 class="text-sm font-extrabold text-slate-900 whitespace-nowrap">
                 <span>행사 식순</span>
               </h3>
-              <span id="schedule-count-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
+              <span id="schedule-count-badge" class="text-[11px] font-mono tabular-nums font-bold px-2 py-0.5 rounded-full bg-slate-100/90 text-slate-700 border border-slate-200/80 whitespace-nowrap">
                 17개 식순 · 07:30~14:30
               </span>
             </div>
@@ -235,7 +245,7 @@
               id="input-schedule-search"
               type="text"
               placeholder="식순명, 담당자, 내용 검색..."
-              class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900"
+              class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-200/80 rounded-lg bg-slate-50/80 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900/15 focus:border-slate-300 text-slate-900 transition-colors"
             />
             <button
               id="btn-clear-schedule-search"
@@ -246,7 +256,7 @@
         </div>
 
         <!-- Timetable Table Grid -->
-        <div id="schedule-table-container" class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs"></div>
+        <div id="schedule-table-container"></div>
       </div>
     </div>
   </div>
@@ -262,9 +272,9 @@
 
   <!-- Emergency Contact PIN Verification Modal -->
   <div id="pin-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl border-2 border-slate-300 max-w-sm w-full p-5 space-y-4">
-      <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center shrink-0 text-xl">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200/90 max-w-sm w-full p-5 space-y-4">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/90 flex items-center justify-center shrink-0 text-xl">
           🔒
         </div>
         <div>
@@ -283,7 +293,7 @@
             maxlength="10"
             placeholder="비밀번호 4자리 입력"
             onkeydown="if(event.key==='Enter') submitPinVerify();"
-            class="w-full px-3.5 py-2.5 text-sm font-mono font-bold tracking-widest text-center border-2 border-slate-300 rounded-xl bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 text-slate-900"
+            class="w-full px-3.5 py-2.5 text-sm font-mono tabular-nums font-bold tracking-widest text-center border border-slate-200/90 rounded-xl bg-slate-50/80 focus:bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 text-slate-900"
           />
         </div>
         <div id="pin-error-msg" class="text-xs font-bold text-red-600 hidden text-center">
@@ -295,14 +305,14 @@
         <button
           type="button"
           onclick="closePinModal()"
-          class="flex-1 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-300 transition-colors cursor-pointer"
+          class="flex-1 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-xl border border-slate-200/80 transition-colors cursor-pointer"
         >
           취소
         </button>
         <button
           type="button"
           onclick="submitPinVerify()"
-          class="flex-1 py-2 text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-colors cursor-pointer active:scale-95"
+          class="flex-1 py-2 text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-2xs transition-colors cursor-pointer active:scale-95"
         >
           인증 및 ON
         </button>
@@ -436,7 +446,6 @@
     }
 
     const SCHEDULE_PHASES = ['전체', '식전·준비', '공식행사', '걷기대회', '공연·폐회'];
-    const DUTY_CATEGORIES = ['전체', '총괄기획', '체육회', '대행용역', '응급안전', '체험부스', '유관부서'];
 
     function formatAutoHyphen(str) {
       if (!str || typeof str !== 'string') return '';
@@ -628,43 +637,43 @@
       ).join('');
 
       container.innerHTML = 
-        '<div class="flex items-center justify-between pb-2 mb-3 border-b-2 border-slate-900 gap-2">' +
+        '<div class="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 gap-2">' +
           '<div class="flex items-center gap-2">' +
-            '<span class="inline-block w-4 h-4 border-2 border-slate-900 rounded-[1.5px] shrink-0"></span>' +
-            '<span class="text-base font-black text-slate-900 tracking-tight">행사 개요</span>' +
+            '<span class="inline-block w-3.5 h-3.5 border-[1.5px] border-slate-900 rounded-[2px] shrink-0"></span>' +
+            '<span class="text-sm font-black text-slate-900 tracking-tight">행사 개요</span>' +
           '</div>' +
-          '<span class="font-black text-xs px-2.5 py-0.5 bg-slate-900 text-amber-300 rounded-full border border-slate-700 shadow-xs tracking-wide shrink-0">D-' + daysLeft + '</span>' +
+          '<span class="font-mono tabular-nums font-black text-[11px] px-2.5 py-0.5 bg-slate-900 text-amber-300 rounded-md border border-slate-800 shadow-2xs tracking-wide shrink-0">D-' + daysLeft + '</span>' +
         '</div>' +
         '<div class="space-y-2 text-xs overview-details">' +
           '<div class="overview-row">' +
-            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 행사명</span>' +
-            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+            '<span class="overview-label font-bold text-slate-500 tracking-wide">• 행사명</span>' +
+            '<span class="font-bold text-slate-300 text-center shrink-0">:</span>' +
             '<span class="font-extrabold text-slate-900 leading-snug break-keep min-w-0">' + (meta.title || '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌') + '</span>' +
           '</div>' +
           '<div class="overview-row">' +
-            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>' +
-            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
-            '<span class="font-semibold text-slate-800 break-keep min-w-0">' + (meta.eventDate || '') + ' (' + (meta.eventTime || '') + ')</span>' +
+            '<span class="overview-label font-bold text-slate-500 tracking-wide">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>' +
+            '<span class="font-bold text-slate-300 text-center shrink-0">:</span>' +
+            '<span class="font-semibold text-slate-800 font-mono tabular-nums break-keep min-w-0">' + (meta.eventDate || '') + ' (' + (meta.eventTime || '') + ')</span>' +
           '</div>' +
           '<div class="overview-row">' +
-            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 장&nbsp;&nbsp;&nbsp;&nbsp;소</span>' +
-            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+            '<span class="overview-label font-bold text-slate-500 tracking-wide">• 장&nbsp;&nbsp;&nbsp;&nbsp;소</span>' +
+            '<span class="font-bold text-slate-300 text-center shrink-0">:</span>' +
             '<span class="font-semibold text-slate-800 leading-snug break-keep min-w-0">' + (meta.location || '') + '</span>' +
           '</div>' +
           '<div class="overview-row">' +
-            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 코&nbsp;&nbsp;&nbsp;&nbsp;스</span>' +
-            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+            '<span class="overview-label font-bold text-slate-500 tracking-wide">• 코&nbsp;&nbsp;&nbsp;&nbsp;스</span>' +
+            '<span class="font-bold text-slate-300 text-center shrink-0">:</span>' +
             '<span class="font-semibold text-slate-800 break-keep min-w-0">' + (meta.course || '') + '</span>' +
           '</div>' +
           '<div class="overview-row">' +
-            '<span class="overview-label font-bold text-slate-600 tracking-wide">• 참&nbsp;&nbsp;&nbsp;&nbsp;여</span>' +
-            '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+            '<span class="overview-label font-bold text-slate-500 tracking-wide">• 참&nbsp;&nbsp;&nbsp;&nbsp;여</span>' +
+            '<span class="font-bold text-slate-300 text-center shrink-0">:</span>' +
             '<span class="font-semibold text-slate-800 break-keep min-w-0">' + (meta.targetAudience || '') + '</span>' +
           '</div>' +
           (progHtml ? 
             '<div class="overview-row">' +
-              '<span class="overview-label font-bold text-slate-600 tracking-wide">• 구&nbsp;&nbsp;&nbsp;&nbsp;성</span>' +
-              '<span class="font-bold text-slate-400 text-center shrink-0">:</span>' +
+              '<span class="overview-label font-bold text-slate-500 tracking-wide">• 구&nbsp;&nbsp;&nbsp;&nbsp;성</span>' +
+              '<span class="font-bold text-slate-300 text-center shrink-0">:</span>' +
               '<div class="space-y-1 min-w-0">' + progHtml + '</div>' +
             '</div>' : '') +
           '<div class="overview-row pt-0.5">' +
@@ -681,16 +690,16 @@
       container.innerHTML = '';
 
       (appData.milestones || []).forEach(m => {
-        // 과제 2(행사 식순)는 상단 [3. 행사식순] 전용 탭으로 승격되었으므로 1번 탭(추진과제)에서는 노출하지 않음
+        // 과제 2(행사 식순)는 상단 [4. 행사식순] 전용 탭으로 승격되었으므로 1번 탭(추진과제)에서는 노출하지 않음
         if (m.id === 2) return;
         const isExpanded = expandedTasks.has(m.id);
         const card = document.createElement('div');
-        card.className = 'p-3.5 rounded-xl border-2 transition-all shadow-2xs ' +
+        card.className = 'p-3.5 rounded-xl border transition-all shadow-2xs ' +
           (m.status === 'in-progress'
-            ? 'bg-amber-50/70 border-amber-400 ring-1 ring-amber-300'
+            ? 'bg-amber-50/35 border-amber-300/90'
             : m.status === 'done'
-            ? 'bg-emerald-50/35 border-emerald-300 ring-1 ring-emerald-200/60'
-            : 'bg-white border-slate-200 text-slate-600');
+            ? 'bg-white border-emerald-200/90'
+            : 'bg-white border-slate-200/80 text-slate-600');
 
         let detailsHtml = '';
         if (isExpanded) {
@@ -699,14 +708,14 @@
             coopHtml = '<div class="flex items-center flex-wrap gap-1.5 pb-2">' +
               '<span class="text-[11px] font-bold text-slate-500">협조부서:</span>' +
               m.cooperationDepts.map(d =>
-                '<span class="text-[10px] px-1.5 py-0.5 font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 rounded-md">' + d + '</span>'
+                '<span class="text-[10px] px-1.5 py-0.5 font-bold bg-indigo-50/80 text-indigo-800 border border-indigo-200/80 rounded-md">' + d + '</span>'
               ).join('') +
             '</div>';
           }
 
           let itemsHtml = '';
           if (m.details && m.details.length > 0) {
-            itemsHtml = '<div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-200/90 shadow-2xs">' +
+            itemsHtml = '<div class="bg-slate-50/60 rounded-xl border border-slate-200/80 overflow-hidden divide-y divide-slate-200/70 shadow-2xs">' +
               m.details.map(detail => {
                 const parsed = parseDetail(detail);
                 const isCoopTask = parsed.text.includes('[협조') || detail.includes('[협조');
@@ -721,15 +730,15 @@
                   : 'bg-slate-600 text-white';
                 const statusLabel = parsed.status === 'done' ? '✓ 완료' : parsed.status === 'in-progress' ? '▶ 진행' : '○ 예정';
                 const borderClass = parsed.status === 'done'
-                  ? 'border-emerald-500'
+                  ? 'border-emerald-300'
                   : parsed.status === 'in-progress'
-                  ? 'border-amber-500'
-                  : 'border-slate-400';
+                  ? 'border-amber-300'
+                  : 'border-slate-300';
                 const dateFontClass = isTimeRange ? 'text-[10.5px] sm:text-[11px]' : (isShortDate ? 'text-[14.5px] sm:text-[15px]' : 'text-[13px] sm:text-[13.5px]');
 
-                return '<div class="p-3 flex items-start gap-3 transition-colors ' + (isCoopTask ? 'bg-indigo-50/40 hover:bg-indigo-50/70' : 'hover:bg-white bg-white/70') + '">' +
-                  '<div class="date-tile shrink-0 flex flex-col items-center justify-center rounded-xl border-2 overflow-hidden shadow-xs font-mono min-w-[70px] sm:min-w-[76px] text-center mt-0.5 bg-white transition-all ' + borderClass + '">' +
-                    '<span class="date-text w-full bg-slate-50 text-slate-950 font-black px-1 py-1.5 tracking-tight border-b border-slate-200 break-all leading-snug ' + dateFontClass + '">' + displayDate + '</span>' +
+                return '<div class="p-3 flex items-start gap-3 transition-colors ' + (isCoopTask ? 'bg-indigo-50/35 hover:bg-indigo-50/60' : 'hover:bg-white bg-white/80') + '">' +
+                  '<div class="date-tile shrink-0 flex flex-col items-center justify-center rounded-lg border overflow-hidden shadow-2xs font-mono tabular-nums min-w-[70px] sm:min-w-[76px] text-center mt-0.5 bg-white transition-all ' + borderClass + '">' +
+                    '<span class="date-text w-full bg-slate-50 text-slate-900 font-black px-1 py-1.5 tracking-tight border-b border-slate-200/80 break-all leading-snug ' + dateFontClass + '">' + displayDate + '</span>' +
                     '<span class="status-text w-full px-1 py-1 text-[11px] sm:text-[11.5px] font-black tracking-normal ' + statusColor + '">' + statusLabel + '</span>' +
                   '</div>' +
                   '<div class="flex-1 min-w-0 pt-0.5 space-y-1.5">' +
@@ -742,24 +751,23 @@
             '</div>';
           }
 
-          detailsHtml = '<div class="pt-2 space-y-2">' + coopHtml + itemsHtml + '</div>';
+          detailsHtml = '<div class="pt-1 space-y-2">' + coopHtml + itemsHtml + '</div>';
         }
 
         const statusBadge = m.status === 'done'
-          ? '<span class="text-[11px] px-2 py-0.5 font-bold rounded border bg-emerald-100 text-emerald-900 border-emerald-400 font-black shadow-3xs">✓ 완료</span>'
+          ? '<span class="text-[11px] px-2 py-0.5 font-extrabold rounded-md border bg-emerald-50 text-emerald-800 border-emerald-200/90">✓ 완료</span>'
           : m.status === 'in-progress'
-          ? '<span class="text-[11px] px-2 py-0.5 font-bold rounded border bg-amber-100 text-amber-900 border-amber-400 font-black">▶ 진행중</span>'
-          : '<span class="text-[11px] px-2 py-0.5 font-bold rounded border bg-slate-50 text-slate-400 border-slate-200">○ 예정</span>';
+          ? '<span class="text-[11px] px-2 py-0.5 font-extrabold rounded-md border bg-amber-50 text-amber-800 border-amber-200/90">▶ 진행중</span>'
+          : '<span class="text-[11px] px-2 py-0.5 font-bold rounded-md border bg-slate-50 text-slate-400 border-slate-200/80">○ 예정</span>';
 
         const numColor = m.status === 'done' ? 'text-emerald-400' : 'text-amber-300';
-        const headerBorder = m.status === 'done' ? 'border-emerald-200/80' : 'border-slate-200';
 
         card.innerHTML =
-          '<div class="flex items-center justify-between pb-2 mb-1 border-b ' + headerBorder + ' gap-1.5 cursor-pointer" onclick="toggleTask(' + m.id + ')">' +
+          '<div class="flex items-center justify-between pb-2.5 mb-2 border-b border-slate-100 gap-1.5 cursor-pointer" onclick="toggleTask(' + m.id + ')">' +
             '<div class="flex items-center gap-2 flex-1 min-w-0">' +
-              '<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white shadow-2xs max-w-full">' +
-                '<span class="font-black ' + numColor + ' text-[11px] shrink-0">' + m.number + '</span>' +
-                '<span class="w-[1px] h-3 bg-slate-600 shrink-0"></span>' +
+              '<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-900 text-white shadow-2xs max-w-full">' +
+                '<span class="font-mono tabular-nums font-black ' + numColor + ' text-[11px] shrink-0">' + m.number + '</span>' +
+                '<span class="w-[1px] h-3 bg-slate-700 shrink-0"></span>' +
                 '<span class="text-xs font-extrabold text-slate-50 tracking-tight truncate">' + m.title + '</span>' +
               '</div>' +
             '</div>' +
@@ -798,17 +806,19 @@
       const pillsContainer = document.getElementById('booth-filter-pills');
       if (!container || !pillsContainer) return;
 
-      const categories = ['전체', '민간', '보건소 부서', '기타'];
+      const categories = ['전체', '보건소 부서', '민간', '운영본부'];
       pillsContainer.innerHTML = categories.map(cat =>
-        '<button type="button" onclick="selectCategory(\'' + cat + '\')" class="px-2.5 py-1 text-xs rounded-lg font-bold whitespace-nowrap border cursor-pointer ' +
-        (activeCategory === cat ? 'bg-slate-900 text-white border-slate-900 shadow-xs' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100') + '">' +
+        '<button type="button" onclick="selectCategory(\'' + cat + '\')" class="px-2.5 py-1 text-xs rounded-lg font-bold whitespace-nowrap border cursor-pointer transition-colors ' +
+        (activeCategory === cat ? 'bg-slate-900 text-white border-slate-900 shadow-2xs' : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50 hover:text-slate-900') + '">' +
         cat +
         '</button>'
       ).join('');
 
       const allBooths = appData.booths || [];
+      let operatingEntitiesCount = 0;
       let confirmedEntities = 0;
       let pendingEntities = 0;
+      let hqEntities = 0;
       let totalDong = 0;
       let confirmedDong = 0;
       let pendingDong = 0;
@@ -820,9 +830,15 @@
       for (let i = 0; i < allBooths.length; i++) {
         const b = allBooths[i];
         if (!b) continue;
+        const isHQ = b.category === '운영본부' || b.category === '운영주체' || (typeof b.name === 'string' && (b.name.includes('운영본부') || b.name.includes('보건행정팀')));
         const isConfirmed = b.status === '확정';
-        if (isConfirmed) confirmedEntities++;
-        else pendingEntities++;
+        if (isHQ) {
+          hqEntities++;
+        } else {
+          operatingEntitiesCount++;
+          if (isConfirmed) confirmedEntities++;
+          else pendingEntities++;
+        }
 
         const parsed = parseBoothScale(b.scale);
         totalDong += parsed.dong;
@@ -838,45 +854,46 @@
       const summaryContainer = document.getElementById('booth-summary-banner');
       if (summaryContainer) {
         summaryContainer.innerHTML = 
-          '<div class="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-950 text-white rounded-xl shadow-xs border border-slate-700 p-3 sm:p-3.5">' +
+          '<div class="bg-slate-900 text-white rounded-xl shadow-2xs border border-slate-800 p-3 sm:p-3.5">' +
             '<div class="grid grid-cols-2 divide-x divide-slate-800 gap-x-3 sm:gap-x-4">' +
               '<div class="flex flex-col justify-between pr-1">' +
                 '<div class="flex items-center gap-1.5 sm:gap-2 mb-1.5">' +
-                  '<div class="w-6 h-6 rounded-md bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center shrink-0">' +
-                    '<svg class="w-3.5 h-3.5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>' +
+                  '<div class="w-6 h-6 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">' +
+                    '<svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>' +
                   '</div>' +
                   '<span class="text-[11px] sm:text-xs font-bold text-slate-300 whitespace-nowrap">총 부스 참여 주체</span>' +
                 '</div>' +
                 '<div class="py-0.5">' +
-                  '<div class="text-xl sm:text-2xl font-black text-white tracking-tight whitespace-nowrap">총 ' + allBooths.length + '개 기관</div>' +
+                  '<div class="text-xl sm:text-2xl font-mono tabular-nums font-black text-white tracking-tight whitespace-nowrap">총 ' + operatingEntitiesCount + '개 기관</div>' +
                 '</div>' +
-                '<div class="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap">' +
-                  '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-indigo-950/80 text-indigo-300 border border-indigo-700/60 whitespace-nowrap">확정 ' + confirmedEntities + '</span>' +
-                  '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-800/90 text-slate-300 border border-slate-700 whitespace-nowrap">협의 ' + pendingEntities + '</span>' +
+                '<div class="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap font-mono tabular-nums">' +
+                  '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-slate-800 text-slate-200 border border-slate-700 whitespace-nowrap">확정 ' + confirmedEntities + '</span>' +
+                  (pendingEntities > 0 ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-slate-800/80 text-slate-300 border border-slate-700 whitespace-nowrap">협의 ' + pendingEntities + '</span>' : '') +
+                  (hqEntities > 0 ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-amber-950/70 text-amber-300 border border-amber-800/60 whitespace-nowrap" title="보건행정팀 운영본부 1개소">본부 ' + hqEntities + '</span>' : '') +
                 '</div>' +
               '</div>' +
               '<div class="flex flex-col justify-between pl-3 sm:pl-4">' +
                 '<div class="flex items-center gap-1.5 sm:gap-2 mb-1.5">' +
-                  '<div class="w-6 h-6 rounded-md bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shrink-0">' +
-                    '<svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V9l-7-6-7 6v12M9 21v-7h6v7" /></svg>' +
+                  '<div class="w-6 h-6 rounded-md bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center shrink-0">' +
+                    '<svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V9l-7-6-7 6v12M9 21v-7h6v7" /></svg>' +
                   '</div>' +
                   '<span class="text-[11px] sm:text-xs font-bold text-slate-300 whitespace-nowrap">총 필요 부스 규모</span>' +
                 '</div>' +
                 '<div class="py-0.5">' +
-                  '<div class="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight whitespace-nowrap">총 ' + totalDong + '동</div>' +
+                  '<div class="text-xl sm:text-2xl font-mono tabular-nums font-black text-emerald-400 tracking-tight whitespace-nowrap">총 ' + totalDong + '동</div>' +
                 '</div>' +
-                '<div class="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap">' +
-                  '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 whitespace-nowrap">확정 ' + confirmedDong + '동</span>' +
-                  (pendingDong > 0 ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-amber-950/70 text-amber-300 border border-amber-700/60 whitespace-nowrap">협의 ' + pendingDong + '동</span>' : '') +
-                  (totalBus > 0 ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-sky-950/80 text-sky-300 border border-sky-700/60 whitespace-nowrap">버스 ' + totalBus + '대</span>' : '') +
+                '<div class="mt-2 pt-2 border-t border-slate-800/90 flex items-center gap-1 sm:gap-1.5 flex-wrap font-mono tabular-nums">' +
+                  '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-extrabold bg-emerald-950/70 text-emerald-300 border border-emerald-800/60 whitespace-nowrap">확정 ' + confirmedDong + '동</span>' +
+                  (pendingDong > 0 ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-amber-950/60 text-amber-300 border border-amber-800/60 whitespace-nowrap">협의 ' + pendingDong + '동</span>' : '') +
+                  (totalBus > 0 ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-sky-950/70 text-sky-300 border border-sky-800/60 whitespace-nowrap">버스 ' + totalBus + '대</span>' : '') +
                 '</div>' +
               '</div>' +
               '<div class="col-span-2 mt-2.5 pt-2 border-t border-slate-800/90 flex items-center justify-between gap-2 flex-wrap">' +
                 '<span class="text-[11px] sm:text-xs font-bold text-slate-400">필요 집기 및 인원 총계</span>' +
-                '<div class="flex items-center gap-1.5 sm:gap-2">' +
-                  '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-indigo-950/70 text-indigo-300 border border-indigo-700/60">인원 <strong class="text-white font-black">' + totalStaff + '명</strong></span>' +
-                  '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-amber-950/70 text-amber-300 border border-amber-700/60">테이블 <strong class="text-white font-black">' + totalTables + '개</strong></span>' +
-                  '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-teal-950/70 text-teal-300 border border-teal-700/60">의자 <strong class="text-white font-black">' + totalChairs + '개</strong></span>' +
+                '<div class="flex items-center gap-1.5 sm:gap-2 font-mono tabular-nums">' +
+                  '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-slate-800 text-slate-300 border border-slate-700">인원 <strong class="text-white font-black">' + totalStaff + '명</strong></span>' +
+                  '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-slate-800 text-slate-300 border border-slate-700">테이블 <strong class="text-white font-black">' + totalTables + '개</strong></span>' +
+                  '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] sm:text-[11.5px] font-extrabold bg-slate-800 text-slate-300 border border-slate-700">의자 <strong class="text-white font-black">' + totalChairs + '개</strong></span>' +
                 '</div>' +
               '</div>' +
             '</div>' +
@@ -884,11 +901,13 @@
       }
 
       document.getElementById('booth-count-badge').innerHTML = 
-        '<span>확정 <strong class="font-black text-slate-900">' + confirmedEntities + '</strong> / 총 <strong class="font-black text-slate-900">' + allBooths.length + '개</strong></span>' +
+        '<span>확정 <strong class="font-black text-slate-900">' + confirmedEntities + '</strong> / 총 <strong class="font-black text-slate-900">' + operatingEntitiesCount + '개</strong></span>' +
         '<span class="text-slate-400 mx-0.5">·</span>' +
-        '<span class="font-black text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] border border-emerald-300/60">필요 ' + totalDong + '동</span>';
+        '<span class="font-black text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] border border-emerald-200/80">필요 ' + totalDong + '동</span>';
 
-      const booths = (appData.booths || []).filter(b => {
+      const operatingBooths = allBooths.filter(b => !(b.category === '운영본부' || b.category === '운영주체' || (typeof b.name === 'string' && (b.name.includes('운영본부') || b.name.includes('보건행정팀')))));
+
+      const booths = allBooths.filter(b => {
         if (activeCategory === '전체') return true;
         if (activeCategory === '보건소 부서' || activeCategory === '보건소 사업' || activeCategory === '보건소 특화') {
           return b.category === '보건소 부서' || b.category === '보건소 사업' || b.category === '보건소 특화';
@@ -896,14 +915,19 @@
         if (activeCategory === '민간' || activeCategory === '민간 헬스케어' || activeCategory === '전문 의료·검진' || activeCategory === '의료·검진' || activeCategory === '의료 검진') {
           return b.category === '민간' || b.category === '민간 헬스케어' || b.category === '전문 의료·검진' || b.category === '의료·검진' || b.category === '의료 검진';
         }
+        if (activeCategory === '운영본부' || activeCategory === '운영주체' || activeCategory === '본부') {
+          return b.category === '운영본부' || b.category === '운영주체' || b.category === '본부' || (typeof b.name === 'string' && (b.name.includes('운영본부') || b.name.includes('보건행정팀')));
+        }
         return b.category === activeCategory;
       });
 
       container.innerHTML = booths.map((b, idx) => {
-        const isHQ = b.category === '운영본부' || (b.name && b.name.includes('운영본부'));
+        const isHQ = b.category === '운영본부' || b.category === '운영주체' || (typeof b.name === 'string' && (b.name.includes('운영본부') || b.name.includes('보건행정팀')));
+        const opIdx = operatingBooths.findIndex(ob => ob.id === b.id);
+        const displayNo = opIdx !== -1 ? (opIdx + 1) : (idx + 1);
         const headerBadge = isHQ
-          ? '<span class="text-[11px] font-extrabold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 shadow-3xs">운영본부</span>'
-          : '<span class="text-[11px] font-mono font-black text-slate-700">No.' + (idx + 1) + '</span>';
+          ? '<span class="text-[11px] font-extrabold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/90 shadow-3xs">운영본부</span>'
+          : '<span class="text-[11px] font-mono tabular-nums font-black text-slate-700">No.' + displayNo + '</span>';
 
         const adminNo = formatAutoHyphen((b.adminPhone || (!b.phone?.startsWith('010') ? b.phone : '') || '').trim());
         const mobileNo = formatAutoHyphen((b.mobilePhone || (b.phone?.startsWith('010') ? b.phone : '') || '').trim());
@@ -911,20 +935,20 @@
         let contactBadges = '';
         if (b.manager) {
           const displayManager = showPrivateMobile ? b.manager : maskPersonName(b.manager);
-          contactBadges += '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 text-[10.5px] sm:text-[11px] font-bold shrink-0 shadow-3xs">' +
+          contactBadges += '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100/90 text-slate-800 border border-slate-200/80 text-[10.5px] sm:text-[11px] font-bold shrink-0 shadow-3xs">' +
             '<span>👤 담당: ' + displayManager + '</span>' +
           '</span>';
         }
         if (adminNo) {
-          contactBadges += '<a href="tel:' + adminNo.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-950 border border-blue-200 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0" title="행정전화 걸기: ' + adminNo + '">' +
+          contactBadges += '<a href="tel:' + adminNo.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-blue-50/80 hover:bg-blue-100/80 text-blue-950 border border-blue-200/80 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0" title="행정전화 걸기: ' + adminNo + '">' +
             '<span class="font-extrabold text-blue-900">📞 행정:</span>' +
-            '<span class="font-mono font-bold tracking-tight text-blue-950">' + adminNo + '</span>' +
+            '<span class="font-mono tabular-nums font-bold tracking-tight text-blue-950">' + adminNo + '</span>' +
           '</a>';
         }
         if (showPrivateMobile && mobileNo) {
-          contactBadges += '<a href="tel:' + mobileNo.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-200 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0" title="휴대전화 걸기: ' + mobileNo + '">' +
+          contactBadges += '<a href="tel:' + mobileNo.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-950 border border-emerald-200/80 shadow-3xs transition-all cursor-pointer active:scale-95 shrink-0" title="휴대전화 걸기: ' + mobileNo + '">' +
             '<span class="font-extrabold text-emerald-900">📱 폰:</span>' +
-            '<span class="font-mono font-bold tracking-tight text-emerald-950">' + mobileNo + '</span>' +
+            '<span class="font-mono tabular-nums font-bold tracking-tight text-emerald-950">' + mobileNo + '</span>' +
           '</a>';
         }
 
@@ -932,28 +956,28 @@
           ? '<div class="flex items-center gap-1 sm:gap-1.5 flex-nowrap overflow-x-auto no-scrollbar mb-2 whitespace-nowrap py-0.5">' + contactBadges + '</div>'
           : '';
 
-        return '<div class="p-3.5 bg-white border-2 border-slate-300 rounded-xl shadow-2xs">' +
-          '<div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-200">' +
+        return '<div class="p-3.5 bg-white border border-slate-200/80 rounded-xl shadow-2xs">' +
+          '<div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100">' +
             '<div class="flex items-center gap-1.5">' +
               headerBadge +
             '</div>' +
-            '<span class="text-[11px] px-2 py-0.5 font-bold rounded border ' + (b.status === '확정' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-amber-50 text-amber-800 border-amber-300') + '">' + b.status + '</span>' +
+            '<span class="text-[11px] px-2 py-0.5 font-bold rounded-md border ' + (b.status === '확정' ? 'bg-emerald-50 text-emerald-800 border-emerald-200/90' : 'bg-amber-50 text-amber-800 border-amber-200/90') + '">' + b.status + '</span>' +
           '</div>' +
           '<div class="text-sm font-extrabold text-slate-900 mb-1.5">' + b.name + '</div>' +
           contactBar +
-          '<div class="text-xs text-slate-700 bg-slate-50 p-2.5 rounded border border-slate-200 leading-relaxed mb-1.5">' +
+          '<div class="text-xs text-slate-700 bg-slate-50/70 p-2.5 rounded-lg border border-slate-200/80 leading-relaxed mb-1.5">' +
             '<span class="font-bold text-slate-600">내용: </span>' + b.program +
           '</div>' +
-          '<div class="text-xs text-slate-600 font-medium flex flex-wrap items-center justify-between gap-y-1.5 gap-x-2 pt-1 border-t border-slate-100">' +
-            '<div>부스규모: <strong class="text-slate-900">' + (b.scale || '') + '</strong></div>' +
-            '<div class="flex items-center gap-1.5 flex-wrap">' +
-              '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-50 text-indigo-900 border border-indigo-200 shadow-3xs">' +
+          '<div class="text-xs text-slate-600 font-medium flex flex-wrap items-center justify-between gap-y-1.5 gap-x-2 pt-1.5 border-t border-slate-100">' +
+            '<div>부스규모: <strong class="text-slate-900 font-mono tabular-nums">' + (b.scale || '') + '</strong></div>' +
+            '<div class="flex items-center gap-1.5 flex-wrap font-mono tabular-nums">' +
+              '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100/80 text-slate-800 border border-slate-200/80 shadow-3xs">' +
                 '<span>인원 <strong>' + (b.staffCount ?? 0) + '</strong>명</span>' +
               '</span>' +
-              '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200 shadow-3xs">' +
+              '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100/80 text-slate-800 border border-slate-200/80 shadow-3xs">' +
                 '<span>테이블 <strong>' + (b.tables ?? 0) + '</strong>개</span>' +
               '</span>' +
-              '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-sky-50 text-sky-900 border border-sky-200 shadow-3xs">' +
+              '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100/80 text-slate-800 border border-slate-200/80 shadow-3xs">' +
                 '<span>의자 <strong>' + (b.chairs ?? 0) + '</strong>개</span>' +
               '</span>' +
             '</div>' +
@@ -997,7 +1021,7 @@
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-300 rounded-xl shadow-2xs">검색 조건과 일치하는 행사 식순이 없습니다.</div>';
+        container.innerHTML = '<div class="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-200/80 rounded-xl shadow-2xs">검색 조건과 일치하는 행사 식순이 없습니다.</div>';
         return;
       }
 
@@ -1006,52 +1030,52 @@
         const isWalkingStart = item.id === 14 || (item.title && item.title.includes('걷기'));
 
         const cardBorderBg = isCeremony
-          ? 'border-blue-300 bg-blue-50/20 shadow-2xs'
+          ? 'border-blue-200/90 bg-blue-50/15 shadow-2xs'
           : (isWalkingStart
-            ? 'border-emerald-300 bg-emerald-50/20 shadow-2xs'
-            : 'border-slate-300 shadow-2xs');
+            ? 'border-emerald-200/90 bg-emerald-50/15 shadow-2xs'
+            : 'border-slate-200/80 shadow-2xs');
 
         const ceremonyBadge = isCeremony
-          ? '<span class="inline-flex items-center gap-1 text-[9.5px] font-bold text-blue-800 bg-blue-100/90 border border-blue-300 px-1.5 py-0.2 rounded cursor-help shrink-0 whitespace-nowrap" title="대통령훈령 제438호 약식절차 1 준용: ① 국기에 대한 경례(전주 없는 애국가 1절 반주, 맹세문 미낭송) ② 묵념(묵념곡 10~15초) ※ \'애국가 제창 등 이하 생략\' 발언 규정상 엄격 금지">🛡 의전 약식1 준용</span>'
+          ? '<span class="inline-flex items-center gap-1 text-[9.5px] font-bold text-blue-800 bg-blue-50 border border-blue-200/90 px-1.5 py-0.2 rounded cursor-help shrink-0 whitespace-nowrap" title="대통령훈령 제438호 약식절차 1 준용: ① 국기에 대한 경례(전주 없는 애국가 1절 반주, 맹세문 미낭송) ② 묵념(묵념곡 10~15초) ※ \'애국가 제창 등 이하 생략\' 발언 규정상 엄격 금지">🛡 의전 약식1 준용</span>'
           : '';
 
         const walkingBadge = isWalkingStart
-          ? '<span class="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-1.5 py-0.2 rounded cursor-help shrink-0 whitespace-nowrap" title="수변문화쉼터 ↔ 영동4교 2km 코스 완주 (12:30 인센티브 배부 마감)">📍 2km 왕복 (마감 12:30)</span>'
+          ? '<span class="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-1.5 py-0.2 rounded cursor-help shrink-0 whitespace-nowrap" title="수변문화쉼터 ↔ 영동4교 2km 코스 완주 (12:30 인센티브 배부 마감)">📍 2km 왕복 (마감 12:30)</span>'
           : '';
 
         const dateBadge = item.date
-          ? '<span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded border whitespace-nowrap ' +
+          ? '<span class="text-[10px] font-mono tabular-nums font-extrabold px-1.5 py-0.5 rounded-md border whitespace-nowrap ' +
             (item.date.includes('31')
-              ? 'bg-sky-100 text-sky-900 border-sky-300'
+              ? 'bg-sky-50 text-sky-900 border-sky-200/90'
               : (item.date.includes('30')
-                ? 'bg-amber-100 text-amber-900 border-amber-300'
-                : 'bg-indigo-100 text-indigo-900 border-indigo-300')) +
+                ? 'bg-amber-50 text-amber-900 border-amber-200/90'
+                : 'bg-indigo-50 text-indigo-900 border-indigo-200/90')) +
             '">' + item.date + '</span>'
           : '';
 
         const phaseBadgeClass = (item.phase === '공식행사' || item.phase === '개회식')
-          ? 'bg-blue-50 text-blue-800 border-blue-200'
+          ? 'bg-blue-50 text-blue-800 border-blue-200/80'
           : (item.phase === '걷기대회'
-            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
             : (item.phase === '식전·준비' || item.phase === '식전' || item.phase === '행사전날'
-              ? 'bg-slate-100 text-slate-700 border-slate-200'
-              : 'bg-purple-50 text-purple-800 border-purple-200'));
+              ? 'bg-slate-100/80 text-slate-700 border-slate-200/80'
+              : 'bg-purple-50 text-purple-800 border-purple-200/80'));
 
         const leadBar = item.lead
           ? '<div class="text-xs text-slate-600 font-medium mb-1.5 flex items-center gap-1">👤 주관/담당: <strong class="text-slate-900">' + item.lead + '</strong></div>'
           : '';
 
         const noteBox = item.note
-          ? '<div class="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200 leading-relaxed"><span class="font-bold text-slate-600">내용: </span>' + item.note + '</div>'
+          ? '<div class="text-xs text-slate-700 bg-slate-50/70 p-2.5 rounded-lg border border-slate-200/80 leading-relaxed"><span class="font-bold text-slate-600">내용: </span>' + item.note + '</div>'
           : '';
 
-        return '<div class="p-3.5 bg-white border-2 rounded-xl transition-all ' + cardBorderBg + '">' +
-          '<div class="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-200">' +
+        return '<div class="p-3.5 bg-white border rounded-xl transition-all ' + cardBorderBg + '">' +
+          '<div class="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-100">' +
             '<div class="flex items-center gap-1.5 flex-wrap">' +
-              '<span class="font-mono font-black text-slate-700 text-xs">No.' + item.id + '</span>' +
+              '<span class="font-mono tabular-nums font-black text-slate-700 text-xs">No.' + item.id + '</span>' +
               dateBadge +
-              '<span class="text-[11px] font-bold px-2 py-0.5 rounded border ' + phaseBadgeClass + '">' + item.phase + '</span>' +
-              '<span class="inline-flex items-center gap-1 font-mono text-[11px] text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">' +
+              '<span class="text-[11px] font-bold px-2 py-0.5 rounded-md border ' + phaseBadgeClass + '">' + item.phase + '</span>' +
+              '<span class="inline-flex items-center gap-1 font-mono tabular-nums text-[11px] text-slate-700 font-bold bg-slate-100/80 px-2 py-0.5 rounded-md border border-slate-200/80">' +
                 '<span>⏱</span><span>' + item.time + '</span>' +
                 (item.duration ? '<span class="text-blue-700 font-extrabold">(' + item.duration + ')</span>' : '') +
               '</span>' +
@@ -1099,19 +1123,19 @@
           : duties.filter(d => normalizeDutyCategory(d.category) === cat).length;
 
         const btnBg = isSelected
-          ? 'bg-slate-900 text-white shadow-xs'
-          : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-300';
+          ? 'bg-slate-900 text-white shadow-2xs'
+          : 'bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-slate-200/80';
 
         const numBadgeBg = isSelected
           ? 'bg-white/20 text-white'
           : 'bg-slate-100 text-slate-600';
 
-        const prefix = cat !== '전체' ? '<span class="opacity-60 text-[10px]">' + idx + '.</span>' : '';
+        const prefix = cat !== '전체' ? '<span class="opacity-60 text-[10px] font-mono">' + idx + '.</span>' : '';
 
-        return '<button type="button" onclick="selectDutyCategory(\'' + cat + '\')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black whitespace-nowrap transition-all cursor-pointer shadow-3xs active:scale-95 ' + btnBg + '">' +
+        return '<button type="button" onclick="selectDutyCategory(\'' + cat + '\')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all cursor-pointer shadow-3xs active:scale-95 ' + btnBg + '">' +
           prefix +
           '<span>' + cat + '</span>' +
-          '<span class="text-[10px] font-mono px-1.5 py-0.2 rounded-full ' + numBadgeBg + '">' + count + '</span>' +
+          '<span class="text-[10px] font-mono tabular-nums px-1.5 py-0.2 rounded-full ' + numBadgeBg + '">' + count + '</span>' +
         '</button>';
       }).join('');
 
@@ -1144,12 +1168,18 @@
           (d.adminPhone && d.adminPhone.toLowerCase().includes(q)) ||
           (d.mobilePhone && d.mobilePhone.toLowerCase().includes(q)) ||
           (d.tasks && d.tasks.some(t => t.toLowerCase().includes(q))) ||
-          (d.category && d.category.toLowerCase().includes(q))
+          (d.category && d.category.toLowerCase().includes(q)) ||
+          (d.staffMembers && d.staffMembers.some(s =>
+            (s.name && (s.name.toLowerCase().includes(q) || maskPersonName(s.name).toLowerCase().includes(q))) ||
+            (s.role && s.role.toLowerCase().includes(q)) ||
+            (s.adminPhone && s.adminPhone.toLowerCase().includes(q)) ||
+            (s.mobilePhone && s.mobilePhone.toLowerCase().includes(q))
+          ))
         );
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-300 rounded-xl shadow-2xs">검색 조건과 일치하는 업무분장 항목이 없습니다.</div>';
+        container.innerHTML = '<div class="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-200/80 rounded-xl shadow-2xs">검색 조건과 일치하는 업무분장 항목이 없습니다.</div>';
         return;
       }
 
@@ -1163,37 +1193,75 @@
         const isWaste = normCat === '쓰레기처리';
 
         const catBadgeClass = isOps
-          ? 'bg-blue-100 text-blue-900 border-blue-300'
+          ? 'bg-blue-50 text-blue-900 border-blue-200/80'
           : (isCourse
-            ? 'bg-indigo-100 text-indigo-900 border-indigo-300'
+            ? 'bg-indigo-50 text-indigo-900 border-indigo-200/80'
             : (isBooth
-              ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+              ? 'bg-emerald-50 text-emerald-900 border-emerald-200/80'
               : (isVIP
-                ? 'bg-purple-100 text-purple-900 border-purple-300'
+                ? 'bg-purple-50 text-purple-900 border-purple-200/80'
                 : (isMeal
-                  ? 'bg-amber-100 text-amber-900 border-amber-300'
+                  ? 'bg-amber-50 text-amber-900 border-amber-200/80'
                   : (isWaste
-                    ? 'bg-rose-100 text-rose-900 border-rose-300'
-                    : 'bg-slate-100 text-slate-800 border-slate-300')))));
+                    ? 'bg-rose-50 text-rose-900 border-rose-200/80'
+                    : 'bg-slate-100 text-slate-800 border-slate-200/80')))));
 
         const adminNo = formatAutoHyphen((duty.adminPhone || (!duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
         const mobileNo = formatAutoHyphen((duty.mobilePhone || (duty.phone?.startsWith('010') ? duty.phone : '') || '').trim());
 
-        let contactBadges = '';
-        if (duty.manager) {
-          contactBadges += '<div class="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shrink-0">👤 ' + (showPrivateMobile ? duty.manager : maskPersonName(duty.manager)) + '</div>';
-        }
-        if (adminNo) {
-          contactBadges += '<a href="tel:' + adminNo.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0" title="행정전화 걸기: ' + adminNo + '">' +
-            '<span class="text-[10.5px] font-extrabold text-blue-800">📞 행정:</span>' +
-            '<span class="font-mono">' + adminNo + '</span>' +
-          '</a>';
-        }
-        if (showPrivateMobile && mobileNo) {
-          contactBadges += '<a href="tel:' + mobileNo.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0" title="휴대전화 걸기: ' + mobileNo + '">' +
-            '<span class="text-[10.5px] font-extrabold text-emerald-800">📱 폰:</span>' +
-            '<span class="font-mono">' + mobileNo + '</span>' +
-          '</a>';
+        let contactSectionHtml = '';
+        if (Array.isArray(duty.staffMembers) && duty.staffMembers.length > 0) {
+          const staffRows = duty.staffMembers.map(stf => {
+            const stfAdmin = formatAutoHyphen((stf.adminPhone || '').trim());
+            const stfMobile = formatAutoHyphen((stf.mobilePhone || '').trim());
+            const hasStfName = Boolean(stf.name);
+            const hasStfAdmin = Boolean(stfAdmin);
+            const hasStfMobile = Boolean(showPrivateMobile && stfMobile);
+            if (!hasStfName && !hasStfAdmin && !hasStfMobile) return '';
+
+            let rowBadges = '';
+            if (hasStfName) {
+              const roleSuffix = stf.role ? ' <span class="text-[10px] text-slate-500 font-semibold ml-0.5">(' + stf.role + ')</span>' : '';
+              rowBadges += '<div class="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100/90 px-2 py-0.5 rounded-md border border-slate-200/80 shrink-0">👤 ' + (showPrivateMobile ? stf.name : maskPersonName(stf.name)) + roleSuffix + '</div>';
+            }
+            if (hasStfAdmin) {
+              rowBadges += '<a href="tel:' + stfAdmin.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50/80 hover:bg-blue-100/80 px-2 py-0.5 rounded-md border border-blue-200/80 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0" title="행정전화 걸기: ' + stfAdmin + '">' +
+                '<span class="text-[10.5px] font-extrabold text-blue-800">📞 행정:</span>' +
+                '<span class="font-mono tabular-nums">' + stfAdmin + '</span>' +
+              '</a>';
+            }
+            if (hasStfMobile) {
+              rowBadges += '<a href="tel:' + stfMobile.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-200/80 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0" title="휴대전화 걸기: ' + stfMobile + '">' +
+                '<span class="text-[10.5px] font-extrabold text-emerald-800">📱 폰:</span>' +
+                '<span class="font-mono tabular-nums">' + stfMobile + '</span>' +
+              '</a>';
+            }
+            return '<div class="flex items-center gap-1.5 flex-wrap">' + rowBadges + '</div>';
+          }).filter(Boolean).join('');
+
+          if (staffRows) {
+            contactSectionHtml = '<div class="space-y-1.5 pt-0.5 pb-0.5">' + staffRows + '</div>';
+          }
+        } else {
+          let contactBadges = '';
+          if (duty.manager) {
+            contactBadges += '<div class="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100/90 px-2 py-0.5 rounded-md border border-slate-200/80 shrink-0">👤 ' + (showPrivateMobile ? duty.manager : maskPersonName(duty.manager)) + '</div>';
+          }
+          if (adminNo) {
+            contactBadges += '<a href="tel:' + adminNo.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50/80 hover:bg-blue-100/80 px-2 py-0.5 rounded-md border border-blue-200/80 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0" title="행정전화 걸기: ' + adminNo + '">' +
+              '<span class="text-[10.5px] font-extrabold text-blue-800">📞 행정:</span>' +
+              '<span class="font-mono tabular-nums">' + adminNo + '</span>' +
+            '</a>';
+          }
+          if (showPrivateMobile && mobileNo) {
+            contactBadges += '<a href="tel:' + mobileNo.replace(/[^0-9]/g, '') + '" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-200/80 shadow-3xs transition-all active:scale-95 cursor-pointer shrink-0" title="휴대전화 걸기: ' + mobileNo + '">' +
+              '<span class="text-[10.5px] font-extrabold text-emerald-800">📱 폰:</span>' +
+              '<span class="font-mono tabular-nums">' + mobileNo + '</span>' +
+            '</a>';
+          }
+          if (contactBadges) {
+            contactSectionHtml = '<div class="flex items-center gap-1.5 flex-wrap pt-0.5 pb-0.5">' + contactBadges + '</div>';
+          }
         }
 
         const tasksHtml = (duty.tasks && duty.tasks.length > 0)
@@ -1210,13 +1278,13 @@
           ? '<div class="text-xs font-bold text-slate-900 leading-snug break-keep">' + duty.role + '</div>'
           : '<div class="text-slate-400 italic font-normal text-xs leading-snug">(담당 역할 설정 대기)</div>';
 
-        const noBadge = duty.id ? '<span class="font-mono font-black text-slate-500 text-[11px] shrink-0">No.' + duty.id + '</span>' : '';
+        const noBadge = duty.id ? '<span class="font-mono tabular-nums font-black text-slate-500 text-[11px] shrink-0">No.' + duty.id + '</span>' : '';
 
-        return '<div class="bg-white border-2 border-slate-300 rounded-xl p-3.5 space-y-2.5 shadow-2xs transition-all hover:border-slate-400">' +
-          '<div class="flex items-center justify-between pb-1.5 border-b border-slate-200 gap-2">' +
+        return '<div class="bg-white border border-slate-200/80 rounded-xl p-3.5 space-y-2.5 shadow-2xs transition-all hover:border-slate-300">' +
+          '<div class="flex items-center justify-between pb-1.5 border-b border-slate-100 gap-2">' +
             '<div class="flex items-center gap-1.5 flex-wrap min-w-0">' +
               noBadge +
-              '<span class="text-[11px] font-black px-2 py-0.5 rounded border shrink-0 ' + catBadgeClass + '">' + (duty.category || '일반') + '</span>' +
+              '<span class="text-[11px] font-black px-2 py-0.5 rounded-md border shrink-0 ' + catBadgeClass + '">' + (duty.category || '일반') + '</span>' +
               deptDisplay +
             '</div>' +
           '</div>' +
@@ -1224,15 +1292,15 @@
             '<span class="text-xs font-bold text-slate-500 shrink-0">역할:</span>' +
             roleDisplay +
           '</div>' +
-          (contactBadges ? '<div class="flex items-center gap-1.5 flex-wrap pt-0.5 pb-0.5">' + contactBadges + '</div>' : '') +
-          '<div class="bg-slate-50/90 rounded-lg p-2.5 border border-slate-200">' +
+          contactSectionHtml +
+          '<div class="bg-slate-50/70 rounded-lg p-2.5 border border-slate-200/80">' +
             '<div class="text-[11px] font-bold text-slate-500 mb-1 flex items-center gap-1"><span>배정 과업:</span></div>' +
             tasksHtml +
           '</div>' +
         '</div>';
       }).join('');
 
-      container.innerHTML = '<div class="space-y-3">' + cardsHtml + '</div>';
+      container.innerHTML = '<div class="space-y-2.5">' + cardsHtml + '</div>';
     }
 
     function setActiveTab(tab) {
@@ -1240,7 +1308,7 @@
 
       const appRoot = document.getElementById('app-root');
       if (appRoot) {
-        appRoot.className = 'w-full sm:max-w-md bg-white sm:rounded-2xl sm:border-2 sm:shadow-lg overflow-hidden flex flex-col min-h-screen text-slate-900 transition-all sm:border-slate-300';
+        appRoot.className = 'w-full max-w-md bg-white sm:rounded-xl sm:border sm:shadow-2xs overflow-hidden flex flex-col min-h-screen text-slate-900 transition-all sm:border-slate-200/80' + (isLargeFont ? ' is-large-font text-[16px]' : '');
       }
 
       const tabs = ['milestones', 'booths', 'duties', 'schedule'];
@@ -1248,10 +1316,10 @@
         const btn = document.getElementById('tab-' + t);
         const content = document.getElementById('content-' + t);
         if (t === tab) {
-          if (btn) btn.className = 'py-2.5 text-xs font-extrabold rounded-lg transition-all cursor-pointer text-center bg-slate-900 text-white shadow-xs';
+          if (btn) btn.className = 'py-2 text-xs font-extrabold rounded-lg transition-all cursor-pointer text-center bg-white text-slate-900 shadow-2xs border border-slate-200/80';
           if (content) content.classList.remove('hidden');
         } else {
-          if (btn) btn.className = 'py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-700 hover:bg-slate-300/70';
+          if (btn) btn.className = 'py-2 text-xs font-bold rounded-lg transition-all cursor-pointer text-center text-slate-600 hover:text-slate-900 hover:bg-white/60 border border-transparent';
           if (content) content.classList.add('hidden');
         }
       });
@@ -1283,10 +1351,15 @@
 
     document.getElementById('btn-toggle-font').onclick = function() {
       isLargeFont = !isLargeFont;
-      document.getElementById('app-root').classList.toggle('is-large-font', isLargeFont);
-      this.classList.toggle('bg-amber-400', isLargeFont);
-      this.classList.toggle('text-slate-950', isLargeFont);
-      this.classList.toggle('border-amber-300', isLargeFont);
+      const appRoot = document.getElementById('app-root');
+      if (appRoot) {
+        appRoot.classList.toggle('is-large-font', isLargeFont);
+        appRoot.classList.toggle('text-[16px]', isLargeFont);
+      }
+      this.className = 'px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black border transition-all cursor-pointer flex items-center gap-1 active:scale-95 whitespace-nowrap ' +
+        (isLargeFont
+          ? 'bg-white text-slate-900 border-white shadow-2xs'
+          : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700');
       document.getElementById('font-icon').innerText = isLargeFont ? '가-' : '가+';
       document.getElementById('font-label').innerText = isLargeFont ? '보통' : '큰글씨';
     };

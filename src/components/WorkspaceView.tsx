@@ -5,14 +5,15 @@ import dynamic from 'next/dynamic';
 import { BudgetCategory, BudgetEntry, InventoryItem, StockChange } from '@/types';
 function BudgetDashboardSkeleton() {
   return (
-    <div className="w-full space-y-6 animate-pulse">
-      <div className="h-10 bg-slate-200/60 dark:bg-slate-800/40 rounded-xl w-48" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="w-full space-y-4 animate-pulse">
+      <div className="h-8 bg-slate-200/60 dark:bg-slate-800/40 rounded-lg w-48" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-36 bg-slate-200/60 dark:bg-slate-800/40 rounded-[2rem]" />
+          <div key={i} className="h-32 bg-slate-200/60 dark:bg-slate-800/40 rounded-xl" />
         ))}
       </div>
-      <div className="h-64 bg-slate-200/60 dark:bg-slate-800/40 rounded-[2rem]" />
+      <div className="h-24 bg-slate-200/60 dark:bg-slate-800/40 rounded-xl" />
+      <div className="h-48 bg-slate-200/60 dark:bg-slate-800/40 rounded-xl" />
     </div>
   );
 }
@@ -178,38 +179,38 @@ function WorkspaceViewComponent(props: WorkspaceViewProps) {
   return (
     <div className="w-full flex flex-col gap-4">
       {/* Tab Switcher */}
-      <div className="flex border-b border-slate-200/80 gap-2 overflow-x-auto pb-px bg-slate-50/50 p-1.5 rounded-2xl border border-slate-200/60 shadow-xs mb-2">
+      <div className="flex gap-1 overflow-x-auto bg-slate-100/80 p-1 rounded-xl border border-slate-200/70 w-fit">
         <button
           onClick={() => handleTabChange('budget')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm tracking-tight transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-semibold text-xs tracking-tight transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'budget'
-              ? 'bg-white text-indigo-600 shadow-md border border-slate-200/60'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
+              ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/80'
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          <span className="w-2 h-2 rounded-full bg-indigo-500" />
+          <span className={`w-1.5 h-1.5 rounded-full ${activeTab === 'budget' ? 'bg-slate-900' : 'bg-slate-400'}`} />
           예산 대조보드
         </button>
         <button
           onClick={() => handleTabChange('inventory')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm tracking-tight transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-semibold text-xs tracking-tight transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'inventory'
-              ? 'bg-white text-indigo-600 shadow-md border border-slate-200/60'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
+              ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/80'
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span className={`w-1.5 h-1.5 rounded-full ${activeTab === 'inventory' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
           홍보물 관리
         </button>
         <button
           onClick={() => handleTabChange('simulator')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm tracking-tight transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-semibold text-xs tracking-tight transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'simulator'
-              ? 'bg-white text-indigo-600 shadow-md border border-slate-200/60'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
+              ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/80'
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          <span className="w-2 h-2 rounded-full bg-purple-500" />
+          <span className={`w-1.5 h-1.5 rounded-full ${activeTab === 'simulator' ? 'bg-indigo-500' : 'bg-slate-400'}`} />
           예산 시뮬레이터
         </button>
       </div>

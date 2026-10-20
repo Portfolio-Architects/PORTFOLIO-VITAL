@@ -18,48 +18,48 @@ import YangjaeFestivalSkeleton from '@/components/skeletons/YangjaeFestivalSkele
 
 function PortfolioDashboardViewSkeleton() {
   return (
-    <div className="w-full flex flex-col gap-6 animate-pulse">
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-4">
-        <div className="xl:col-span-6 flex flex-col gap-6">
-          <div className="bg-slate-100/60 dark:bg-slate-800/40 rounded-[2rem] p-6 sm:p-7 border border-slate-200/40 dark:border-slate-800 h-[380px] flex flex-col justify-between">
-            <div className="flex justify-between items-center mb-5">
-              <div className="w-48 h-6 bg-slate-200 dark:bg-slate-700 rounded-lg" />
-              <div className="w-36 h-10 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+    <div className="w-full flex flex-col gap-5 animate-pulse">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 mt-2">
+        <div className="xl:col-span-6 flex flex-col gap-5">
+          <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200/80 shadow-2xs h-[380px] flex flex-col justify-between">
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+              <div className="w-44 h-5 bg-slate-200/80 rounded-md" />
+              <div className="w-36 h-9 bg-slate-100 border border-slate-200/80 rounded-lg" />
             </div>
             <div className="flex-grow flex flex-col sm:flex-row gap-8 items-center justify-center">
-              <div className="w-[170px] h-[170px] rounded-full border-[15px] border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0" />
+              <div className="w-[170px] h-[170px] rounded-full border-[14px] border-slate-100 flex items-center justify-center flex-shrink-0" />
               <div className="flex-grow flex flex-col gap-3 w-full">
-                <div className="w-full h-4 bg-slate-200 dark:bg-slate-700 rounded" />
-                <div className="w-5/6 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
-                <div className="w-2/3 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
-                <div className="w-3/4 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="w-full h-3.5 bg-slate-100 rounded" />
+                <div className="w-5/6 h-3.5 bg-slate-100 rounded" />
+                <div className="w-2/3 h-3.5 bg-slate-100 rounded" />
+                <div className="w-3/4 h-3.5 bg-slate-100 rounded" />
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:gap-6">
-            <div className="bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/40 dark:border-slate-800 rounded-[1.5rem] py-3.5 px-4 h-[102px] flex flex-col justify-between">
-              <div className="w-24 h-3 bg-slate-200 dark:bg-slate-700 rounded" />
-              <div className="w-16 h-6 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+          <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
+            <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs h-[96px] flex flex-col justify-between">
+              <div className="w-24 h-2.5 bg-slate-200/80 rounded" />
+              <div className="w-16 h-6 bg-slate-200/80 rounded-md" />
             </div>
-            <div className="bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/40 dark:border-slate-800 rounded-[1.5rem] py-3.5 px-4 h-[102px] flex flex-col justify-between">
-              <div className="w-24 h-3 bg-slate-200 dark:bg-slate-700 rounded" />
-              <div className="w-16 h-6 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+            <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs h-[96px] flex flex-col justify-between">
+              <div className="w-24 h-2.5 bg-slate-200/80 rounded" />
+              <div className="w-16 h-6 bg-slate-200/80 rounded-md" />
             </div>
           </div>
         </div>
-        <div className="xl:col-span-6 flex flex-col gap-6">
-          <div className="bg-slate-100/60 dark:bg-slate-800/40 rounded-[2rem] p-6 sm:p-7 border border-slate-200/40 dark:border-slate-800 h-full min-h-[500px] flex flex-col justify-between">
-            <div className="flex justify-between items-center mb-5">
-              <div className="flex flex-col gap-2">
-                <div className="w-56 h-6 bg-slate-200 dark:bg-slate-700 rounded-lg" />
-                <div className="w-40 h-3 bg-slate-200 dark:bg-slate-700 rounded" />
+        <div className="xl:col-span-6 flex flex-col gap-5">
+          <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200/80 shadow-2xs h-full min-h-[500px] flex flex-col justify-between">
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+              <div className="flex flex-col gap-1.5">
+                <div className="w-52 h-5 bg-slate-200/80 rounded-md" />
+                <div className="w-36 h-3 bg-slate-100 rounded" />
               </div>
-              <div className="w-28 h-9 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+              <div className="w-28 h-8 bg-slate-100 border border-slate-200/80 rounded-lg" />
             </div>
-            <div className="flex-grow w-full bg-slate-200/20 dark:bg-slate-700/10 rounded-2xl flex items-end gap-3 p-4 h-[365px]">
-              <div className="flex-grow bg-slate-200 dark:bg-slate-700 rounded-t h-[50%]" />
-              <div className="flex-grow bg-slate-200 dark:bg-slate-700 rounded-t h-[70%]" />
-              <div className="flex-grow bg-slate-200 dark:bg-slate-700 rounded-t h-[90%]" />
+            <div className="flex-grow w-full bg-slate-50/70 border border-slate-100 rounded-xl flex items-end gap-3 p-4 h-[365px]">
+              <div className="flex-grow bg-slate-200/70 rounded-t h-[50%]" />
+              <div className="flex-grow bg-slate-200/70 rounded-t h-[70%]" />
+              <div className="flex-grow bg-slate-200/70 rounded-t h-[90%]" />
             </div>
           </div>
         </div>
@@ -70,14 +70,14 @@ function PortfolioDashboardViewSkeleton() {
 
 function WorkspaceViewSkeleton() {
   return (
-    <div className="w-full flex flex-col gap-6 animate-pulse">
-      <div className="flex border-b border-slate-200 gap-1 pb-px">
-        <div className="w-32 h-11 bg-slate-200 dark:bg-slate-700 rounded-t-lg" />
-        <div className="w-32 h-11 bg-slate-200/50 dark:bg-slate-700/50 rounded-t-lg" />
+    <div className="w-full flex flex-col gap-5 animate-pulse">
+      <div className="flex border-b border-slate-200/80 gap-1 pb-px">
+        <div className="w-32 h-10 bg-slate-200/80 rounded-t-lg" />
+        <div className="w-32 h-10 bg-slate-100 rounded-t-lg" />
       </div>
-      <div className="flex items-center justify-between flex-wrap gap-2 mt-4">
-        <div className="w-36 h-7 bg-slate-200 dark:bg-slate-700 rounded-lg" />
-        <div className="w-24 h-9 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+      <div className="flex items-center justify-between flex-wrap gap-2 mt-2">
+        <div className="w-36 h-6 bg-slate-200/80 rounded-md" />
+        <div className="w-24 h-8 bg-slate-100 border border-slate-200/80 rounded-lg" />
       </div>
     </div>
   );
@@ -163,19 +163,16 @@ function scheduleStaggeredPreloads(): () => void {
     import('@/components/budget/BudgetDashboard');
   }, 3500);
 
-  // Stage 2 (+5.5s): Secondary modules (YangjaeFestivalDashboard, InventoryList, MindMap3D)
+  // Stage 2 (+5.5s): Secondary modules (YangjaeFestivalDashboard, InventoryList)
   scheduleIdle(() => {
     import('@/components/festival/YangjaeFestivalDashboard');
     import('@/components/inventory/InventoryList');
-    import('@/components/MindMap3D');
   }, 5500);
 
-  // Stage 3 (+7.5s): Simulator, Project & Modals (BudgetSimulator, ProjectManagementPage, AppLogModal, AIAssistantModal, CommandPalette)
+  // Stage 3 (+7.5s): Simulator & Modals (BudgetSimulator, AppLogModal, CommandPalette)
   scheduleIdle(() => {
     import('@/components/budget/BudgetSimulator');
-    import('@/components/project/ProjectManagementPage');
     import('@/components/AppLogModal');
-    import('@/components/ai/AIAssistantModal');
     import('@/components/modals/CommandPalette');
   }, 7500);
 
@@ -205,14 +202,26 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
   const [isQuickInputOpen, setIsQuickInputOpen] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [hasOpenedCommandPalette, setHasOpenedCommandPalette] = useState(false);
+
+  // Defer TASKS, MEETINGS, PROJECTS, INVENTORY fetching on initial Dashboard load until tab switch or Ctrl+K open (latched once triggered)
+  const isDeferredDataEnabled =
+    activeModule !== 'dashboard' ||
+    visitedModules.workspace ||
+    visitedModules.festival ||
+    visitedModules.simulator ||
+    visitedModules.mindmap ||
+    visitedModules.project ||
+    isCommandPaletteOpen ||
+    hasOpenedCommandPalette;
 
   // Domain Hooks
-  const { tasks, stats: taskStats } = useTasks();
+  const { tasks, stats: taskStats } = useTasks({ enabled: isDeferredDataEnabled });
   const { categories: budgetCategories, entries: budgetEntries, addCategory, updateCategory, deleteCategory, replaceCategories, addEntry, updateEntry, deleteEntry, batchUpdateEntries, batchDeleteEntries, batchSettleEntries, getCategoryStats, overallStatsActual } = useBudget();
-  const { items: inventoryItems, addItem, updateItem, deleteItem, adjustStock, getItemHistory } = useInventory();
-  const { meetings } = useMeetings();
-  const { projects } = useProjects();
-  const { contacts } = useContacts();
+  const { items: inventoryItems, addItem, updateItem, deleteItem, adjustStock, getItemHistory } = useInventory({ enabled: isDeferredDataEnabled });
+  const { meetings } = useMeetings({ enabled: isDeferredDataEnabled });
+  const { projects } = useProjects({ enabled: isDeferredDataEnabled });
+  const { contacts } = useContacts({ enabled: isCommandPaletteOpen || hasOpenedCommandPalette });
 
   const handleCloseCommandPalette = useCallback(() => setIsCommandPaletteOpen(false), []);
 
@@ -220,7 +229,11 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setIsCommandPaletteOpen(prev => !prev);
+        setIsCommandPaletteOpen(prev => {
+          const next = !prev;
+          if (next) setHasOpenedCommandPalette(true);
+          return next;
+        });
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -327,36 +340,38 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
         <div className="max-w-[1800px] mx-auto px-2 sm:px-3 lg:px-4 pt-4 sm:pt-6 lg:pt-8 flex flex-col gap-3">
           
           {/* Global Module Header & Divider Container */}
-          <div className="flex flex-col gap-12 pt-3 sm:pt-4 lg:pt-5 shrink-0">
-            <div className="flex flex-col gap-3">
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 flex items-center gap-4">
-                <div className="w-12 h-12 bg-white rounded-[1rem] shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden">
+          <div className="flex flex-col gap-5 pt-2 sm:pt-3 lg:pt-4 shrink-0">
+            <div className="flex flex-col gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3.5">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-xl shadow-2xs border border-slate-200/80 flex items-center justify-center overflow-hidden shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/icon-192x192.png" alt={`${appMode} Logo`} className="w-full h-full object-cover" />
                 </div>
-                {activeModule === 'dashboard' 
-                  ? `PORTFOLIO ${appMode}` 
-                  : `${appMode} ${
-                      activeModule === 'workspace' 
-                        ? '예산관리' 
-                        : activeModule === 'festival'
-                        ? '양재천 페스티벌'
-                        : activeModule === 'simulator'
-                        ? '예산 시뮬레이터' 
-                        : ''
-                    }`
-                }
+                <span>
+                  {activeModule === 'dashboard' 
+                    ? `PORTFOLIO ${appMode}` 
+                    : `${appMode} ${
+                        activeModule === 'workspace' 
+                          ? '예산관리' 
+                          : activeModule === 'festival'
+                          ? '양재천 페스티벌'
+                          : activeModule === 'simulator'
+                          ? '예산 시뮬레이터' 
+                          : ''
+                      }`
+                  }
+                </span>
               </h1>
-              <div className="flex items-center gap-3 ml-2">
-                <div className={`w-1 h-5 ${appMode === 'HCHPS' ? 'bg-emerald-600' : 'bg-blue-600'} rounded-full`} />
-                <p className="text-[13px] font-medium text-slate-500 tracking-wide">
+              <div className="flex items-center gap-2.5 ml-1">
+                <div className="w-1 h-4 bg-slate-900 rounded-full shrink-0" />
+                <p className="text-xs sm:text-[13px] font-medium text-slate-500 tracking-tight">
                   {appMode === 'HCHPS' 
                     ? '사내 업무 편성, 지식 자산화, 그리고 실시간 관제를 위한 초개인화 인텔리전스 워크스페이스' 
                     : 'Vital Information & Task Architecture Ledger — converging public health resources, tasks, and budget execution into a unified management topology'}
                 </p>
               </div>
             </div>
-            <div className="h-[1px] w-full bg-slate-200 dark:bg-slate-700" />
+            <div className="h-px w-full bg-slate-200/80" />
           </div>
 
           {/* Module Content */}
@@ -427,13 +442,13 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
           </div>
 
           {/* Common Footer */}
-          <div id="dashboard-footer" className="mt-8 pt-8 pb-4 border-t border-slate-200/60 shrink-0">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase">
-              <span>© 2026 PORTFOLIO {appMode}. All rights reserved.</span>
-              <span className="flex items-center gap-3">
-                Precision Operations Intelligence
-                <span className="text-slate-300">|</span> 
-                <button onClick={handleLogout} className={`text-${appMode === 'HCHPS' ? 'emerald' : 'blue'}-500 hover:text-${appMode === 'HCHPS' ? 'emerald' : 'blue'}-600 transition-colors cursor-pointer`}>SECURE</button>
+          <div id="dashboard-footer" className="mt-8 pt-6 pb-4 border-t border-slate-200/80 shrink-0">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 text-[11px] font-medium text-slate-400 tracking-wider uppercase">
+              <span className="font-mono tabular-nums">© 2026 PORTFOLIO {appMode}. All rights reserved.</span>
+              <span className="flex items-center gap-2.5">
+                <span>Precision Operations Intelligence</span>
+                <span className="text-slate-300">·</span> 
+                <button onClick={handleLogout} className="text-slate-600 hover:text-slate-900 font-semibold transition-colors cursor-pointer">SECURE</button>
               </span>
             </div>
           </div>

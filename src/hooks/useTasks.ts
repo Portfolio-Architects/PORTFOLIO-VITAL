@@ -76,12 +76,14 @@ function calculateNextDueDate(currentDueDate?: string, recurrence?: string): str
   return formatYMD(nextDate);
 }
 
-export function useTasks() {
+export function useTasks(options?: { enabled?: boolean }) {
+  const enabled = options?.enabled ?? true;
   const queryClient = useQueryClient();
 
   const { data: tasks = [], isLoading, error } = useQuery({
     queryKey: ['TASKS'],
     queryFn: () => readSheet<Task>('TASKS'),
+    enabled,
     staleTime: 1000,
     refetchOnWindowFocus: true,
     refetchIntervalInBackground: false,

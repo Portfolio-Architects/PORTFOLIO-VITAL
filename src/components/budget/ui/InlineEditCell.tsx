@@ -75,6 +75,8 @@ const EditingInput: React.FC<EditingInputProps> = ({
     } else if (e.key === 'Escape') {
       e.preventDefault();
       isCommittedRef.current = true;
+      const value = initialValue;
+      setTempValue(value !== undefined && value !== null ? String(value) : '');
       onCancel();
     }
   };
@@ -86,10 +88,12 @@ const EditingInput: React.FC<EditingInputProps> = ({
       type={type === 'date' ? 'date' : 'text'}
       value={tempValue}
       onChange={(e) => setTempValue(e.target.value)}
+      onClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
       onBlur={handleCommit}
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
-      className={`px-2 py-0.5 text-xs border-2 border-indigo-500 rounded-md outline-none bg-white font-mono shadow-inner text-slate-800 transition-all ${inputClassName || className}`}
+      className={`w-full min-w-0 px-1.5 py-0.5 text-xs border border-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 rounded outline-none bg-white font-mono text-slate-900 transition-all ${inputClassName || className}`}
     />
   );
 };
@@ -161,7 +165,7 @@ export const InlineEditCell = React.memo<InlineEditCellProps>(({
       onClick={(e) => {
         e.stopPropagation();
       }}
-      className={`cursor-pointer hover:bg-indigo-50/70 hover:outline hover:outline-1 hover:outline-indigo-300 rounded px-1.5 py-0.5 transition-colors select-none ${className}`}
+      className={`cursor-pointer hover:bg-slate-100/80 hover:outline hover:outline-1 hover:outline-slate-300 rounded px-1.5 py-0.5 transition-colors select-none ${className}`}
       title="더블클릭하여 빠르게 수정"
     >
       {displayFormatter

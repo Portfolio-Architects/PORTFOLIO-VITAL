@@ -293,16 +293,16 @@ const ContactCard = React.memo(({
   const parsed = parsedNotes;
 
   return (
-    <div className="group relative flex flex-col justify-between p-4 bg-white/70 hover:bg-white border border-slate-200/70 hover:border-emerald-500/50 rounded-2xl transition-all duration-200 hover:shadow-md">
+    <div className="group relative flex flex-col justify-between p-3.5 bg-white hover:bg-slate-50/50 border border-slate-200/80 hover:border-slate-300 rounded-xl shadow-2xs transition-colors">
       {/* Top Header: Name & Action Buttons */}
       <div>
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-            <span className="text-sm font-bold text-slate-800 tracking-tight">
+            <span className="text-sm font-bold text-slate-900 tracking-tight">
               <HighlightText text={contact.name} queryTokens={queryTokens} />
             </span>
             {parsed.source && (
-              <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/70 rounded-full">
+              <span className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200/80 rounded-md">
                 <HighlightText text={parsed.source} queryTokens={queryTokens} />
               </span>
             )}
@@ -311,14 +311,14 @@ const ContactCard = React.memo(({
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
             <button
               onClick={handleEdit}
-              className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg cursor-pointer transition-colors"
+              className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer transition-colors"
               title="연락처 수정"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={handleDelete}
-              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer transition-colors"
+              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md cursor-pointer transition-colors"
               title="연락처 삭제"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -327,25 +327,25 @@ const ContactCard = React.memo(({
         </div>
 
         {/* Contact Info (Phone & Email) */}
-        <div className="flex flex-col gap-1.5 mt-2.5 text-xs font-semibold text-slate-600">
+        <div className="flex flex-col gap-1.5 mt-2.5 text-xs font-medium text-slate-600">
           <div className="flex items-center justify-between group/phone">
             <a 
               href={`tel:${contact.phone.replace(/[^0-9+]/g, '')}`}
-              className="flex items-center gap-1.5 text-slate-700 hover:text-emerald-600 transition-colors font-medium"
+              className="flex items-center gap-1.5 text-slate-700 hover:text-slate-900 transition-colors font-mono tabular-nums font-medium"
               title="전화 걸기"
             >
-              <Phone className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <HighlightText text={contact.phone} queryTokens={queryTokens} />
             </a>
             <button
               onClick={handleCopyPhone}
-              className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-md transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors cursor-pointer"
               title="전화번호 복사"
             >
               {copiedPhone ? (
                 <>
                   <Check className="w-3 h-3 text-emerald-600" />
-                  <span className="text-emerald-600 font-bold">복사됨</span>
+                  <span className="text-emerald-700 font-semibold">복사됨</span>
                 </>
               ) : (
                 <>
@@ -361,10 +361,10 @@ const ContactCard = React.memo(({
               <button
                 type="button"
                 onClick={handleCopyEmail}
-                className="flex items-center gap-1.5 text-slate-600 hover:text-indigo-600 transition-colors text-[11px] font-medium text-left truncate cursor-pointer select-text"
+                className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 transition-colors text-[11px] font-mono text-left truncate cursor-pointer select-text"
                 title="클릭하여 이메일 텍스트 복사"
               >
-                <Mail className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <span className="truncate select-text">
                   <HighlightText text={contact.email} queryTokens={queryTokens} />
                 </span>
@@ -372,13 +372,13 @@ const ContactCard = React.memo(({
               <button
                 type="button"
                 onClick={handleCopyEmail}
-                className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors cursor-pointer shrink-0"
+                className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors cursor-pointer shrink-0"
                 title="이메일 텍스트 복사"
               >
                 {copiedEmail ? (
                   <>
-                    <Check className="w-3 h-3 text-indigo-600" />
-                    <span className="text-indigo-600 font-bold">복사됨</span>
+                    <Check className="w-3 h-3 text-emerald-600" />
+                    <span className="text-emerald-700 font-semibold">복사됨</span>
                   </>
                 ) : (
                   <>
@@ -394,22 +394,22 @@ const ContactCard = React.memo(({
 
       {/* Structured Notes & Affiliation Area */}
       {contact.notes && (
-        <div className="mt-3 pt-2 border-t border-slate-100 flex flex-col gap-1.5 text-[11px] font-medium text-slate-600">
+        <div className="mt-2.5 pt-2 border-t border-slate-100 flex flex-col gap-1.5 text-[11px] font-medium text-slate-600">
           {parsed.affiliation && (
             <div className="flex items-start gap-1.5 text-slate-700">
               <Building className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
               <span className="leading-snug">
-                <span className="text-slate-400 font-semibold mr-1">소속/직책:</span>
+                <span className="text-slate-400 font-medium mr-1">소속/직책:</span>
                 <HighlightText text={parsed.affiliation} queryTokens={queryTokens} className="font-semibold text-slate-800" />
               </span>
             </div>
           )}
 
           {parsed.detailNote && (
-            <div className="flex items-start gap-1.5 text-slate-600 bg-slate-50/70 p-2 rounded-xl border border-slate-150/50">
-              <FileText className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-1.5 text-slate-600 bg-slate-50/80 p-2 rounded-lg border border-slate-200/70">
+              <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
               <span className="leading-relaxed break-all">
-                <span className="text-amber-700 font-bold mr-1">비고:</span>
+                <span className="text-slate-700 font-semibold mr-1">비고:</span>
                 <HighlightText text={parsed.detailNote} queryTokens={queryTokens} />
               </span>
             </div>
@@ -648,110 +648,110 @@ const ContactsBoxComponent: React.FC = () => {
   }, [formData, updateContact, addContact]);
 
   return (
-    <div className="glass-panel rounded-[2rem] p-8 shadow-2xs border border-white/20 transition-all duration-300 hover:shadow-md">
+    <div className="bg-white rounded-xl p-5 sm:p-6 shadow-2xs border border-slate-200/80">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/50 pb-5 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-emerald-500/10 text-emerald-600 rounded-2xl border border-emerald-500/15">
-            <BookOpen className="w-6 h-6" />
+          <div className="p-2.5 bg-slate-100 text-slate-700 rounded-xl border border-slate-200/80 shrink-0">
+            <BookOpen className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h4 className="text-xl font-bold text-slate-800 tracking-tight">내 연락처 및 주소록 관리</h4>
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 bg-emerald-100/70 text-emerald-800 rounded-full">
-                <Sparkles className="w-3 h-3 text-emerald-600" /> 비고/메모·초성 스마트 검색
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="text-base font-bold text-slate-900 tracking-tight">내 연락처 및 주소록 관리</h4>
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200/80 rounded-md">
+                <Sparkles className="w-3 h-3 text-slate-500" /> 비고/메모·초성 스마트 검색
               </span>
             </div>
-            <p className="text-xs font-semibold text-slate-450 mt-0.5">
+            <p className="text-xs font-medium text-slate-500 mt-0.5">
               실무 협업자 및 마인드맵 공약제안 노드별 연락 정보를 관리합니다. (비고/메모, 소속, 직책, 출처 통합 검색)
             </p>
           </div>
         </div>
         
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-[11px] font-semibold px-3 py-1 bg-emerald-500/10 border border-emerald-500/15 text-emerald-700 rounded-full shadow-3xs">
+          <span className="text-[11px] font-mono tabular-nums font-medium px-2.5 py-1 bg-slate-50 border border-slate-200/80 text-slate-600 rounded-lg">
             {localSearchTerm ? (
-              <>검색 <strong className="text-emerald-800 font-bold">{filteredContacts.length}</strong>명 / 전체 {contacts.length}명</>
+              <>검색 <strong className="text-slate-900 font-bold">{filteredContacts.length}</strong>명 / 전체 {contacts.length}명</>
             ) : (
-              <>총 <strong className="text-emerald-800 font-bold">{contacts.length}</strong>명</>
+              <>총 <strong className="text-slate-900 font-bold">{contacts.length}</strong>명</>
             )}
           </span>
           <button
             onClick={handleToggleSort}
-            className="flex items-center gap-1 text-[11px] font-bold px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 bg-slate-100/80 hover:bg-slate-200/70 text-slate-700 border border-slate-200/80 rounded-lg transition-colors cursor-pointer"
             title="정렬 기준 변경"
           >
-            <ArrowUpDown className="w-3 h-3" />
+            <ArrowUpDown className="w-3 h-3 text-slate-500" />
             {sortOrder === 'NAME_ASC' ? '가나다순' : '최신순'}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Container (left side) */}
-        <form onSubmit={handleSubmit} className="lg:col-span-4 flex flex-col gap-4 bg-slate-55/20 p-6 rounded-2xl border border-slate-200/40 backdrop-blur-xs h-fit">
-          <span className="text-sm font-bold text-slate-700 mb-1 flex items-center gap-2">
+        <form onSubmit={handleSubmit} className="lg:col-span-4 flex flex-col gap-3.5 bg-slate-50/70 p-4 sm:p-5 rounded-xl border border-slate-200/80 h-fit">
+          <span className="text-xs font-bold text-slate-800 mb-0.5 flex items-center gap-1.5 uppercase tracking-wide">
             {formData.editingId ? (
               <>
-                <Pencil className="w-4 h-4 text-emerald-500 animate-pulse" /> 연락처 수정
+                <Pencil className="w-3.5 h-3.5 text-slate-700" /> 연락처 수정
               </>
             ) : (
               <>
-                <UserPlus className="w-4 h-4 text-emerald-500" /> 신규 연락처 추가
+                <UserPlus className="w-3.5 h-3.5 text-slate-700" /> 신규 연락처 추가
               </>
             )}
           </span>
 
           {formData.error && (
-            <div className="flex items-center gap-2 text-xs font-bold bg-rose-500/10 text-rose-605 p-3 rounded-xl border border-rose-500/20">
-              <ShieldAlert className="w-4.5 h-4.5 shrink-0" />
+            <div className="flex items-center gap-2 text-xs font-semibold bg-rose-50 text-rose-700 p-2.5 rounded-lg border border-rose-200/80">
+              <ShieldAlert className="w-4 h-4 shrink-0" />
               <span>{formData.error}</span>
             </div>
           )}
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-600">이름 / 노드명</label>
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] font-semibold text-slate-600">이름 / 노드명</label>
             <input
               type="text"
               value={formData.name}
               onChange={handleNameChange}
               placeholder="예: 이성섭 상임이사, 최장미"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-white/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-350"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200/90 text-xs sm:text-sm font-medium text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400"
               required
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-600">연락처 (전화번호)</label>
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] font-semibold text-slate-600">연락처 (전화번호)</label>
             <input
               type="text"
               value={formData.phone}
               onChange={handlePhoneChange}
               placeholder="예: 010-5284-3946"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-white/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-350"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200/90 text-xs sm:text-sm font-mono tabular-nums font-medium text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400"
               required
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-600">이메일 주소 (선택)</label>
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] font-semibold text-slate-600">이메일 주소 (선택)</label>
             <input
               type="email"
               value={formData.email}
               onChange={handleEmailChange}
               placeholder="예: email@example.com"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-white/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-350"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200/90 text-xs sm:text-sm font-mono font-medium text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400"
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-600">비고 / 메모 / 소속 (선택)</label>
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] font-semibold text-slate-600">비고 / 메모 / 소속 (선택)</label>
             <textarea
               rows={3}
               value={formData.notes}
               onChange={handleNotesChange}
               placeholder="예: 소속: 매헌기념관, 비고: 체력측정요구 뒷빽, [출처: 사업운영]"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-350 resize-none leading-relaxed"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200/90 text-xs font-medium text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400 resize-none leading-relaxed"
             />
             <p className="text-[10px] text-slate-400">
               * 소속, 직책, 출처, 비고 내용을 적어두시면 검색창에서 즉시 찾아낼 수 있습니다.
@@ -761,7 +761,7 @@ const ContactsBoxComponent: React.FC = () => {
           <div className="flex flex-col gap-2 mt-1">
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold py-3 px-4 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.98] cursor-pointer"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors shadow-2xs cursor-pointer"
             >
               {formData.editingId ? '연락처 수정 완료' : '연락처 저장'}
             </button>
@@ -769,7 +769,7 @@ const ContactsBoxComponent: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCancelEdit}
-                className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 px-4 rounded-xl transition-all duration-200 cursor-pointer text-xs"
+                className="w-full bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90 font-semibold py-2 px-4 rounded-lg transition-colors cursor-pointer text-xs"
               >
                 수정 취소
               </button>
@@ -784,14 +784,14 @@ const ContactsBoxComponent: React.FC = () => {
             className="relative mb-3 cursor-text"
             onClick={() => searchInputRef.current?.focus()}
           >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <input
               ref={searchInputRef}
               type="text"
               value={localSearchTerm}
               onChange={handleSearchChange}
               placeholder="이름, 전화번호, 비고/메모, 소속, 직책 키워드 및 초성(ㅊㄹ, ㅇㅅㅅ) 검색..."
-              className="w-full pl-11 pr-10 py-3 rounded-2xl border border-slate-300/80 text-sm font-semibold text-slate-800 bg-white hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all placeholder:text-slate-400 shadow-3xs cursor-text"
+              className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-200/90 text-xs sm:text-sm font-medium text-slate-800 bg-slate-50/50 hover:bg-white focus:bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400 shadow-2xs cursor-text"
             />
             {localSearchTerm && (
               <button
@@ -800,10 +800,10 @@ const ContactsBoxComponent: React.FC = () => {
                   e.stopPropagation();
                   handleClearSearch();
                 }}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
                 title="검색어 초기화"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -811,13 +811,13 @@ const ContactsBoxComponent: React.FC = () => {
           {/* Contacts Card Grid with Window Virtualization */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mb-3" />
-              <p className="text-xs font-bold">주소록 데이터를 불러오고 있습니다...</p>
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-slate-200 border-t-slate-800 mb-3" />
+              <p className="text-xs font-medium">주소록 데이터를 불러오고 있습니다...</p>
             </div>
           ) : filteredContacts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white/40 border border-dashed border-slate-200 rounded-2xl">
-              <BookOpen className="w-10 h-10 text-slate-300 mb-3" />
-              <p className="text-sm font-bold text-slate-500">
+            <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 border border-dashed border-slate-200/90 rounded-xl">
+              <BookOpen className="w-8 h-8 text-slate-300 mb-2.5" />
+              <p className="text-xs sm:text-sm font-semibold text-slate-500">
                 {localSearchTerm 
                   ? `"${localSearchTerm}" 관련 검색 결과가 없습니다.`
                   : '등록된 연락처가 없습니다.'}
@@ -826,7 +826,7 @@ const ContactsBoxComponent: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="mt-3 text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
+                  className="mt-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 underline cursor-pointer"
                 >
                   검색어 초기화
                 </button>

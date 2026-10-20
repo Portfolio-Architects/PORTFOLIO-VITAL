@@ -119,19 +119,19 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Category Header Card */}
-        <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-2">
+        <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
             <span>대상 세부사업 / 과목</span>
-            <span className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">
+            <span className="font-mono text-slate-700 font-semibold">
               {category.formationItem || category.statItem || '일반'}
             </span>
           </div>
-          <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
+          <div className="text-sm font-bold text-slate-900">
             {category.name}
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-slate-800/80 text-xs">
-            <span className="text-slate-600 dark:text-slate-400">현재 미집행 잔액</span>
-            <span className="font-mono font-extrabold text-rose-600 dark:text-rose-400 text-sm">
+          <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs">
+            <span className="text-slate-600">현재 미집행 잔액</span>
+            <span className="font-mono tabular-nums font-bold text-rose-600 text-sm">
               {formatN(currentRemaining)}원
             </span>
           </div>
@@ -139,7 +139,7 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
 
         {/* Input: Plan Item Name */}
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+          <label className="text-xs font-medium text-slate-600 flex items-center justify-between">
             <span>지출 계획명 (품목 / 집행 사유)</span>
             <span className="text-[11px] font-normal text-slate-400">예: 피복비 구매, 하반기 강사수당 등</span>
           </label>
@@ -149,7 +149,7 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
             placeholder="지출 예정 품목명 또는 계획 내용을 입력하세요"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3.5 py-2 rounded-lg border border-slate-200/80 bg-white text-slate-900 text-xs focus:outline-none focus:border-slate-400 transition-colors"
           />
         </div>
 
@@ -157,13 +157,13 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              <label className="text-xs font-medium text-slate-600">
                 단가 (원)
               </label>
               <button
                 type="button"
                 onClick={handleFillAllRemaining}
-                className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold cursor-pointer"
+                className="text-[11px] text-slate-700 hover:text-slate-900 hover:underline font-semibold cursor-pointer"
                 title="남은 잔액 전액을 단가로 입력"
               >
                 잔액 전액 채우기
@@ -176,14 +176,14 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
                 placeholder="0"
                 value={unitPriceStr}
                 onChange={handleUnitPriceChange}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-mono text-right pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3.5 py-2 rounded-lg border border-slate-200/80 bg-white text-slate-900 text-xs font-mono tabular-nums text-right pr-8 focus:outline-none focus:border-slate-400 transition-colors"
               />
-              <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">원</span>
+              <span className="absolute right-3 top-2 text-xs text-slate-400 font-medium">원</span>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label className="text-xs font-medium text-slate-600">
               수량
             </label>
             <input
@@ -192,35 +192,35 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
               max="99999"
               value={quantity}
               onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value || '1', 10)))}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-mono text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3.5 py-2 rounded-lg border border-slate-200/80 bg-white text-slate-900 text-xs font-mono tabular-nums text-right focus:outline-none focus:border-slate-400 transition-colors"
             />
           </div>
         </div>
 
         {/* Expected Amount & Burn-down Simulation Preview */}
-        <div className="bg-indigo-50/70 dark:bg-indigo-950/40 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 space-y-2">
+        <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-indigo-800 dark:text-indigo-300 font-bold flex items-center gap-1.5">
-              <Calculator size={14} /> 총 계획 예정액
+            <span className="text-slate-700 font-semibold flex items-center gap-1.5">
+              <Calculator size={14} className="text-slate-500" /> 총 계획 예정액
             </span>
-            <span className="font-mono font-black text-indigo-700 dark:text-indigo-200 text-base">
+            <span className="font-mono tabular-nums font-bold text-slate-900 text-base">
               {formatN(totalAmount)}원
             </span>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-indigo-200/50 dark:border-indigo-900/60 text-xs">
-            <span className="text-slate-600 dark:text-slate-400">계획 반영 후 예상 잔액</span>
-            <div className="flex items-center gap-1.5 font-mono font-bold">
+          <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs">
+            <span className="text-slate-500">계획 반영 후 예상 잔액</span>
+            <div className="flex items-center gap-1.5 font-mono tabular-nums font-semibold">
               {expectedBalanceAfterPlan < 0 ? (
-                <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                <span className="text-rose-600 flex items-center gap-1">
                   <AlertTriangle size={13} /> {formatN(expectedBalanceAfterPlan)}원 (예산 초과)
                 </span>
               ) : expectedBalanceAfterPlan === 0 ? (
-                <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span className="text-emerald-600 flex items-center gap-1">
                   <CheckCircle2 size={13} /> 0원 (100% 완전 소진)
                 </span>
               ) : (
-                <span className="text-slate-700 dark:text-slate-300">
+                <span className="text-slate-700">
                   {formatN(expectedBalanceAfterPlan)}원
                 </span>
               )}
@@ -231,19 +231,19 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
         {/* Execution Date & Memo */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label className="text-xs font-medium text-slate-600">
               예정 집행 일자
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3.5 py-2 rounded-lg border border-slate-200/80 bg-white text-slate-900 text-xs focus:outline-none focus:border-slate-400 transition-colors"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label className="text-xs font-medium text-slate-600">
               비고 / 메모 (선택)
             </label>
             <input
@@ -251,13 +251,13 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
               placeholder="예: 4분기 집행 예정"
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3.5 py-2 rounded-lg border border-slate-200/80 bg-white text-slate-900 text-xs focus:outline-none focus:border-slate-400 transition-colors"
             />
           </div>
         </div>
 
         {error && (
-          <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 text-rose-700 dark:text-rose-300 text-xs font-medium">
+          <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200/80 text-rose-700 text-xs font-medium">
             {error}
           </div>
         )}
@@ -267,13 +267,13 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer"
+            className="px-4 py-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 text-xs font-medium transition-colors cursor-pointer"
           >
             취소
           </button>
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
+            className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Sparkles size={14} />
             소진 계획 등록

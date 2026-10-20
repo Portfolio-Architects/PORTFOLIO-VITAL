@@ -267,36 +267,37 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
   }, [groupedByPolicy, isPolicyVirtualActive, startIndex, endIndex]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       
-      {/* Risk Alert Compact Card & Integrated Simulator Burn-down Hub */}
+      {/* Risk Alert Minimalist Bar & Integrated Simulator Burn-down Hub */}
       {riskCategories.length > 0 && (
-        <div className="bg-rose-50/70 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/30 rounded-2xl p-3 shadow-2xs transition-all">
+        <div className="bg-white border border-rose-200/80 rounded-xl px-4 py-3 shadow-2xs transition-colors">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <div className="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
-                <ShieldAlert size={17} />
+              <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                <ShieldAlert size={15} />
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold text-rose-900 dark:text-rose-200">불용 위험 모니터링</span>
-                <span className="px-2 py-0.5 text-[11px] font-bold bg-rose-200/80 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 rounded-full">
+                <span className="text-xs font-bold text-slate-900">불용 위험 모니터링</span>
+                <span className="px-2 py-0.5 text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/70 rounded-md">
                   {riskCategories.length}개 사업
                 </span>
-                <div className="flex items-center gap-2 text-xs text-rose-700/80 dark:text-rose-300 flex-wrap">
-                  <span>미집행 잔액: <strong className="text-rose-800 dark:text-rose-200 font-mono font-bold">{formatN(totalRiskUnspent)}원</strong></span>
+                <span className="text-slate-200 hidden sm:inline">|</span>
+                <div className="flex items-center gap-2 text-xs text-slate-600 flex-wrap">
+                  <span>미집행 잔액 <strong className="text-slate-900 font-mono font-semibold tabular-nums">{formatN(totalRiskUnspent)}원</strong></span>
                   {totalRiskPlanned > 0 ? (
                     <>
-                      <span className="text-rose-300 dark:text-rose-700 font-mono">−</span>
-                      <span className="text-indigo-700 dark:text-indigo-300 font-medium">
-                        소진 계획: <strong className="font-mono font-bold">{formatN(totalRiskPlanned)}원</strong>
+                      <span className="text-slate-300 font-mono">−</span>
+                      <span className="text-slate-600">
+                        소진 계획 <strong className="font-mono font-semibold text-indigo-600 tabular-nums">{formatN(totalRiskPlanned)}원</strong>
                       </span>
-                      <span className="text-rose-300 dark:text-rose-700 font-mono">=</span>
-                      <span className="bg-white/80 dark:bg-slate-900/60 px-2 py-0.5 rounded-md border border-rose-200/60 dark:border-rose-800/40 text-rose-900 dark:text-rose-100">
-                        최종 불용 예상: <strong className="font-mono font-bold">{formatN(totalRiskProjected)}원</strong>
+                      <span className="text-slate-300 font-mono">=</span>
+                      <span className="bg-rose-50/70 px-2 py-0.5 rounded-md border border-rose-200/60 text-rose-800">
+                        최종 불용 예상 <strong className="font-mono font-bold tabular-nums">{formatN(totalRiskProjected)}원</strong>
                       </span>
                     </>
                   ) : (
-                    <span className="text-[11px] text-rose-500/80 dark:text-rose-400/80 font-normal">
+                    <span className="text-[11px] text-rose-500 font-medium">
                       (소진 계획 미수립)
                     </span>
                   )}
@@ -304,37 +305,37 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {props.onNavigateToSimulator && (
                 <button
                   type="button"
                   onClick={props.onNavigateToSimulator}
-                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                  className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 transition-colors flex items-center gap-1.5 cursor-pointer"
                   title="예산 시뮬레이터로 이동하여 종합 시뮬레이션 및 정산 관리"
                 >
-                  <Sparkles size={13} className="text-indigo-600 dark:text-indigo-400" />
+                  <Sparkles size={13} className="text-indigo-600" />
                   <span>시뮬레이터 상세</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => setIsRiskExpanded(!isRiskExpanded)}
-                className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white/90 dark:bg-slate-800 hover:bg-white text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <span>{isRiskExpanded ? '접기' : '사업 목록'}</span>
-                <ChevronDown size={14} className={`transform transition-transform duration-200 ${isRiskExpanded ? 'rotate-180' : ''}`} />
+                <ChevronDown size={13} className={`transform transition-transform duration-200 text-slate-400 ${isRiskExpanded ? 'rotate-180' : ''}`} />
               </button>
             </div>
           </div>
 
           {/* Collapsible details: 2-column compact scroll grid */}
           {isRiskExpanded && (
-            <div className="mt-2.5 pt-2.5 border-t border-rose-200/60 dark:border-rose-900/40">
-              <div className="flex items-center justify-between text-[11px] text-rose-600 dark:text-rose-400 mb-2 px-1">
+            <div className="mt-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-between text-[11px] text-slate-500 mb-2 px-0.5">
                 <span>조기 집행 및 연말 잔액 소진 조치(시뮬레이션 계획 수립 및 품의) 권고 사업 목록</span>
-                <span>총 {riskCategories.length}건</span>
+                <span className="font-mono">총 {riskCategories.length}건</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1">
                 {riskCategories.map((item) => {
                   const unspent = item.stExcludePlanned.remaining;
                   const planned = item.st.planned;
@@ -343,37 +344,37 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
                   const isPartiallyPlanned = planned > 0 && finalRemaining > 0;
 
                   return (
-                    <div key={item.cat.id} className="flex items-center justify-between text-xs bg-white/85 dark:bg-slate-900/70 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/30 gap-2 shadow-3xs">
+                    <div key={item.cat.id} className="flex items-center justify-between text-xs bg-slate-50/70 hover:bg-slate-50 p-2.5 rounded-lg border border-slate-200/70 gap-2 transition-colors">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate" title={item.cat.name}>
+                          <span className="font-semibold text-slate-800 truncate" title={item.cat.name}>
                             {item.cat.name}
                           </span>
                           {isFullyPlanned ? (
-                            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded shrink-0">
+                            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded shrink-0">
                               계획 100%
                             </span>
                           ) : isPartiallyPlanned ? (
-                            <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-100/80 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded shrink-0">
+                            <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-1.5 py-0.5 rounded shrink-0">
                               수립중
                             </span>
                           ) : (
-                            <span className="text-[10px] text-rose-600 dark:text-rose-400 bg-rose-100/70 dark:bg-rose-950/60 px-1.5 py-0.5 rounded shrink-0">
+                            <span className="text-[10px] text-rose-600 bg-rose-50 border border-rose-200/60 px-1.5 py-0.5 rounded shrink-0">
                               {item.reason}
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400 flex-wrap">
-                          <span>미집행: <strong className="font-mono text-slate-700 dark:text-slate-300">{formatN(unspent)}원</strong></span>
+                        <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500 flex-wrap">
+                          <span>미집행: <strong className="font-mono text-slate-700 tabular-nums">{formatN(unspent)}원</strong></span>
                           {planned > 0 && (
                             <>
-                              <span className="text-slate-300 dark:text-slate-600">/</span>
-                              <span className="text-indigo-600 dark:text-indigo-400">
-                                계획: <strong className="font-mono">{formatN(planned)}원</strong>
+                              <span className="text-slate-300">/</span>
+                              <span className="text-indigo-600">
+                                계획: <strong className="font-mono tabular-nums">{formatN(planned)}원</strong>
                               </span>
-                              <span className="text-slate-300 dark:text-slate-600">/</span>
-                              <span className={finalRemaining <= 0 ? 'text-emerald-600 font-bold' : 'text-amber-600'}>
-                                최종잔여: <strong className="font-mono">{formatN(finalRemaining)}원</strong>
+                              <span className="text-slate-300">/</span>
+                              <span className={finalRemaining <= 0 ? 'text-emerald-600 font-semibold' : 'text-amber-600'}>
+                                최종잔여: <strong className="font-mono tabular-nums">{formatN(finalRemaining)}원</strong>
                               </span>
                             </>
                           )}
@@ -384,7 +385,7 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
                         <button
                           type="button"
                           onClick={() => setQuickPlanCategory(item.cat)}
-                          className="px-2 py-1 text-[11px] font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-1 cursor-pointer shadow-3xs hover:shadow-xs active:scale-95"
+                          className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-slate-900 hover:bg-slate-800 text-white transition-colors flex items-center gap-1 cursor-pointer"
                           title="이 사업에 대한 소진 계획(품의) 즉시 수립"
                         >
                           <Plus size={12} />
@@ -400,73 +401,219 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-xl font-bold">예산 관리</h2>
+      {/* Minimalist Top Header Bar */}
+      <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
+        <div className="flex items-baseline gap-2.5">
+          <h2 className="text-lg font-bold text-slate-900 tracking-tight">예산 관리</h2>
+          <span className="text-xs text-slate-400 font-medium">
+            {groupedByPolicy.length}개 정책사업 · {filteredCategoriesTree.length}개 통계목
+          </span>
+        </div>
         <div className="flex gap-2">
-          <button onClick={() => { setEntryModalInitialData(null); setShowEntryModal(true); }} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer" disabled={categories.length === 0}>
-            <FilePlus2 size={16} /> 지출 품의
+          <button
+            onClick={() => { setEntryModalInitialData(null); setShowEntryModal(true); }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors cursor-pointer shadow-2xs disabled:opacity-40"
+            disabled={categories.length === 0}
+          >
+            <FilePlus2 size={14} /> 지출 품의
           </button>
         </div>
       </div>
 
-      {/* Hierarchical & Multi-Criteria Filters */}
-      <div className="glass-panel rounded-[2rem] p-5 shadow-2xs border border-white/20">
-        <div className="flex items-center justify-between flex-wrap gap-2 mb-3 min-h-[32px]">
-          <div className="text-sm font-bold text-slate-800 tracking-wide flex items-center gap-2">
-            <span>다중 필터링 & 실시간 대조 시스템</span>
-            {deferredSearchTerm && (
-              <span className="text-xs bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full border border-indigo-100 font-normal shrink-0">
-                검색어: "{deferredSearchTerm}"
-              </span>
+      {/* Overall Summary (4 Unified Minimalist KPI Cards) */}
+      {(() => {
+        const overallExecRate = filteredStats.totalBudget > 0 ? (filteredStats.totalSpent / filteredStats.totalBudget) * 100 : 0;
+        const overallRemRate = filteredStats.totalBudget > 0 ? (filteredStats.remaining / filteredStats.totalBudget) * 100 : 0;
+        const realAvailableRemRate = filteredStats.totalBudget > 0 ? ((filteredStats.remaining + filteredStats.dailyExpenseRemaining) / filteredStats.totalBudget) * 100 : 0;
+
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Card 1: Total Budget */}
+            <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-semibold text-slate-500">전체 예산 현황</span>
+                  <CircleDollarSign size={15} className="text-slate-400" />
+                </div>
+                <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono tabular-nums">
+                  {formatN(filteredStats.totalBudget)}
+                  <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+                </div>
+              </div>
+              <div className="mt-3 pt-2.5 border-t border-slate-100">
+                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mb-2" title={`집행률: ${overallExecRate.toFixed(1)}% | 실질 미집행률: ${realAvailableRemRate.toFixed(1)}%`}>
+                  <div 
+                    className="bg-slate-900 h-full transition-all duration-500" 
+                    style={{ width: `${Math.min(100, overallExecRate)}%` }} 
+                  />
+                  <div 
+                    className="bg-emerald-500/70 h-full transition-all duration-500" 
+                    style={{ width: `${Math.min(100 - Math.min(100, overallExecRate), realAvailableRemRate)}%` }} 
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[11px] font-mono">
+                  <span className="text-slate-600 font-medium">집행 <strong className="text-slate-900">{overallExecRate.toFixed(1)}%</strong></span>
+                  <span className="text-slate-500">미집행 <strong className="text-emerald-700">{realAvailableRemRate.toFixed(1)}%</strong></span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Card 2: General Account */}
+            <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-semibold text-slate-500">일반 계좌 (e-호조 본청)</span>
+                  <Wallet size={15} className="text-slate-400" />
+                </div>
+                <div className="flex items-baseline justify-between gap-1">
+                  <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono tabular-nums">
+                    {formatN(filteredStats.remaining)}
+                    <span className="text-xs font-normal text-slate-400 ml-1">원 잔여</span>
+                  </div>
+                  <span className="text-[11px] font-semibold font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600" title="e-호조 본청 잔여율">
+                    본청 잔여 {overallRemRate.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+              <div className="mt-3 pt-2.5 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+                <span>본청 직접 지출</span>
+                <span className="font-semibold text-slate-800 font-mono tabular-nums">{formatN(filteredStats.totalSpent - filteredStats.dailyExpenseIssued)}원</span>
+              </div>
+            </div>
+
+            {/* Card 3: Daily Expense Issuance */}
+            <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-semibold text-slate-500">일상경비 이체내역</span>
+                <div className="flex gap-1.5 items-center">
+                  <button 
+                    onClick={() => setShowDailyStatModal(true)} 
+                    className="text-[11px] bg-slate-50 hover:bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md transition-colors font-semibold border border-slate-200/80 cursor-pointer"
+                  >
+                    통계목별
+                  </button>
+                  <Receipt size={15} className="text-slate-400" />
+                </div>
+              </div>
+              <div className="divide-y divide-slate-100 text-xs">
+                <div className="py-1 flex justify-between items-center">
+                  <span className="text-slate-500">교부액 (원금)</span>
+                  <span className="font-medium text-slate-800 font-mono tabular-nums">{formatN(filteredStats.dailyExpenseIssued)}원</span>
+                </div>
+                <div className="py-1 flex justify-between items-center">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-500">실지출액</span>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      집행 {filteredStats.dailyExpenseIssued > 0 ? ((filteredStats.dailyExpenseSpent / filteredStats.dailyExpenseIssued) * 100).toFixed(1) : '0.0'}%
+                    </span>
+                  </div>
+                  <span className="font-medium text-slate-800 font-mono tabular-nums">{formatN(filteredStats.dailyExpenseSpent)}원</span>
+                </div>
+                <div className="pt-1.5 flex justify-between items-center">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-700 font-semibold">가용 잔액</span>
+                    <span className="text-[10px] font-mono text-amber-600 font-medium">
+                      미집행 {filteredStats.dailyExpenseIssued > 0 ? ((filteredStats.dailyExpenseRemaining / filteredStats.dailyExpenseIssued) * 100).toFixed(1) : '0.0'}%
+                    </span>
+                  </div>
+                  <span className="font-bold text-amber-700 font-mono tabular-nums">{formatN(filteredStats.dailyExpenseRemaining)}원</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4: Total Available Remaining */}
+            <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    보건소 실질 총 가용
+                  </span>
+                  <div className="flex gap-1.5 items-center">
+                    <button 
+                      onClick={() => setShowLedgerModal(true)} 
+                      className="flex items-center gap-1 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[11px] px-2 py-0.5 rounded-md transition-colors font-semibold border border-slate-200/80 cursor-pointer"
+                    >
+                      <Search size={11} /> 상세 대조
+                    </button>
+                    <ShieldCheck size={15} className="text-emerald-600" />
+                  </div>
+                </div>
+                <div className="flex items-baseline justify-between gap-1">
+                  <div className="text-xl sm:text-2xl font-bold text-emerald-700 tracking-tight font-mono tabular-nums">
+                    {formatN(filteredStats.remaining + filteredStats.dailyExpenseRemaining)}
+                    <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+                  </div>
+                  <span className="text-[11px] font-semibold font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/60" title="전체 예산 대비 실질 총 가용률(미집행률)">
+                    실질 미집행 {realAvailableRemRate.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+              <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between items-center font-mono tabular-nums">
+                <span>본청 e-호조: {formatN(filteredStats.remaining)}원</span>
+                <span>일상 통장: {formatN(filteredStats.dailyExpenseRemaining)}원</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Minimalist Filter & Search Bar */}
+      <div className="bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200/80 space-y-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          {/* Keyword Search Input */}
+          <div className="relative flex-1 z-10">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 z-20">
+              <Search size={14} />
+            </div>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="사업명(정책/단위/세부), 통계목, 산출기초, 문서번호, 지출목적 실시간 검색..."
+              className="w-full pl-9 pr-8 py-1.5 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors cursor-text relative z-10"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer z-20"
+              >
+                ✕
+              </button>
             )}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button onClick={handleSaveFilters} className="text-xs px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-semibold border border-blue-200 transition-all cursor-pointer shadow-3xs">
+
+          <div className="flex items-center justify-between sm:justify-end gap-1.5 shrink-0">
+            <span className="text-[11px] font-medium text-slate-400 hidden xl:inline mr-1">다중 필터링 & 실시간 대조 시스템</span>
+            {deferredSearchTerm && (
+              <span className="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium shrink-0">
+                검색어: &quot;{deferredSearchTerm}&quot;
+              </span>
+            )}
+            <button onClick={handleSaveFilters} className="text-xs px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-lg font-medium border border-slate-200/90 transition-colors cursor-pointer">
               구성 저장하기
             </button>
-            <button onClick={handleResetFilters} className="text-xs px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg font-semibold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs">
-              <RefreshCw size={12} /> 초기화 및 해제
+            <button onClick={handleResetFilters} className="text-xs px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 rounded-lg font-medium border border-slate-200/90 transition-colors flex items-center gap-1 cursor-pointer">
+              <RefreshCw size={11} /> 초기화 및 해제
             </button>
           </div>
-        </div>
-
-        {/* Keyword Search Input */}
-        <div className="relative mb-3 z-10">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-20">
-            <Search size={16} />
-          </div>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="사업명(정책/단위/세부), 통계목, 산출기초, 문서번호, 지출목적 실시간 검색..."
-            className="w-full pl-10 pr-10 py-2 bg-white/80 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-text relative z-10"
-          />
-          {searchTerm && (
-            <button
-              type="button"
-              onClick={() => setSearchTerm('')}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer z-20"
-            >
-              ✕
-            </button>
-          )}
         </div>
 
         {/* Filter Controls Row */}
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap gap-1.5 items-center">
           <MultiSelectDropdown label="정책사업명" options={uniquePolicies} selected={filterPolicy} onChange={val => { setFilterPolicy(val); setFilterUnit([]); setFilterDetail([]); setFilterStat([]); }} />
           <MultiSelectDropdown label="단위사업명" options={unitOptions} selected={filterUnit} onChange={val => { setFilterUnit(val); setFilterDetail([]); setFilterStat([]); }} disabled={unitOptions.length === 0} />
           <MultiSelectDropdown label="세부사업명" options={detailOptions} selected={filterDetail} onChange={val => { setFilterDetail(val); setFilterStat([]); }} disabled={detailOptions.length === 0} />
           <MultiSelectDropdown label="통계목" options={statOptions} selected={filterStat} onChange={val => setFilterStat(val)} disabled={statOptions.length === 0} />
 
           {/* Month Filter Selector */}
-          <div className="flex items-center gap-1.5 bg-white/80 border border-slate-200 rounded-xl px-3 py-1.5 text-xs shadow-3xs">
-            <span className="text-slate-500 font-medium">월별:</span>
+          <div className="flex items-center gap-1.5 bg-slate-50/70 border border-slate-200/90 rounded-lg px-2.5 py-1.5 text-xs">
+            <span className="text-slate-400 font-medium">월별</span>
             <select
               value={filterMonth}
               onChange={(e) => setFilterMonth(e.target.value)}
-              className="bg-transparent font-bold text-slate-700 focus:outline-none cursor-pointer"
+              className="bg-transparent font-semibold text-slate-700 focus:outline-none cursor-pointer"
             >
               <option value="전체">전체 (1~12월)</option>
               {Array.from({ length: 12 }, (_, i) => `${i + 1}월`).map(m => (
@@ -476,160 +623,6 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
           </div>
         </div>
       </div>
-
-      {/* Overall Summary (4 Cards) */}
-      {(() => {
-        const overallExecRate = filteredStats.totalBudget > 0 ? (filteredStats.totalSpent / filteredStats.totalBudget) * 100 : 0;
-        const overallRemRate = filteredStats.totalBudget > 0 ? (filteredStats.remaining / filteredStats.totalBudget) * 100 : 0;
-        const realAvailableRemRate = filteredStats.totalBudget > 0 ? ((filteredStats.remaining + filteredStats.dailyExpenseRemaining) / filteredStats.totalBudget) * 100 : 0;
-
-        return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {/* Card 1: Total Budget */}
-            <div className="glass-panel-dark rounded-[2rem] p-6 flex flex-col h-full justify-between shadow-2xs hover:shadow-lg hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 group">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-sm font-semibold text-slate-400 tracking-wide flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50"></span> 전체 예산 현황
-                </span>
-                <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 text-indigo-400 group-hover:scale-110 transition-transform duration-300">
-                  <CircleDollarSign size={18} />
-                </div>
-              </div>
-              <div>
-                <div className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2 font-mono">
-                  {formatN(filteredStats.totalBudget)}
-                  <span className="text-sm font-medium text-slate-400 ml-1">원</span>
-                </div>
-                {/* Dual Gauge Bar */}
-                <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden flex border border-slate-700/60 mb-2.5" title={`집행률: ${overallExecRate.toFixed(1)}% | 실질 미집행률: ${realAvailableRemRate.toFixed(1)}%`}>
-                  <div 
-                    className="bg-gradient-to-r from-indigo-500 to-blue-500 h-full transition-all duration-500" 
-                    style={{ width: `${Math.min(100, overallExecRate)}%` }} 
-                  />
-                  <div 
-                    className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full opacity-80 transition-all duration-500" 
-                    style={{ width: `${Math.min(100 - Math.min(100, overallExecRate), realAvailableRemRate)}%` }} 
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-1 text-xs">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/80 border border-slate-700/80 text-indigo-300 font-mono font-bold">
-                    집행 {overallExecRate.toFixed(1)}%
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/80 border border-slate-700/80 text-emerald-300 font-mono font-bold">
-                    미집행 {realAvailableRemRate.toFixed(1)}%
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Card 2: General Account */}
-            <div className="glass-panel rounded-[2rem] p-6 flex flex-col h-full justify-between shadow-2xs hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-sm font-semibold text-blue-600 tracking-wide flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></span> 일반 계좌 (e-호조 본청)
-                </span>
-                <div className="p-2 rounded-xl bg-blue-50 border border-blue-100 text-blue-500 group-hover:scale-110 transition-transform duration-300">
-                  <Wallet size={18} />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-baseline justify-between gap-1 mb-2">
-                  <div className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight font-mono">
-                    {formatN(filteredStats.remaining)}
-                    <span className="text-sm font-bold text-gray-500 ml-1">원 잔여</span>
-                  </div>
-                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200" title="e-호조 본청 잔여율">
-                    본청 잔여 {overallRemRate.toFixed(1)}%
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-xs bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 text-gray-500 font-medium">
-                  <span>본청 직접 지출</span>
-                  <span className="font-semibold text-gray-700 font-mono">{formatN(filteredStats.totalSpent - filteredStats.dailyExpenseIssued)}원</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 3: Daily Expense Issuance */}
-            <div className="glass-panel rounded-[2rem] p-5 flex flex-col h-full justify-between shadow-2xs hover:shadow-lg hover:shadow-amber-500/10 hover:-translate-y-1 transition-all duration-300 group">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-sm font-semibold text-amber-600 tracking-wide flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span> 일상경비 이체내역
-                </span>
-                <div className="flex gap-2 items-center">
-                  <button 
-                    onClick={() => setShowDailyStatModal(true)} 
-                    className="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 px-2 py-1 rounded-lg transition-colors font-bold border border-amber-200 flex items-center gap-1 cursor-pointer shadow-3xs"
-                  >
-                    통계목별
-                  </button>
-                  <div className="p-2 rounded-xl bg-amber-50 border border-amber-100 text-amber-500 group-hover:scale-110 transition-transform duration-300">
-                    <Receipt size={18} />
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5 mt-1">
-                <div className="bg-gray-50/80 rounded-xl p-2 border border-gray-100 flex justify-between items-center text-xs">
-                  <span className="text-gray-500 font-bold">교부액 (원금)</span>
-                  <span className="font-semibold text-gray-700 font-mono">{formatN(filteredStats.dailyExpenseIssued)}원</span>
-                </div>
-                <div className="bg-gray-50/80 rounded-xl p-2 border border-gray-100 flex justify-between items-center text-xs">
-                  <div className="flex items-center gap-1">
-                    <span className="text-gray-500 font-bold">실지출액</span>
-                    <span className="text-[10px] font-bold font-mono px-1 py-0.2 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                      집행 {filteredStats.dailyExpenseIssued > 0 ? ((filteredStats.dailyExpenseSpent / filteredStats.dailyExpenseIssued) * 100).toFixed(1) : '0.0'}%
-                    </span>
-                  </div>
-                  <span className="font-semibold text-gray-700 font-mono">{formatN(filteredStats.dailyExpenseSpent)}원</span>
-                </div>
-                <div className="bg-amber-50/80 rounded-xl p-2 border border-amber-100 flex justify-between items-center text-xs shadow-3xs">
-                  <div className="flex items-center gap-1">
-                    <span className="text-amber-800 font-bold">가용 잔액</span>
-                    <span className="text-[10px] font-bold font-mono px-1 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-300">
-                      미집행 {filteredStats.dailyExpenseIssued > 0 ? ((filteredStats.dailyExpenseRemaining / filteredStats.dailyExpenseIssued) * 100).toFixed(1) : '0.0'}%
-                    </span>
-                  </div>
-                  <span className="font-bold text-amber-700 font-mono">{formatN(filteredStats.dailyExpenseRemaining)}원</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 4: Total Available Remaining */}
-            <div className="bg-gradient-to-br from-teal-700 to-emerald-800 rounded-[2rem] p-6 flex flex-col h-full justify-between shadow-2xs hover:shadow-lg hover:shadow-teal-600/25 hover:-translate-y-1 transition-all duration-300 group border border-teal-600/50">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-sm font-semibold text-teal-100 tracking-wide flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-teal-300 shadow-sm shadow-teal-300/50"></span> 보건소 실질 총 가용
-                </span>
-                <div className="flex gap-2 items-center">
-                  <button 
-                    onClick={() => setShowLedgerModal(true)} 
-                    className="flex items-center gap-1 bg-teal-800 hover:bg-teal-900 text-white text-xs px-2.5 py-1.5 rounded-lg transition-colors font-bold border border-teal-600 shadow-3xs cursor-pointer"
-                  >
-                    <Search size={12} /> 상세 대조
-                  </button>
-                  <div className="p-2 rounded-xl bg-teal-800/80 border border-teal-600 text-teal-300 group-hover:scale-110 transition-transform duration-300">
-                    <ShieldCheck size={18} />
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-baseline justify-between gap-1 mb-2">
-                  <div className="text-2xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-sm font-mono">
-                    {formatN(filteredStats.remaining + filteredStats.dailyExpenseRemaining)}
-                    <span className="text-sm font-semibold text-teal-200 ml-1">원</span>
-                  </div>
-                  <span className="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-teal-600/80 border border-teal-400/50 text-white shadow-3xs" title="전체 예산 대비 실질 총 가용률(미집행률)">
-                    실질 미집행 {realAvailableRemRate.toFixed(1)}%
-                  </span>
-                </div>
-                <div className="text-[11px] text-teal-100 font-medium bg-teal-900/40 p-2 rounded-xl border border-teal-600/30 flex justify-between items-center">
-                  <span>본청 e-호조: {formatN(filteredStats.remaining)}원</span>
-                  <span>일상 통장: {formatN(filteredStats.dailyExpenseRemaining)}원</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* Categories */}
       {categories.length === 0 ? (

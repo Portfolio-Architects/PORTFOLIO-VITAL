@@ -118,24 +118,24 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
   return (
     <div className="space-y-4">
       {/* Top Header & Search Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50/70 rounded-lg border border-slate-200/80">
         <div className="flex items-center gap-2">
-          <ListFilter className="w-4 h-4 text-indigo-600" />
-          <span className="text-xs font-bold text-slate-800">
+          <ListFilter className="w-4 h-4 text-slate-500" />
+          <span className="text-xs font-semibold text-slate-700">
             시뮬레이션 확정 지출 목록 ({filteredEntries.length}건)
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Keyword Search */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="항목명 / 세부사업 / 통계목 검색..."
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              className="pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/80 w-48 sm:w-60 font-medium"
+              className="pl-8 pr-3 py-1.5 bg-white border border-slate-200/80 rounded-lg text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:border-slate-400 transition-colors w-48 sm:w-60"
             />
           </div>
 
@@ -144,9 +144,9 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
             <button
               type="button"
               onClick={onLoadTestPreset}
-              className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-100 transition-all cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-slate-500" />
               테스트 프리셋 로드
             </button>
           )}
@@ -155,7 +155,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
             <button
               type="button"
               onClick={onResetAll}
-              className="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-1.5 hover:bg-rose-100 transition-all cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 border border-slate-200/80 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               전체 비우기
@@ -165,16 +165,16 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
       </div>
 
       {/* Filter Tabs & View Mode Switcher */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-bold">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-medium">
         {/* Status Filter Tab Pills */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setStatusTab('all')}
-            className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer border ${
               statusTab === 'all'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                ? 'bg-slate-900 text-white border-slate-900 font-semibold'
+                : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80'
             }`}
           >
             전체 ({entries.length})
@@ -182,10 +182,10 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
           <button
             type="button"
             onClick={() => setStatusTab('planned')}
-            className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border ${
               statusTab === 'planned'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700'
+                ? 'bg-slate-900 text-white border-slate-900 font-semibold'
+                : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -194,10 +194,10 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
           <button
             type="button"
             onClick={() => setStatusTab('settled')}
-            className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border ${
               statusTab === 'settled'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
+                ? 'bg-slate-900 text-white border-slate-900 font-semibold'
+                : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80'
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -206,44 +206,44 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
         </div>
 
         {/* View Mode Switcher */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200/60">
           <button
             type="button"
             onClick={() => setViewMode('grouped')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               viewMode === 'grouped'
-                ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/80'
+                ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
             title="통계목별로 그룹화하여 목록을 확인합니다."
           >
-            <Layers className="w-3.5 h-3.5 text-indigo-600" />
+            <Layers className="w-3.5 h-3.5" />
             <span>통계목별 그룹 ({groupedEntries.length})</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode('table')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               viewMode === 'table'
-                ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/80'
+                ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
             title="간편 테이블 표 형식으로 확인합니다."
           >
-            <TableIcon className="w-3.5 h-3.5 text-indigo-600" />
+            <TableIcon className="w-3.5 h-3.5" />
             <span>테이블 뷰</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode('cards')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               viewMode === 'cards'
-                ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/80'
+                ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
             title="카드 타일 형태로 확인합니다."
           >
-            <LayoutGrid className="w-3.5 h-3.5 text-indigo-600" />
+            <LayoutGrid className="w-3.5 h-3.5" />
             <span>카드 뷰</span>
           </button>
         </div>
@@ -258,27 +258,27 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
               {groupedEntries.map((group, groupIdx) => (
                 <div
                   key={`sim-grp-${group.detailedProject}-${group.statItem}-${groupIdx}`}
-                  className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs space-y-0"
+                  className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-2xs space-y-0"
                 >
                   {/* Group Header */}
-                  <div className="bg-slate-50/90 px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                  <div className="bg-slate-50/80 px-4 py-2.5 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold text-xs flex items-center gap-1">
-                        <Boxes className="w-3.5 h-3.5 text-indigo-500" />
+                      <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200/80 text-slate-700 font-semibold text-xs flex items-center gap-1">
+                        <Boxes className="w-3.5 h-3.5 text-slate-400" />
                         {group.detailedProject}
                       </span>
-                      <span className="text-slate-400 text-xs">❯</span>
-                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 font-mono">
-                        <Tag className="w-3.5 h-3.5 text-slate-500" />
+                      <span className="text-slate-300 text-xs">/</span>
+                      <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200/80 text-slate-800 font-semibold text-xs flex items-center gap-1 font-mono">
+                        <Tag className="w-3.5 h-3.5 text-slate-400" />
                         {group.statItem}
                       </span>
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 border border-purple-200 text-purple-700 font-sans">
+                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-sans">
                         등록 {group.items.length}건
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 font-mono text-xs">
+                    <div className="flex items-center gap-2 font-mono text-xs tabular-nums">
                       <span className="text-slate-500 font-sans text-xs">통계목 지출 소계:</span>
-                      <span className="font-extrabold text-sm text-purple-700 bg-purple-50 border border-purple-200/80 px-2.5 py-0.5 rounded-md">
+                      <span className="font-bold text-sm text-indigo-600 bg-white border border-slate-200/80 px-2.5 py-0.5 rounded-md">
                         ₩{group.subtotalAmount.toLocaleString('ko-KR')}
                       </span>
                     </div>
@@ -291,37 +291,37 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                       return (
                         <div
                           key={`sim-grp-item-${item.id}-${itemIdx}`}
-                          className={`p-3.5 sm:px-4 flex flex-wrap items-center justify-between gap-3 transition-colors ${
-                            isSettled ? 'bg-slate-50/40 text-slate-500' : 'hover:bg-slate-50/80 text-slate-800'
+                          className={`p-3 sm:px-4 flex flex-wrap items-center justify-between gap-3 transition-colors ${
+                            isSettled ? 'bg-slate-50/40 text-slate-500' : 'hover:bg-slate-50/60 text-slate-800'
                           }`}
                         >
                           {/* Left: Status, Name & Memo */}
-                          <div className="flex items-start gap-3 min-w-[240px] flex-1">
+                          <div className="flex items-start gap-2.5 min-w-[240px] flex-1">
                             {isSettled ? (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1 shrink-0 mt-0.5">
+                              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80 flex items-center gap-1 shrink-0 mt-0.5">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" /> 집행 완료
                               </span>
                             ) : (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1 shrink-0 mt-0.5">
-                                <Clock className="w-3 h-3 text-purple-500" /> 집행 대기
+                              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200/80 flex items-center gap-1 shrink-0 mt-0.5">
+                                <Clock className="w-3 h-3 text-slate-500" /> 집행 대기
                               </span>
                             )}
-                            <div className="space-y-1 min-w-0">
+                            <div className="space-y-0.5 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 {item.actionType === 'daily_expense' ? (
-                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1 shrink-0">
-                                    <Coins className="w-2.5 h-2.5 text-amber-600" /> 일상경비
+                                  <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/80 flex items-center gap-1 shrink-0">
+                                    <Coins className="w-3 h-3 text-amber-600" /> 일상경비
                                   </span>
                                 ) : (
-                                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
+                                  <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/80 shrink-0">
                                     일반지출
                                   </span>
                                 )}
-                                <h5 className={`text-sm font-bold ${isSettled ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                                <h5 className={`text-sm font-semibold ${isSettled ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                                   {item.name}
                                 </h5>
                                 {item.createdAt && (
-                                  <span className="text-[10px] text-slate-400 font-mono">
+                                  <span className="text-[11px] text-slate-400 font-mono tabular-nums">
                                     {item.createdAt.split('T')[0]}
                                   </span>
                                 )}
@@ -336,13 +336,13 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                           </div>
 
                           {/* Middle: Unit Price x Qty */}
-                          <div className="text-right font-mono text-xs text-slate-500 sm:w-44 shrink-0">
-                            <span className="font-sans text-[11px]">단가 ₩{item.unitPrice.toLocaleString('ko-KR')}</span> × <span className="font-bold text-slate-700">{item.quantity}개</span>
+                          <div className="text-right font-mono tabular-nums text-xs text-slate-500 sm:w-44 shrink-0">
+                            <span className="font-sans text-[11px]">단가 ₩{item.unitPrice.toLocaleString('ko-KR')}</span> × <span className="font-semibold text-slate-700">{item.quantity}개</span>
                           </div>
 
                           {/* Right: Amount & Actions */}
                           <div className="flex items-center justify-end gap-3 sm:w-56 shrink-0">
-                            <span className={`font-mono font-extrabold text-sm ${isSettled ? 'text-slate-400' : 'text-purple-700'}`}>
+                            <span className={`font-mono tabular-nums font-bold text-sm ${isSettled ? 'text-slate-400' : 'text-indigo-600'}`}>
                               ₩{(item.amount || 0).toLocaleString('ko-KR')}
                             </span>
 
@@ -351,7 +351,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                                 <button
                                   type="button"
                                   onClick={() => onSettleEntry(item.id)}
-                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                  className="px-2.5 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-medium flex items-center gap-1 cursor-pointer transition-colors"
                                   title="실제 지출로 집행 (정산)"
                                 >
                                   <CheckCircle2 className="w-3 h-3" />
@@ -362,7 +362,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                                 <button
                                   type="button"
                                   onClick={() => onEditEntry(item)}
-                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition-all cursor-pointer border border-slate-200/60"
+                                  className="p-1.5 rounded-md bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer border border-slate-200/80"
                                   title="수정"
                                 >
                                   <Pencil className="w-3.5 h-3.5" />
@@ -371,7 +371,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                               <button
                                 type="button"
                                 onClick={() => onDeleteEntry(item.id)}
-                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all cursor-pointer border border-slate-200/60"
+                                className="p-1.5 rounded-md bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer border border-slate-200/80"
                                 title="삭제"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -389,17 +389,17 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
 
           {/* 2. Compact Table View */}
           {viewMode === 'table' && (
-            <div className="overflow-x-auto custom-scrollbar rounded-xl border border-slate-200 bg-white shadow-xs">
+            <div className="overflow-x-auto custom-scrollbar rounded-lg border border-slate-200/80 bg-white">
               <table className="w-full text-left text-sm border-collapse font-sans">
                 <thead>
-                  <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold text-xs">
-                    <th className="py-3 px-4 min-w-[90px] text-center">상태</th>
-                    <th className="py-3 px-4 min-w-[160px]">세부사업</th>
-                    <th className="py-3 px-4 min-w-[140px]">통계목</th>
-                    <th className="py-3 px-4 min-w-[220px]">항목명 / 비고</th>
-                    <th className="py-3 px-4 text-right min-w-[130px]">단가 × 수량</th>
-                    <th className="py-3 px-4 text-right min-w-[130px] text-purple-700">예정 금액</th>
-                    <th className="py-3 px-4 text-center min-w-[110px]">관리</th>
+                  <tr className="bg-slate-50/80 text-slate-500 border-b border-slate-200/80 font-semibold text-xs">
+                    <th className="py-2.5 px-4 min-w-[90px] text-center">상태</th>
+                    <th className="py-2.5 px-4 min-w-[160px]">세부사업</th>
+                    <th className="py-2.5 px-4 min-w-[140px]">통계목</th>
+                    <th className="py-2.5 px-4 min-w-[220px]">항목명 / 비고</th>
+                    <th className="py-2.5 px-4 text-right min-w-[130px]">단가 × 수량</th>
+                    <th className="py-2.5 px-4 text-right min-w-[130px]">예정 금액</th>
+                    <th className="py-2.5 px-4 text-center min-w-[110px]">관리</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs font-mono">
@@ -409,39 +409,39 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                       <tr
                         key={`sim-tbl-item-${item.id}-${itemIdx}`}
                         className={`transition-colors ${
-                          isSettled ? 'bg-slate-50/40 text-slate-500' : 'hover:bg-slate-50/80 text-slate-800'
+                          isSettled ? 'bg-slate-50/40 text-slate-500' : 'hover:bg-slate-50/60 text-slate-800'
                         }`}
                       >
-                        <td className="py-3 px-4 text-center font-sans">
+                        <td className="py-2.5 px-4 text-center font-sans">
                           {isSettled ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 inline-flex items-center gap-0.5">
+                            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/80 inline-flex items-center gap-0.5">
                               <CheckCircle2 className="w-2.5 h-2.5" /> 완료
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 inline-flex items-center gap-0.5">
+                            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200/80 inline-flex items-center gap-0.5">
                               <Clock className="w-2.5 h-2.5" /> 대기
                             </span>
                           )}
                         </td>
-                        <td className="py-3 px-4 font-sans font-bold text-slate-900">
+                        <td className="py-2.5 px-4 font-sans font-semibold text-slate-900">
                           {item.detailedProject}
                         </td>
-                        <td className="py-3 px-4 font-sans text-slate-700">
+                        <td className="py-2.5 px-4 font-sans text-slate-700">
                           {item.statItem}
                         </td>
-                        <td className="py-3 px-4 font-sans">
+                        <td className="py-2.5 px-4 font-sans">
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {item.actionType === 'daily_expense' ? (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 inline-flex items-center gap-0.5 shrink-0">
+                                <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/80 inline-flex items-center gap-0.5 shrink-0">
                                   <Coins className="w-2.5 h-2.5 text-amber-600" /> 일상경비
                                 </span>
                               ) : (
-                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 inline-flex items-center gap-0.5 shrink-0">
+                                <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/80 inline-flex items-center gap-0.5 shrink-0">
                                   일반지출
                                 </span>
                               )}
-                              <span className={`font-bold ${isSettled ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                              <span className={`font-semibold ${isSettled ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                                 {item.name}
                               </span>
                             </div>
@@ -453,21 +453,21 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                             )}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-right text-slate-600">
+                        <td className="py-2.5 px-4 text-right text-slate-600 tabular-nums">
                           ₩{item.unitPrice.toLocaleString('ko-KR')} × {item.quantity}
                         </td>
-                        <td className="py-3 px-4 text-right">
-                          <span className={`font-extrabold text-sm ${isSettled ? 'text-slate-400' : 'text-purple-700'}`}>
+                        <td className="py-2.5 px-4 text-right tabular-nums">
+                          <span className={`font-bold text-sm ${isSettled ? 'text-slate-400' : 'text-indigo-600'}`}>
                             ₩{(item.amount || 0).toLocaleString('ko-KR')}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-center font-sans">
+                        <td className="py-2.5 px-4 text-center font-sans">
                           <div className="flex items-center justify-center gap-1">
                             {!isSettled && onSettleEntry && (
                               <button
                                 type="button"
                                 onClick={() => onSettleEntry(item.id)}
-                                className="px-2 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold flex items-center gap-0.5 cursor-pointer shadow-3xs transition-all active:scale-95"
+                                className="px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-medium flex items-center gap-0.5 cursor-pointer transition-colors"
                                 title="실제 지출로 집행 (정산)"
                               >
                                 <CheckCircle2 className="w-3 h-3" />
@@ -478,7 +478,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                               <button
                                 type="button"
                                 onClick={() => onEditEntry(item)}
-                                className="p-1 rounded-md bg-white hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 text-[10px] cursor-pointer transition-all shadow-3xs"
+                                className="p-1 rounded bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-slate-200/80 text-[10px] cursor-pointer transition-colors"
                                 title="항목 수정"
                               >
                                 <Pencil className="w-3 h-3" />
@@ -487,7 +487,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                             <button
                               type="button"
                               onClick={() => onDeleteEntry(item.id)}
-                              className="p-1 rounded-md bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 text-[10px] cursor-pointer transition-all shadow-3xs"
+                              className="p-1 rounded bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-200/80 text-[10px] cursor-pointer transition-colors"
                               title="항목 삭제"
                             >
                               <Trash2 className="w-3 h-3" />
@@ -510,40 +510,40 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                 return (
                   <div
                     key={`sim-card-item-${item.id}-${itemIdx}`}
-                    className={`border rounded-xl p-4 space-y-3 shadow-xs transition-all group flex flex-col justify-between ${
+                    className={`border rounded-xl p-4 space-y-3 shadow-2xs transition-colors group flex flex-col justify-between ${
                       isSettled
-                        ? 'bg-slate-50/60 border-emerald-200/80'
-                        : 'bg-white border-slate-200/90 hover:border-indigo-300'
+                        ? 'bg-slate-50/60 border-slate-200/80'
+                        : 'bg-white border-slate-200/80 hover:border-slate-300'
                     }`}
                   >
                     <div className="space-y-2">
                       {/* Title & Status Badge & Actions */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                             {isSettled ? (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80 flex items-center gap-1">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" /> 집행 완료
                               </span>
                             ) : (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
-                                <Clock className="w-3 h-3 text-indigo-500" /> 집행 대기
+                              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200/80 flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-slate-500" /> 집행 대기
                               </span>
                             )}
                             {item.actionType === 'daily_expense' ? (
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
+                              <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/80 flex items-center gap-1">
                                 <Coins className="w-2.5 h-2.5 text-amber-600" /> 일상경비
                               </span>
                             ) : (
-                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                              <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/80">
                                 일반지출
                               </span>
                             )}
                             <h4
-                              className={`text-sm font-bold transition-colors line-clamp-2 ${
+                              className={`text-sm font-semibold transition-colors line-clamp-2 ${
                                 isSettled
                                   ? 'text-slate-500 line-through'
-                                  : 'text-slate-900 group-hover:text-indigo-600'
+                                  : 'text-slate-900'
                               }`}
                             >
                               {item.name}
@@ -556,7 +556,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                             <button
                               type="button"
                               onClick={() => onEditEntry(item)}
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition-all cursor-pointer border border-slate-200/60"
+                              className="p-1.5 rounded-md bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer border border-slate-200/80"
                               title="수정"
                             >
                               <Pencil className="w-3.5 h-3.5" />
@@ -565,7 +565,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                           <button
                             type="button"
                             onClick={() => onDeleteEntry(item.id)}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all cursor-pointer border border-slate-200/60"
+                            className="p-1.5 rounded-md bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors cursor-pointer border border-slate-200/80"
                             title="삭제"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -575,19 +575,19 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
 
                       {/* Category Badges */}
                       <div className="flex flex-wrap gap-1.5 text-[11px]">
-                        <span className="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-100 text-indigo-700 font-semibold flex items-center gap-1">
-                          <Boxes className="w-3 h-3 text-indigo-500" />
+                        <span className="px-2 py-0.5 rounded bg-slate-50 border border-slate-200/80 text-slate-700 font-medium flex items-center gap-1">
+                          <Boxes className="w-3 h-3 text-slate-400" />
                           {item.detailedProject}
                         </span>
-                        <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-mono font-medium flex items-center gap-1">
-                          <Tag className="w-3 h-3 text-slate-500" />
+                        <span className="px-2 py-0.5 rounded bg-slate-50 border border-slate-200/80 text-slate-700 font-mono font-medium flex items-center gap-1">
+                          <Tag className="w-3 h-3 text-slate-400" />
                           {item.statItem}
                         </span>
                       </div>
 
                       {/* Memo */}
                       {item.memo && (
-                        <p className="text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200/60 line-clamp-2 flex items-start gap-1 font-medium">
+                        <p className="text-xs text-slate-500 bg-slate-50/70 p-2 rounded-lg border border-slate-200/60 line-clamp-2 flex items-start gap-1">
                           <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                           <span>{item.memo}</span>
                         </p>
@@ -596,13 +596,13 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
 
                     {/* Price, Amount & Settle Action */}
                     <div className="pt-3 border-t border-slate-100 flex flex-col gap-2 mt-2">
-                      <div className="flex items-center justify-between font-mono text-xs">
+                      <div className="flex items-center justify-between font-mono tabular-nums text-xs">
                         <span className="text-slate-500 font-sans text-[11px]">
                           ₩{item.unitPrice.toLocaleString('ko-KR')} × {item.quantity}개
                         </span>
                         <span
-                          className={`font-extrabold text-sm ${
-                            isSettled ? 'text-slate-400' : 'text-purple-700'
+                          className={`font-bold text-sm ${
+                            isSettled ? 'text-slate-400' : 'text-indigo-600'
                           }`}
                         >
                           ₩{(item.amount || 0).toLocaleString('ko-KR')}
@@ -614,7 +614,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                         <button
                           type="button"
                           onClick={() => onSettleEntry(item.id)}
-                          className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                          className="w-full py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                           title="실제 집행이 이루어졌을 때 실제 지출로 정산 전환합니다."
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
@@ -622,9 +622,9 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                         </button>
                       )}
                       {isSettled && (
-                        <div className="text-[11px] text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-100 flex items-center justify-between">
+                        <div className="text-[11px] text-emerald-700 font-medium bg-emerald-50/70 px-2.5 py-1.5 rounded-lg border border-emerald-200/80 flex items-center justify-between">
                           <span>실제 e-호조 지출 반영 완료</span>
-                          {item.settledDate && <span className="font-mono text-[10px]">{item.settledDate}</span>}
+                          {item.settledDate && <span className="font-mono tabular-nums text-[10px]">{item.settledDate}</span>}
                         </div>
                       )}
                     </div>
@@ -635,8 +635,8 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
           )}
         </div>
       ) : (
-        <div className="py-12 bg-white rounded-xl border border-slate-200 text-center flex flex-col items-center justify-center gap-2">
-          <h4 className="text-sm font-bold text-slate-700">등록된 시뮬레이션 항목이 없습니다.</h4>
+        <div className="py-12 bg-white rounded-xl border border-slate-200/80 text-center flex flex-col items-center justify-center gap-1.5">
+          <h4 className="text-sm font-semibold text-slate-700">등록된 시뮬레이션 항목이 없습니다.</h4>
           <p className="text-xs text-slate-400">
             상단 입력 폼에서 확정 지출 예정 내역을 등록하거나 테스트 프리셋을 로드하세요.
           </p>
@@ -644,9 +644,9 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
             <button
               type="button"
               onClick={onLoadTestPreset}
-              className="mt-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+              className="mt-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-3.5 h-3.5" />
               표준 8개 테스트 지출 항목 로드
             </button>
           )}
@@ -655,9 +655,9 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
 
       {/* Summary Footer */}
       {filteredEntries.length > 0 && (
-        <div className="flex items-center justify-between p-3.5 bg-indigo-50/70 border border-indigo-100 rounded-xl text-xs font-bold text-slate-800">
+        <div className="flex items-center justify-between p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-lg text-xs font-semibold text-slate-800">
           <span className="text-slate-600 font-medium">선택/필터된 지출 예정액 합계</span>
-          <span className="font-mono text-sm font-extrabold text-purple-700">
+          <span className="font-mono tabular-nums text-sm font-bold text-indigo-600">
             ₩{totalAmountSum.toLocaleString('ko-KR')} 원
           </span>
         </div>

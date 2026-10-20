@@ -82,11 +82,42 @@ describe('Challenger 1 Adversarial Stress Test Suite: Zero-Stall Pipeline (R2)',
       expect(content).toMatch(/scheduleIdle\(\(\)\s*=>\s*\{[\s\S]*?YangjaeFestivalDashboard[\s\S]*?InventoryList[\s\S]*?\},\s*5500\)/);
 
       // Stage 3 (+7.5s)
-      expect(content).toMatch(/scheduleIdle\(\(\)\s*=>\s*\{[\s\S]*?BudgetSimulator[\s\S]*?AppLogModal[\s\S]*?AIAssistantModal[\s\S]*?CommandPalette[\s\S]*?\},\s*7500\)/);
+      expect(content).toMatch(/scheduleIdle\(\(\)\s*=>\s*\{[\s\S]*?BudgetSimulator[\s\S]*?AppLogModal[\s\S]*?CommandPalette[\s\S]*?\},\s*7500\)/);
+
+      // Extract scheduleStaggeredPreloads function body and verify unexposed modules are NOT preloaded
+      const preloadFnMatch = content.match(/function scheduleStaggeredPreloads\(\)[\s\S]*?\n\}/);
+      expect(preloadFnMatch).not.toBeNull();
+      const preloadFnBody = preloadFnMatch![0];
+      expect(preloadFnBody).not.toContain('MindMap3D');
+      expect(preloadFnBody).not.toContain('ProjectManagementPage');
+      expect(preloadFnBody).not.toContain('AIAssistantModal');
 
       // Memory cleanup return function
       expect(content).toMatch(/timeouts\.forEach\(clearTimeout\)/);
       expect(content).toMatch(/idleCallbacks\.forEach\(h\s*=>\s*window\.cancelIdleCallback\(h\)\)/);
+    });
+
+    test('ProtectedApp.tsx defers TASKS, MEETINGS, PROJECTS, INVENTORY on initial dashboard and latches Ctrl+K state', () => {
+      const protectedAppPath = path.join(__dirname, '..', 'src', 'components', 'ProtectedApp.tsx');
+      const content = fs.readFileSync(protectedAppPath, 'utf8');
+
+      expect(content).toContain('useTasks({ enabled: isDeferredDataEnabled })');
+      expect(content).toContain('useInventory({ enabled: isDeferredDataEnabled })');
+      expect(content).toContain('useMeetings({ enabled: isDeferredDataEnabled })');
+      expect(content).toContain('useProjects({ enabled: isDeferredDataEnabled })');
+      expect(content).toContain('useContacts({ enabled: isCommandPaletteOpen || hasOpenedCommandPalette })');
+      expect(content).toContain('hasOpenedCommandPalette');
+      expect(content).toContain('if (next) setHasOpenedCommandPalette(true)');
+    });
+
+    test('/api/app-logs route.ts eliminates legacy WATCHER_HISTORY.json PBKDF2 100,000-iteration decryption', () => {
+      const appLogsRoutePath = path.join(__dirname, '..', 'src', 'app', 'api', 'app-logs', 'route.ts');
+      const content = fs.readFileSync(appLogsRoutePath, 'utf8');
+
+      expect(content).not.toContain('WATCHER_HISTORY.json');
+      expect(content).not.toContain('PBKDF2');
+      expect(content).not.toContain('100000');
+      expect(content).not.toContain('decryptData');
     });
 
     test('Simulated scheduleStaggeredPreloads properly unregisters all timers on unmount', () => {
@@ -258,3 +289,4 @@ describe('Challenger 1 Adversarial Stress Test Suite: Zero-Stall Pipeline (R2)',
     });
   });
 });
+

@@ -4,8 +4,9 @@ import { useCallback, useMemo } from 'react';
 import { useGoogleSheet, useSheetCrud } from './useGoogleSheet';
 import { Meeting, generateId } from '@/types';
 
-export function useMeetings() {
-  const [meetings, setMeetings] = useGoogleSheet<Meeting>('MEETINGS', 'hchps-meetings', []);
+export function useMeetings(options?: { enabled?: boolean }) {
+  const enabled = options?.enabled ?? true;
+  const [meetings, setMeetings] = useGoogleSheet<Meeting>('MEETINGS', 'hchps-meetings', [], enabled);
   const { syncAdd, syncUpdate, syncDelete } = useSheetCrud<Meeting>('MEETINGS');
 
   // Pre-indexed O(1) lookup Map for meetings by ID

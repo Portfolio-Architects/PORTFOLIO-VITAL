@@ -72,51 +72,51 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="세부사업 및 통계목별 일상경비 이체내역" size="2xl">
-      <div className="space-y-5">
-        <div className="p-4 bg-amber-50 border border-amber-100 rounded-lg flex items-start gap-3">
-          <Info className="text-amber-600 mt-0.5 shrink-0" size={18} />
-          <div className="text-[14px] text-amber-800 leading-relaxed font-medium">
+      <div className="space-y-4">
+        <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-lg flex items-start gap-2.5">
+          <Info className="text-slate-500 mt-0.5 shrink-0" size={16} />
+          <div className="text-xs text-slate-600 leading-relaxed font-medium">
             각 세부사업 하위의 통계목별로 교부된 일상경비와 실제 지출액, 가용 잔액 현황입니다.
           </div>
         </div>
 
         {statSummary.length === 0 ? (
-          <div className="text-center py-10 text-gray-500 font-medium">
+          <div className="text-center py-10 text-slate-400 text-sm font-medium">
             교부되거나 지출된 일상경비 내역이 없습니다.
           </div>
         ) : (
-          <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
+          <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-[14px]">
+              <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200 text-[13px] font-bold text-gray-600">
-                    <th className="py-3.5 px-4">세부사업명</th>
-                    <th className="py-3.5 px-4">통계목</th>
-                    <th className="py-3.5 px-4 text-right">교부액 (원금)</th>
-                    <th className="py-3.5 px-4 text-right">실지출액</th>
-                    <th className="py-3.5 px-4 text-right">가용 잔액</th>
-                    <th className="py-3.5 px-4 text-center">집행률</th>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500">
+                    <th className="py-3 px-4">세부사업명</th>
+                    <th className="py-3 px-4">통계목</th>
+                    <th className="py-3 px-4 text-right">교부액 (원금)</th>
+                    <th className="py-3 px-4 text-right">실지출액</th>
+                    <th className="py-3 px-4 text-right">가용 잔액</th>
+                    <th className="py-3 px-4 text-center">집행률</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-slate-100">
                   {statSummary.map((item, idx) => {
                     const pct = item.issued > 0 ? (item.spent / item.issued) * 100 : 0;
                     return (
-                      <tr key={`${item.detailedProject}_${item.statItem}_${idx}`} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="py-3.5 px-4 text-gray-600 font-semibold">{item.detailedProject}</td>
-                        <td className="py-3.5 px-4 font-bold text-gray-800">{item.statItem}</td>
-                        <td className="py-3.5 px-4 text-right text-gray-700 font-medium">{formatN(item.issued)}원</td>
-                        <td className="py-3.5 px-4 text-right text-gray-700 font-medium">{formatN(item.spent)}원</td>
-                        <td className="py-3.5 px-4 text-right font-bold text-amber-600 bg-amber-50/20">{formatN(item.remaining)}원</td>
-                        <td className="py-3.5 px-4 text-center">
+                      <tr key={`${item.detailedProject}_${item.statItem}_${idx}`} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3 px-4 text-slate-600 font-medium">{item.detailedProject}</td>
+                        <td className="py-3 px-4 font-semibold text-slate-800">{item.statItem}</td>
+                        <td className="py-3 px-4 text-right text-slate-700 font-medium tabular-nums">{formatN(item.issued)}원</td>
+                        <td className="py-3 px-4 text-right text-slate-700 font-medium tabular-nums">{formatN(item.spent)}원</td>
+                        <td className="py-3 px-4 text-right font-semibold text-amber-700 bg-amber-50/20 tabular-nums">{formatN(item.remaining)}원</td>
+                        <td className="py-3 px-4 text-center">
                           <div className="flex items-center justify-center gap-2">
-                            <div className="w-16 bg-gray-100 rounded-full h-2 overflow-hidden border border-gray-200">
+                            <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
                               <div
                                 className="bg-amber-500 h-full rounded-full transition-all duration-500"
                                 style={{ width: `${Math.min(pct, 100)}%` }}
                               />
                             </div>
-                            <span className="text-[12px] font-extrabold text-gray-600 w-9 text-right">
+                            <span className="text-[11px] font-semibold text-slate-600 w-9 text-right tabular-nums">
                               {pct.toFixed(0)}%
                             </span>
                           </div>
@@ -125,24 +125,24 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
                     );
                   })}
                   {/* 합계 행 */}
-                  <tr className="bg-amber-50/40 border-t-2 border-amber-100 font-bold">
-                    <td colSpan={2} className="py-4 px-4 text-amber-900 font-black">
+                  <tr className="bg-slate-50/90 border-t border-slate-200 font-semibold">
+                    <td colSpan={2} className="py-3.5 px-4 text-slate-900 font-bold">
                       <div className="flex items-center gap-1.5">
-                        <BarChart3 size={16} className="text-amber-700" /> 합계
+                        <BarChart3 size={15} className="text-slate-600" /> 합계
                       </div>
                     </td>
-                    <td className="py-4 px-4 text-right text-amber-950 font-extrabold">{formatN(totals.issued)}원</td>
-                    <td className="py-4 px-4 text-right text-amber-950 font-extrabold">{formatN(totals.spent)}원</td>
-                    <td className="py-4 px-4 text-right text-amber-700 font-black bg-amber-50/60">{formatN(totals.remaining)}원</td>
-                    <td className="py-4 px-4 text-center">
+                    <td className="py-3.5 px-4 text-right text-slate-900 font-bold tabular-nums">{formatN(totals.issued)}원</td>
+                    <td className="py-3.5 px-4 text-right text-slate-900 font-bold tabular-nums">{formatN(totals.spent)}원</td>
+                    <td className="py-3.5 px-4 text-right text-amber-700 font-bold bg-amber-50/30 tabular-nums">{formatN(totals.remaining)}원</td>
+                    <td className="py-3.5 px-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="w-16 bg-gray-200 rounded-full h-2 overflow-hidden border border-amber-200">
+                        <div className="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden">
                           <div
-                            className="bg-amber-600 h-full rounded-full transition-all duration-500"
+                            className="bg-slate-800 h-full rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(totals.issued > 0 ? (totals.spent / totals.issued) * 100 : 0, 100)}%` }}
                           />
                         </div>
-                        <span className="text-[13px] font-black text-amber-800 w-9 text-right">
+                        <span className="text-xs font-bold text-slate-800 w-9 text-right tabular-nums">
                           {(totals.issued > 0 ? (totals.spent / totals.issued) * 100 : 0).toFixed(0)}%
                         </span>
                       </div>
@@ -154,10 +154,10 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
           </div>
         )}
 
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end pt-1">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-colors text-[14px] cursor-pointer"
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors text-xs cursor-pointer"
           >
             닫기
           </button>

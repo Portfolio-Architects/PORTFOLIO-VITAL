@@ -1,4 +1,4 @@
-﻿import json
+import json
 import re
 import os
 
@@ -15,7 +15,7 @@ json_str = json.dumps(data, ensure_ascii=False, indent=2)
 if os.path.exists(hook_file):
     with open(hook_file, 'r', encoding='utf-8') as f:
         hook_content = f.read()
-    hook_pattern = r'(export const YANGJAE_FALLBACK_DATA: FestivalData = )[\s\S]*?(;\n\nexport const initialFallbackData)'
+    hook_pattern = r'(export const YANGJAE_FALLBACK_DATA: FestivalData = )[\s\S]*?(;\r?\n\r?\nexport const initialFallbackData)'
     new_hook = re.sub(hook_pattern, r'\g<1>' + json_str.replace('\\', '\\\\') + r'\g<2>', hook_content)
     with open(hook_file, 'w', encoding='utf-8') as f:
         f.write(new_hook)

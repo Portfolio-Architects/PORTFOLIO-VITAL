@@ -5,12 +5,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { readSheet, addRow, updateRow, deleteRow, replaceAll } from '@/lib/sheets-api';
 import { Contact, generateId } from '@/types';
 
-export function useContacts() {
+export function useContacts(options?: { enabled?: boolean }) {
+  const enabled = options?.enabled ?? true;
   const queryClient = useQueryClient();
 
   const { data: contacts = [], isLoading: loading } = useQuery({
     queryKey: ['CONTACTS'],
     queryFn: () => readSheet<Contact>('CONTACTS'),
+    enabled,
     staleTime: 1000,
     refetchOnWindowFocus: true,
     refetchIntervalInBackground: false,

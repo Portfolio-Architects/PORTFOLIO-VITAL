@@ -174,7 +174,30 @@ export const ADMINISTRATIVE_ENDING_MAP: [RegExp, string][] = [
 ];
 
 /**
- * 7. 공문서 본문 린터 및 새니타이저
+ * 7. 공문서 개조식 기호 및 다중 문장 줄바꿈(Enter) 강제 정규화
+ * - 한 문단 내에 줄바꿈 없이 이어진 개조식 기호(󰏚, ▢, ❍, •, ※) 앞에 강제 개행(\n) 삽입
+ * - 개조식 종결어미(-함., -됨., -임., -음.) 뒤에 이어지는 후속 개조식 항목/문장을 줄바꿈 분리
+ */
+export function formatAdministrativeLineBreaks(text: string): string {
+  if (!text) return '';
+
+  let formatted = text;
+
+  // 1) 문장 중간에 줄바꿈 없이 이어진 공문서 딩뱃 기호(󰏚, ▢, ❍, •, ※) 앞에 개행 삽입
+  // 단, 마크다운 리스트 결합 형태('- ❍', '* ❍')나 이미 줄 시작인 경우는 보존
+  formatted = formatted.replace(/([^\n\-\*])\s+(󰏚|▢|❍|•|※)\s+/g, '$1\n$2 ');
+
+  // 2) 개조식 종결어미(함., 됨., 임., 음.) 직후에 공백만 두고 다음 법정 번호/기호(1., 가., 1), -, ❍, ▢)가 이어지는 경우 줄바꿈 삽입
+  formatted = formatted.replace(
+    /([가-힣]+(?:함|됨|임|음)\.)[ \t]+((?:[1-9]\.|[가-하]\.|[1-9]\)|[가-하]\)|󰏚|▢|❍|-|•|※)\s+)/g,
+    '$1\n$2'
+  );
+
+  return formatted;
+}
+
+/**
+ * 8. 공문서 본문 린터 및 새니타이저
  */
 export function sanitizeAdministrativeText(text: string): string {
   if (!text) return '';
@@ -196,11 +219,14 @@ export function sanitizeAdministrativeText(text: string): string {
     return `${y}. ${parseInt(m, 10)}. ${parseInt(d, 10)}.`;
   });
 
+  // 4) 개조식 기호 및 문장 간 줄바꿈(Enter) 강제 정규화
+  sanitized = formatAdministrativeLineBreaks(sanitized);
+
   return sanitized;
 }
 
 /**
- * 8. 공문서 끝 표시 보정
+ * 9. 공문서 끝 표시 보정
  */
 export function ensureAdministrativeEnding(text: string): string {
   if (!text) return '';

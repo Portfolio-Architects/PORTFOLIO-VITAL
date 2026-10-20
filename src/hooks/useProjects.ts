@@ -5,9 +5,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useGoogleSheet, useSheetCrud } from './useGoogleSheet';
 import { Project, ChecklistItem, generateId } from '@/types';
 
-export function useProjects() {
+export function useProjects(options?: { enabled?: boolean }) {
+  const enabled = options?.enabled ?? true;
   const queryClient = useQueryClient();
-  const [projects, setProjects] = useGoogleSheet<Project>('PROJECTS', 'hchps-projects', []);
+  const [projects, setProjects] = useGoogleSheet<Project>('PROJECTS', 'hchps-projects', [], enabled);
   const { syncAdd, syncUpdate, syncDelete } = useSheetCrud<Project>('PROJECTS');
 
   // Pre-indexed O(1) lookup Map for projects by ID
