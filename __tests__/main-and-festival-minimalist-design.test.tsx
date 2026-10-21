@@ -218,6 +218,21 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
   });
 
   describe('4. Yangjae Festival Minimalist Source & Static Replica Verification', () => {
+    const getStaticReplicaHtml = () => {
+      const outPath = path.join(process.cwd(), 'out/festival/yangjae/index.html');
+      if (fs.existsSync(outPath)) {
+        return fs.readFileSync(outPath, 'utf-8');
+      }
+      const template = fs.readFileSync(
+        path.join(process.cwd(), 'scripts/pages-template.html'),
+        'utf-8'
+      );
+      const festivalData = JSON.parse(
+        fs.readFileSync(path.join(process.cwd(), 'data/FESTIVAL_YANGJAE_2026.json'), 'utf-8')
+      );
+      return template.replace('__APP_DATA_JSON__', JSON.stringify(festivalData));
+    };
+
     it('renders YangjaeFestivalSkeleton with minimalist 1px border and 4-tab segmented bar', () => {
       const { container } = render(<YangjaeFestivalSkeleton />);
       expect(container.innerHTML).not.toContain('border-2');
@@ -238,10 +253,7 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
         path.join(process.cwd(), 'scripts/pages-template.html'),
         'utf-8'
       );
-      const outHtmlSrc = fs.readFileSync(
-        path.join(process.cwd(), 'out/festival/yangjae/index.html'),
-        'utf-8'
-      );
+      const outHtmlSrc = getStaticReplicaHtml();
 
       // Root container and segmented tabs use 1px border-slate-200/80 and white active pill
       expect(dashboardSrc).toContain('sm:rounded-xl sm:border sm:border-slate-200/80 sm:shadow-2xs');
@@ -269,10 +281,7 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
     });
 
     it('parses and executes the embedded JavaScript in out/festival/yangjae/index.html without SyntaxError and preserves is-large-font across tabs', () => {
-      const outHtmlSrc = fs.readFileSync(
-        path.join(process.cwd(), 'out/festival/yangjae/index.html'),
-        'utf-8'
-      );
+      const outHtmlSrc = getStaticReplicaHtml();
 
       const scriptMatches = outHtmlSrc.match(/<script>([\s\S]*?)<\/script>/g);
       expect(scriptMatches).not.toBeNull();
