@@ -86,7 +86,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
   const dailyExpenseRemaining = currentStatSummary?.dailyExpenseRemaining || 0;
   const generalRemaining = currentStatSummary?.currentRemaining || 0;
   const hasDailyExpense = dailyExpenseIssued > 0;
-  const effectiveActionType: BudgetActionType = (!hasDailyExpense && actionType === 'daily_expense') ? 'general' : actionType;
+  const effectiveActionType: BudgetActionType = actionType;
   const isEditMode = Boolean(editingEntry && editingEntry.id);
 
   // When editing an existing PLANNED daily_expense entry on the same project/statItem,
@@ -158,12 +158,9 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
       return;
     }
 
-    // Daily expense limit check
+    // Daily expense limit check (non-blocking: allows simulation with shortfall warning)
     if (effectiveActionType === 'daily_expense') {
-      if (calculatedAmount > effectiveDailyExpenseLimit) {
-        setValidationError(`[일상경비 한도 초과] 등록하려는 총 예정액(₩${calculatedAmount.toLocaleString('ko-KR')}원)이 통계목 일상경비 미집행 잔액(₩${effectiveDailyExpenseLimit.toLocaleString('ko-KR')}원)을 초과합니다.`);
-        return;
-      }
+      // Entry is permitted even if exceeding current balance to allow planned additional issuance simulation
     }
 
     if (isEditMode && editingEntry) {
@@ -199,30 +196,30 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
   }, [name, detailedProject, statItem, effectiveActionType, unitPrice, quantity, calculatedAmount, memo, effectiveDailyExpenseLimit, isEditMode, editingEntry, onAddEntry, onUpdateEntry, onCancelEdit]);
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs space-y-4 text-slate-800">
+    <div className="bg-white border border-slate-200/80 rounded-xl p-5 md:p-6 shadow-2xs space-y-5 text-slate-800">
       {/* Panel Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-slate-50 text-slate-600 border border-slate-200/80 flex items-center justify-center shrink-0">
-            <Calculator className="w-4 h-4" />
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 border border-slate-200/80 flex items-center justify-center shrink-0">
+            <Calculator className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+            <h3 className="text-base font-bold text-slate-900 tracking-tight">
               {isEditMode ? '지출 예정 항목 수정' : '확정 지출 예정 내역 입력'}
             </h3>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-xs text-slate-400">
               시뮬레이션에 반영할 미집행 확정 지출 항목(단가, 수량, 세부사업)을 등록합니다.
             </p>
           </div>
         </div>
 
         {/* Global Preset & Reset Actions */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {onLoadTestPreset && (
             <button
               type="button"
               onClick={onLoadTestPreset}
-              className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
               title="8개의 표준 보건소 및 AI 메디헬스 테스트 지출 항목을 로드합니다."
             >
               <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
@@ -233,10 +230,10 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
             <button
               type="button"
               onClick={onResetAll}
-              className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-rose-50/60 border border-slate-200/80 hover:border-rose-200 text-slate-500 hover:text-rose-600 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50/60 border border-slate-200/80 hover:border-rose-200 text-slate-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
               title="모든 시뮬레이션 지출 예정 항목을 초기화합니다."
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3.5 h-3.5" />
               전체 초기화
             </button>
           )}
@@ -245,18 +242,18 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
 
       {/* Validation Error Banner */}
       {validationError && (
-        <div className="flex items-center gap-2 p-2.5 bg-rose-50/80 border border-rose-200/80 rounded-lg text-rose-700 text-xs font-semibold">
+        <div className="flex items-center gap-2 p-3 bg-rose-50/80 border border-rose-200/80 rounded-lg text-rose-700 text-xs sm:text-sm font-semibold">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{validationError}</span>
         </div>
       )}
 
       {/* Input Form Grid */}
-      <form onSubmit={handleSubmit} className="space-y-3.5">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
           {/* 1. Item Name */}
-          <div className="lg:col-span-4 space-y-1">
-            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+          <div className="lg:col-span-4 space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
               <span>지출 예정 항목명</span>
               <span className="text-rose-500">*</span>
             </label>
@@ -265,20 +262,20 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
               placeholder="예: AI 헬스체크업 키오스크 구매"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-slate-400 transition-colors"
+              className="w-full px-3.5 py-2.5 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-slate-400 transition-colors"
             />
           </div>
 
           {/* 2. Detailed Project Dropdown */}
-          <div className="lg:col-span-4 space-y-1">
-            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+          <div className="lg:col-span-4 space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
               <span>세부사업 선택</span>
               <span className="text-rose-500">*</span>
             </label>
             <select
               value={detailedProject}
               onChange={handleDetailedProjectChange}
-              className="w-full px-3 py-2 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-slate-400 transition-colors"
+              className="w-full px-3.5 py-2.5 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 text-sm focus:outline-none focus:border-slate-400 transition-colors"
             >
               <option value="">-- 세부사업 선택 --</option>
               {detailedProjects.map((dp) => (
@@ -288,8 +285,8 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
           </div>
 
           {/* 3. Budget Stat Item Dropdown */}
-          <div className="lg:col-span-4 space-y-1">
-            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+          <div className="lg:col-span-4 space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
               <span>통계목 선택</span>
               <span className="text-rose-500">*</span>
             </label>
@@ -297,7 +294,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
               value={statItem}
               onChange={(e) => setStatItem(e.target.value)}
               disabled={!detailedProject}
-              className="w-full px-3 py-2 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-slate-400 disabled:opacity-50 transition-colors"
+              className="w-full px-3.5 py-2.5 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 text-sm focus:outline-none focus:border-slate-400 disabled:opacity-50 transition-colors"
             >
               <option value="">{detailedProject ? '-- 통계목 선택 --' : '-- 세부사업을 먼저 선택하세요 --'}</option>
               {statItemOptions.map((st) => (
@@ -307,24 +304,24 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
           </div>
 
           {/* 3-1. Expense Source & Type Segmented Selector (일반 지출 vs 일상경비 지출) */}
-          <div className="lg:col-span-12 p-3 bg-slate-50/60 border border-slate-200/80 rounded-xl space-y-2">
+          <div className="lg:col-span-12 p-3.5 bg-slate-50/60 border border-slate-200/80 rounded-xl space-y-2.5">
             <div className="flex items-center justify-between flex-wrap gap-1">
-              <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+              <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
                 <span>지출 재원 및 경비 구분</span>
                 <span className="text-rose-500">*</span>
               </label>
-              <span className="text-[11px] text-slate-400 font-medium">
+              <span className="text-xs text-slate-400 font-medium">
                 {!detailedProject || !statItem ? (
                   '세부사업과 통계목을 먼저 선택하세요'
                 ) : hasDailyExpense ? (
                   '🪙 일상경비 교부 통계목 (원하는 지출 재원을 선택하세요)'
                 ) : (
-                  '🏢 본청 일반지출 전용 통계목'
+                  '🪙 일상경비 미교부 통계목 (선택 시 추가 교부 필요 반영)'
                 )}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Option 1: General Expenditure */}
               <button
                 type="button"
@@ -332,29 +329,29 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
                   setActionType('general');
                   setValidationError(null);
                 }}
-                className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer flex items-start gap-2.5 ${
+                className={`p-3 rounded-lg border text-left transition-colors cursor-pointer flex items-start gap-3 ${
                   effectiveActionType === 'general'
                     ? 'bg-white border-slate-900 shadow-2xs'
                     : 'bg-white/70 border-slate-200/80 hover:border-slate-300'
                 }`}
               >
-                <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${
+                <div className={`p-2 rounded-md shrink-0 mt-0.5 ${
                   effectiveActionType === 'general' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'
                 }`}>
-                  <Building2 className="w-3.5 h-3.5" />
+                  <Building2 className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1 flex-wrap">
-                    <span className={`text-xs font-bold ${effectiveActionType === 'general' ? 'text-slate-900' : 'text-slate-600'}`}>
+                    <span className={`text-xs sm:text-sm font-bold ${effectiveActionType === 'general' ? 'text-slate-900' : 'text-slate-600'}`}>
                       일반 지출 (본청 직접 집행)
                     </span>
-                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded font-mono tabular-nums ${
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded font-mono tabular-nums ${
                       effectiveActionType === 'general' ? 'bg-slate-100 text-slate-900' : 'bg-slate-100 text-slate-500'
                     }`}>
                       가용 {generalRemaining.toLocaleString('ko-KR')}원
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                  <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
                     본청 총예산에서 직접 집행 (세부사업 가용 잔액 차감)
                   </p>
                 </div>
@@ -364,45 +361,41 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
               <button
                 type="button"
                 onClick={() => {
-                  if (!hasDailyExpense) return;
                   setActionType('daily_expense');
                   setValidationError(null);
                 }}
-                disabled={!hasDailyExpense}
-                className={`p-2.5 rounded-lg border text-left transition-colors flex items-start gap-2.5 ${
-                  !hasDailyExpense
-                    ? 'opacity-50 bg-slate-100/50 border-slate-200/70 cursor-not-allowed'
-                    : effectiveActionType === 'daily_expense'
-                    ? 'bg-amber-50/40 border-amber-500 shadow-2xs cursor-pointer'
-                    : 'bg-white/70 border-slate-200/80 hover:border-amber-300 cursor-pointer'
+                className={`p-3 rounded-lg border text-left transition-colors cursor-pointer flex items-start gap-3 ${
+                  effectiveActionType === 'daily_expense'
+                    ? 'bg-amber-50/40 border-amber-500 shadow-2xs'
+                    : 'bg-white/70 border-slate-200/80 hover:border-amber-300'
                 }`}
               >
-                <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${
+                <div className={`p-2 rounded-md shrink-0 mt-0.5 ${
                   effectiveActionType === 'daily_expense' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-500'
                 }`}>
-                  <Coins className="w-3.5 h-3.5" />
+                  <Coins className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1 flex-wrap">
-                    <span className={`text-xs font-bold ${effectiveActionType === 'daily_expense' ? 'text-amber-950' : 'text-slate-600'}`}>
+                    <span className={`text-xs sm:text-sm font-bold ${effectiveActionType === 'daily_expense' ? 'text-amber-950' : 'text-slate-600'}`}>
                       일상경비 지출 (교부금 내 집행)
                     </span>
                     {hasDailyExpense ? (
-                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded font-mono tabular-nums ${
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded font-mono tabular-nums ${
                         effectiveActionType === 'daily_expense' ? 'bg-amber-100 text-amber-900' : 'bg-amber-50 text-amber-700'
                       }`}>
                         미집행 {effectiveDailyExpenseLimit.toLocaleString('ko-KR')}원
                       </span>
                     ) : (
-                      <span className="text-[10px] font-medium text-slate-400">
-                        미교부 통계목
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800 font-mono">
+                        미교부 (추가 교부 필요)
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                  <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
                     {hasDailyExpense
                       ? `총 교부액 ₩${dailyExpenseIssued.toLocaleString('ko-KR')}원 중 미집행 잔액에서 차감`
-                      : '해당 통계목에는 교부된 일상경비가 없습니다.'}
+                      : '현재 교부액이 없어 향후 추가 교부(shortfall)를 전제로 시뮬레이션에 반영됩니다.'}
                   </p>
                 </div>
               </button>
@@ -410,8 +403,8 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
           </div>
 
           {/* 4. Unit Price Input */}
-          <div className="lg:col-span-3 space-y-1">
-            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+          <div className="lg:col-span-3 space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
               <span>단가 (원)</span>
               <span className="text-rose-500">*</span>
             </label>
@@ -420,13 +413,13 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
               placeholder="0"
               value={unitPriceStr}
               onChange={handleUnitPriceChange}
-              className="w-full px-3 py-2 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 text-xs sm:text-sm text-right focus:outline-none focus:border-slate-400 transition-colors font-mono tabular-nums font-bold"
+              className="w-full px-3.5 py-2.5 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 text-sm text-right focus:outline-none focus:border-slate-400 transition-colors font-mono tabular-nums font-bold"
             />
           </div>
 
           {/* 5. Quantity Input */}
-          <div className="lg:col-span-2 space-y-1">
-            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+          <div className="lg:col-span-2 space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
               <span>수량</span>
               <span className="text-rose-500">*</span>
             </label>
@@ -435,17 +428,17 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-              className="w-full px-3 py-2 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 text-xs sm:text-sm text-center focus:outline-none focus:border-slate-400 transition-colors font-mono tabular-nums font-bold"
+              className="w-full px-3.5 py-2.5 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 text-sm text-center focus:outline-none focus:border-slate-400 transition-colors font-mono tabular-nums font-bold"
             />
           </div>
 
           {/* 6. Total Amount Auto-Calculation */}
-          <div className="lg:col-span-4 space-y-1">
+          <div className="lg:col-span-4 space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-bold text-slate-700">
                 총 예정 집행액 (자동 계산)
               </label>
-              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
                 effectiveActionType === 'daily_expense'
                   ? 'bg-amber-50 text-amber-800 border-amber-200/80'
                   : 'bg-slate-100 text-slate-700 border-slate-200/80'
@@ -453,26 +446,26 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
                 {effectiveActionType === 'daily_expense' ? '🪙 일상경비 잔액 차감' : '🏢 본청 예산 차감'}
               </span>
             </div>
-            <div className={`w-full px-3 py-2 rounded-lg font-bold text-sm text-right flex items-center justify-between border ${
+            <div className={`w-full px-3.5 py-2.5 rounded-lg font-bold text-base text-right flex items-center justify-between border ${
               effectiveActionType === 'daily_expense'
                 ? 'bg-amber-50/40 border-amber-200/80 text-amber-900'
                 : 'bg-slate-50/80 border-slate-200/90 text-slate-900'
             }`}>
               <span className="text-xs font-medium text-slate-400">₩</span>
-              <span className="font-mono tabular-nums text-sm sm:text-base">{calculatedAmount.toLocaleString('ko-KR')} 원</span>
+              <span className="font-mono tabular-nums text-base">{calculatedAmount.toLocaleString('ko-KR')} 원</span>
             </div>
             {effectiveActionType === 'daily_expense' && calculatedAmount > effectiveDailyExpenseLimit && (
-              <p className="text-[11px] font-semibold text-rose-600 mt-0.5">
+              <p className="text-xs font-semibold text-rose-600 mt-0.5">
                 ⚠️ 일상경비 미집행 잔액(₩{effectiveDailyExpenseLimit.toLocaleString('ko-KR')}원)을 {(calculatedAmount - effectiveDailyExpenseLimit).toLocaleString('ko-KR')}원 초과했습니다.
               </p>
             )}
           </div>
 
           {/* 7. Action Buttons */}
-          <div className="lg:col-span-3 flex items-end gap-1.5">
+          <div className="lg:col-span-3 flex items-end gap-2">
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-lg shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               {isEditMode ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
               {isEditMode ? '수정 완료' : '항목 추가'}
@@ -481,7 +474,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
               <button
                 type="button"
                 onClick={onCancelEdit}
-                className="py-2 px-2.5 bg-white hover:bg-slate-50 text-slate-600 text-xs font-medium rounded-lg border border-slate-200/90 transition-colors flex items-center justify-center cursor-pointer"
+                className="py-2.5 px-3 bg-white hover:bg-slate-50 text-slate-600 text-sm font-medium rounded-lg border border-slate-200/90 transition-colors flex items-center justify-center cursor-pointer"
                 title="수정 취소"
               >
                 <X className="w-4 h-4" />
@@ -490,14 +483,14 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
           </div>
 
           {/* 8. Memo Input */}
-          <div className="lg:col-span-12 space-y-1">
-            <label className="text-xs font-medium text-slate-500">산출근거 및 비고 (선택)</label>
+          <div className="lg:col-span-12 space-y-1.5">
+            <label className="text-xs font-bold text-slate-500">산출근거 및 비고 (선택)</label>
             <input
               type="text"
               placeholder="예: 건강증진지원실 AI 메디헬스 결과지 자동 출력 및 분석 키오스크 2대"
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-800 placeholder-slate-400 text-xs focus:outline-none focus:border-slate-400 transition-colors"
+              className="w-full px-3.5 py-2.5 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-slate-400 transition-colors"
             />
           </div>
         </div>

@@ -1,6 +1,16 @@
 import { useState, useMemo } from 'react';
 import { BudgetCategory, BudgetEntry } from '@/types';
 
+function resolveDetailedProject(category: BudgetCategory): string {
+  return (
+    category.detailedProject?.trim() ||
+    category.unitProject?.trim() ||
+    category.policyProject?.trim() ||
+    category.name?.trim() ||
+    '기타 사업'
+  );
+}
+
 export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budgetEntries: BudgetEntry[]) {
   const [selectedProject, setSelectedProject] = useState('ALL');
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
@@ -10,7 +20,7 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
   const detailedProjects = useMemo(() => {
     const projects = new Set<string>();
     for (let i = 0; i < budgetCategories.length; i++) {
-      const dp = budgetCategories[i].detailedProject;
+      const dp = resolveDetailedProject(budgetCategories[i]);
       if (dp) projects.add(dp);
     }
     return Array.from(projects);
@@ -20,7 +30,7 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
   const filteredCategories = useMemo(() => {
     return selectedProject === 'ALL' 
       ? budgetCategories 
-      : budgetCategories.filter(c => c.detailedProject === selectedProject);
+      : budgetCategories.filter(c => resolveDetailedProject(c) === selectedProject);
   }, [budgetCategories, selectedProject]);
 
   // Calculate Budget Stats
@@ -56,16 +66,16 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
     { name: '잔여 예산', value: Math.max(0, remainingBudget), color: '#E2E8F0' }
   ], [executedBudget, remainingBudget]);
 
-  const breakdownData = useMemo<{ name: string; total: number; executed: number; rate: number; formationItem?: string }[]>(() => {
-    // Pre-group categories by detailedProject in a single O(C) pass using Map
+  const breakdownData = useMemo<{ id?: string; name: string; total: number; executed: number; rate: number; formationItem?: string }[]>(() => {
+    // Pre-group categories by resolved detailedProject in a single O(C) pass using Map
     const catsByDetailedProject = new Map<string, BudgetCategory[]>();
     for (let i = 0; i < budgetCategories.length; i++) {
       const c = budgetCategories[i];
-      if (!c.detailedProject) continue;
-      let list = catsByDetailedProject.get(c.detailedProject);
+      const dp = resolveDetailedProject(c);
+      let list = catsByDetailedProject.get(dp);
       if (!list) {
         list = [];
-        catsByDetailedProject.set(c.detailedProject, list);
+        catsByDetailedProject.set(dp, list);
       }
       list.push(c);
     }
@@ -87,7 +97,7 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
     }
 
     if (selectedProject === 'ALL') {
-      const projectsData: { name: string; total: number; executed: number; rate: number }[] = [];
+      const projectsData: { id?: string; name: string; total: number; executed: number; rate: number }[] = [];
       for (let i = 0; i < detailedProjects.length; i++) {
         const dp = detailedProjects[i];
         const cats = catsByDetailedProject.get(dp) || [];
@@ -98,17 +108,17 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
           executed += (executedByCatId[cats[j].id] || 0);
         }
         const rate = total > 0 ? (executed / total) * 100 : 0;
-        projectsData.push({ name: dp, total, executed, rate });
+        projectsData.push({ id: `dp-${dp}`, name: dp, total, executed, rate });
       }
       return projectsData.sort((a, b) => a.name.localeCompare(b.name));
     } else {
       const cats = catsByDetailedProject.get(selectedProject) || [];
-      const result: { name: string; formationItem?: string; total: number; executed: number; rate: number }[] = [];
+      const result: { id?: string; name: string; formationItem?: string; total: number; executed: number; rate: number }[] = [];
       for (let i = 0; i < cats.length; i++) {
         const cat = cats[i];
         const executed = executedByCatId[cat.id] || 0;
         const rate = cat.totalBudget > 0 ? (executed / cat.totalBudget) * 100 : 0;
-        result.push({ name: cat.name, formationItem: cat.formationItem, total: cat.totalBudget, executed, rate });
+        result.push({ id: cat.id, name: cat.name, formationItem: cat.formationItem, total: cat.totalBudget, executed, rate });
       }
       return result.sort((a, b) => a.name.localeCompare(b.name));
     }

@@ -174,7 +174,7 @@ export interface DocumentEntry {
   status: 'draft' | 'ready' | 'done'; // 상태
 }
 
-export type ModuleType = 'dashboard' | 'workspace' | 'mindmap' | 'project' | 'festival' | 'simulator';
+export type ModuleType = 'dashboard' | 'workspace' | 'mindmap' | 'project' | 'festival' | 'simulator' | 'archive' | 'memory';
 
 // ============ Budget Simulator Module ============
 export interface SimulationEntry {
@@ -210,6 +210,9 @@ export interface ProjectSimulationSummary {
   dailyExpenseIssued?: number;   // 세부사업 일상경비 총 교부액
   dailyExpenseSpent?: number;    // 세부사업 일상경비 실집행액
   dailyExpenseRemaining?: number;// 세부사업 일상경비 교부액 중 미집행비용 (교부액 - 실집행액)
+  dailyExpenseShortfall?: number;// 세부사업 일상경비 부족분 (추가 교부 필요액 합계)
+  needsAdditionalIssuance?: boolean;// 추가 교부 필요 여부 (dailyExpenseShortfall > 0)
+  lockedAmount?: number;         // 잠금 한도액
 }
 
 export interface StatItemSimulationSummary {
@@ -227,6 +230,9 @@ export interface StatItemSimulationSummary {
   dailyExpenseIssued?: number;   // 통계목 일상경비 교부액
   dailyExpenseSpent?: number;    // 통계목 일상경비 실집행액
   dailyExpenseRemaining?: number;// 통계목 일상경비 교부액 중 미집행비용 (교부액 - 실집행액)
+  dailyExpenseShortfall?: number;// 통계목 일상경비 부족분 (추가 교부 필요액)
+  needsAdditionalIssuance?: boolean;// 추가 교부 필요 여부 (dailyExpenseShortfall > 0)
+  lockedAmount?: number;         // 잠금 한도액
 }
 
 // ============ Weekly Scheduler Module ============
@@ -257,7 +263,28 @@ export interface Contact {
   updatedAt: string;
 }
 
+// ============ Working Memory Module ============
+export type WorkingMemoryCategory = 'budget' | 'audit' | 'festival' | 'directive' | 'general';
+export type WorkingMemoryStatus = 'pending' | 'reflected';
+export type WorkingMemorySource = 'pc' | 'mobile';
+
+export interface WorkingMemoryMemo {
+  id: string;
+  content: string;
+  category: WorkingMemoryCategory;
+  tags: string[];
+  numericHighlight?: string;
+  dateHighlight?: string;
+  status: WorkingMemoryStatus;
+  source?: WorkingMemorySource;
+  pinned?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  reflectedAt?: string;
+}
+
 // ============ Utility ============
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
+

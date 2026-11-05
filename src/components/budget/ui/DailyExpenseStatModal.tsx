@@ -11,7 +11,7 @@ interface DailyExpenseStatModalProps {
   isOpen: boolean;
   onClose: () => void;
   categories: BudgetCategory[];
-  getCategoryStats: (id: string) => CategoryStats | null;
+  getCategoryStats: (id: string, excludePlanned?: boolean) => CategoryStats | null;
 }
 
 function formatN(n: number) { return n.toLocaleString('ko-KR'); }
@@ -26,7 +26,7 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
     
     for (let i = 0; i < categories.length; i++) {
       const cat = categories[i];
-      const catStats = getCategoryStats(cat.id);
+      const catStats = getCategoryStats(cat.id, true);
       if (!catStats) continue;
 
       const detailedProject = cat.detailedProject || '미지정 세부사업';
@@ -73,9 +73,9 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="세부사업 및 통계목별 일상경비 이체내역" size="2xl">
       <div className="space-y-4">
-        <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-lg flex items-start gap-2.5">
-          <Info className="text-slate-500 mt-0.5 shrink-0" size={16} />
-          <div className="text-xs text-slate-600 leading-relaxed font-medium">
+        <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-lg flex items-start gap-3">
+          <Info className="text-slate-500 mt-0.5 shrink-0" size={18} />
+          <div className="text-sm text-slate-600 leading-relaxed font-medium">
             각 세부사업 하위의 통계목별로 교부된 일상경비와 실제 지출액, 가용 잔액 현황입니다.
           </div>
         </div>
@@ -87,15 +87,15 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
         ) : (
           <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full text-left border-collapse text-sm">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500">
-                    <th className="py-3 px-4">세부사업명</th>
-                    <th className="py-3 px-4">통계목</th>
-                    <th className="py-3 px-4 text-right">교부액 (원금)</th>
-                    <th className="py-3 px-4 text-right">실지출액</th>
-                    <th className="py-3 px-4 text-right">가용 잔액</th>
-                    <th className="py-3 px-4 text-center">집행률</th>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-xs font-bold text-slate-500">
+                    <th className="py-3.5 px-4">세부사업명</th>
+                    <th className="py-3.5 px-4">통계목</th>
+                    <th className="py-3.5 px-4 text-right">교부액 (원금)</th>
+                    <th className="py-3.5 px-4 text-right">실지출액</th>
+                    <th className="py-3.5 px-4 text-right">가용 잔액</th>
+                    <th className="py-3.5 px-4 text-center">집행률</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -103,20 +103,26 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
                     const pct = item.issued > 0 ? (item.spent / item.issued) * 100 : 0;
                     return (
                       <tr key={`${item.detailedProject}_${item.statItem}_${idx}`} className="hover:bg-slate-50/60 transition-colors">
-                        <td className="py-3 px-4 text-slate-600 font-medium">{item.detailedProject}</td>
-                        <td className="py-3 px-4 font-semibold text-slate-800">{item.statItem}</td>
-                        <td className="py-3 px-4 text-right text-slate-700 font-medium tabular-nums">{formatN(item.issued)}원</td>
-                        <td className="py-3 px-4 text-right text-slate-700 font-medium tabular-nums">{formatN(item.spent)}원</td>
-                        <td className="py-3 px-4 text-right font-semibold text-amber-700 bg-amber-50/20 tabular-nums">{formatN(item.remaining)}원</td>
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-3.5 px-4 text-slate-600 font-medium">{item.detailedProject}</td>
+                        <td className="py-3.5 px-4 font-bold text-slate-800">{item.statItem}</td>
+                        <td className="py-3.5 px-4 text-right text-slate-700 font-semibold font-mono tabular-nums">
+                          {formatN(item.issued)}<span className="text-xs text-slate-400 ml-0.5">원</span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right text-slate-700 font-semibold font-mono tabular-nums">
+                          {formatN(item.spent)}<span className="text-xs text-slate-400 ml-0.5">원</span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-bold text-amber-700 bg-amber-50/20 font-mono tabular-nums">
+                          {formatN(item.remaining)}<span className="text-xs text-amber-600/70 ml-0.5">원</span>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
                           <div className="flex items-center justify-center gap-2">
-                            <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div className="w-16 bg-slate-100 rounded-full h-2 overflow-hidden">
                               <div
                                 className="bg-amber-500 h-full rounded-full transition-all duration-500"
                                 style={{ width: `${Math.min(pct, 100)}%` }}
                               />
                             </div>
-                            <span className="text-[11px] font-semibold text-slate-600 w-9 text-right tabular-nums">
+                            <span className="text-xs font-bold text-slate-600 w-9 text-right font-mono tabular-nums">
                               {pct.toFixed(0)}%
                             </span>
                           </div>
@@ -125,24 +131,30 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
                     );
                   })}
                   {/* 합계 행 */}
-                  <tr className="bg-slate-50/90 border-t border-slate-200 font-semibold">
-                    <td colSpan={2} className="py-3.5 px-4 text-slate-900 font-bold">
-                      <div className="flex items-center gap-1.5">
-                        <BarChart3 size={15} className="text-slate-600" /> 합계
+                  <tr className="bg-slate-50/90 border-t border-slate-200 font-bold text-base">
+                    <td colSpan={2} className="py-4 px-4 text-slate-900 font-extrabold">
+                      <div className="flex items-center gap-2">
+                        <BarChart3 size={16} className="text-slate-600" /> 합계
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-right text-slate-900 font-bold tabular-nums">{formatN(totals.issued)}원</td>
-                    <td className="py-3.5 px-4 text-right text-slate-900 font-bold tabular-nums">{formatN(totals.spent)}원</td>
-                    <td className="py-3.5 px-4 text-right text-amber-700 font-bold bg-amber-50/30 tabular-nums">{formatN(totals.remaining)}원</td>
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-4 px-4 text-right text-slate-900 font-extrabold font-mono tabular-nums">
+                      {formatN(totals.issued)}<span className="text-xs text-slate-400 ml-0.5">원</span>
+                    </td>
+                    <td className="py-4 px-4 text-right text-slate-900 font-extrabold font-mono tabular-nums">
+                      {formatN(totals.spent)}<span className="text-xs text-slate-400 ml-0.5">원</span>
+                    </td>
+                    <td className="py-4 px-4 text-right text-amber-700 font-extrabold bg-amber-50/30 font-mono tabular-nums">
+                      {formatN(totals.remaining)}<span className="text-xs text-amber-600/70 ml-0.5">원</span>
+                    </td>
+                    <td className="py-4 px-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                        <div className="w-16 bg-slate-200 rounded-full h-2 overflow-hidden">
                           <div
                             className="bg-slate-800 h-full rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(totals.issued > 0 ? (totals.spent / totals.issued) * 100 : 0, 100)}%` }}
                           />
                         </div>
-                        <span className="text-xs font-bold text-slate-800 w-9 text-right tabular-nums">
+                        <span className="text-xs font-extrabold text-slate-800 w-9 text-right font-mono tabular-nums">
                           {(totals.issued > 0 ? (totals.spent / totals.issued) * 100 : 0).toFixed(0)}%
                         </span>
                       </div>
@@ -157,7 +169,7 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
         <div className="flex justify-end pt-1">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors text-xs cursor-pointer"
+            className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg transition-colors text-sm cursor-pointer"
           >
             닫기
           </button>

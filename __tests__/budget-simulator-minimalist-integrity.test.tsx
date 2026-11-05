@@ -302,7 +302,7 @@ describe('BudgetSimulator Minimalist Redesign & Functional Integrity Suite', () 
       expect(onAddEntry).not.toHaveBeenCalled();
     });
 
-    it('falls back actionType to general when switching from a daily-expense statItem to a statItem without dailyExpenseIssued', () => {
+    it('preserves actionType as daily_expense when switching from a daily-expense statItem to a statItem without dailyExpenseIssued to simulate shortfall (Milestone 272)', () => {
       const onAddEntry = jest.fn();
 
       render(
@@ -330,6 +330,9 @@ describe('BudgetSimulator Minimalist Redesign & Functional Integrity Suite', () 
       fireEvent.change(selects[0], { target: { value: '강남체력인증센터 운영' } });
       fireEvent.change(selects[1], { target: { value: '201-02 공공운영비' } });
 
+      // In Milestone 272, switching to a 0-issuance statItem preserves daily_expense selection and displays shortfall guidance badge
+      expect(screen.getByText(/미교부 \(추가 교부 필요\)/)).toBeInTheDocument();
+
       // Fill name and unit price
       fireEvent.change(screen.getByPlaceholderText('예: AI 헬스체크업 키오스크 구매'), {
         target: { value: '공공요금 납부' },
@@ -344,7 +347,7 @@ describe('BudgetSimulator Minimalist Redesign & Functional Integrity Suite', () 
         expect.objectContaining({
           detailedProject: '강남체력인증센터 운영',
           statItem: '201-02 공공운영비',
-          actionType: 'general',
+          actionType: 'daily_expense',
         })
       );
     });

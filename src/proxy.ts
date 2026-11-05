@@ -2,14 +2,32 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function proxy(req: NextRequest) {
+  const pathname = req.nextUrl.pathname;
+  const isPublicStaticAsset =
+    pathname === '/manifest.json' ||
+    pathname === '/sw.js' ||
+    pathname === '/favicon.ico' ||
+    pathname.startsWith('/templates/') ||
+    /\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|otf|txt|xml)$/i.test(pathname);
+
+  if (isPublicStaticAsset) {
+    return NextResponse.next();
+  }
+
   const sessionCookie = req.cookies.get('hchps_session');
   const isAuthenticated = sessionCookie?.value === 'authenticated-secure-session-token';
-  const isLoginPage = req.nextUrl.pathname === '/login';
-  const isPublicFestival = req.nextUrl.pathname.startsWith('/festival') || req.nextUrl.pathname.startsWith('/api/festival') || req.nextUrl.pathname.startsWith('/api/calendar') || req.nextUrl.pathname.startsWith('/api/auth');
+  const isLoginPage = pathname === '/login';
+  const isPublicFestival =
+    pathname.startsWith('/festival') ||
+    pathname.startsWith('/api/festival') ||
+    pathname.startsWith('/memo') ||
+    pathname.startsWith('/api/memo') ||
+    pathname.startsWith('/api/calendar') ||
+    pathname.startsWith('/api/auth');
   const isTunnelDomain = req.nextUrl.hostname.includes('trycloudflare.com') || req.nextUrl.hostname.includes('loca.lt');
 
   // 외부 터널 도메인으로 루트(/) 접속 시 양재천 페스티벌 관제판으로 자동 이동
-  if (isTunnelDomain && req.nextUrl.pathname === '/') {
+  if (isTunnelDomain && pathname === '/') {
     return NextResponse.redirect(new URL('/festival/yangjae', req.url));
   }
 
@@ -30,15 +48,10 @@ export function proxy(req: NextRequest) {
   return NextResponse.next();
 }
 
-
 export default proxy;
-
-
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|manifest\\.json|sw\\.js|icon-.*\\.png|.*\\.svg).*)',
   ],
 };
-
-

@@ -15,6 +15,8 @@ import {
   Trash2,
   CheckCircle2,
   Building2,
+  Lock,
+  AlertTriangle,
 } from 'lucide-react';
 
 export interface StatItemDetailModalProps {
@@ -147,6 +149,57 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
   const dailyExpenseSpent = summary?.dailyExpenseSpent ?? 0;
   const dailyExpenseRemaining = summary?.dailyExpenseRemaining ?? (dailyExpenseIssued - dailyExpenseSpent);
 
+  // Total locked amount from subItems or summary
+  const totalLockedAmount = useMemo(() => {
+    let total = 0;
+    for (const sub of targetSubItems) {
+      if (sub.isLocked) {
+        total += (sub.amount || 0);
+      } else if (sub.calculations && sub.calculations.length > 0) {
+        for (const calc of sub.calculations) {
+          if (calc.isLocked) {
+            total += (calc.amount || 0);
+          }
+        }
+      }
+    }
+    return summary?.lockedAmount ?? total;
+  }, [targetSubItems, summary]);
+
+  // Budget Appropriateness Status
+  const appropriatenessStatus = useMemo(() => {
+    if (isDeficit) {
+      return {
+        label: '초과 경고',
+        color: 'bg-rose-50 border-rose-200/80 text-rose-700',
+        icon: <AlertTriangle size={13} className="text-rose-600" />,
+        desc: '최종 예상 잔액이 마이너스로 예산 초과가 발생합니다.',
+      };
+    }
+    if ((summary?.dailyExpenseShortfall || 0) > 0) {
+      return {
+        label: '추가 교부 필요',
+        color: 'bg-amber-50 border-amber-200/80 text-amber-800',
+        icon: <AlertTriangle size={13} className="text-amber-600" />,
+        desc: `일상경비 교부 잔액이 ${(summary?.dailyExpenseShortfall || 0).toLocaleString('ko-KR')}원 부족합니다.`,
+      };
+    }
+    if (totalLockedAmount > 0 && finalExpectedBalance < totalLockedAmount) {
+      return {
+        label: '잠금한도 침범',
+        color: 'bg-rose-50 border-rose-200/80 text-rose-700',
+        icon: <Lock size={13} className="text-rose-600" />,
+        desc: `법정 의무 잠금 한도(${totalLockedAmount.toLocaleString('ko-KR')}원) 대비 가용 잔액이 부족합니다.`,
+      };
+    }
+    return {
+      label: '정상/안전',
+      color: 'bg-emerald-50/70 border-emerald-200/80 text-emerald-700',
+      icon: <CheckCircle2 size={13} className="text-emerald-600" />,
+      desc: '예산 집행 및 시뮬레이션 상태가 양호합니다.',
+    };
+  }, [isDeficit, summary?.dailyExpenseShortfall, totalLockedAmount, finalExpectedBalance]);
+
   const getActionTypeBadge = (actionType?: string) => {
     switch (actionType) {
       case 'issuance':
@@ -189,119 +242,152 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
       title=""
       size="4xl"
     >
-      <div className="space-y-4 -mt-2">
+      <div className="space-y-5 -mt-2">
         {/* Custom Header Section */}
-        <div className="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="flex flex-wrap items-start justify-between gap-3 pb-3.5 border-b border-slate-100">
           <div>
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center gap-1.5">
-                <Building2 size={12} className="text-slate-500" />
+            <div className="flex items-center gap-2 flex-wrap mb-1.5">
+              <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center gap-1.5">
+                <Building2 size={13} className="text-slate-500" />
                 {detailedProject}
               </span>
               <span className="text-xs text-slate-300">/</span>
-              <span className="text-xs font-medium text-slate-500 font-mono">
+              <span className="text-xs font-bold text-slate-500 font-mono">
                 통계목 상세
               </span>
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
-              <Receipt className="text-slate-600 w-5 h-5 shrink-0" />
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5 flex-wrap">
+              <Receipt className="text-slate-600 w-6 h-6 shrink-0" />
               <span>{statItem}</span>
-              <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/80 text-slate-600 font-sans">
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200/80 text-slate-600 font-sans">
                 세부 지출원장 및 시뮬레이션
               </span>
+              <span
+                className={`text-xs font-bold px-2.5 py-1 rounded-full border inline-flex items-center gap-1 font-sans ${appropriatenessStatus.color}`}
+                title={appropriatenessStatus.desc}
+              >
+                {appropriatenessStatus.icon}
+                <span>{appropriatenessStatus.label}</span>
+              </span>
+              {totalLockedAmount > 0 && (
+                <span
+                  className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/80 text-amber-800 inline-flex items-center gap-1 font-sans"
+                  title={`법정 의무 잠금 한도: ${formatN(totalLockedAmount)}원`}
+                >
+                  <Lock size={12} className="text-amber-600" />
+                  <span>잠금 한도 <strong className="font-mono tabular-nums">{formatN(totalLockedAmount)}</strong>원</span>
+                </span>
+              )}
+              {(summary?.dailyExpenseShortfall || 0) > 0 && (
+                <span
+                  className="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200/80 text-rose-700 inline-flex items-center gap-1 font-sans"
+                  title={`일상경비 추가 교부 필요: ${formatN(summary!.dailyExpenseShortfall!)}원`}
+                >
+                  <AlertTriangle size={12} className="text-rose-600" />
+                  <span>추가 교부 필요 <strong className="font-mono tabular-nums">{formatN(summary!.dailyExpenseShortfall!)}</strong>원</span>
+                </span>
+              )}
             </h2>
           </div>
         </div>
 
         {/* Top KPI Metrics Banner */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-          <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex flex-col shadow-2xs">
-            <span className="text-xs font-medium text-slate-500">총 예산액</span>
-            <span className="text-sm sm:text-base font-bold font-mono tabular-nums text-slate-900 mt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 flex flex-col shadow-2xs">
+            <span className="text-xs font-bold text-slate-500">총 예산액</span>
+            <span className="text-base sm:text-lg font-extrabold font-mono tabular-nums text-slate-900 mt-1">
               {formatN(totalBudget)}
-              <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+              <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
             </span>
           </div>
 
-          <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex flex-col shadow-2xs">
-            <span className="text-xs font-medium text-slate-500 flex items-center justify-between">
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 flex flex-col shadow-2xs">
+            <span className="text-xs font-bold text-slate-500 flex items-center justify-between">
               <span>현재 실집행액</span>
-              <span className="font-mono tabular-nums text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded">
+              <span className="font-mono tabular-nums text-[11px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                 집행 {executionRate.toFixed(1)}%
               </span>
             </span>
-            <span className="text-sm sm:text-base font-bold font-mono tabular-nums text-slate-900 mt-1">
+            <span className="text-base sm:text-lg font-extrabold font-mono tabular-nums text-slate-900 mt-1">
               {formatN(currentSpent)}
-              <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+              <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
             </span>
           </div>
 
-          <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex flex-col shadow-2xs">
-            <span className="text-xs font-medium text-slate-500 flex items-center justify-between">
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 flex flex-col shadow-2xs">
+            <span className="text-xs font-bold text-slate-500 flex items-center justify-between">
               <span>현재 집행 잔액</span>
-              <span className="font-mono tabular-nums text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">
+              <span className="font-mono tabular-nums text-[11px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
                 미집행 {remainingRate.toFixed(1)}%
               </span>
             </span>
-            <span className="text-sm sm:text-base font-bold font-mono tabular-nums text-emerald-600 mt-1">
+            <span className="text-base sm:text-lg font-extrabold font-mono tabular-nums text-emerald-600 mt-1">
               {formatN(currentRemaining)}
-              <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+              <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
             </span>
           </div>
 
-          <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex flex-col shadow-2xs">
-            <span className="text-xs font-medium text-slate-500">시뮬레이션 예정액</span>
-            <span className="text-sm sm:text-base font-bold font-mono tabular-nums text-indigo-600 mt-1">
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 flex flex-col shadow-2xs">
+            <span className="text-xs font-bold text-slate-500">시뮬레이션 예정액</span>
+            <span className="text-base sm:text-lg font-extrabold font-mono tabular-nums text-indigo-600 mt-1">
               {formatN(simulatedExpenditure)}
-              <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+              <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
             </span>
           </div>
 
-          <div className={`rounded-xl p-3 flex flex-col border shadow-2xs ${
+          <div className={`rounded-xl p-3.5 flex flex-col border shadow-2xs ${
             isDeficit ? 'bg-rose-50/50 border-rose-200/80' : 'bg-white border-slate-200/80'
           }`}>
-            <span className={`text-xs font-medium flex items-center justify-between ${isDeficit ? 'text-rose-700' : 'text-slate-500'}`}>
+            <span className={`text-xs font-bold flex items-center justify-between ${isDeficit ? 'text-rose-700' : 'text-slate-500'}`}>
               <span>최종 예상 잔액</span>
-              <span className={`font-mono tabular-nums text-[10px] font-medium px-1.5 py-0.2 rounded ${
+              <span className={`font-mono tabular-nums text-[11px] font-bold px-1.5 py-0.5 rounded ${
                 isDeficit ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'
               }`}>
                 {isDeficit ? `초과 ${Math.abs(finalRemainingRate).toFixed(1)}%` : `잔여 ${finalRemainingRate.toFixed(1)}%`}
               </span>
             </span>
-            <span className={`text-sm sm:text-base font-bold font-mono tabular-nums mt-1 ${
+            <span className={`text-base sm:text-lg font-extrabold font-mono tabular-nums mt-1 ${
               isDeficit ? 'text-rose-600' : 'text-slate-900'
             }`}>
               {formatN(finalExpectedBalance)}
-              <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+              <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
             </span>
           </div>
 
-          <div className="bg-white border border-slate-200/80 rounded-xl p-3 flex flex-col shadow-2xs">
-            <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
-              <Coins size={12} className="text-amber-600" />
+          <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 flex flex-col shadow-2xs">
+            <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
+              <Coins size={13} className="text-amber-600" />
               <span>일상 미집행 잔액</span>
             </span>
-            <span className="text-sm sm:text-base font-bold font-mono tabular-nums text-amber-700 mt-1">
+            <span className="text-base sm:text-lg font-extrabold font-mono tabular-nums text-amber-700 mt-1">
               {formatN(dailyExpenseRemaining)}
-              <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+              <span className="text-xs font-semibold text-slate-400 ml-1">원</span>
             </span>
+            {(summary?.dailyExpenseShortfall || 0) > 0 && (
+              <div className="mt-1 flex items-center gap-1">
+                <span className="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200/80 px-1.5 py-0.5 rounded font-mono tabular-nums inline-flex items-center gap-0.5">
+                  <AlertTriangle size={10} className="text-rose-600" />
+                  <span>부족 {formatN(summary!.dailyExpenseShortfall!)}원</span>
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-1 border-b border-slate-200/80">
+        <div className="flex items-center gap-2 border-b border-slate-200/80">
           <button
             type="button"
             onClick={() => setActiveTab('actual')}
-            className={`pb-2.5 px-3 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer relative ${
+            className={`pb-3 px-3.5 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-colors cursor-pointer relative ${
               activeTab === 'actual'
                 ? 'text-slate-900 border-b-2 border-slate-900'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Receipt size={15} />
+            <Receipt size={16} />
             <span>실제 지출 집행 내역</span>
-            <span className="px-1.5 py-0.5 rounded text-[11px] font-mono tabular-nums bg-slate-100 text-slate-600">
+            <span className="px-2 py-0.5 rounded-full text-xs font-mono tabular-nums bg-slate-100 text-slate-600">
               {rawActualList.length}건
             </span>
           </button>
@@ -309,15 +395,15 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
           <button
             type="button"
             onClick={() => setActiveTab('simulation')}
-            className={`pb-2.5 px-3 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer relative ${
+            className={`pb-3 px-3.5 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-colors cursor-pointer relative ${
               activeTab === 'simulation'
                 ? 'text-slate-900 border-b-2 border-slate-900'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Sparkles size={15} />
+            <Sparkles size={16} />
             <span>시뮬레이션 예정 내역</span>
-            <span className="px-1.5 py-0.5 rounded text-[11px] font-mono tabular-nums bg-slate-100 text-slate-600">
+            <span className="px-2 py-0.5 rounded-full text-xs font-mono tabular-nums bg-slate-100 text-slate-600">
               {simulationEntries.length}건
             </span>
           </button>
@@ -325,15 +411,15 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
           <button
             type="button"
             onClick={() => setActiveTab('subItems')}
-            className={`pb-2.5 px-3 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer relative ${
+            className={`pb-3 px-3.5 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-colors cursor-pointer relative ${
               activeTab === 'subItems'
                 ? 'text-slate-900 border-b-2 border-slate-900'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Calculator size={15} />
+            <Calculator size={16} />
             <span>본예산 산출 기초 (산출근거)</span>
-            <span className="px-1.5 py-0.5 rounded text-[11px] font-mono tabular-nums bg-slate-100 text-slate-600">
+            <span className="px-2 py-0.5 rounded-full text-xs font-mono tabular-nums bg-slate-100 text-slate-600">
               {targetSubItems.length}개 산출목
             </span>
           </button>
@@ -346,22 +432,22 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
             <div className="flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="품의 목적, 문서번호, 비고 검색..."
-                    className="pl-8 pr-3 py-1.5 bg-slate-50/50 border border-slate-200/80 rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:bg-white focus:border-slate-400 transition-colors w-52 sm:w-64"
+                    className="pl-9 pr-3 py-1.5 bg-slate-50/50 border border-slate-200/80 rounded-xl text-xs placeholder-slate-400 focus:outline-none focus:bg-white focus:border-slate-400 transition-colors w-52 sm:w-64"
                   />
                 </div>
 
-                <div className="flex items-center gap-1 bg-slate-50/50 border border-slate-200/80 rounded-lg px-2.5 py-1 text-xs">
+                <div className="flex items-center gap-1.5 bg-slate-50/50 border border-slate-200/80 rounded-xl px-2.5 py-1.5 text-xs">
                   <Filter size={13} className="text-slate-400" />
                   <select
                     value={actionTypeFilter}
                     onChange={(e) => setActionTypeFilter(e.target.value)}
-                    className="bg-transparent text-slate-700 text-xs font-medium focus:outline-none cursor-pointer"
+                    className="bg-transparent text-slate-700 text-xs font-bold focus:outline-none cursor-pointer"
                   >
                     <option value="all">전체 구분</option>
                     <option value="general">일반지출</option>
@@ -372,12 +458,12 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
-                  <ArrowUpDown size={12} className="text-slate-400" />
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-bold">
+                  <ArrowUpDown size={13} className="text-slate-400" />
                   <select
                     value={sortOrder}
                     onChange={(e) => setSortOrder(e.target.value as SortOrder)}
-                    className="bg-slate-50/50 border border-slate-200/80 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 focus:outline-none cursor-pointer"
+                    className="bg-slate-50/50 border border-slate-200/80 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
                   >
                     <option value="date-desc">최신 일자순</option>
                     <option value="date-asc">과거 일자순</option>
@@ -392,55 +478,55 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
             {filteredActualEntries.length === 0 ? (
               <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-slate-200/80 text-slate-500 text-xs">
                 <Receipt className="w-7 h-7 text-slate-300 mx-auto mb-2" />
-                <p className="font-semibold text-slate-700">해당 통계목의 실제 지출 집행 내역이 없습니다.</p>
-                <p className="text-[11px] text-slate-400 mt-1">
+                <p className="font-bold text-slate-700 text-sm">해당 통계목의 실제 지출 집행 내역이 없습니다.</p>
+                <p className="text-xs text-slate-400 mt-1">
                   검색 필터를 초기화하거나 예산 관리 메뉴에서 지출 품의를 등록하세요.
                 </p>
               </div>
             ) : (
-              <div className="border border-slate-200/80 rounded-lg overflow-hidden bg-white">
+              <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white">
                 <div className="max-h-[380px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-xs border-b border-slate-200/80 z-10 text-slate-500 font-semibold">
+                    <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-xs border-b border-slate-200/80 z-10 text-slate-500 font-bold whitespace-nowrap">
                       <tr>
-                        <th className="py-2.5 px-3 min-w-[90px]">집행일자</th>
-                        <th className="py-2.5 px-3 min-w-[200px]">지출 목적 / 품의 내용</th>
-                        <th className="py-2.5 px-3 min-w-[85px]">구분</th>
-                        <th className="py-2.5 px-3 min-w-[120px]">시행문서번호</th>
-                        <th className="py-2.5 px-3 text-right min-w-[110px]">집행금액</th>
-                        <th className="py-2.5 px-3 min-w-[120px]">비고 / 채주</th>
+                        <th className="py-3 px-4 min-w-[90px]">집행일자</th>
+                        <th className="py-3 px-4 min-w-[200px]">지출 목적 / 품의 내용</th>
+                        <th className="py-3 px-4 min-w-[85px]">구분</th>
+                        <th className="py-3 px-4 min-w-[120px]">시행문서번호</th>
+                        <th className="py-3 px-4 text-right min-w-[110px]">집행금액</th>
+                        <th className="py-3 px-4 min-w-[120px]">비고 / 채주</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-mono text-xs">
                       {filteredActualEntries.map((item, idx) => (
                         <tr key={item.id || `actual-${idx}`} className="hover:bg-slate-50/60 transition-colors">
-                          <td className="py-2.5 px-3 text-slate-600 font-medium whitespace-nowrap font-sans">
+                          <td className="py-3 px-4 align-middle text-slate-600 font-bold whitespace-nowrap font-sans">
                             {item.date || '-'}
                           </td>
-                          <td className="py-2.5 px-3 text-slate-900 font-semibold font-sans">
+                          <td className="py-3 px-4 align-middle text-slate-900 font-bold font-sans text-sm">
                             <div>{item.purpose || '(목적 미기재)'}</div>
                             {item.relatedPlanId && (
-                              <span className="text-[10px] text-slate-500 font-medium font-sans">
+                              <span className="text-xs text-slate-500 font-medium font-sans">
                                 (시뮬레이션 계획 정산 완료건)
                               </span>
                             )}
                           </td>
-                          <td className="py-2.5 px-3 font-sans">
+                          <td className="py-3 px-4 align-middle font-sans whitespace-nowrap">
                             {getActionTypeBadge(item.actionType)}
                           </td>
-                          <td className="py-2.5 px-3 text-slate-600 font-sans">
+                          <td className="py-3 px-4 align-middle text-slate-600 font-sans whitespace-nowrap">
                             {item.docRegNum ? (
-                              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px]">
+                              <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-xs font-semibold">
                                 {item.docRegNum}
                               </span>
                             ) : (
                               <span className="text-slate-300">-</span>
                             )}
                           </td>
-                          <td className="py-2.5 px-3 text-right font-bold tabular-nums text-slate-900 text-[13px]">
+                          <td className="py-3 px-4 text-right align-middle font-extrabold tabular-nums text-slate-900 text-sm whitespace-nowrap">
                             ₩{formatN(item.amount)}
                           </td>
-                          <td className="py-2.5 px-3 text-slate-500 font-sans truncate max-w-[180px]" title={item.memo}>
+                          <td className="py-3 px-4 align-middle text-slate-500 font-sans truncate max-w-[180px]" title={item.memo}>
                             {item.memo || '-'}
                           </td>
                         </tr>
@@ -450,13 +536,13 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
                 </div>
 
                 {/* Footer Total Summary Bar */}
-                <div className="bg-slate-50/80 border-t border-slate-200/80 px-4 py-2.5 flex items-center justify-between text-xs font-semibold text-slate-800">
+                <div className="bg-slate-50/80 border-t border-slate-200/80 px-4 py-3 flex items-center justify-between text-xs font-bold text-slate-800">
                   <span className="text-slate-600 font-sans">
                     조회된 지출 건수: <strong className="font-mono tabular-nums text-slate-900">{filteredActualEntries.length}</strong>건
                   </span>
                   <div className="flex items-center gap-2 font-sans">
                     <span className="text-slate-500">지출 집행 합계:</span>
-                    <span className="font-mono tabular-nums text-sm text-slate-900 font-bold">
+                    <span className="font-mono tabular-nums text-base text-slate-900 font-extrabold">
                       ₩{formatN(actualFilteredTotalAmount)}
                     </span>
                   </div>
@@ -469,11 +555,11 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
         {/* Tab 2: Simulation Planned Entries List */}
         {activeTab === 'simulation' && (
           <div className="space-y-3">
-            <div className="p-3 bg-slate-50/80 border border-slate-200/80 rounded-lg text-xs text-slate-700 flex items-center justify-between">
-              <span>
+            <div className="p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-xl text-xs text-slate-700 flex items-center justify-between">
+              <span className="font-medium">
                 현재 예산 시뮬레이터에 등록되어 미집행 차감 예정된 항목들입니다.
               </span>
-              <span className="font-semibold font-mono tabular-nums text-slate-900">
+              <span className="font-bold font-mono tabular-nums text-slate-900">
                 총 {simulationEntries.length}건 등록
               </span>
             </div>
@@ -481,24 +567,24 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
             {simulationEntries.length === 0 ? (
               <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-slate-200/80 text-slate-500 text-xs">
                 <Sparkles className="w-7 h-7 text-slate-300 mx-auto mb-2" />
-                <p className="font-semibold text-slate-700">등록된 시뮬레이션 예정 항목이 없습니다.</p>
-                <p className="text-[11px] text-slate-400 mt-1">
+                <p className="font-bold text-slate-700 text-sm">등록된 시뮬레이션 예정 항목이 없습니다.</p>
+                <p className="text-xs text-slate-400 mt-1">
                   상단 시뮬레이션 등록 폼에서 신규 물품/용역 계획을 추가하여 잔액을 검토해 보세요.
                 </p>
               </div>
             ) : (
-              <div className="border border-slate-200/80 rounded-lg overflow-hidden bg-white">
+              <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white">
                 <div className="max-h-[380px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-xs border-b border-slate-200/80 z-10 text-slate-500 font-semibold">
+                    <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-xs border-b border-slate-200/80 z-10 text-slate-500 font-bold whitespace-nowrap">
                       <tr>
-                        <th className="py-2.5 px-3 min-w-[160px]">예정 지출 항목명</th>
-                        <th className="py-2.5 px-3 text-right min-w-[110px]">단가</th>
-                        <th className="py-2.5 px-3 text-center min-w-[60px]">수량</th>
-                        <th className="py-2.5 px-3 text-right min-w-[120px]">차감 예정액</th>
-                        <th className="py-2.5 px-3 text-center min-w-[80px]">상태</th>
-                        <th className="py-2.5 px-3 min-w-[120px]">비고 / 산출내역</th>
-                        <th className="py-2.5 px-3 text-center min-w-[90px]">관리</th>
+                        <th className="py-3 px-4 min-w-[160px]">예정 지출 항목명</th>
+                        <th className="py-3 px-4 text-right min-w-[110px]">단가</th>
+                        <th className="py-3 px-4 text-center min-w-[60px]">수량</th>
+                        <th className="py-3 px-4 text-right min-w-[120px]">차감 예정액</th>
+                        <th className="py-3 px-4 text-center min-w-[80px]">상태</th>
+                        <th className="py-3 px-4 min-w-[120px]">비고 / 산출내역</th>
+                        <th className="py-3 px-4 text-center min-w-[90px]">관리</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-mono text-xs">
@@ -507,53 +593,53 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
 
                         return (
                           <tr key={sim.id || `sim-${idx}`} className="hover:bg-slate-50/60 transition-colors">
-                            <td className="py-2.5 px-3 text-slate-900 font-semibold font-sans">
+                            <td className="py-3 px-4 align-middle text-slate-900 font-bold font-sans text-sm">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 {sim.actionType === 'daily_expense' ? (
-                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200/80 inline-flex items-center gap-0.5 shrink-0">
-                                    <Coins className="w-2.5 h-2.5 text-amber-600" /> 일상경비
+                                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200/80 inline-flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                                    <Coins className="w-3 h-3 text-amber-600" /> 일상경비
                                   </span>
                                 ) : (
-                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200/80 inline-flex items-center gap-0.5 shrink-0">
+                                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200/80 inline-flex items-center gap-0.5 whitespace-nowrap shrink-0">
                                     일반지출
                                   </span>
                                 )}
                                 <span>{sim.name}</span>
                               </div>
                             </td>
-                            <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">
+                            <td className="py-3 px-4 text-right align-middle tabular-nums text-slate-600 font-medium whitespace-nowrap">
                               ₩{formatN(sim.unitPrice || 0)}
                             </td>
-                            <td className="py-2.5 px-3 text-center tabular-nums text-slate-700 font-semibold">
-                              {sim.quantity || 1}
+                            <td className="py-3 px-4 text-center align-middle tabular-nums text-slate-700 font-bold whitespace-nowrap">
+                              {sim.quantity || 1}개
                             </td>
-                            <td className="py-2.5 px-3 text-right font-bold tabular-nums text-indigo-600 text-[13px]">
+                            <td className="py-3 px-4 text-right align-middle font-extrabold tabular-nums text-indigo-600 text-sm whitespace-nowrap">
                               ₩{formatN(sim.amount)}
                             </td>
-                            <td className="py-2.5 px-3 text-center font-sans">
+                            <td className="py-3 px-4 text-center align-middle font-sans whitespace-nowrap">
                               {isSettled ? (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                                <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                                   정산완료
                                 </span>
                               ) : (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200/80">
+                                <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
                                   예정
                                 </span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-slate-500 font-sans truncate max-w-[180px]" title={sim.memo}>
+                            <td className="py-3 px-4 align-middle text-slate-500 font-sans truncate max-w-[180px]" title={sim.memo}>
                               {sim.memo || '-'}
                             </td>
-                            <td className="py-2.5 px-3 text-center font-sans">
+                            <td className="py-3 px-4 text-center align-middle font-sans whitespace-nowrap">
                               <div className="flex items-center justify-center gap-1">
                                 {!isSettled && onSettleSimEntry && (
                                   <button
                                     type="button"
                                     onClick={() => onSettleSimEntry(sim.id)}
-                                    className="p-1 rounded bg-white hover:bg-emerald-50 text-emerald-600 border border-slate-200/80 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded bg-white hover:bg-emerald-50 text-emerald-600 border border-slate-200/80 transition-colors cursor-pointer"
                                     title="실제 지출로 정산 전환"
                                   >
-                                    <CheckCircle2 size={13} />
+                                    <CheckCircle2 size={14} />
                                   </button>
                                 )}
                                 {!isSettled && onEditSimEntry && (
@@ -563,20 +649,20 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
                                       onEditSimEntry(sim);
                                       onClose();
                                     }}
-                                    className="p-1 rounded bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/80 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/80 transition-colors cursor-pointer"
                                     title="수정"
                                   >
-                                    <Pencil size={13} />
+                                    <Pencil size={14} />
                                   </button>
                                 )}
                                 {onDeleteSimEntry && (
                                   <button
                                     type="button"
                                     onClick={() => onDeleteSimEntry(sim.id)}
-                                    className="p-1 rounded bg-white hover:bg-rose-50 text-rose-600 border border-slate-200/80 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded bg-white hover:bg-rose-50 text-rose-600 border border-slate-200/80 transition-colors cursor-pointer"
                                     title="삭제"
                                   >
-                                    <Trash2 size={13} />
+                                    <Trash2 size={14} />
                                   </button>
                                 )}
                               </div>
@@ -588,13 +674,13 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
                   </table>
                 </div>
 
-                <div className="bg-slate-50/80 border-t border-slate-200/80 px-4 py-2.5 flex items-center justify-between text-xs font-semibold text-slate-800">
+                <div className="bg-slate-50/80 border-t border-slate-200/80 px-4 py-3 flex items-center justify-between text-xs font-bold text-slate-800">
                   <span className="text-slate-600 font-sans">
                     시뮬레이션 건수: <strong className="font-mono tabular-nums text-slate-900">{simulationEntries.length}</strong>건
                   </span>
                   <div className="flex items-center gap-2 font-sans">
                     <span className="text-slate-500">예정 차감 합계:</span>
-                    <span className="font-mono tabular-nums text-sm text-indigo-600 font-bold">
+                    <span className="font-mono tabular-nums text-base text-indigo-600 font-extrabold">
                       ₩{formatN(simulatedExpenditure)}
                     </span>
                   </div>
@@ -607,52 +693,76 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
         {/* Tab 3: Budget SubItems Foundation */}
         {activeTab === 'subItems' && (
           <div className="space-y-3">
-            <div className="p-3 bg-slate-50/80 border border-slate-200/80 rounded-lg text-xs text-slate-600">
+            <div className="p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-xl text-xs text-slate-600 font-medium">
               본예산 편성 시 확정된 산출기초 및 세부 산출내역입니다. 실무 집행 시 기준 단가와 대상 인원수를 대조할 수 있습니다.
             </div>
+
+            {totalLockedAmount > 0 && (
+              <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl text-xs text-amber-900 font-medium flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Lock size={14} className="text-amber-700 shrink-0" />
+                  <span>법정 필수경비(인건비/보험료 등) 잠금 한도 총액: <strong className="font-mono tabular-nums text-sm font-extrabold text-amber-950">₩{formatN(totalLockedAmount)}</strong></span>
+                </div>
+                <span className="text-amber-700 font-bold text-[11px] bg-white border border-amber-200/80 px-2 py-0.5 rounded">임의 삭감 불가</span>
+              </div>
+            )}
 
             {targetSubItems.length === 0 ? (
               <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-slate-200/80 text-slate-500 text-xs">
                 <Calculator className="w-7 h-7 text-slate-300 mx-auto mb-2" />
-                <p className="font-semibold text-slate-700">등록된 세부 산출내역(subItems)이 없습니다.</p>
-                <p className="text-[11px] text-slate-400 mt-1">
+                <p className="font-bold text-slate-700 text-sm">등록된 세부 산출내역(subItems)이 없습니다.</p>
+                <p className="text-xs text-slate-400 mt-1">
                   예산 관리 카테고리 설정에서 산출 기초를 등록하면 실시간으로 연동됩니다.
                 </p>
               </div>
             ) : (
-              <div className="space-y-2.5 max-h-[380px] overflow-y-auto custom-scrollbar pr-1">
+              <div className="space-y-3 max-h-[380px] overflow-y-auto custom-scrollbar pr-1">
                 {targetSubItems.map((sub, idx) => (
-                  <div key={sub.id || `sub-${idx}`} className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs space-y-2">
+                  <div key={sub.id || `sub-${idx}`} className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs space-y-2.5">
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div className="flex items-center gap-2">
                         {sub.prefix && (
-                          <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-mono">
+                          <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono">
                             {sub.prefix}
                           </span>
                         )}
-                        <span className="text-sm font-semibold text-slate-900">{sub.name}</span>
+                        <span className="text-sm sm:text-base font-bold text-slate-900">{sub.name}</span>
+                        {sub.isLocked && (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-50 border border-amber-200/80 text-amber-800 inline-flex items-center gap-1 font-sans">
+                            <Lock size={11} className="text-amber-600" />
+                            <span>잠금</span>
+                          </span>
+                        )}
                       </div>
-                      <span className="text-sm font-bold font-mono tabular-nums text-slate-900">
+                      <span className="text-base font-extrabold font-mono tabular-nums text-slate-900">
                         ₩{formatN(sub.amount)}
                       </span>
                     </div>
 
                     {sub.calculation && (
-                      <div className="text-xs font-mono text-slate-600 bg-slate-50/70 p-2 rounded-lg border border-slate-200/60">
+                      <div className="text-xs font-mono text-slate-600 bg-slate-50/70 p-2.5 rounded-lg border border-slate-200/60">
                         {sub.calculation}
                       </div>
                     )}
 
                     {sub.calculations && sub.calculations.length > 0 && (
-                      <div className="mt-2 space-y-1.5 pl-2.5 border-l-2 border-slate-200">
+                      <div className="mt-2 space-y-1.5 pl-3 border-l-2 border-slate-200">
                         {sub.calculations.map((calc, cIdx) => (
-                          <div key={calc.id || `calc-${cIdx}`} className="flex items-center justify-between text-xs py-1 px-2.5 rounded-lg bg-slate-50/60 border border-slate-200/60">
-                            <span className="font-medium text-slate-700">{calc.name}</span>
+                          <div key={calc.id || `calc-${cIdx}`} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg bg-slate-50/60 border border-slate-200/60">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-slate-700">{calc.name}</span>
+                              {calc.isLocked && (
+                                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200/80 text-amber-800 inline-flex items-center gap-0.5 font-sans">
+                                  <Lock size={10} className="text-amber-600" />
+                                  <span>잠금</span>
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-center gap-3">
                               {calc.calculation && (
-                                <span className="font-mono text-slate-500 text-[11px]">{calc.calculation}</span>
+                                <span className="font-mono text-slate-500 text-xs">{calc.calculation}</span>
                               )}
-                              <span className="font-mono tabular-nums font-semibold text-slate-800">₩{formatN(calc.amount)}</span>
+                              <span className="font-mono tabular-nums font-extrabold text-slate-800 text-sm">₩{formatN(calc.amount)}</span>
                             </div>
                           </div>
                         ))}
@@ -666,15 +776,15 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
         )}
 
         {/* Modal Footer Controls */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
-          <div className="text-slate-400 text-[11px] flex items-center gap-1.5">
-            <Building2 size={13} className="text-slate-400" />
+        <div className="flex items-center justify-between pt-3.5 border-t border-slate-100 text-xs">
+          <div className="text-slate-400 text-xs flex items-center gap-1.5">
+            <Building2 size={14} className="text-slate-400" />
             <span>단일 진실 공급원(SSOT): data/BUDGET_ENTRIES.json & BUDGET_CATEGORIES.json</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors cursor-pointer"
+            className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold transition-colors cursor-pointer"
           >
             닫기
           </button>

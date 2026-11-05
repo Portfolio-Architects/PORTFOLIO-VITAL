@@ -44,12 +44,12 @@ function MultiSelectDropdownComponent({
   };
 
   return (
-    <div className="relative inline-block w-full sm:w-auto sm:min-w-[160px] sm:max-w-[210px]">
+    <div className="relative inline-block w-full sm:w-auto sm:min-w-[160px] sm:max-w-[220px]">
       <button 
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)} 
-        className={`flex items-center justify-between w-full px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
+        className={`flex items-center justify-between w-full px-3 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
           disabled 
             ? 'opacity-45 cursor-not-allowed bg-slate-50 border-slate-200 text-slate-400' 
             : isAll 
@@ -58,7 +58,7 @@ function MultiSelectDropdownComponent({
         }`}
       >
         <span className="truncate">{isAll ? `${label} 전체` : `${selected.length}개 선택됨${selected.length === 1 ? ` (${selected[0]})` : ''}`}</span>
-        <ChevronDown size={13} className={`shrink-0 ml-1.5 transition-transform ${isOpen ? 'rotate-180' : ''} ${isAll ? 'text-slate-400' : 'text-slate-300'}`} />
+        <ChevronDown size={14} className={`shrink-0 ml-1.5 transition-transform ${isOpen ? 'rotate-180' : ''} ${isAll ? 'text-slate-400' : 'text-slate-300'}`} />
       </button>
       
       {isOpen && !disabled && (
@@ -70,7 +70,7 @@ function MultiSelectDropdownComponent({
               onClick={() => { onChange([]); setIsOpen(false); }}
             >
               <input type="checkbox" checked={isAll} readOnly className="mr-2 accent-slate-900 rounded" />
-              <span className="text-xs font-semibold text-slate-800">{label} 전체</span>
+              <span className="text-sm font-semibold text-slate-800">{label} 전체</span>
             </div>
             {options.map((opt, i) => {
               const val = getOptValue(opt);
@@ -78,14 +78,14 @@ function MultiSelectDropdownComponent({
               return (
                 <div 
                   key={`${val}-${i}`}
-                  className="flex items-center justify-between px-3 py-1.5 cursor-pointer hover:bg-slate-50 group"
+                  className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-slate-50 group"
                   onClick={() => toggle(val)}
                 >
                   <div className="flex items-center min-w-[120px] max-w-[200px] pr-3">
                     <input type="checkbox" checked={selectedSet.has(val)} readOnly className="mr-2 flex-shrink-0 accent-slate-900 rounded" />
-                    <span className="text-xs text-slate-700 truncate" title={val}>{val}</span>
+                    <span className="text-sm text-slate-700 truncate" title={val}>{val}</span>
                   </div>
-                  {suffix && <span className="text-[11px] font-mono text-slate-400 group-hover:text-slate-600 whitespace-nowrap">{suffix}</span>}
+                  {suffix && <span className="text-xs font-mono text-slate-400 group-hover:text-slate-600 whitespace-nowrap">{suffix}</span>}
                 </div>
               );
             })}

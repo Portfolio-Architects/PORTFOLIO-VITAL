@@ -230,23 +230,23 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
   }, [finalProjectedRate]);
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs flex flex-col gap-3 relative overflow-hidden">
+    <div className="bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col gap-4 relative overflow-hidden">
       {/* 1. Header with Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 relative z-10">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-slate-50 text-slate-600 border border-slate-200/80 flex items-center justify-center shrink-0">
-            <TrendingUp className="w-4 h-4" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 border border-slate-200/80 flex items-center justify-center shrink-0">
+            <TrendingUp className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+              <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
                 지출 예정액 반영 예산 소진 추세
               </h3>
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200/70 text-slate-600 font-mono">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 border border-slate-200/70 text-slate-600 font-mono">
                 Commitment Burn-up
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               현재 실집행선에 시뮬레이터 등록 예정액(₩{totalSimulatedExpenditure.toLocaleString('ko-KR')})을 합산한 0–100% 예상 소진선
             </p>
           </div>
@@ -254,12 +254,12 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
 
         {/* Project Selector & Status Indicators */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50/70 border border-slate-200/90 rounded-lg text-xs text-slate-600">
-            <Filter className="w-3 h-3 text-slate-400" />
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50/70 border border-slate-200/90 rounded-lg text-xs text-slate-600">
+            <Filter className="w-3.5 h-3.5 text-slate-400" />
             <select
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
             >
               <option value="ALL">전체 세부사업 총괄</option>
               {availableDetailedProjects.map((dp) => (
@@ -271,22 +271,22 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
           </div>
 
           <div className="flex items-center gap-1.5">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-lg text-[11px] font-semibold font-mono tabular-nums text-slate-700">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-800" />
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/80 rounded-lg text-xs font-bold font-mono tabular-nums text-slate-700">
+              <span className="w-2 h-2 rounded-full bg-slate-800" />
               <span>현재 실집행 {currentRate.toFixed(1)}%</span>
             </div>
 
             <div
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold font-mono tabular-nums border ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold font-mono tabular-nums border ${
                 isOverBudget
                   ? 'bg-rose-50 border-rose-200/80 text-rose-700'
                   : 'bg-indigo-50/70 border-indigo-200/70 text-indigo-700'
               }`}
             >
               {isOverBudget ? (
-                <AlertTriangle className="w-3 h-3 text-rose-600" />
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
               ) : (
-                <CheckCircle2 className="w-3 h-3 text-indigo-600" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
               )}
               <span>예정 반영 {finalProjectedRate.toFixed(1)}%</span>
             </div>
@@ -295,7 +295,7 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
       </div>
 
       {/* 2. Burn-up Line Chart */}
-      <div className="w-full h-[220px] sm:h-[240px] mt-0.5 relative">
+      <div className="w-full h-[240px] sm:h-[260px] mt-0.5 relative">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 20, right: 15, left: -15, bottom: 0 }}>
             <defs>
@@ -387,7 +387,7 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
       </div>
 
       {/* 3. Bottom Legend Indicators */}
-      <div className="flex items-center justify-center gap-4 sm:gap-6 pt-2 text-[11px] text-slate-500 font-medium border-t border-slate-100 flex-wrap">
+      <div className="flex items-center justify-center gap-4 sm:gap-6 pt-2.5 text-xs text-slate-500 font-medium border-t border-slate-100 flex-wrap">
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-1 bg-slate-900 rounded-full" />
           <span>실제 누적 소진율 (1~9월 실적)</span>

@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { BudgetCategory, BudgetEntry } from '@/types';
 import { useBudgetFilters } from '@/hooks/useBudgetFilters';
 import { Card } from '@/components/ui/card';
-import { ShieldAlert, RefreshCw, Search, FilePlus2, CircleDollarSign, Wallet, Receipt, ShieldCheck, ChevronDown, Sparkles, Plus } from 'lucide-react';
+import { RefreshCw, Search, FilePlus2, CircleDollarSign, Wallet, Receipt, ShieldCheck } from 'lucide-react';
 import { MultiSelectDropdown } from './ui/MultiSelectDropdown';
 import { PolicyGroupCard } from './ui/PolicyGroupCard';
 import { useVirtualList } from '@/hooks/useVirtualList';
@@ -32,11 +32,6 @@ const LedgerModal = dynamic(
 
 const DailyExpenseStatModal = dynamic(
   () => import('./ui/DailyExpenseStatModal').then((mod) => mod.DailyExpenseStatModal),
-  { ssr: false }
-);
-
-const QuickPlanModal = dynamic(
-  () => import('./ui/QuickPlanModal').then((mod) => mod.QuickPlanModal),
   { ssr: false }
 );
 
@@ -93,8 +88,6 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
   const [returnToEntryModal, setReturnToEntryModal] = useState(false);
   const [showLedgerModal, setShowLedgerModal] = useState(false);
   const [showDailyStatModal, setShowDailyStatModal] = useState(false);
-  const [isRiskExpanded, setIsRiskExpanded] = useState(false);
-  const [quickPlanCategory, setQuickPlanCategory] = useState<BudgetCategory | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -136,30 +129,6 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
       setReturnToEntryModal(false);
     }
   }, [updateEntry, addEntry, returnToEntryModal]);
-
-  const handleSaveQuickPlan = useCallback((plan: {
-    categoryId: string;
-    detailedProject: string;
-    statItem: string;
-    name: string;
-    unitPrice: number;
-    quantity: number;
-    amount: number;
-    memo?: string;
-    date: string;
-  }) => {
-    addEntry({
-      categoryId: plan.categoryId,
-      amount: plan.amount,
-      date: plan.date,
-      purpose: plan.name,
-      memo: plan.memo,
-      isPlanned: true,
-      isSettled: false,
-      actionType: 'general'
-    });
-    setQuickPlanCategory(null);
-  }, [addEntry]);
 
   const handleSettleEntry = useCallback((plannedEntryId: string, actualAmount: number) => {
     const plannedEntry = entries.find(e => e.id === plannedEntryId);
@@ -226,32 +195,6 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
     setShowBatchModal(false);
   }, [batchCats, updateCategory]);
 
-  const currentMonth = new Date().getMonth() + 1;
-  const isEndOfYearApproaching = currentMonth >= 11;
-  
-  const riskCategories = useMemo(() => {
-    return categories.map(cat => {
-      const st = getCategoryStats(cat.id);
-      const stExcludePlanned = getCategoryStats(cat.id, true) || st;
-      if (!st || !stExcludePlanned) return null;
-      if (currentMonth >= 9 && stExcludePlanned.usageRate < 70) return { cat, st, stExcludePlanned, reason: '3분기 집행률 70% 미만' };
-      if (isEndOfYearApproaching && (stExcludePlanned.remaining / st.totalBudget) >= 0.1) return { cat, st, stExcludePlanned, reason: '회계연도 마감 임박 (가용 잔액 10% 초과)' };
-      return null;
-    }).filter((item): item is NonNullable<typeof item> => Boolean(item));
-  }, [categories, getCategoryStats, currentMonth, isEndOfYearApproaching]);
-
-  const totalRiskUnspent = useMemo(() => {
-    return riskCategories.reduce((acc, curr) => acc + (curr.stExcludePlanned.remaining ?? 0), 0);
-  }, [riskCategories]);
-
-  const totalRiskPlanned = useMemo(() => {
-    return riskCategories.reduce((acc, curr) => acc + (curr.st.planned ?? 0), 0);
-  }, [riskCategories]);
-
-  const totalRiskProjected = useMemo(() => {
-    return Math.max(0, totalRiskUnspent - totalRiskPlanned);
-  }, [totalRiskUnspent, totalRiskPlanned]);
-
   // Policy groups virtualization
   const isPolicyVirtualActive = groupedByPolicy.length > 4;
   const { startIndex, endIndex, topPadding, bottomPadding } = useVirtualList({
@@ -267,155 +210,22 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
   }, [groupedByPolicy, isPolicyVirtualActive, startIndex, endIndex]);
 
   return (
-    <div className="space-y-4">
-      
-      {/* Risk Alert Minimalist Bar & Integrated Simulator Burn-down Hub */}
-      {riskCategories.length > 0 && (
-        <div className="bg-white border border-rose-200/80 rounded-xl px-4 py-3 shadow-2xs transition-colors">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
-                <ShieldAlert size={15} />
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold text-slate-900">불용 위험 모니터링</span>
-                <span className="px-2 py-0.5 text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/70 rounded-md">
-                  {riskCategories.length}개 사업
-                </span>
-                <span className="text-slate-200 hidden sm:inline">|</span>
-                <div className="flex items-center gap-2 text-xs text-slate-600 flex-wrap">
-                  <span>미집행 잔액 <strong className="text-slate-900 font-mono font-semibold tabular-nums">{formatN(totalRiskUnspent)}원</strong></span>
-                  {totalRiskPlanned > 0 ? (
-                    <>
-                      <span className="text-slate-300 font-mono">−</span>
-                      <span className="text-slate-600">
-                        소진 계획 <strong className="font-mono font-semibold text-indigo-600 tabular-nums">{formatN(totalRiskPlanned)}원</strong>
-                      </span>
-                      <span className="text-slate-300 font-mono">=</span>
-                      <span className="bg-rose-50/70 px-2 py-0.5 rounded-md border border-rose-200/60 text-rose-800">
-                        최종 불용 예상 <strong className="font-mono font-bold tabular-nums">{formatN(totalRiskProjected)}원</strong>
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-[11px] text-rose-500 font-medium">
-                      (소진 계획 미수립)
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {props.onNavigateToSimulator && (
-                <button
-                  type="button"
-                  onClick={props.onNavigateToSimulator}
-                  className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 transition-colors flex items-center gap-1.5 cursor-pointer"
-                  title="예산 시뮬레이터로 이동하여 종합 시뮬레이션 및 정산 관리"
-                >
-                  <Sparkles size={13} className="text-indigo-600" />
-                  <span>시뮬레이터 상세</span>
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setIsRiskExpanded(!isRiskExpanded)}
-                className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <span>{isRiskExpanded ? '접기' : '사업 목록'}</span>
-                <ChevronDown size={13} className={`transform transition-transform duration-200 text-slate-400 ${isRiskExpanded ? 'rotate-180' : ''}`} />
-              </button>
-            </div>
-          </div>
-
-          {/* Collapsible details: 2-column compact scroll grid */}
-          {isRiskExpanded && (
-            <div className="mt-3 pt-3 border-t border-slate-100">
-              <div className="flex items-center justify-between text-[11px] text-slate-500 mb-2 px-0.5">
-                <span>조기 집행 및 연말 잔액 소진 조치(시뮬레이션 계획 수립 및 품의) 권고 사업 목록</span>
-                <span className="font-mono">총 {riskCategories.length}건</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1">
-                {riskCategories.map((item) => {
-                  const unspent = item.stExcludePlanned.remaining;
-                  const planned = item.st.planned;
-                  const finalRemaining = item.st.remaining;
-                  const isFullyPlanned = planned > 0 && finalRemaining <= 0;
-                  const isPartiallyPlanned = planned > 0 && finalRemaining > 0;
-
-                  return (
-                    <div key={item.cat.id} className="flex items-center justify-between text-xs bg-slate-50/70 hover:bg-slate-50 p-2.5 rounded-lg border border-slate-200/70 gap-2 transition-colors">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-slate-800 truncate" title={item.cat.name}>
-                            {item.cat.name}
-                          </span>
-                          {isFullyPlanned ? (
-                            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded shrink-0">
-                              계획 100%
-                            </span>
-                          ) : isPartiallyPlanned ? (
-                            <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-1.5 py-0.5 rounded shrink-0">
-                              수립중
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-rose-600 bg-rose-50 border border-rose-200/60 px-1.5 py-0.5 rounded shrink-0">
-                              {item.reason}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500 flex-wrap">
-                          <span>미집행: <strong className="font-mono text-slate-700 tabular-nums">{formatN(unspent)}원</strong></span>
-                          {planned > 0 && (
-                            <>
-                              <span className="text-slate-300">/</span>
-                              <span className="text-indigo-600">
-                                계획: <strong className="font-mono tabular-nums">{formatN(planned)}원</strong>
-                              </span>
-                              <span className="text-slate-300">/</span>
-                              <span className={finalRemaining <= 0 ? 'text-emerald-600 font-semibold' : 'text-amber-600'}>
-                                최종잔여: <strong className="font-mono tabular-nums">{formatN(finalRemaining)}원</strong>
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setQuickPlanCategory(item.cat)}
-                          className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-slate-900 hover:bg-slate-800 text-white transition-colors flex items-center gap-1 cursor-pointer"
-                          title="이 사업에 대한 소진 계획(품의) 즉시 수립"
-                        >
-                          <Plus size={12} />
-                          <span>소진 계획</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
+    <div className="space-y-6">
       {/* Minimalist Top Header Bar */}
       <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
         <div className="flex items-baseline gap-2.5">
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight">예산 관리</h2>
-          <span className="text-xs text-slate-400 font-medium">
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">예산 관리</h2>
+          <span className="text-xs sm:text-sm text-slate-400 font-medium">
             {groupedByPolicy.length}개 정책사업 · {filteredCategoriesTree.length}개 통계목
           </span>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => { setEntryModalInitialData(null); setShowEntryModal(true); }}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors cursor-pointer shadow-2xs disabled:opacity-40"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition-colors cursor-pointer shadow-2xs disabled:opacity-40"
             disabled={categories.length === 0}
           >
-            <FilePlus2 size={14} /> 지출 품의
+            <FilePlus2 size={16} /> 지출 품의
           </button>
         </div>
       </div>
@@ -427,21 +237,21 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
         const realAvailableRemRate = filteredStats.totalBudget > 0 ? ((filteredStats.remaining + filteredStats.dailyExpenseRemaining) / filteredStats.totalBudget) * 100 : 0;
 
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Total Budget */}
-            <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+            <div className="bg-white border border-slate-200/80 rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-semibold text-slate-500">전체 예산 현황</span>
-                  <CircleDollarSign size={15} className="text-slate-400" />
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm font-bold text-slate-600">전체 예산 현황</span>
+                  <CircleDollarSign size={18} className="text-slate-400" />
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono tabular-nums">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono tabular-nums">
                   {formatN(filteredStats.totalBudget)}
-                  <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+                  <span className="text-sm font-medium text-slate-400 ml-1">원</span>
                 </div>
               </div>
-              <div className="mt-3 pt-2.5 border-t border-slate-100">
-                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex mb-2" title={`집행률: ${overallExecRate.toFixed(1)}% | 실질 미집행률: ${realAvailableRemRate.toFixed(1)}%`}>
+              <div className="mt-4 pt-3 border-t border-slate-100">
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex mb-2.5" title={`집행률: ${overallExecRate.toFixed(1)}% | 실질 미집행률: ${realAvailableRemRate.toFixed(1)}%`}>
                   <div 
                     className="bg-slate-900 h-full transition-all duration-500" 
                     style={{ width: `${Math.min(100, overallExecRate)}%` }} 
@@ -451,68 +261,68 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
                     style={{ width: `${Math.min(100 - Math.min(100, overallExecRate), realAvailableRemRate)}%` }} 
                   />
                 </div>
-                <div className="flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-slate-600 font-medium">집행 <strong className="text-slate-900">{overallExecRate.toFixed(1)}%</strong></span>
-                  <span className="text-slate-500">미집행 <strong className="text-emerald-700">{realAvailableRemRate.toFixed(1)}%</strong></span>
+                <div className="flex items-center justify-between text-xs font-mono tabular-nums">
+                  <span className="text-slate-600 font-semibold">집행 <strong className="text-slate-900">{overallExecRate.toFixed(1)}%</strong></span>
+                  <span className="text-slate-500 font-semibold">미집행 <strong className="text-emerald-700">{realAvailableRemRate.toFixed(1)}%</strong></span>
                 </div>
               </div>
             </div>
             
             {/* Card 2: General Account */}
-            <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+            <div className="bg-white border border-slate-200/80 rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-semibold text-slate-500">일반 계좌 (e-호조 본청)</span>
-                  <Wallet size={15} className="text-slate-400" />
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm font-bold text-slate-600">일반 계좌 (e-호조 본청)</span>
+                  <Wallet size={18} className="text-slate-400" />
                 </div>
                 <div className="flex items-baseline justify-between gap-1">
-                  <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono tabular-nums">
+                  <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono tabular-nums">
                     {formatN(filteredStats.remaining)}
-                    <span className="text-xs font-normal text-slate-400 ml-1">원 잔여</span>
+                    <span className="text-sm font-medium text-slate-400 ml-1">원 잔여</span>
                   </div>
-                  <span className="text-[11px] font-semibold font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600" title="e-호조 본청 잔여율">
+                  <span className="text-xs font-bold font-mono tabular-nums px-2 py-0.5 rounded bg-slate-100 text-slate-700" title="e-호조 본청 잔여율">
                     본청 잔여 {overallRemRate.toFixed(1)}%
                   </span>
                 </div>
               </div>
-              <div className="mt-3 pt-2.5 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
-                <span>본청 직접 지출</span>
-                <span className="font-semibold text-slate-800 font-mono tabular-nums">{formatN(filteredStats.totalSpent - filteredStats.dailyExpenseIssued)}원</span>
+              <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+                <span className="font-medium">본청 직접 지출</span>
+                <span className="font-bold text-slate-800 font-mono tabular-nums">{formatN(filteredStats.totalSpent - filteredStats.dailyExpenseIssued)}원</span>
               </div>
             </div>
 
             {/* Card 3: Daily Expense Issuance */}
-            <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-slate-500">일상경비 이체내역</span>
+            <div className="bg-white border border-slate-200/80 rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm font-bold text-slate-600">일상경비 이체내역</span>
                 <div className="flex gap-1.5 items-center">
                   <button 
                     onClick={() => setShowDailyStatModal(true)} 
-                    className="text-[11px] bg-slate-50 hover:bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md transition-colors font-semibold border border-slate-200/80 cursor-pointer"
+                    className="text-xs bg-slate-50 hover:bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md transition-colors font-semibold border border-slate-200/80 cursor-pointer"
                   >
                     통계목별
                   </button>
-                  <Receipt size={15} className="text-slate-400" />
+                  <Receipt size={18} className="text-slate-400" />
                 </div>
               </div>
               <div className="divide-y divide-slate-100 text-xs">
-                <div className="py-1 flex justify-between items-center">
-                  <span className="text-slate-500">교부액 (원금)</span>
-                  <span className="font-medium text-slate-800 font-mono tabular-nums">{formatN(filteredStats.dailyExpenseIssued)}원</span>
+                <div className="py-2 flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">교부액 (원금)</span>
+                  <span className="font-semibold text-slate-800 font-mono tabular-nums">{formatN(filteredStats.dailyExpenseIssued)}원</span>
                 </div>
-                <div className="py-1 flex justify-between items-center">
+                <div className="py-2 flex justify-between items-center">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-500">실지출액</span>
-                    <span className="text-[10px] font-mono text-slate-400">
+                    <span className="text-slate-500 font-medium">실지출액</span>
+                    <span className="text-[11px] font-mono tabular-nums text-slate-400">
                       집행 {filteredStats.dailyExpenseIssued > 0 ? ((filteredStats.dailyExpenseSpent / filteredStats.dailyExpenseIssued) * 100).toFixed(1) : '0.0'}%
                     </span>
                   </div>
-                  <span className="font-medium text-slate-800 font-mono tabular-nums">{formatN(filteredStats.dailyExpenseSpent)}원</span>
+                  <span className="font-semibold text-slate-800 font-mono tabular-nums">{formatN(filteredStats.dailyExpenseSpent)}원</span>
                 </div>
-                <div className="pt-1.5 flex justify-between items-center">
+                <div className="pt-2 flex justify-between items-center">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-700 font-semibold">가용 잔액</span>
-                    <span className="text-[10px] font-mono text-amber-600 font-medium">
+                    <span className="text-slate-700 font-bold">가용 잔액</span>
+                    <span className="text-[11px] font-mono tabular-nums text-amber-600 font-semibold">
                       미집행 {filteredStats.dailyExpenseIssued > 0 ? ((filteredStats.dailyExpenseRemaining / filteredStats.dailyExpenseIssued) * 100).toFixed(1) : '0.0'}%
                     </span>
                   </div>
@@ -522,34 +332,34 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
             </div>
 
             {/* Card 4: Total Available Remaining */}
-            <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+            <div className="bg-white border border-slate-200/80 rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm font-bold text-emerald-700 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                     보건소 실질 총 가용
                   </span>
                   <div className="flex gap-1.5 items-center">
                     <button 
                       onClick={() => setShowLedgerModal(true)} 
-                      className="flex items-center gap-1 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[11px] px-2 py-0.5 rounded-md transition-colors font-semibold border border-slate-200/80 cursor-pointer"
+                      className="flex items-center gap-1 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md transition-colors font-semibold border border-slate-200/80 cursor-pointer"
                     >
-                      <Search size={11} /> 상세 대조
+                      <Search size={12} /> 상세 대조
                     </button>
-                    <ShieldCheck size={15} className="text-emerald-600" />
+                    <ShieldCheck size={18} className="text-emerald-600" />
                   </div>
                 </div>
                 <div className="flex items-baseline justify-between gap-1">
-                  <div className="text-xl sm:text-2xl font-bold text-emerald-700 tracking-tight font-mono tabular-nums">
+                  <div className="text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight font-mono tabular-nums">
                     {formatN(filteredStats.remaining + filteredStats.dailyExpenseRemaining)}
-                    <span className="text-xs font-normal text-slate-400 ml-1">원</span>
+                    <span className="text-sm font-medium text-slate-400 ml-1">원</span>
                   </div>
-                  <span className="text-[11px] font-semibold font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/60" title="전체 예산 대비 실질 총 가용률(미집행률)">
+                  <span className="text-xs font-bold font-mono tabular-nums px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/60" title="전체 예산 대비 실질 총 가용률(미집행률)">
                     실질 미집행 {realAvailableRemRate.toFixed(1)}%
                   </span>
                 </div>
               </div>
-              <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between items-center font-mono tabular-nums">
+              <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex justify-between items-center font-mono tabular-nums">
                 <span>본청 e-호조: {formatN(filteredStats.remaining)}원</span>
                 <span>일상 통장: {formatN(filteredStats.dailyExpenseRemaining)}원</span>
               </div>
@@ -559,56 +369,56 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
       })()}
 
       {/* Minimalist Filter & Search Bar */}
-      <div className="bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200/80 space-y-2.5">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+      <div className="bg-white rounded-xl p-5 shadow-2xs border border-slate-200/80 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
           {/* Keyword Search Input */}
           <div className="relative flex-1 z-10">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 z-20">
-              <Search size={14} />
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-20">
+              <Search size={16} />
             </div>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="사업명(정책/단위/세부), 통계목, 산출기초, 문서번호, 지출목적 실시간 검색..."
-              className="w-full pl-9 pr-8 py-1.5 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors cursor-text relative z-10"
+              className="w-full pl-10 pr-9 py-2 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors cursor-text relative z-10"
             />
             {searchTerm && (
               <button
                 type="button"
                 onClick={() => setSearchTerm('')}
-                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer z-20"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer z-20"
               >
                 ✕
               </button>
             )}
           </div>
 
-          <div className="flex items-center justify-between sm:justify-end gap-1.5 shrink-0">
-            <span className="text-[11px] font-medium text-slate-400 hidden xl:inline mr-1">다중 필터링 & 실시간 대조 시스템</span>
+          <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+            <span className="text-xs font-medium text-slate-400 hidden xl:inline mr-1">다중 필터링 & 실시간 대조 시스템</span>
             {deferredSearchTerm && (
-              <span className="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium shrink-0">
+              <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-medium shrink-0">
                 검색어: &quot;{deferredSearchTerm}&quot;
               </span>
             )}
-            <button onClick={handleSaveFilters} className="text-xs px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-lg font-medium border border-slate-200/90 transition-colors cursor-pointer">
+            <button onClick={handleSaveFilters} className="text-xs sm:text-sm px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-lg font-medium border border-slate-200/90 transition-colors cursor-pointer">
               구성 저장하기
             </button>
-            <button onClick={handleResetFilters} className="text-xs px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 rounded-lg font-medium border border-slate-200/90 transition-colors flex items-center gap-1 cursor-pointer">
-              <RefreshCw size={11} /> 초기화 및 해제
+            <button onClick={handleResetFilters} className="text-xs sm:text-sm px-3 py-2 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 rounded-lg font-medium border border-slate-200/90 transition-colors flex items-center gap-1 cursor-pointer">
+              <RefreshCw size={12} /> 초기화 및 해제
             </button>
           </div>
         </div>
 
         {/* Filter Controls Row */}
-        <div className="flex flex-wrap gap-1.5 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           <MultiSelectDropdown label="정책사업명" options={uniquePolicies} selected={filterPolicy} onChange={val => { setFilterPolicy(val); setFilterUnit([]); setFilterDetail([]); setFilterStat([]); }} />
           <MultiSelectDropdown label="단위사업명" options={unitOptions} selected={filterUnit} onChange={val => { setFilterUnit(val); setFilterDetail([]); setFilterStat([]); }} disabled={unitOptions.length === 0} />
           <MultiSelectDropdown label="세부사업명" options={detailOptions} selected={filterDetail} onChange={val => { setFilterDetail(val); setFilterStat([]); }} disabled={detailOptions.length === 0} />
           <MultiSelectDropdown label="통계목" options={statOptions} selected={filterStat} onChange={val => setFilterStat(val)} disabled={statOptions.length === 0} />
 
           {/* Month Filter Selector */}
-          <div className="flex items-center gap-1.5 bg-slate-50/70 border border-slate-200/90 rounded-lg px-2.5 py-1.5 text-xs">
+          <div className="flex items-center gap-1.5 bg-slate-50/70 border border-slate-200/90 rounded-lg px-3 py-2 text-xs sm:text-sm">
             <span className="text-slate-400 font-medium">월별</span>
             <select
               value={filterMonth}
@@ -628,7 +438,7 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
       {categories.length === 0 ? (
         <Card><div className="px-5 py-10 text-center text-sm text-[var(--color-text-tertiary)]">예산 과목을 추가해 보세요</div></Card>
       ) : (
-        <div ref={containerRef} className="space-y-3">
+        <div ref={containerRef} className="space-y-4">
           {groupedByPolicy.length === 0 && <div className="text-center text-sm text-gray-500 py-8">선택된 필터에 해당하는 예산 과목이 없습니다.</div>}
           
           {isPolicyVirtualActive && topPadding > 0 && (
@@ -728,18 +538,6 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
           onClose={() => setShowDailyStatModal(false)}
           categories={filteredCategoriesTree}
           getCategoryStats={getCategoryStats}
-        />
-      )}
-
-      {/* Quick Plan Modal */}
-      {quickPlanCategory && (
-        <QuickPlanModal
-          key={quickPlanCategory.id}
-          isOpen={!!quickPlanCategory}
-          onClose={() => setQuickPlanCategory(null)}
-          category={quickPlanCategory}
-          currentRemaining={getCategoryStats(quickPlanCategory.id, true)?.remaining ?? 0}
-          onSavePlan={handleSaveQuickPlan}
         />
       )}
     </div>

@@ -1,8 +1,8 @@
 # 대한민국 공공기관 한글(HWPX) 표준 서식 및 자동 생성 종합 지침서
 # (Permanent Public Administration HWPX Generation Guidelines)
 
-**관리 번호:** `VITAL-DOCS-HWPX-2026-V2`  
-**제정 일자:** 2026. 10. 14. (개정: 2026. 10. 15.)  
+**관리 번호:** `VITAL-DOCS-HWPX-2026-V3`  
+**제정 일자:** 2026. 10. 14. (개정: 2026. 11. 4.)  
 **단일 진실 공급원(SSOT):** `docs/HWP_GENERATION_GUIDELINES.md`  
 **적용 대상:** 시스템 내 모든 공문서, 기안문, 사업계획서, 상황보고서, 결과보고서 및 자동 생성 스크립트(`scratch/generate_new_hwpx.py`)
 
@@ -194,9 +194,9 @@
 
 ---
 
-## 󰏚 7. XML 인플레이스 자동 변환 파이프라인 연동 (`scratch/generate_new_hwpx.py`)
+## 󰏚 7. XML 인플레이스 자동 변환 파이프라인 및 5대 텍스트 겹침 원천 차단 규격 (`scratch/generate_new_hwpx.py`)
 
-시스템은 Python 유틸리티 `scratch/generate_new_hwpx.py`를 통해 마크다운 초안 문서를 완전한 HWPX 파일로 무손실 컴파일함.
+시스템은 Python 유틸리티 `scratch/generate_new_hwpx.py`를 통해 마크다운 초안 문서를 완전한 HWPX 파일로 무손실 컴파일하며, 줄 레이아웃·표 기하학 자동 재계산 엔진을 통해 텍스트 겹침 현상을 원천 차단함.
 
 ### ▢ 1. 4단계 빌드 파이프라인 (Execution Pipeline)
 
@@ -207,24 +207,47 @@
 [Step 2: 공공 표준 개조식 마크다운 초안 생성]
   └─ 딩뱃 위계(󰏚 -> ▢ -> ❍ -> -), 문장별 강제 엔터, 개조식 종결어미(-함, -됨), 개인정보 비식별화
   ▼
-[Step 3: 비파괴 복제 기반 generate_new_hwpx.py 실행]
-  └─ 템플릿 복제 -> section0.xml 언팩 -> pure hp:t 텍스트 치환 -> ZIP 재압축
+[Step 3: 비파괴 복제 및 5대 텍스트 겹침 차단 컴파일 (generate_new_hwpx.py)]
+  └─ 템플릿 복제 -> header.xml 압축 스타일 정규화 -> pure hp:t 치환 -> 줄·표 기하학 자동 재계산 -> ZIP 플래그 복원
   ▼
-[Step 4: 표준 준거 지침(여백, 폰트, 2타 띄기, 끝.) 최종 검증]
-  └─ 한컴오피스 호환성 검증 및 privacy_guard.py 무결점 게이트키퍼 통과
+[Step 4: 표준 준거 지침 및 무결성 게이트키퍼 최종 검증]
+  └─ verify_hwpx_no_overlap 자동 검증, 한컴오피스 호환성 및 privacy_guard.py 게이트키퍼 통과
 ```
 
 ### ▢ 2. XML 텍스트 인플레이스 치환 규칙
 
-- ❍ **제어 객체 격리 (`has_ctrl_objects`):** 파서는 문단(`hp:p`) 내 `hp:tbl`, `hp:box`, `hp:picture`, `hp:equation` 등의 하위 노드를 탐지하여, 컨트롤 객체가 내포된 문단은 텍스트 일괄 덮어쓰기 대상에서 제외함.
-- ❍ **순수 텍스트 런 교체 (`hp:run > hp:t`):** 단일 문단에 복수의 런(`hp:run`)이 존재할 경우, 첫 번째 텍스트 노드에 신규 텍스트를 주입하고 나머지 잉여 런의 텍스트 노드는 비워 스타일 속성(자간, 폰트, 크기)의 파괴를 영구 방어함.
-- ❍ **표 내부 셀 매핑:** 마크다운 파이프라인 테이블(`| ... |`)을 감지하여 템플릿 표 내부의 대상 행·열 노드를 순차 매핑 치환함.
+- ❍ **제어 객체 격리 (`has_ctrl_objects`):** 파서는 문단(`hp:p`) 내 `hp:tbl`, `hp:box`, `hp:picture`, `hp:pic`, `hp:equation`, `hp:rect`, `hp:container` 등의 하위 노드를 탐지하여, 컨트롤 객체나 머리말·꼬리말이 내포된 문단은 본문 텍스트 일괄 덮어쓰기 대상에서 제외함.
+- ❍ **순수 텍스트 런 단일화 교체 (`set_p_text` / `update_paragraph_text`):** 단일 문단에 복수의 순수 텍스트 런(`hp:run`) 또는 복수의 `hp:t` 노드가 존재할 경우, 첫 번째 런(`r0`)의 스타일 속성(`charPrIDRef`)을 보존하여 신규 텍스트를 주입하고 잉여 `hp:t`는 부모 `hp:run`에서, 잉여 `hp:run`은 부모 `hp:p`에서 정확히 제거함.
+- ❍ **표 내부 셀 매핑 (`set_tc_lines`):** 마크다운 파이프라인 테이블(`| ... |`)을 감지하여 `<hp:tc>/<hp:subList>/<hp:p>` 계층의 대상 행·열(`colAddr`) 노드를 순차 매핑 치환하고 줄 세그먼트를 즉시 재계산함.
 
-### ▢ 3. 한컴오피스 호환 ZIP 바이너리 패칭
+### ▢ 3. 5대 텍스트 겹침(Text Overlap) 원천 차단 엔진 규격 (★ 필수 엄수)
 
-- ❍ 파이썬 표준 라이브러리 `zipfile` 모듈이 압축 해제 및 재압축 시 리셋하는 ZIP 로컬 헤더 플래그 비트(Bit 2 Fast Deflating, value 4)를 `struct.pack_into('<H', data, offset+6, 4)`로 복구하여, 한컴오피스 한글 2020/2024에서 경고 창 없이 100% 정상 열람되도록 보장함.
+한컴오피스 한글(HWPX) 문서에서 글자나 줄·표가 겹쳐 출력되는 5대 구조적 원인을 컴파일러 수준에서 다음과 같이 원천 차단함:
 
-### ▢ 4. 실행 CLI 명령어 표준
+- ❍ **[차단 규격 1] `<hp:linesegarray>` (`vertpos`/`textpos`) 정적 레이아웃 캐시 재계산 및 자식 순서 강제 (`recalc_tc_linesegs`, `layout_sec_paragraph`, `ensure_linesegarray_last`):**
+  - 한컴오피스는 문단별 줄바꿈 시작 위치(`textpos`)와 수직 Y좌표(`vertpos`)를 `<hp:linesegarray>`에 정적 캐싱하므로, 텍스트 치환 또는 `copy.deepcopy` 문단 복제 후 이를 갱신하지 않으면 모든 줄이 동일한 `vertpos="0"`에 겹쳐 렌더링됨.
+  - `wrap_text_positions`로 한글(`0.90 × vertsize × scale`)·영문/숫자(`0.45 × vertsize × scale`) 시각 폭을 계산하여 줄바꿈 인덱스(`textpos`)를 도출하고, 줄마다 `vertpos`를 `vertsize + spacing`만큼 단조 증가시켜 재구성함.
+  - XSD 스키마에 의거하여 `<hp:linesegarray>`는 반드시 모든 `<hp:run>` 뒤인 `<hp:p>`의 **최하단 마지막 자식 노드**로 배치함 (`ensure_linesegarray_last`).
+- ❍ **[차단 규격 2] 표 셀 높이(`<hp:cellSz>`), 중첩 표(Nested Table) 상향 전파, 표 전체 높이(`<hp:tbl>/<hp:sz>`) 및 호스트 문단 `<hp:lineseg>` 동기화 (`sync_table_geometry`, `heal_section_tables_and_layout`):**
+  - 표 셀 내부 텍스트가 다중 줄로 개행될 때 셀 높이(`<hp:cellSz height>`)를 `cum_vertpos - last_spacing + top_m + bot_m` 이상으로 갱신하며, 셀 내부 문단에 하위 중첩 표(`<hp:tbl>`)가 포함된 경우 하위 표의 `<hp:sz height>`를 호스트 문단의 `vertsize`에 반영하여 후속 문단 `vertpos`가 하위 표 하단 이후로 밀려나도록 계산함.
+  - 동일 행(`<hp:tr>`) 내 비중첩 셀(`rowSpan == 1`)의 높이를 최대 행 높이(`row_h`)로 통일하고, 결재란 등 모든 셀이 `rowSpan > 1`로 엇갈려 배치된 행(Staggered RowSpan)과 수직 병합 셀은 병합 구간 행 높이 합산 제약식으로 역산·동기화함.
+  - 문서 내 모든 표를 깊이 역순(최하위 중첩 표 $\to$ 상위 외곽 표)으로 순회(`heal_section_tables_and_layout`)하여 하위 표 높이 변화를 상위 셀과 외곽 표 전체 높이(`<hp:tbl>/<hp:sz height>`) 및 직속 호스트 문단(`<hp:p>`)의 `<hp:lineseg vertsize/textheight/baseline>`까지 연쇄 반영함.
+- ❍ **[차단 규격 3] 표/개체 인라인 배치(`treatAsChar="1"`) 강제로 부유(Floating) 겹침 차단 (`enforce_inline_table_flow`):**
+  - `<hp:tbl>/<hp:pos treatAsChar="0"/>`(글자처럼 취급 해제) 상태에서는 표 높이가 확장될 때 후속 문단을 밀어내지 못하고 기존 Y좌표 위에 부유하여 겹침이 발생함.
+  - 데이터 행이 갱신·확장되는 표는 `<hp:pos treatAsChar="1" vertOffset="0"/>`으로 정규화하여 본문 텍스트 흐름과 함께 자연스럽게 페이지가 넘어가도록 강제함.
+- ❍ **[차단 규격 4] 엑셀 복사 표의 자간/줄간격 압축 스타일 및 `<hp:cellMargin>` `0xFFFFFFFF`(`4294967295`) 정수 오버플로우 방어 (`normalize_header_styles`, `get_excel_defective_ids`, `get_cell_margins`):**
+  - `Contents/header.xml` 내 엑셀 복사 유입 스타일의 자간 강제 압축(`lineWrap="SQUEEZE"`)을 `lineWrap="BREAK"`로 변환하고, `paraPr 129`의 음수 첫줄 들여쓰기(`<hc:intent>`)를 `0`으로, 100% 미만 압축 줄간격(`lineSpacing < 100%`)을 최소 `130%`로 정규화함.
+  - `get_excel_defective_ids`를 통해 `header.xml`에서 실제 결함이 감지된 엑셀 문단 참조(`paraPrIDRef="129"`, `"119"`, `styleIDRef="45"`)만 비압축(`condense="0"`) 표준 셀 문단 스타일로 치환하여 타 템플릿의 정상 스타일 오염을 방지함.
+  - `<hp:cellMargin>`의 미지정 상속값 `4294967295`(`0xFFFFFFFF = -1`)를 그대로 연산할 경우 약 42.9억 HWPUnit 오버플로우가 발생하므로, `raw < 0` 또는 `raw >= 10000`인 여백값을 표준 셀 여백(`141` HWPUnits)으로 클램핑함.
+- ❍ **[차단 규격 5] 다중 `<hp:run>` / `<hp:t>` 및 인라인 `<hp:lineBreak/>`·`<hp:fwSpace/>`·`<hp:markpenBegin/>` 잔류 유령 텍스트 완벽 제거 (`flatten_t_node`, `set_p_text`):**
+  - `<hp:t>` 내부의 `<hp:lineBreak/>`, `<hp:fwSpace/>` 자식 태그 및 `t.text` 덮어쓰기 후 `<hp:markpenBegin/>` `.tail`에 남은 구버전 형광펜 유령 텍스트가 신규 텍스트와 이중 중첩되는 현상을 막기 위해 텍스트 추출·치환 전 자식 태그를 평탄화·제거함.
+  - `extra_t` 노드를 `p_node.remove(extra_t)`로 잘못 호출하여 발생하는 `ValueError`를 방지하고 반드시 실제 부모인 `r0.remove(extra_t)` 및 `p_elem.remove(extra_r)`로 정리함.
+
+### ▢ 4. 한컴오피스 호환 ZIP 바이너리 패칭 (`patch_zip_flags`)
+
+- ❍ 파이썬 표준 라이브러리 `zipfile` 모듈이 압축 해제 및 재압축 시 리셋하는 ZIP 로컬 헤더(`PK\x03\x04` offset+6) 및 중앙 디렉토리 헤더(`PK\x01\x02` offset+8)의 플래그 비트(Bit 2 Fast Deflating, value 4)를 `struct.pack_into('<H', ...)`로 복구하여, 한컴오피스 한글 2020/2024에서 경고 창 없이 100% 정상 열람되도록 보장함.
+
+### ▢ 5. 실행 CLI 명령어 표준
 
 ```bash
 python scratch/generate_new_hwpx.py \
@@ -237,7 +260,7 @@ python scratch/generate_new_hwpx.py \
 
 ## 󰏚 8. 자가 점검 및 사후 확인 체크리스트 (Self-Verification Guard)
 
-HWPX 문서를 생성하거나 마크다운 초안을 작성한 에이전트는 다음 9개 항목을 자가 점검하여 100% 통과해야 함:
+HWPX 문서를 생성하거나 마크다운 초안을 작성한 에이전트는 다음 14개 항목을 자가 점검하여 100% 통과해야 함:
 
 - [ ] **[여백]** 상하 15.0mm, 좌우 20.0mm, 머리말/꼬리말 10.0mm 준거 여부
 - [ ] **[폰트]** 대제목 22pt, 중간제목 16~18pt, 본문 15pt, 세부 13pt 위계 준수 여부
@@ -248,3 +271,9 @@ HWPX 문서를 생성하거나 마크다운 초안을 작성한 에이전트는 
 - [ ] **[표기법]** 날짜 마침표+공백(`2026. 9. 14.`), 24시각제(`14:00`), 금액 병기(`금10,000,000원(금일천만원)`), 홑낫표 준거 여부
 - [ ] **[문체]** Zero Psychological Ventriloquism(감정·심리 묘사 배제) 및 개조식 종결어미(`-함`, `-됨`, `-임`) 준수 여부
 - [ ] **[보안]** `python scripts/privacy_guard.py --scan` 구동으로 주민등록번호 및 개인식별정보 노출 0건 확인 여부
+- [ ] **[줄세그먼트]** 모든 문단(`<hp:p>`)에서 `<hp:linesegarray>`가 `<hp:run>` 뒤에 위치하며, 셀·중첩 표 문단 내 `vertpos` 중복/침범이 0건(`dup_vpos_cells == 0`, `inverted_order_p == 0`)인지 여부
+- [ ] **[표기하학]** 표 셀 줄바꿈 및 중첩 표 확장 시 `<hp:cellSz height>`, 엇갈린 병합 행(`rowSpan`), `<hp:tbl>/<hp:sz height>` 및 직속 호스트 문단 `<hp:lineseg vertsize>`가 상향 동기화(`sync_table_geometry`, `heal_section_tables_and_layout`)되었는지 여부
+- [ ] **[글자처럼취급]** 가변 행 표의 `<hp:pos treatAsChar="1" vertOffset="0"/>` 설정으로 부유(Floating) 테이블 겹침이 차단되었는지 여부
+- [ ] **[압축/오버플로우해제]** `header.xml` 내 `lineWrap="SQUEEZE"`·압축 줄간격(`<100%`)·음수 들여쓰기(`paraPr 129`) 0건 및 `<hp:cellMargin>` `0xFFFFFFFF`(`4294967295`) 오버플로우(`huge_height_cells == 0`)가 차단되었는지 여부
+- [ ] **[다중런정리]** `<hp:t>` 내부 잔류 `<hp:lineBreak/>`·`<hp:fwSpace/>`·`<hp:markpenBegin/>` 유령 꼬리 평탄화(`ghost_t_nodes == 0`) 및 잉여 `<hp:run>`/`<hp:t>` 정리 완료 여부
+

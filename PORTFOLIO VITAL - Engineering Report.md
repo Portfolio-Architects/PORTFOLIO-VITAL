@@ -19,7 +19,7 @@
 4. **시맨틱 온톨로지 그래프 및 업무 암묵지·스케줄 자산화 ($\mathcal{J}_{\text{Ontology}}$)**:
    - `OntologyCanvasEngine`(Dirty Flag, LOD 텍스트 컬링, 32비트 정수 인코딩, Zero-Allocation)을 통한 인물·부서·업무 관계망 매핑, `TaskWisdomView` 암묵지 아카이빙, PartyKit + Yjs CRDT 실시간 동기화, 자연어 스케줄러 및 Google Calendar / RFC 5545 iCal(`/api/calendar/feed.ics`) 양방향 연동.
 5. **개인정보 보호법(PIPA) 가드레일 및 Zero-Trust 하네스 무결성 ($\mathcal{J}_{\text{Security}}$)**:
-   - 로컬 비식별화 CLI(`scripts/privacy_guard.py`)를 통한 고유식별·민감정보 사전 마스킹(Rule Q), PBKDF2 WebCrypto 인증 미들웨어(`src/middleware.ts`), E2EE 바이패스 평문 JSON 고속 I/O(자동 20버전 순환 백업 및 글로벌 툼스톤), Zod Loud-Failure 스키마 검증(`schemas.ts`) 및 **33개 Jest 테스트 스위트(315+ 테스트)** 상시 통과 보증.
+   - 로컬 비식별화 CLI(`scripts/privacy_guard.py`)를 통한 고유식별·민감정보 사전 마스킹(Rule Q), PBKDF2 WebCrypto 인증 미들웨어(`src/middleware.ts`), E2EE 바이패스 평문 JSON 고속 I/O(자동 20버전 순환 백업 및 글로벌 툼스톤), 9대 도메인 무손실 동기화 Zod Loud-Failure 하네스(`schemas.ts` $\leftrightarrow$ `run-harness.js`) 및 **38개 Jest 테스트 스위트(390+ 테스트)** 상시 통과 보증.
 
 ---
 
@@ -48,22 +48,22 @@
 
 ---
 
-## 3. 코드베이스 및 문서 현황 요약 통계 (2026-10-14 실측 기준)
+## 3. 코드베이스 및 문서 현황 요약 통계 (2026-10-26 실측 기준)
 
 | 지표 | 수치 |
 |------|------|
 | 모듈형 도메인 스킬셋 (`.agents/skills/`) | **5개 전용 스킬셋** (`vital-budget-audit`, `vital-hwpx-docgen`, `vital-festival-4way-sync`, `vital-public-infographic`, `vital-governance-ops` — Antigravity 2.0 커스텀 규격 준수) |
 | 영구 참조 가이드라인 문서 (`docs/`) | **2개 파일** (`PERSONAL_INFO_PROTECTION_GUIDE.md`, `HWP_GENERATION_GUIDELINES.md` — 외부 브레인 파손 링크 완전 대체) |
 | TypeScript/TSX 소스 파일 수 (`src/`) | **168개** (`64 components`, `40 hooks`, `35 lib`, `21 app`, `1 middleware`, `1 party`, `1 proxy`, `1 store`, `1 types`, `3 root`) |
-| 총 코드 라인 수 (`src/` LOC) | **54,035줄** (컴포넌트 28,867줄, 훅 9,598줄, 라이브러리 11,301줄, 앱/라우트 3,522줄 등) |
+| 총 코드 라인 수 (`src/` LOC) | **54,230+줄** (컴포넌트 28,867줄, 훅 9,598줄, 라이브러리 11,490+줄, 앱/라우트 3,522줄 등) |
 | Cloudflare Edge Functions (`functions/`) | **5개 파일** (**2,739줄** — `festival/yangjae.ts`, `data.ts`, `chat.ts`, `embeddings.ts`, `semantic-search.ts`) |
-| 자동화 및 검증 스크립트 (`scripts/`) | **28개 파일** (Node.js 및 Python CLI — HWPX/Excel 동기화, KV 듀얼 싱크 데몬, PIPA 비식별화, 하네스 검증 등) |
-| 총 커밋 수 | **563+ 커밋** |
+| 자동화 및 검증 스크립트 (`scripts/`) | **30개 파일** (Node.js 및 Python CLI — 9대 도메인 Zod 하네스 게이트키퍼, 스키마 드리프트 감사, HWPX/Excel 동기화, KV 듀얼 싱크 데몬, PIPA 비식별화 등) |
+| 총 커밋 수 | **565+ 커밋** |
 | 컴포넌트 모듈 (`src/components/`) | **12개 서브 디렉토리 + 루트 모듈** (총 **64개 파일**, **28,867 LOC** — `budget`: 20, `root`: 18, `dashboard`: 5, `ui`: 5, `mindmap`: 4, `ai`: 2, `festival`: 2, `law`: 2, `skeletons`: 2, `inventory`: 1, `layout`: 1, `modals`: 1, `project`: 1) |
 | 로컬 서버 함수 (API Routes) | **14개 API 라우트 핸들러** (`src/app/api/`, 2,468 LOC) + **1개 LLM 스트리밍 라우트** (`src/app/llm/chat/route.ts`) |
 | 커스텀 훅 (`src/hooks/`) | **40개** (**9,598 LOC**) |
-| 라이브러리 계층 (`src/lib/`) | **35개 모듈 파일** (**11,301 LOC** — 온톨로지 엔진 7개, 다중 에이전트 3개, 도메인/스키마/보안 유틸리티 25개) |
-| 자동화 테스트 스위트 (`__tests__/`) | **33개 Jest 테스트 스위트 (315+ 테스트 케이스 100% PASS)** + Playwright E2E 스위트 |
+| 라이브러리 계층 (`src/lib/`) | **35개 모듈 파일** (**11,490+ LOC** — 온톨로지 엔진 7개, 다중 에이전트 3개, 도메인/스키마/보안 유틸리티 25개) |
+| 자동화 테스트 스위트 (`__tests__/` & `src/__tests__/`) | **38개 Jest 테스트 스위트 (390+ 테스트 케이스 100% PASS)** + Playwright E2E 스위트 |
 
 ---
 
@@ -133,7 +133,7 @@ data/                   → 로컬 PC 단일 진실 공급원(SSOT) 데이터베
 └── backups/            → 최근 20개 변경 이력 자동 순환 백업 디렉토리
 functions/              → Cloudflare Pages Functions (24/7 엣지 서버리스 API, 5개 파일, 2,739 LOC)
 └── api/                → chat.ts, data.ts, embeddings.ts, semantic-search.ts, festival/yangjae.ts
-scripts/                → 자동화·동기화·보안·하네스 검증 CLI 도구 (28개 파일)
+scripts/                → 자동화·동기화·보안·하네스 검증 CLI 도구 (30개 파일)
 ├── sync-rules.js, prepare-pages-output.js, sync-festival-to-cloud.js, watch-and-sync-cloud.js
 ├── sync-schedules.js, sync_festival_excel.py, sync-festival-fallbacks.py, privacy_guard.py, run-harness.js 등
 src/
@@ -145,7 +145,7 @@ src/
 ├── components/         → 기능별 UI 컴포넌트 (총 64개 파일, 28,867 LOC, 12개 서브 디렉토리 + 루트)
 │   ├── budget/ (20), dashboard/ (5), festival/ (2), mindmap/ (4), ui/ (5), ai/ (2), law/ (2), skeletons/ (2), inventory/ (1), layout/ (1), modals/ (1), project/ (1), 루트 (18)
 ├── hooks/              → 40개 커스텀 훅 (도메인 CRUD + 예산 시뮬레이터 + 축제 관제 + CRDT 동기화 + 성능 감시, 9,598 LOC)
-├── lib/                → 핵심 라이브러리 (35개 모듈 파일, 11,301 LOC)
+├── lib/                → 핵심 라이브러리 (35개 모듈 파일, 11,490+ LOC)
 │   ├── agents/         → planner.ts, generator.ts, evaluator.ts (다중 에이전트 파이프라인)
 │   ├── engine/         → OntologyLayout, OntologyNetwork, OntologyRenderer, PerformanceProfiler, ontology-extractor, watcher
 │   ├── OntologyCanvasEngine.ts, schemas.ts, budget-rules.ts, rag-engine.ts, korean-nlp.ts 등
@@ -269,16 +269,17 @@ src/
 | **하이브리드 실시간 동기화** | CRDT 무결성, Cloudflare KV 엣지 복원력 | **A+** | Yjs CRDT + IndexedDB 로컬 동기화에 더해 `watch-and-sync-cloud.js` 300ms 무인 데몬으로 모바일 24/7 무중단 레플리카 확립 |
 | **아키텍처 및 관심사 분리** | M-V-C 경계 준수, 컴포넌트 직접 fetch 배제 | **A+** | 64개 UI 컴포넌트 내 직접 네트워크 호출 0건 달성, 40개 커스텀 훅으로 100% 캡슐화 |
 | **렌더링 및 모바일 인체공학** | 유휴 CPU 효율, 448px 모바일 클리핑 제로 | **A+** | Dirty Flag + `useDocumentVisibility` 탭 이탈 일시정지로 유휴 CPU 0% 달성, 모바일 카드뷰 가로 잘림 0건 |
-| **타입 및 테스트 무결성** | TS strict 컴파일, 자동화 테스트 커버리지 | **A+** | TypeScript 컴파일 에러 0건, Zod 런타임 스키마 에러 0건, Jest **33개 스위트(315+ 테스트) 100% PASS** |
+| **타입 및 테스트 무결성** | TS strict 컴파일, 자동화 테스트 커버리지 | **A+** | TypeScript 컴파일 에러 0건, 9대 도메인 Zod 스키마 드리프트·런타임 에러 0건, Jest **38개 스위트(390+ 테스트) 100% PASS** |
 | **법정 공문서 & PIPA 보안** | HWPX 표준 준수, 고유식별정보 비식별화 | **A+** | `generate_new_hwpx.py` 4단계 비파괴 공문서 빌드 및 `privacy_guard.py` 사전 마스킹 가드레일(Rule Q) 완비 |
 
 ### 6-2. 코드베이스 정적 및 동적 게이트키퍼 진단 결과 (`run-harness.js` & Jest 기준)
 
-- **최신 진단 일시:** 2026-10-14 기준
+- **최신 진단 일시:** 2026-10-26 기준
 - **아키텍처 규칙 위반 (Architectural Violations):** **0건**
 - **린트 및 타입 오류 (ESLint / TypeScript Errors):** **0건**
-- **Zod 스키마 런타임 검증 오류 (Zod Schema Errors):** **0건**
-- **Jest 단위/통합 회귀 테스트:** **33/33 Suites, 315/315 Tests ALL PASS (100%)**
+- **9대 도메인 스키마 드리프트 (`src/lib/schemas.ts` $\leftrightarrow$ `scripts/run-harness.js`):** **0건 (최상위·중첩 객체·열거형 100% 1:1 동기화)**
+- **Zod 스키마 런타임 검증 오류 (Zod Schema Errors across 9 SSOT Sheets):** **0건**
+- **Jest 단위/통합 회귀 테스트:** **38/38 Suites, 390+ Tests ALL PASS (100%)**
 
 ---
 
@@ -343,6 +344,7 @@ sequenceDiagram
 | **예산안·사업설명서 수리 감사** | `verify_complete_integrity.py`, Rule R | 사업개요 총사업비 = 소요재원(기금·시비·구비) = 산출내역 목·세목(인건비·5대보험·퇴직연차 원단위/천원단위) 100% 일치 검증 |
 | **4단계 HWPX 공문서 자동 빌드** | `scratch/generate_new_hwpx.py`, `/api/law`, Rule G·M | 아카이브 팩트 + 법령/조례 RAG $\to$ 공문서 개조식 마크다운 초안 $\to$ 비파괴 HWPX 템플릿 복제 조판 |
 | **개인정보 비식별화 가드레일** | `scripts/privacy_guard.py`, Rule Q | 주민등록번호·전화번호·계좌번호·민감정보 사전 스캔(`--scan`) 및 자동 마스킹(`--sanitize`) |
+| **9대 도메인 제로트러스트 하네스** | `src/lib/schemas.ts`, `scripts/run-harness.js` | 9개 SSOT 시트 전수 Zod 검증, 런타임 `.catch()` 폴백과 CLI Strict 검증 이중 방어 및 스키마 드리프트 자동 차단 |
 
 ### 7-4. 사용자 운영 페르소나 및 행동 분류 체계 (User Operational Persona & Behavioral Taxonomy)
 
@@ -403,15 +405,164 @@ Antigravity 2.0 커스터마이징 규격(`agy-customizations`)에 따라 VITAL 
 | 스킬 / 가이드라인 | 파일 경로 | 목적 함수 | 핵심 런북 및 제공 역량 |
 |:---|:---|:---:|:---|
 | **vital-budget-audit** | `.agents/skills/vital-budget-audit/SKILL.md` | $\mathcal{J}_{\text{Budget}}$ | 공공예산 3중 총액 1원 정합성 검증, 하위 `2)` 개별 천원 올림 후 상위 `1)` 합산 규격, 101-04 법정 인건비 산출식 엔진, e-호조 일상경비 듀얼 파이프라인 감사 |
-| **vital-hwpx-docgen** | `.agents/skills/vital-hwpx-docgen/SKILL.md` | $\mathcal{J}_{\text{DocAuto}}$ | 법령·아카이브 RAG 기반 기안서 초안 마크다운 작성, 비파괴 복제 기반 `generate_new_hwpx.py` 4단계 한글 자동 빌드, 공공기관 표준 서식 조판 |
+| **vital-hwpx-docgen** | `.agents/skills/vital-hwpx-docgen/SKILL.md` | $\mathcal{J}_{\text{DocAuto}}$ | 법령·아카이브 RAG 기반 기안서 초안 마크다운 작성, 비파괴 복제 기반 `generate_new_hwpx.py` 4단계 한글 자동 빌드, 5대 텍스트 겹침 원천 차단 및 기하학 재계산 조판 |
 | **vital-festival-4way-sync** | `.agents/skills/vital-festival-4way-sync/SKILL.md` | $\mathcal{J}_{\text{FieldSync}}$ | 양재천 건강 페스티벌 448px(`max-w-md`) 모바일 관제 대시보드 유지보수, 로컬 SSOT ↔ 마스터 엑셀 ↔ 정적 HTML ↔ Cloudflare KV 300ms 무인 듀얼 싱크, 국민의례 약식 1 의전 준거 |
 | **vital-public-infographic** | `.agents/skills/vital-public-infographic/SKILL.md` | $\mathcal{J}_{\text{DocAuto}}$ | 16:9 가로형 및 2:3 세로형 듀얼 포맷 공공 캠페인 포스터 설계, 순수 2D QR 매트릭스 단독 조판, 5대 코스 4,500명 쿼터 수리적 일치 및 오탈자 0 보증 |
 | **vital-governance-ops** | `.agents/skills/vital-governance-ops/SKILL.md` | $\mathcal{J}_{\text{Security}}$ | 신규 엔지니어링 마일스톤 패치 로깅, `scripts/sync-rules.js` 3-Way 동기화, `privacy_guard.py` PIPA 비식별화, RFC 5545 iCal 피드 연동, Zod 하네스 게이트키퍼 총괄 운영 |
-| **HWP_GENERATION_GUIDELINES** | `docs/HWP_GENERATION_GUIDELINES.md` | $\mathcal{J}_{\text{DocAuto}}$ | 외부 브레인 파손 링크를 영구 대체하는 워크스페이스 표준 가이드라인 (용지 여백 15/20/10mm, 폰트 위계 22/18/15/13/11pt, 다단계 항목 기호, 2타 띄기, 행정 문장부호) |
+| **HWP_GENERATION_GUIDELINES** | `docs/HWP_GENERATION_GUIDELINES.md` | $\mathcal{J}_{\text{DocAuto}}$ | 외부 브레인 파손 링크를 영구 대체하는 워크스페이스 표준 가이드라인 (용지 여백 15/20/10mm, 폰트 위계 22/18/15/13/11pt, 다단계 항목 기호, 2타 띄기, 5대 텍스트 겹침 원천 차단 규격 V3) |
 
 ---
 
 ## 8. 최근 엔지니어링 마일스톤
+
+### [Milestone 279: 범용 HWPX 컴파일러(`generate_new_hwpx.py`) 5대 텍스트 겹침 원천 차단·기하학 재계산 엔진 통합 및 한글 문서 작성 룰셋(`HWP_GENERATION_GUIDELINES.md` V3·`SKILL.md`) 영구 패치] Integrated the 5-pillar HWPX anti-overlap and geometry auto-recalculation engine ('recalc_tc_linesegs', 'sync_table_geometry' with staggered multi-rowSpan solver, 'heal_section_tables_and_layout' bottom-up nested table height propagation, 'layout_sec_paragraph', 'enforce_inline_table_flow', header-aware 'normalize_header_styles'/'get_excel_defective_ids', '0xFFFFFFFF' cellMargin overflow guard, multi-run/'<hp:lineBreak/>'/'<hp:markpenBegin/>' ghost tail cleanup, and 10-metric 'verify_hwpx_no_overlap' gatekeeper) into 'scratch/generate_new_hwpx.py', upgraded 'docs/HWP_GENERATION_GUIDELINES.md' (V3) and '.agents/skills/vital-hwpx-docgen/SKILL.md', and verified 100% pass across 'scratch/test_hwpx_anti_overlap.py'. (2026-11-04)
+* **개요 및 추진 목적**:
+  - HWPX 공문서 자동 생성 시 텍스트만 교체할 경우 발생하던 상하 줄 겹침, 다중 문단 `vertpos="0"` 중첩, 중첩 표(Nested Table) 및 일반 표(Table)와 후속 본문 겹침, 엑셀 복사 셀의 글자 찌그러짐(`SQUEEZE`) 및 `0xFFFFFFFF` 정수 오버플로우, `<hp:markpenBegin/>` 유령 꼬리 중첩 등 **5대 텍스트 겹침 결함**을 범용 컴파일러(`scratch/generate_new_hwpx.py`)와 문서 작성 룰셋(`docs/HWP_GENERATION_GUIDELINES.md`, `.agents/skills/vital-hwpx-docgen/SKILL.md`)에서 원천 차단함:
+    1. **제1원칙 — `<hp:linesegarray>` 정적 레이아웃 캐시 재계산 및 자식 노드 순서 강제 (`wrap_text_positions`, `recalc_tc_linesegs`, `ensure_linesegarray_last`)**:
+       - 한글·한자(`1.0em`), 영문·숫자·공백(`0.55em`) 및 장평(`charPr ratio`)을 반영하여 셀·문단 가용 폭 대비 자동 줄바꿈 오프셋(`textpos`)과 단조 증가 수직 오프셋(`vertpos += line_step`)을 재산출하고, 문단 내 `<hp:linesegarray>`가 항상 모든 `<hp:run>` 뒤에 위치하도록 강제함.
+    2. **제2원칙 — 표 셀 높이·엇갈린 수직 병합(`rowSpan > 1`)·중첩 표(Nested Table) 상향 전파·섹션 누적 Y좌표 연쇄 동기화 (`sync_table_geometry`, `heal_section_tables_and_layout`, `layout_sec_paragraph`)**:
+       - 각 행의 최대 셀 높이로 단일 행 셀을 통일한 뒤 결재란 등 엇갈린 수직 병합 셀(`rowSpan > 1`)의 `<hp:cellSz height>`를 병합 구간 행 높이 합계 제약식으로 역산·동기화하고, 최하위 중첩 표부터 외곽 표까지 깊이 역순(`heal_section_tables_and_layout`)으로 `<hp:tbl>/<hp:sz height>` 및 직속 호스트 문단 `<hp:lineseg vertsize>`를 갱신한 후 다중 섹션(`Contents/section*.xml`) 전체 문단 Y좌표를 재정렬함.
+    3. **제3원칙 — 표·개체 글자처럼 취급(`treatAsChar="1"`) 인라인 흐름 강제 (`enforce_inline_table_flow`)**:
+       - `<hp:tbl>` 및 `<hp:pic>` 하위의 `<hp:pos treatAsChar="0">` 부동 배치 속성을 `treatAsChar="1"`, `vertOffset="0"`으로 정규화하여 표 확장 시 후속 본문과의 충돌을 차단함.
+    4. **제4원칙 — `header.xml` 인지형 엑셀 압축 스타일(`SQUEEZE`·음수 내어쓰기·압축 줄간격) 정규화 및 `0xFFFFFFFF` 여백 오버플로우 방어 (`normalize_header_styles`, `get_excel_defective_ids`, `get_cell_margins`)**:
+       - `Contents/header.xml`의 `lineWrap="SQUEEZE"`를 `"BREAK"`로, `paraPr id="129"` 음수 내어쓰기(`<hc:intent value="-2400"/>`)를 `"0"`으로, `100%` 미만 줄간격을 `130%`로 교정하고, 실제 결함이 존재하는 엑셀 문단 참조만 비압축(`condense="0"`) 스타일로 안전 치환하며, `<hp:cellMargin>`의 부호 없는 32비트 정수 언더플로우(`4294967295`) 감지 시 표준 여백(`141 HWPUNIT`)으로 즉시 클램핑함.
+    5. **제5원칙 — 다중 `<hp:run>`/`<hp:t>` 및 인라인 `<hp:lineBreak/>`·`<hp:markpenBegin/>` 유령 꼬리 클린업 + 무결점 게이트키퍼 (`flatten_t_node`, `set_p_text`, `verify_hwpx_no_overlap`)**:
+       - `<hp:tc>/<hp:subList>/<hp:p>` 정규 경로 탐색과 컨트롤 보존형 단일 텍스트 런 병합 및 구버전 형광펜(`<hp:markpenBegin/>`) 유령 `.tail` 제거를 구현하고, 빌드 직후 `verify_hwpx_no_overlap()`으로 10대 결함 지표 및 ZIP Bit-2 플래그(`4`)를 전수 검증함.
+* **정량적 검증 성과**:
+  - 기존 템플릿 3종(`2026_메디런_프로그램_운영_계획.hwpx`, `서울체력장_강남센터_개소식_추진계획.hwpx`, `2027_강남구보건소_신체활동_사업_총괄계획서.hwpx`) 잠재 결함(자식 순서 역전 6건, 중복/침범 `vertpos` 및 과소 셀 높이 10건, 형광펜 유령 꼬리 8건, 압축 줄간격 2건) 자동 치유 후 재검증 결함: **0건 (`verify_hwpx_no_overlap` ALL ZERO)**
+  - 5대 텍스트 겹침 원천 차단 단위·통합·적대적 게이트키퍼 테스트 (`scratch/test_hwpx_anti_overlap.py`): **100% PASS**
+
+### [Milestone 278: PWA `manifest.json` 프록시 리다이렉트 파싱 오류 해소 및 메인 대시보드 중첩 동적 청크(`ChunkLoadError`) 크래시 원천 차단] Excluded static PWA and public assets ('manifest.json', 'sw.js', 'icon-*.png', '*.svg') from 'src/proxy.ts' authentication redirection, eliminated nested 'next/dynamic' chunk waterfall in 'PortfolioDashboardView.tsx' ('ContactsBox'), and fortified 'ProtectedApp.tsx' dynamic loaders and idle preloads with fallback recovery handlers. (2026-10-29)
+* **개요 및 추진 목적**:
+  - 브라우저의 익명(Credential-less) `<link rel="manifest">` 요청이 `src/proxy.ts` 미들웨어에 의해 `/login` HTML로 307 리다이렉트되어 발생하던 `manifest.json:1 Manifest: Line: 1, column: 1, Syntax error.`와, 로컬 서버 재시작·일시 중단 시 `PortfolioDashboardView.tsx`의 중첩 동적 청크 로드 실패가 `App Route Error Boundary` 전체 크래시로 전파되던 `ChunkLoadError`를 근본적으로 해결함:
+    1. **정적 PWA 및 퍼블릭 에셋 프록시 리다이렉트 차단 (`src/proxy.ts`, `public/manifest.json`)**:
+       - `src/proxy.ts` 내 `isPublicStaticAsset` 분기 및 `config.matcher` 정규식을 보강하여 `/manifest.json`, `/sw.js`, `/icon-*.png`, `/*.svg`, `/templates/*` 등 정적 자산 요청이 쿠키 유무와 무관하게 200 OK 원문으로 즉시 응답되도록 수정함.
+       - `public/manifest.json`의 `start_url`(`"/"`) 및 아이콘 `src`(`"/icon-192x192.png"`, `"/icon-512x512.png"`)를 루트 절대경로로 정규화함.
+    2. **대시보드 중첩 동적 청크(`ContactsBox`) 정적 통합 및 `ChunkLoadError` 폴백 방어 (`PortfolioDashboardView.tsx`, `ProtectedApp.tsx`)**:
+       - `PortfolioDashboardView.tsx` 내부에서 `ContactsBox`를 이중으로 `next/dynamic` 분리하던 구조를 정적 import(`import { ContactsBox } from './ContactsBox'`) + `useIdleMount()` 지연 마운트로 일원화하여 2차 청크 네트워크 폭포수 및 하위 `ChunkLoadError` 발생 지점을 제거함.
+       - `ProtectedApp.tsx`에서 `DirectPortfolioDashboardView` 인라인 폴백 및 모든 `dynamic()` 로더·`scheduleStaggeredPreloads()` 유휴 프리로더에 `.catch()` 안전 복구 핸들러를 장착하여 서버 재시작 시에도 `App Route Error Boundary` 크래시가 발생하지 않도록 방어함.
+* **정량적 검증 성과**:
+  - `http://localhost:3001/manifest.json` 무인증 요청 응답: **HTTP 200 OK (유효 JSON 파싱 100% 통과)**
+  - `PortfolioDashboardView` 및 `ContactsBox` 중첩 `ChunkLoadError`: **0건 (TypeScript `tsc --noEmit` 및 Jest 테스트 100% PASS)**
+
+### [Milestone 277: 작업기억 보조 포스트잇 보드, 맥락 인지 하단 고정 배너 및 모바일 클라우드 KV 메모 우체통 구축] Implemented 'WORKING_MEMORY' SSOT domain across 'schemas.ts' and 'run-harness.js' (10-Domain Parity), built 'working-memory-parser.ts' for 1-second memo classification, multi-line batch capture, and numeric/date highlight extraction, mounted 'WorkingMemoryBoard.tsx' on Main Dashboard and 'WorkingMemoryContextBanner.tsx' at the bottom of Budget/Simulator/Festival/Project views, and created PIN-protected '/memo' mobile route + '/api/memo' Cloudflare KV inbox relay with tombstone & clock-skew protection. (2026-10-26)
+* **개요 및 추진 목적**:
+  - 다중 단위사업 병행 실무 중 과거에 결재·수신했던 메모보고나 구두 지시사항(예: `9/21 통합건강증진사업 가내시 메모보고: 2027 건강생활실천사업 본예산 증액 반영 필요 (기존 6,500만 원 → 변경 7,800만 원)`)이 후속 예산 편성·행감 시점에 작업기억(Working Memory)에서 누락되는 현상을 원천 방지하는 **1초 무마찰 캡처 및 맥락 자동 호출 시스템**을 구축함:
+    1. **10대 도메인 SSOT 확장 및 무결점 스키마 패리티 확립 (`src/types/index.ts`, `src/lib/schemas.ts`, `scripts/run-harness.js`, `data/WORKING_MEMORY.json`)**:
+       - `WorkingMemoryCategorySchema`(`budget`|`audit`|`festival`|`directive`|`general`), `WorkingMemoryStatusSchema`(`pending`|`reflected`), `WorkingMemorySourceSchema`(`desktop`|`mobile`), `WorkingMemorySchema` 및 `StrictWorkingMemorySchema`를 정의하고 10번째 정규 도메인 시트(`WORKING_MEMORY`)로 등록함.
+    2. **1초 한 줄 입력·다중 줄 일괄 붙여넣기 자동 태깅 및 핵심 수치·일자 하이라이트 파서 (`src/lib/working-memory-parser.ts`)**:
+       - 제목·카테고리 선택 없이 한 줄 또는 다중 줄(`splitWorkingMemoryLines` / `createWorkingMemoryMemosFromText`)을 붙여넣어도 키워드 가중치 분석을 통해 `[2027 예산편성]`, `[팀장님 지시]`, `[행정감사]`, `[양재천 행사]`, `[일반 메모]` 다중 태그를 자동 부여함.
+       - 예산 증감·물량 변경 화살표(`6,500만 원 → 7,800만 원`, 단위 생략형 `6500 → 7800`, 우측 단위 생략형 `6,500만 원 → 7,800`) 및 단수 증감액(`1,200만 원 증액`, `7,800 증액`)을 `numericHighlight`로 즉시 추출하고, 통계목 코드(`201-01`, `101-04`)나 소수점 물량(`1.5억 원`, `3.5%`)과의 오인 충돌 없이 ISO 날짜(`2026-09-21`), 다중 일자(`9. 21. · 10. 15.`), 기간(`9. 21.~9. 28.`)을 `dateHighlight`로 정규화 추출함.
+    3. **메인 대시보드 포스트잇 보드 및 맥락 인지 하단 자동 고정 배너 (`WorkingMemoryBoard.tsx`, `WorkingMemoryContextBanner.tsx`)**:
+       - 메인 대시보드 최상단에 실시간 자동 분류·다중 줄 일괄 캡처 미리보기, `<button>` 기반 태그별 필터 탭(`0 <select>`), 상단 고정, `[✓ 반영 완료]` 소거 기능을 갖춘 포스트잇 보드를 탑재함.
+       - `예산관리`(`workspace`), `예산 시뮬레이터`(`simulator`), `양재천 페스티벌`(`festival`), `사업 관리`(`project`) 진입 시 해당 화면과 연관된 미반영 메모 및 `[팀장님 지시]`를 각 페이지 최하단 경고 배너로 자동 고정 노출하여 `[✓ 반영 완료]` 클릭 전까지 누락 확률 0%를 보장함.
+    4. **하이브리드 보안 PIN 기반 모바일 클라우드 KV 메모 우체통 및 툼스톤·인과율 보호 (`MobileMemoInbox.tsx`, `src/app/memo/page.tsx`, `/api/memo`, `functions/api/memo.ts`)**:
+       - 외부 이동·회의·퇴근 후 스마트폰(`max-w-md` 448px)에서 4자리 보안 PIN 인증만으로 1초 만에 단건·다중 줄 메모 전송, `[✓ 반영 완료]`, `[삭제]`를 수행하면 Cloudflare KV(`sheet:WORKING_MEMORY`) 및 로컬 PC SSOT(`data/WORKING_MEMORY.json`)로 즉시 반영되며, 글로벌 툼스톤(`GLOBAL_TOMBSTONES`) 및 단조 증가 타임스탬프(`nextMonotonicIso` / `mergeWorkingMemoryMemos`)로 좀비 부활과 기기 간 시계 오차 역전을 원천 차단함.
+* **정량적 검증 성과**:
+  - 10대 도메인 하네스 스키마 드리프트 및 런타임 검증 오류: **0건 (`node scripts/run-harness.js` ALL PASS)**
+  - 작업기억 파서·포스트잇 보드·맥락 배너·모바일 우체통·Cloudflare Edge Function 단위/통합 테스트 (`__tests__/working-memory.test.tsx` 28건, `__tests__/harness-schema-parity.test.ts` 30건): **100% PASS**
+
+
+### [Milestone 276: 마스터 아카이브(`F:\_Organized_Archive`) 물리적 폴더 9대 사업 통폐합, 본문·사진 문맥 추론 색인(`ARCHIVE_INDEX.json`) 및 VITAL 아카이브 통합 탐색기 구축] Consolidated 8,664 files in 'F:\_Organized_Archive' into a clean 'Year -> 9 Core Projects' hierarchy with 0 loose root files and SHA-256 lossless migration logging ('data/ARCHIVE_MIGRATION_LOG.json'), built full-text body extraction ('.hwpx', '.hwp', '.pdf', '.xlsx', '.pptx') and photo context inheritance indexer ('scripts/organize_and_index_archive.py' -> 'data/ARCHIVE_INDEX.json', 6,201 non-duplicate items), and implemented 'ArchiveExplorerView.tsx', 'useArchiveExplorer.ts', and '/api/archive/*' routes with Linked Project Cluster panel and photo thumbnail gallery. (2026-10-26)
+* **개요 및 추진 목적**:
+  - 업무용 파일 급증(총 8,664개: 사진 4,158개, 행정문서 4,100개 등)으로 인해 윈도우 탐색기에서 연계 자료 탐색, 파일명에 키워드가 없는 문서 추론, 일련번호 형태(`KakaoTalk_...`, `copy_...`)의 현장 사진 식별에 과도한 시간이 소요되는 병목을 근본적으로 해결함:
+    1. **물리적 폴더 구조 표준화 및 무손실 롤백 안전장치 구축 (`scripts/organize_and_index_archive.py --organize`)**:
+       - 최상위 루트에 흩어져 있던 낱개 파일 241개와 임시 압축 해제 폴더 30여 개를 생산 연도(`2018년`~`2026년`) 및 단위사업 폴더 하위로 전량 분류·이관하여 루트 잔류 낱개 파일 **0건** 달성.
+       - `2026년` 내부의 33개 파편화·중복 폴더를 **9대 핵심 단위사업 폴더**(`01_기획총괄_주요업무_행감` ~ `09_일반행정_보안_법령_기타`, 총 2,485개 파일)로 통폐합하고, 기존 중복 폴더(`_Duplicates`, `_Legacy_Duplicates`)를 `_Archive_Duplicates`로 일원화 격리함.
+       - 모든 파일 이동(2,507건) 시 SHA-256 해시 대조 및 `data/ARCHIVE_MIGRATION_LOG.json` 전수 기록을 적용하여 덮어쓰기 손실 0건 및 `--rollback` 즉시 복원 보장.
+    2. **다중 포맷 본문 추출·PIPA 마스킹 및 사진 문맥 자동 태깅 색인기 (`scripts/organize_and_index_archive.py --index`)**:
+       - `_Archive_Duplicates`를 제외한 6,201개 실무 파일(문서 2,805개, 사진 2,396개, 엑셀 544개, 발표자료 116개 등)을 대상으로 `.hwpx`, `.hwp`, `.pdf`, `.xlsx`, `.pptx`, `.txt` 본문 텍스트·시트명을 추출하여 `data/ARCHIVE_INDEX.json`에 색인함.
+       - `AGENTS.md` Rule Q에 의거하여 본문 스니펫 내 주민등록번호·휴대전화번호를 자동 비식별화 마스킹하고, 식별 불가능한 파일명의 사진(`KakaoTalk_...jpg`, `copy_...png` 931건 포함)에 소속 폴더의 사업명·연도·인접 문서 핵심 키워드·이미지 분류(`photo`/`poster`/`logo`)를 자동 상속 태깅함.
+    3. **VITAL 아카이브 통합 탐색기 UI 및 로컬 브릿지 API 구축 (`src/components/archive/ArchiveExplorerView.tsx`, `src/hooks/useArchiveExplorer.ts`, `src/app/api/archive/*`)**:
+       - 파일명에 검색어가 없어도 본문 일치 문장 하이라이트(`본문 내용 일치` 배지)와 보건소 도메인 동의어·약칭 사전(`연관어 추론` 배지)으로 즉시 찾아주는 통합 검색창 구현.
+       - 특정 문서·사진 선택 시 동일 단위사업 및 인접 시점의 **연관 기안문(HWPX/PDF) + 예산·산출표(XLSX) + 현장 사진(JPG)**을 한 화면에 묶어 보여주는 **「연계 업무 묶음(Project Cluster)」** 패널 탑재.
+       - 사진·시안 전용 **고속 썸네일 그리드 갤러리**, 확대 라이트박스 모달, 윈도우 기본 연결 프로그램/탐색기 원클릭 실행(`/api/archive/open`) 및 경로 이탈 방지(`403 Forbidden`) 보안 검증 완비.
+* **정량적 검증 성과**:
+  - `F:\_Organized_Archive` 최상위 루트 낱개 파일: **241개 $\to$ 0개 (100% 정돈 완료)**
+  - `2026년` 하위 파편 폴더 통폐합: **33개 $\to$ 9대 핵심 단위사업 표준 폴더**
+  - 본문·사진 색인 규모: **총 6,201개 비중복 파일 (문서 2,805, 사진 2,396, 시트 544, 발표자료 116, 디자인·미디어 340)**
+  - Jest 통합 테스트 (`__tests__/archive-explorer.test.tsx`, `__tests__/main-and-festival-minimalist-design.test.tsx`): **15 / 15 Tests ALL PASS**
+  - TypeScript 정적 타입 및 9대 도메인 하네스 (`npx tsc --noEmit`, `node scripts/run-harness.js`): **0 Errors (ALL PASS)**
+
+### [Milestone 275: 9대 도메인 Zod 하네스 게이트키퍼 확장 및 스키마 드리프트(Schema Drift) 원천 차단 고도화] Upgraded 'scripts/run-harness.js' and 'src/lib/schemas.ts' to eliminate schema drift across all 9 SSOT domain sheets ('TASKS', 'BUDGET_CATEGORIES', 'BUDGET_ENTRIES', 'BUDGET_SIMULATIONS', 'PROJECTS', 'EXTERNAL_DOCS', 'CLASSIFICATION_WORDS', 'SCHEDULES', 'CONTACTS'), synchronized 'BudgetEntrySchema' dual-pipeline fields ('fundingSource', 'transferDirection', 'simulationEntryId', 'entryType', 'actionType'), added strict gatekeeper schemas ('getStrictDomainSchema') with exact 1:1 parsed output parity alongside runtime '.catch()' fallbacks, implemented comment/string-aware recursive nested object & enum schema parity verification ('verifySchemaParityWithSource'), and verified 100% compliance with 29 Jest tests in '__tests__/harness-schema-parity.test.ts'. (2026-10-26)
+* **개요 및 추진 목적**:
+  - 하네스 레이어 구조적 정합성 진단에서 도출된 **스키마 이중 선언(Schema Drift) 및 CLI 게이트키퍼 검증 범위(4개 $\to$ 9개 시트) 고도화 제언**을 이행하여, 런타임 스키마(`src/lib/schemas.ts`)와 CLI 하네스 게이트키퍼(`scripts/run-harness.js`) 간의 필드·중첩 객체·열거형·시트 불일치를 원천 제거하고 무결점 자동 감시 체계를 구축함:
+    1. **9대 SSOT 도메인 시트 전수 검증 확장 및 `BudgetEntrySchema` 정합성 동기화 (`scripts/run-harness.js`, `src/lib/schemas.ts`, `scripts/test-m3-forensic.js`)**:
+       - 기존 4개 시트(`TASKS`, `BUDGET_CATEGORIES`, `BUDGET_ENTRIES`, `PROJECTS`)만 검사하던 `SHEETS_TO_CHECK`를 `BUDGET_SIMULATIONS`(`SimulationEntrySchema`), `EXTERNAL_DOCS`(`ExternalDocSchema`), `CLASSIFICATION_WORDS`(`ClassificationWordsSchema`), `SCHEDULES`(`ScheduleSchema`), `CONTACTS`(`ContactSchema`)를 포함한 **9대 전체 도메인 SSOT 시트(`DOMAIN_SHEET_NAMES`)**로 확장함.
+       - `scripts/run-harness.js` 내 `BudgetEntrySchema`에서 누락되어 있던 e-호조 일상경비·시뮬레이터 연계 필드(`fundingSource`, `transferDirection: z.enum(['in', 'out'])`, `simulationEntryId`)와 엄격한 열거형 제약(`entryType: z.literal('approval')`, `actionType: BudgetActionTypeSchema`)을 `src/lib/schemas.ts`와 1:1로 일치시킴.
+    2. **런타임 `.catch()` 폴백 보존 및 1:1 출력 등가성(Output Parity) Strict 게이트키퍼 스키마 이중화 (`src/lib/schemas.ts`)**:
+       - `AGENTS.md` Rule B(하위 호환성 `.catch()` 기본값 유지)를 준수하여 런타임 `getDomainSchema`의 폴백 안전성은 100% 보존하면서, `.catch()` 마스킹 없이 잘못된 타입·누락 필드를 즉시 검출하는 `Strict*Schema` 9종 및 `getStrictDomainSchema`를 `src/lib/schemas.ts`에 추가 노출함.
+       - 런타임 스키마에서 `.optional().catch(...)`로 선언된 필드(`isPlanned`, `isSettled`, `checked`, `virtualAdjustment`, `note`, `actionType`, `status`)에 불필요한 `.default(...)` 변조를 배제하여 정상 레코드 파싱 시 런타임·Strict·CLI 하네스 3자 간 파싱 결과 객체가 100% 일치(`toEqual`)하도록 보장함.
+    3. **재귀적 중첩 객체·열거형 스키마 드리프트(Schema Drift) 감시 엔진 및 29개 Jest 테스트 구축 (`scripts/run-harness.js`, `__tests__/harness-schema-parity.test.ts`)**:
+       - `scripts/run-harness.js`에 주석(`//`, `/* */`) 및 문자열 리터럴 인식 기반 `extractNestedObjectKeyMapFromSchemaSource()`, `extractZodObjectKeyMap()`, `extractEnumValuesFromSchemaSource()` 및 `verifySchemaParityWithSource()`를 탑재하여, 단일 라인 다중 프로퍼티 선언뿐만 아니라 중첩 객체(`BudgetCategorySchema.subItems`, `subItems.calculations`, `fundingSplits`, `ProjectSchema.checklistItems`)와 4대 열거형(`TaskStatusSchema`, `TaskPrioritySchema`, `BudgetActionTypeSchema`, `ScheduleTypeSchema`)까지 재귀적으로 대조하고 불일치 발생 시 `[HARNESS SCHEMA DRIFT ERROR]`를 즉시 발생시키도록 고도화함.
+       - `__tests__/harness-schema-parity.test.ts` 스위트(29개 테스트 케이스)를 신설하여 9대 도메인 시트 커버리지, 최상위·중첩 객체·열거형 1:1 일치성, 스키마 드리프트 탐지력, 주석/단일행 파서 내구성, Loud-Failure vs `.catch()` 이중 시맨틱, 그리고 실제 `data/*.json`(총 329개 레코드) 전수 통과 및 파싱 출력 1:1 등가성을 100% 자동 검증함.
+
+
+### [Milestone 274: 메인 대시보드 시각 정보·언어 정합성 패치 및 도넛-비목 리스트 수리·색상 1:1 일치화] Eliminated English ALL-CAPS template clichés across 'PortfolioDashboardView.tsx' and 'ProtectedApp.tsx' by standardizing on Korean public accounting terminology and '원' currency units, unified donut chart slices with breakdown list colors and share percentages (including '<0.1%' micro-share formatting, circular 7-slice collision avoidance, and 'resolveDetailedProject' 0-won parity fallback in 'usePortfolioAnalytics.ts'), and aligned 'PortfolioDashboardViewSkeleton' with the 4-KPI grid and ContactsBox placeholder. (2026-10-23)
+* **개요 및 추진 목적**:
+  - `frontend-design` 메인페이지 점검 결과 도출된 **과제 1(시각 정보·언어 정합성 패치)**을 이행하여 생성형 템플릿 특유의 영문 대문자(ALL-CAPS) 클리셰와 통화 단위 혼재(`KRW`/`원`)를 제거하고, 도넛 차트 슬라이스와 우측 비목 리스트 간의 색상·비중·합계를 오차 0원으로 100% 일치시킴:
+    1. **한국어 공공회계 표준 용어 및 `원` 단위 통일 (`src/components/dashboard/PortfolioDashboardView.tsx`, `src/components/ProtectedApp.tsx`)**:
+       - `Budget Allocation`, `TOTAL BUDGET`, `BUDGET EXECUTION`, `REMAINING BUDGET`, `EXECUTED AMOUNT`, `REMAINING AMOUNT`, `Monthly Budget Execution`, `PEAK SPENDING`, `REQ. SPEND / MO`, `REMAINING TARGET` 등 영문 대문자 라벨과 `KRW` 단위를 전면 제거함.
+       - `세부사업별 예산 편성 현황`, `총 편성 예산`, `예산 집행률`, `예산 잔여율`, `누적 집행액`, `가용 잔액`, `월별 예산 집행 추이`, `최대 집행월`, `월 권장 집행액 (11월 기준)`, `목표 대비 잔여액` 및 `원` 단위로 일원화하고, 월별 추이 차트 X축(`Jan`~`Dec` $\to$ `1월`~`12월`) 및 글로벌 헤더·푸터(`VITAL 통합 대시보드`, `로그아웃`)를 한국어 행정 표준으로 정비함.
+    2. **도넛 차트-비목 리스트 색상·비중 1:1 매칭 및 `resolveDetailedProject` 오차 0원 폴백 (`src/hooks/usePortfolioAnalytics.ts`, `src/components/dashboard/PortfolioDashboardView.tsx`)**:
+       - 기존 도넛 차트가 `집행`/`잔액` 2개 슬라이스만 표시하면서 우측 비목 리스트는 6색 범례 칩을 렌더링하던 시각 정보 불일치를 해소하여, `dynamicPieData`가 `breakdownWithShare`의 비목별 편성액·비중(`shareLabel`)·색상(`color`)을 1:1로 렌더링하도록 통합함.
+       - `usePortfolioAnalytics.ts`에 `resolveDetailedProject` 폴백 헬퍼(`detailedProject` $\to$ `unitProject` $\to$ `policyProject` $\to$ `name` $\to$ `'기타 사업'`)를 도입하여 `detailedProject`가 비어 있는 카테고리가 유입되더라도 도넛 중앙 `총 편성 예산`과 비목 리스트 합계가 오차 0원으로 일치하도록 보장함.
+       - 원형 도넛 차트에서 `6k + 1`번째(예: 7번째) 슬라이스가 1번째 슬라이스(`#0f172a`)와 인접 충돌하는 현상을 방지(`colorIdx = 1` 보정)하고, `0.1%` 미만 양수 예산 비목의 `<0.1%` 표기 및 `<Pie minAngle={2}>` 최소 가시 각도를 적용함.
+    3. **초기 로딩 스켈레톤(`PortfolioDashboardViewSkeleton`) 4-KPI 및 하단 주소록 정합성 보정 (`src/components/ProtectedApp.tsx`)**:
+       - 기존 2개만 렌더링되던 KPI 스켈레톤 카드를 실제 뷰와 동일한 2×2 4개 카드(`min-h-[78px]`)로 확장하고 하단 `ContactsBox` 스켈레톤 영역(`h-[250px]`)을 추가하여 하이드레이션 레이아웃 시프트(CLS)를 원천 차단함.
+
+### [Milestone 273: 예산관리 페이지 내 홍보물 관리 탭 및 불용 위험 모니터링 배너 제거·예산 대조보드 2-Tab 체계 일원화] Removed the 'Promotional Materials Management' ('홍보물 관리') sub-tab from 'WorkspaceView.tsx' and the 'Unused Budget Risk Monitoring' ('불용 위험 모니터링') alert bar from 'BudgetDashboard.tsx', streamlining the Budget Management workspace into a focused 2-Tab topology ('예산 대조보드' and '예산 시뮬레이터') with automatic localStorage tab state normalization. (2026-10-21)
+* **개요 및 추진 목적**:
+  - 사용자 지시에 의거하여 예산관리(`WorkspaceView.tsx`) 상단 서브탭에서 `홍보물 관리` 탭을 제거하여 `예산 대조보드`·`예산 시뮬레이터` 2-Tab 구조로 일원화하고, 예산 대조보드(`BudgetDashboard.tsx`) 상단의 `불용 위험 모니터링` 배너를 삭제하여 핵심 예산 지표 및 통계목 대조 가독성을 극대화함:
+    1. **예산관리 서브탭 구조 개편 및 로컬 스토리지 폴백 정규화 (`src/components/WorkspaceView.tsx`)**:
+       - 상단 탭 스위처에서 `홍보물 관리` 버튼과 하단 `InventoryList` 조건부 렌더링 블록을 제거하고, `예산 대조보드`(`budget`)와 `예산 시뮬레이터`(`simulator`) 2개 핵심 탭으로 직관화함.
+       - 브라우저 `localStorage`의 `hchps-workspace-active-tab` 키에 기존 `'inventory'` 값이 잔존하더라도 자동으로 `'budget'`(예산 대조보드) 탭으로 안전하게 폴백되도록 상태 초기화 로직을 보강함.
+       - 상위 컴포넌트(`ProtectedApp.tsx`) 및 외부 테스트와의 타입 호환성을 위해 `WorkspaceViewProps` 인터페이스의 재고 관련 프로퍼티를 선택적(Optional) 시그니처로 유지함.
+    2. **예산 대조보드 상단 불용 위험 모니터링 배너 제거 (`src/components/budget/BudgetDashboard.tsx`)**:
+       - 대조보드 최상단에 표시되던 `불용 위험 모니터링` 경고 바(`riskCategories` 집계, 접이식 사업 목록 그리드, `QuickPlanModal` 연동 스테이트)를 제거하고, `예산 관리` 헤더와 4대 핵심 KPI 카드가 최상단에 직결 노출되도록 레이아웃을 정리함.
+    3. **Dormant Sub-Tab 및 대조보드 회귀 테스트 스위트 동기화 (`__tests__/auditor-m2-integrity.test.tsx`, `__tests__/challenger-m2-dormant-tab.test.tsx`, `__tests__/budget-minimalist-integrity.test.tsx`)**:
+       - `WorkspaceView`의 비활성 서브탭 상태 보존(Dormant Sub-Tab) 검증 테스트 및 `BudgetDashboard` 무결성 테스트를 전수 구동하여 PASS를 확인함.
+
+### [Milestone 272: 예산 시뮬레이터·대조보드 일상경비 듀얼 파이프라인 수리 무결성 확립, 3-Slot 수직 칼정렬 및 산출기초 잠금한도 가드레일 강화] Established 100% mathematical integrity and dual-pipeline accounting between Budget Dashboard and Simulator ('useBudgetSimulator.ts', 'useBudgetFilters.ts', 'StatItemDetailModal.tsx', 'SimulationResultTable.tsx', 'SimulationSummaryCards.tsx', 'DailyExpenseStatModal.tsx', 'SimulationInputForm.tsx'), isolating actual vs. planned expenses, automating daily expense shortfall calculation and final expected balance deduction, enforcing tabular-nums monospace typography with 3-Slot vertical column alignment, and implementing subItems isLocked legal reserve guardrails validated by 9 comprehensive automated tests. (2026-10-21)
+* **개요 및 추진 목적**:
+  - 사용자 지시에 의거하여 예산 관리 대조보드와 예산 시뮬레이터 간의 일상경비 교부·실집행·예정 수리적 정합성을 100% 일치시키고, 숫자 텍스트 및 다중 상태 캡슐의 3-Slot 수직 칼정렬과 산출기초(subItems) 기반 잠금(isLocked) 통제 가드레일을 구축함:
+    1. **일상경비 듀얼 파이프라인 수리적 정합성 및 부족분(Shortfall) 연동 (`src/types/index.ts`, `src/hooks/useBudgetFilters.ts`, `src/hooks/useBudgetSimulator.ts`, `src/components/budget/ui/SimulationInputForm.tsx`, `src/components/budget/ui/DailyExpenseStatModal.tsx`)**:
+       - `ProjectSimulationSummary` 및 `StatItemSimulationSummary` 인터페이스에 `dailyExpenseShortfall`, `needsAdditionalIssuance`, `lockedAmount` 필드를 확장함.
+       - `useBudgetFilters.ts`에서 대조보드 필터 집계 시 표준 회계 모드(`getCategoryStats(cat.id)`)와 품의 제외 실적 모드(`getCategoryStats(cat.id, true)`)를 분리 적용함.
+       - 일반지출 잔액(`remaining`)은 품의 반영 잔액을 유지하되, 일상경비 잔액(`dailyExpenseRemaining`)은 순수 실적치(`교부액 - 실지출액`)로 분리 집계하여 시뮬레이션 예정 항목(`isPlanned: true`)의 대조보드 실지출 혼입을 원천 차단함.
+       - `useBudgetSimulator.ts`에서 통계목별 순수 가용잔액 `actualDailyRemaining = Math.max(0, val.dailyExpenseIssued - val.dailyExpenseSpent)`을 산출함.
+       - 일상경비 지출 예정액이 교부잔액을 초과하거나 미교부(0원)된 경우 독립 부족분 `shortfall = Math.max(0, val.simulatedDailyExpenditure - actualDailyRemaining)`을 도출함.
+       - 본청 최종 예상 잔액에서 부족분을 연동 차감하는 `finalExpectedBalance = currentRemaining - val.simulatedGeneralExpenditure - shortfall` 수식을 적용함.
+       - 통계목 간 교차 집행 금지 규정에 따라 각 통계목 $k$의 `shortfall_k`를 세부사업 단위로 단순 합산($\sum_k$)하여 상단 요약 카드와 결과 테이블 합계 간 1원의 오차도 없는 100% 동일성을 보장함.
+       - `SimulationInputForm.tsx`에서 0원 미교부 통계목에 대한 일반지출 강제 덮어쓰기 로직을 제거하고, `미교부 (추가 교부 필요)` 배지와 함께 일상경비 지출 계획 등록을 허용함.
+       - `DailyExpenseStatModal.tsx`에서 `getCategoryStats(cat.id, true)`를 호출하여 `교부액 - 실지출액 = 가용 잔액` 공식을 100% 성립시킴.
+    2. **숫자 타이포그래피 우측 칼정렬 및 3-Slot 수직 정렬 그리드 규격화 (`src/components/budget/ui/SimulationResultTable.tsx`, `src/components/budget/ui/SimulationSummaryCards.tsx`, `src/components/budget/ui/BudgetCategoryCardItem.tsx`, `src/components/budget/BudgetDashboard.tsx`)**:
+       - 결과 테이블, 요약 카드, 상세 모달 전반의 모든 금액, 집행률, 잔여율, 수량 수치에 `font-mono tabular-nums text-right`를 일괄 적용함.
+       - 원화 기호(`₩`) 및 통화 단위(`원`, `%`)를 본문 숫자와 분리 표기하여 폰트 자폭 불일치로 인한 브라우저 렌더링 흔들림을 차단함.
+       - `SimulationResultTable.tsx`에서 1열(구분/항목명 캡슐), 3열(총 예산액), 4열(현재 실집행), 5열(현재 잔액), 6열(시뮬레이션 예정액), 7열(최종 예상 잔액)의 3-Slot 수직 정렬선을 확립함.
+       - 일상경비 예정액이 교부잔액을 초과할 경우 6열 및 7열에 `[추가 교부 필요 ₩...원]` 배지를 렌더링함.
+       - Level 3 세부 지출 항목 행의 단가, 수량(`× N개`), 산출금액 수직 정렬을 체계화함.
+       - `SimulationSummaryCards.tsx`의 5번 카드(최종 예상 잔액) 및 6번 카드(적자 발생 세부사업 수)에 `totalShortfall`을 즉시 반영하여 `[추가 교부 필요 ₩...원]` 배지와 `교부 필요` 상태 태그를 표출함.
+       - `BudgetCategoryCardItem.tsx` 및 `BudgetDashboard.tsx` 내 분할 비율 배지와 집행률 지표에 `tabular-nums`를 보강함.
+    3. **산출기초(subItems) 및 잠금(isLocked) 한도 가드레일 강화 (`src/components/budget/ui/StatItemDetailModal.tsx`, `__tests__/stat-item-detail-modal.test.tsx`)**:
+       - `targetSubItems` 및 하위 산출식(`calculations`)을 전수 순회하여 `isLocked === true` 플래그가 지정된 항목의 금액을 누적 합산한 `totalLockedAmount`를 도출함.
+       - 4단계 예산 적합성 판정 엔진(`초과 경고`, `추가 교부 필요`, `잠금한도 침범`, `정상/안전`)을 구축하여 모달 상단 헤더에 실시간 상태 캡슐을 표출함.
+       - 법정 의무 잠금 한도 대비 최종 예상 잔액이 미달할 경우 `잠금한도 침범` 경고 캡슐을 표출하여 인건비 잠식 위험을 방지함.
+       - Tab 3("본예산 산출 기초") 상단에 법정 필수경비 알림 배너(`임의 삭감 불가`)를 렌더링하고 각 산출기초 행 및 세부 계산식에 `🔒 잠금` 캡슐을 명시함.
+       - `__tests__/stat-item-detail-modal.test.tsx` 스위트에 9개 단위/통합 테스트를 구축하여 모달 렌더링, 필터링, 탭 전환, 팝업 연동, 부족분 배지, 잠금 한도 가드레일을 100% 자동 검증함.
+
+### [Milestone 271: 전 페이지 미니멀리즘 색감·헤어라인 유지 및 텍스트 크기·컴포넌트 규격 롤백 복원 (메인 대시보드·예산관리·예산 시뮬레이터·양재천 페스티벌 4-Way 정적 레플리카 가독성 극대화)] Preserved 100% of the minimalist color palette, 1px slate hairline borders, tabular-nums monospace alignment, and dual-pipeline accounting fixes from Milestones 268–270 while rolling back text sizes ('text-*') and component dimensions (paddings, gaps, heights, chart radii, and button touch targets) to their larger, highly legible pre-minimalism levels (commit 4db65e4) across 22 UI files and the 4-Way Yangjae Festival static replica. (2026-10-21)
+* **개요 및 추진 목적**:
+  - 사용자 지시(`색감은 유지하면서 텍스트 크기랑 컴포넌트 크기들은 전으로 롤백해봐`)에 의거하여 Milestone 268~270에서 도입한 **미니멀리즘 색감·표면·테두리 스타일**(`bg-white`, `border-slate-200/80` 1px 헤어라인, 슬레이트 저채도 배지, `font-mono tabular-nums`, 세그먼트 탭 컨트롤)과 **모든 회계·기능 버그 수정 사항**은 100% 그대로 유지하면서, 축소되었던 **텍스트 크기(`text-*`)와 컴포넌트 물리 규격(패딩, 간격, 높이, 차트·아이콘 크기)**을 미니멀리즘 개편 직전(`4db65e4`)의 넉넉하고 시원한 크기로 전면 롤백 복원함:
+    1. **글로벌 앱 셸 및 메인 페이지 규격 복원 (`Sidebar.tsx`, `ProtectedApp.tsx`, `PortfolioDashboardView.tsx`, `ContactsBox.tsx`)**:
+       - 상단 GNB(`Sidebar`) 높이를 `h-14` $\to$ `h-16`으로, 본문 상단 오프셋(`ProtectedApp`)을 `pt-14` $\to$ `pt-16`으로 복원하고 로고(`w-9 h-9`, `text-lg`) 및 메뉴 탭(`px-4 py-2 text-sm`) 크기를 복원함.
+       - 메인 대시보드(`PortfolioDashboardView`)의 4대 KPI 카드(`p-6`, 수치 `text-2xl lg:text-3xl font-extrabold`), 도넛 차트(`w-52 h-52`, `innerRadius=60`, `outerRadius=80`) 및 번업 차트(`h-64 md:h-72`) 높이를 복원하고, 부서 주소록(`ContactsBox`) 헤더·입력 폼·카드 그리드(`gap-4`, 카드 `p-4`, 성명 `text-[15px] font-bold`) 규격을 복원함.
+    2. **예산관리 페이지 규격 복원 (`WorkspaceView.tsx`, `BudgetDashboard.tsx`, `MultiSelectDropdown.tsx`, `InlineEditCell.tsx`, `PolicyGroupCard.tsx`, `BudgetCategoryCardItem.tsx`, `DailyExpenseStatModal.tsx`, `BatchEditModal.tsx`)**:
+       - `BudgetDashboard`의 불용 위험 바(`p-4`, `text-sm`), 4대 핵심 요약 카드(`p-5`, 대표 금액 `text-2xl font-black`, 보조 배지 `text-xs`), 필터 바(`p-4 md:p-5`, 드롭다운 `py-2 text-xs font-bold`), `PolicyGroupCard`(`p-5 md:p-6`, 정책사업명 `text-lg md:text-xl`, 총예산 `text-xl md:text-2xl`, 세부사업명 `text-base md:text-lg`) 및 `BudgetCategoryCardItem`(`p-4 md:p-5`, 통계목명 `text-[15px] md:text-base`, 금액 `text-[15px] md:text-base font-extrabold`, 산출내역·지출원장 테이블 `text-xs md:text-sm`)의 텍스트와 여백을 복원함.
+    3. **예산 시뮬레이터 페이지 규격 복원 (`BudgetSimulator.tsx`, `SimulationSummaryCards.tsx`, `SimulationBurnUpChart.tsx`, `SimulationInputForm.tsx`, `SimulationResultTable.tsx`, `SimulationEntryList.tsx`, `StatItemDetailModal.tsx`, `QuickPlanModal.tsx`)**:
+       - 상단 헤더(`p-5 md:p-6`, 타이틀 `text-xl md:text-2xl font-black`), 6대 KPI 요약 카드(`p-5`, 금액 `text-xl xl:text-2xl font-extrabold`), 번업 차트(`h-[320px]`), 지출 예정 입력 폼(`p-5 md:p-6`, 입력 필드 `px-3.5 py-2.5 text-sm`, 최종 산출 금액 `text-lg font-extrabold`), 결과 테이블(`SimulationResultTable` 세부사업명·통계목 금액 `text-[15px] sm:text-base font-extrabold`, 행 패딩 `py-3 px-4`) 및 상세 모달(`StatItemDetailModal` 제목 `text-xl sm:text-2xl font-black`) 규격을 복원함.
+    4. **양재천 페스티벌 대시보드 및 4-Way 정적 엣지 레플리카 규격 복원 (`YangjaeFestivalDashboard.tsx`, `scripts/pages-template.html`, `out/festival/yangjae/index.html`)**:
+       - 상단 4대 메인 탭(`1. 추진과제` $\to$ `2. 부스현황` $\to$ `3. 업무분장` $\to$ `4. 행사식순`) 버튼 터치 타겟 및 폰트 크기를 일반 모드 `py-2.5 text-xs font-extrabold`, 큰글씨 모드 `py-3 text-base font-black`으로 복원하고 탭 콘텐츠 간격(`space-y-3.5` / `space-y-3`) 및 `prepare-pages-output.js` 정적 빌드를 동기화 완료함.
 
 ### [Milestone 270: 메인 페이지(통합 대시보드·글로벌 앱 셸·주소록) 및 양재천 페스티벌 페이지(React 뷰·4-Way 정적 엣지 레플리카) 미니멀리즘 디자인 전면 개편 (100% SSOT 데이터 및 인라인 관제 무결성 보존)] Extended the unified minimalist design system (clean white surfaces, 1px slate-200/80 hairline borders, low-saturation slate typography hierarchy, tabular-nums monospace alignment, and segmented tab controls) across the Main Dashboard & Global App Shell ('ProtectedApp.tsx', 'Sidebar.tsx', 'LocalhostStatusHUD.tsx', 'PortfolioDashboardView.tsx', 'ContactsBox.tsx') and the Yangjae Festival 4-Way Edge Replica ('YangjaeFestivalDashboard.tsx', 'YangjaeFestivalClientWrapper.tsx', 'YangjaeFestivalSkeleton.tsx', 'scripts/pages-template.html', 'out/festival/yangjae/index.html') while preserving 100% of underlying SSOT data, KPI metrics, inline editing, and 448px mobile ergonomics. (2026-10-20)
 * **개요 및 추진 목적**:

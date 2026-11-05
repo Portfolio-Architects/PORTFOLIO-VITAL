@@ -71,7 +71,7 @@ description: >-
 - ❍ **문장별 강제 엔터(개행) 및 단락 분리:**
   - 마크다운 초안 및 채팅 응답에서 비표준 기호(`󰏚`, `▢`, `❍`, `가.`, `1)`)가 한 줄로 병합되지 않도록 반드시 마크다운 리스트 불릿 결합(`- ❍ `, `  - `) 또는 줄 끝 스페이스 2칸(`  \n`) / 빈 줄(`\n\n`)을 적용하여 **1문장 = 1줄(Enter)**로 분리함.
 
-### ▢ Phase 3. 비파괴 HWPX 복제 및 XML 텍스트 인플레이스 컴파일
+### ▢ Phase 3. 비파괴 HWPX 복제, XML 인플레이스 컴파일 및 5대 텍스트 겹침 원천 차단
 
 - ❍ **비파괴 복제 실행:** 원본 템플릿(`scratch/template.hwpx`)을 직접 수정하지 않고 신규 출력 경로로 복제함.
 - ❍ **Python 컴파일러 가동:**
@@ -81,17 +81,24 @@ description: >-
     --output "d:/Desktop/공공문서 폴더/2026년/2026_신규공문서.hwpx" \
     --markdown "scratch/draft.md"
   ```
-- ❍ **XML 제어 객체 격리 및 ZIP 헤더 패치:**
+- ❍ **5대 텍스트 겹침(Text Overlap) 원천 차단 엔진 의무 가동 (`scratch/generate_new_hwpx.py`):**
+  - **[1] `<hp:linesegarray>` (`vertpos`/`textpos`) 동적 재계산 및 자식 순서 강제 (`recalc_tc_linesegs`, `layout_sec_paragraph`, `ensure_linesegarray_last`):** 텍스트 치환 또는 `copy.deepcopy` 복제 시 정적 캐시된 `vertpos="0"`이 중복되어 줄이 겹치는 현상을 차단하기 위해 `wrap_text_positions`로 줄바꿈 오프셋(`textpos`)과 단조 증가 `vertpos`를 재계산하고, `<hp:linesegarray>`를 항상 모든 `<hp:run>` 뒤인 `<hp:p>`의 마지막 자식으로 배치함.
+  - **[2] 표 셀 높이(`<hp:cellSz>`), 중첩 표(Nested Table) 상향 전파, 표 전체 높이(`<hp:tbl>/<hp:sz>`) 및 직속 호스트 문단 `<hp:lineseg>` 동기화 (`sync_table_geometry`, `heal_section_tables_and_layout`):** 셀 내부 다중 줄 개행 및 하위 중첩 표 확장 시 `<hp:cellSz height>`를 확장하고, 동일 행(`<hp:tr>`) 내 `rowSpan == 1` 셀 높이를 최대 행 높이로 통일하며, 결재란 등 엇갈린 병합 행(Staggered `rowSpan > 1`)과 수직 병합 셀을 병합 구간 행 합산 높이로 역산·일치시키고 최하위 중첩 표부터 외곽 표까지 깊이 역순(`heal_section_tables_and_layout`)으로 `<hp:tbl>/<hp:sz height>` 및 직속 호스트 문단 `<hp:lineseg vertsize>`를 연쇄 동기화함.
+  - **[3] 표 개체 인라인 배치(`treatAsChar="1"`) 강제 (`enforce_inline_table_flow`):** 가변 행 표의 `<hp:pos treatAsChar="0"/>`(부유 객체)로 인해 표 확장 시 하단 본문과 겹치는 현상을 막기 위해 `treatAsChar="1" vertOffset="0"`으로 정규화함.
+  - **[4] 엑셀 복사 압축 스타일 정규화 및 `0xFFFFFFFF`(`4294967295`) 셀 여백 오버플로우 차단 (`normalize_header_styles`, `get_excel_defective_ids`, `get_cell_margins`):** `Contents/header.xml`의 `lineWrap="SQUEEZE"`를 `"BREAK"`로, `paraPr 129` 음수 들여쓰기를 `0`으로, 100% 미만 줄간격을 `130%`로 정규화하고, `header.xml`에서 실제 결함이 감지된 엑셀 문단 참조만 비압축(`condense="0"`) 문단 스타일로 치환하며, `<hp:cellMargin>`의 `4294967295`(`0xFFFFFFFF = -1`) 상속값을 `141` HWPUnits로 클램핑하여 42.9억 HWPUnit 오버플로우를 차단함.
+  - **[5] 다중 `<hp:run>` / `<hp:t>` 및 인라인 `<hp:lineBreak/>`·`<hp:fwSpace/>`·`<hp:markpenBegin/>` 정리 (`flatten_t_node`, `set_p_text`, `set_tc_lines`):** `<hp:t>` 내부의 자식 태그(`.tail` 및 구버전 형광펜 유령 꼬리 텍스트)를 평탄화·제거하고, 잉여 `hp:t`는 부모 `hp:run`에서, 잉여 `hp:run`은 부모 `hp:p`에서 정확히 제거함.
+- ❍ **XML 제어 객체 격리 및 ZIP 헤더 패치 (`patch_zip_flags`):**
   - 표(`hp:tbl`), 글상자(`hp:box`), 이미지, 수식 등의 제어 노드를 파괴하지 않고 순수 본문 `hp:t` 텍스트만 치환함.
   - `struct.pack_into`를 통해 ZIP 압축 플래그 비트(Bit 2 Fast Deflating, value 4)를 바이너리 복원하여 한컴오피스 100% 호환성을 확보함.
 
-### ▢ Phase 4. 한글 표준 준거 지침 최종 검증 (Compliance Audit)
+### ▢ Phase 4. 한글 표준 준거 지침 및 레이아웃 무결성 최종 검증 (Compliance Audit)
 
-- ❍ `docs/HWP_GENERATION_GUIDELINES.md` 8대 항목 전수 대조:
+- ❍ `docs/HWP_GENERATION_GUIDELINES.md` 14대 항목 및 `verify_hwpx_no_overlap` 전수 대조:
   - 용지 여백(상하 15.0mm, 좌우 20.0mm, 머리말/꼬리말 10.0mm).
   - 서체 크기(대제목 22pt, 중간제목 16~18pt, 본문 15pt, 세부 13pt).
   - 2타 띄기(기호 뒤 1~2타, 들여쓰기 2타, 붙임 뒤 2타, 문서 끝 `  끝.`).
   - 문장부호(날짜 마침표+공백 `2026. 9. 14.`, 24시각제 `14:00`, 금액 병기 `금10,000,000원(금일천만원)`, 홑낫표 `｢ ｣`).
+  - 5대 텍스트 겹침 무결성(`inverted_order_p == 0`, `dup_vpos_cells == 0`, `huge_height_cells == 0`, `narrow_hsize_cells == 0`, `squeeze_count == 0`, `compressed_lspacing == 0`, `ghost_t_nodes == 0`).
 
 ---
 
@@ -101,7 +108,7 @@ description: >-
 # 1. 초안 마크다운 문서 내 개인정보(주민등록번호, 전화번호 등) 정밀 스캔
 python scripts/privacy_guard.py --scan scratch/draft.md
 
-# 2. HWPX 무손실 자동 생성 실행
+# 2. HWPX 무손실 자동 생성 및 5대 텍스트 겹침 차단 게이트키퍼 실행
 python scratch/generate_new_hwpx.py --template scratch/template.hwpx --output scratch/output.hwpx --markdown scratch/draft.md
 
 # 3. 행정 문체 포매터 단위 테스트 검증
@@ -120,6 +127,11 @@ npm test -- __tests__/administrative-formatter.test.ts
 | **AP-H4** | 연월일 표기 시 끝 마침표 누락(`2026. 9. 14`) 또는 일 뒤 공백 누락 | `2026. 9. 14.` (일 뒤 마침표 찍고 1공백 필수) |
 | **AP-H5** | 문서 종결 시 공백 없이 `끝.` 표기하거나 붙임 뒤 1공백만 띄움 | 붙임 뒤 2공백(`붙임  `), 문서 마감 시 2공백 후 `  끝.` |
 | **AP-H6** | 마크다운에서 `❍ 문장1\n❍ 문장2`를 단일 개행만 하여 한 줄로 병합됨 | `- ❍ 문장` 리스트 결합 또는 문단 간 빈 줄(`\n\n`)로 1문장 1줄 엔터 강제 |
+| **AP-H7** | `<hp:t>` 수정 또는 `copy.deepcopy` 후 `<hp:linesegarray>` 미갱신·`<hp:run>` 앞에 배치 | `recalc_tc_linesegs`·`layout_sec_paragraph` 재계산 및 `ensure_linesegarray_last` 강제 |
+| **AP-H8** | 셀 텍스트 개행·중첩 표 확장 후 `<hp:cellSz>`·`<hp:tbl>/<hp:sz>` 및 상위 표 미동기화 | `heal_section_tables_and_layout` 및 `sync_table_geometry`로 중첩 표 상향 전파·병합 행 동기화 |
+| **AP-H9** | 가변 행 데이터 표를 `<hp:pos treatAsChar="0"/>`(부유 객체)로 방치하여 본문과 겹침 | `enforce_inline_table_flow`를 통해 `treatAsChar="1" vertOffset="0"` 인라인 배치 강제 |
+| **AP-H10** | 엑셀 복사 `lineWrap="SQUEEZE"` 방치 및 `<hp:cellMargin>` `4294967295` 직접 연산 | `normalize_header_styles`로 `BREAK` 변환 및 `get_cell_margins`에서 `141` HWPUnits로 클램핑 |
+| **AP-H11** | `p_node.remove(extra_t)` 잘못된 부모 삭제 호출 또는 `<hp:t>` 내 `<hp:lineBreak/>`·`<hp:markpenBegin/>` 방치 | `set_p_text` 및 `flatten_t_node`를 사용하여 `r0.remove(extra_t)` 및 자식·유령 꼬리 평탄화 수행 |
 
 ---
 
@@ -134,5 +146,6 @@ npm test -- __tests__/administrative-formatter.test.ts
 ### ▢ 2. 사후 검증 체크리스트
 
 - ❍ `python scripts/privacy_guard.py --scan <초안.md>`를 실행하여 주민등록번호 및 개인식별정보 노출이 0건인지 입증함.
-- ❍ `python scratch/generate_new_hwpx.py` 실행 로그에서 `Successfully built HWPX with 100% identical ZIP headers`를 확인함.
-- ❍ 생성된 HWPX의 텍스트가 깨지거나 표 서식이 밀리지 않았는지 문서 구조를 최종 승인함.
+- ❍ `python scratch/generate_new_hwpx.py` 실행 로그에서 `Verified 0 overlap defects` 및 `Successfully built HWPX with 100% identical ZIP headers`를 확인함.
+- ❍ 생성된 HWPX의 텍스트 겹침, 셀 높이 오버플로우, 표 서식 밀림이 0건인지 최종 승인함.
+

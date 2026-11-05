@@ -220,15 +220,15 @@ const BudgetCategoryCardItemComponent = ({
   if (!stats) return null;
 
   return (
-    <div className="group/item relative bg-white border border-slate-200/80 rounded-xl px-3.5 py-2.5 hover:border-slate-300 transition-colors">
-      <div className={`flex items-center justify-between gap-2 ${isExpanded ? 'mb-2.5' : 'mb-0'}`}>
+    <div className="group/item relative bg-white border border-slate-200/80 rounded-xl p-4 hover:border-slate-300 transition-colors">
+      <div className={`flex items-center justify-between gap-2 ${isExpanded ? 'mb-3' : 'mb-0'}`}>
         <div 
-          className="text-sm font-semibold flex items-center gap-2 text-slate-800 cursor-pointer hover:text-indigo-600 transition-colors select-none min-w-0 flex-1" 
+          className="text-[15px] font-bold flex items-center gap-2.5 text-slate-800 cursor-pointer hover:text-indigo-600 transition-colors select-none min-w-0 flex-1" 
           onClick={() => setIsExpanded(prev => !prev)}
         >
-          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color || '#4A6CF7' }} />
+          <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color || '#4A6CF7' }} />
           <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
-            {cat.formationItem && <span className="text-slate-400 font-mono text-xs">[{cat.formationItem}]</span>}
+            {cat.formationItem && <span className="text-slate-400 font-mono text-[13px]">[{cat.formationItem}]</span>}
             <InlineEditCell
               cellId={`${cat.id}:statItem`}
               value={cat.statItem || cat.name}
@@ -238,61 +238,61 @@ const BudgetCategoryCardItemComponent = ({
               onCancelEdit={() => setActiveCellId(null)}
               onSave={(newVal) => updateCategory && updateCategory(cat.id, { statItem: String(newVal) })}
               onNavigate={(dir) => handleCellNavigate(`${cat.id}:statItem`, dir)}
-              className="font-semibold text-slate-800 hover:text-indigo-600 text-sm"
+              className="font-bold text-slate-800 hover:text-indigo-600 text-[15px]"
             />
-            {cat.managementProject && <span className="text-slate-500 font-medium text-xs">({cat.managementProject})</span>}
+            {cat.managementProject && <span className="text-slate-500 font-semibold text-[13px]">({cat.managementProject})</span>}
 
             {/* Minimalist summary pill: total budget, execution rate, remaining rate, remaining won */}
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-slate-600 text-xs font-mono tabular-nums flex-wrap" title="예산 총액 / 집행률 / 미집행률 / 잔여액">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-slate-600 text-xs sm:text-[13px] font-mono tabular-nums flex-wrap" title="예산 총액 / 집행률 / 미집행률 / 잔여액">
               <span>예산 {formatN(cat.totalBudget)}원</span>
               <span className="text-slate-300">|</span>
-              <span className="font-semibold text-indigo-600">집행 {(stats.usageRate || 0).toFixed(1)}%</span>
+              <span className="font-bold text-indigo-600">집행 {(stats.usageRate || 0).toFixed(1)}%</span>
               <span className="text-slate-300">|</span>
-              <span className="font-semibold text-emerald-700">미집행 {(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%</span>
+              <span className="font-bold text-emerald-700">미집행 {(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%</span>
               <span className="text-slate-300">|</span>
-              <span className="font-bold text-slate-900">잔여 {formatN(stats.remaining)}원</span>
+              <span className="font-black text-slate-900">잔여 {formatN(stats.remaining)}원</span>
             </span>
 
             <div className={`text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-              <ChevronDown size={14} />
+              <ChevronDown size={15} />
             </div>
           </div>
           {cat.budgetType && cat.budgetType !== '본예산' && (
-            <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded ml-1 flex-shrink-0 border ${cat.budgetType === '간주예산' ? 'bg-purple-50/70 text-purple-700 border-purple-200/60' : 'bg-rose-50/70 text-rose-700 border-rose-200/60'}`}>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded ml-1 flex-shrink-0 border ${cat.budgetType === '간주예산' ? 'bg-purple-50/70 text-purple-700 border-purple-200/60' : 'bg-rose-50/70 text-rose-700 border-rose-200/60'}`}>
               {cat.budgetType}
             </span>
           )}
           {cat.fundingSource && cat.fundingSource.replace(/구비\(자체\)/g, '구비') !== '구비' && (
-            <span className="text-[11px] font-medium px-1.5 py-0.5 rounded ml-0.5 flex-shrink-0 border bg-slate-50 text-slate-600 border-slate-200/80">
+            <span className="text-xs font-semibold px-2 py-0.5 rounded ml-0.5 flex-shrink-0 border bg-slate-50 text-slate-600 border-slate-200/80">
               {cat.fundingSource.replace(/구비\(자체\)/g, '구비')}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-0.5 opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity flex-shrink-0">
+        <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity flex-shrink-0">
           {onSwapCat && !isFirst && (
-            <button onClick={(e) => { e.stopPropagation(); onSwapCat(cat.id, -1); }} className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700" title="위로 이동"><ArrowUp size={12} /></button>
+            <button onClick={(e) => { e.stopPropagation(); onSwapCat(cat.id, -1); }} className="p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700" title="위로 이동"><ArrowUp size={13} /></button>
           )}
           {onSwapCat && !isLast && (
-            <button onClick={(e) => { e.stopPropagation(); onSwapCat(cat.id, 1); }} className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700" title="아래로 이동"><ArrowDown size={12} /></button>
+            <button onClick={(e) => { e.stopPropagation(); onSwapCat(cat.id, 1); }} className="p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700" title="아래로 이동"><ArrowDown size={13} /></button>
           )}
-          <button onClick={() => onEditCat(cat)} className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700" title="수정"><Pencil size={12} /></button>
-          <button onClick={() => onDeleteCat(cat.id)} className="p-1 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-600" title="삭제"><Trash2 size={12} /></button>
+          <button onClick={() => onEditCat(cat)} className="p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700" title="수정"><Pencil size={13} /></button>
+          <button onClick={() => onDeleteCat(cat.id)} className="p-1.5 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-600" title="삭제"><Trash2 size={13} /></button>
         </div>
       </div>
 
       {isExpanded && (
-        <div className="mt-2.5 space-y-2.5 pt-2.5 border-t border-slate-100">
+        <div className="mt-3 space-y-3 pt-3 border-t border-slate-100">
           {/* Minimalist Execution & Remaining Summary Strip */}
-          <div className="bg-slate-50/70 rounded-lg px-3.5 py-2.5 border border-slate-200/60 space-y-2">
+          <div className="bg-slate-50/70 rounded-lg p-3 border border-slate-200/60 space-y-2.5">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-slate-500 font-medium text-xs">사용 (집행+품의)</span>
-                  <span className="text-[11px] font-semibold font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200/80 text-indigo-600" title="통계목 집행률">
+                  <span className="text-slate-500 font-semibold text-[13px]">사용 (집행+품의)</span>
+                  <span className="text-xs font-bold font-mono tabular-nums px-2 py-0.5 rounded bg-white border border-slate-200/80 text-indigo-600" title="통계목 집행률">
                     집행 {(stats.usageRate || 0).toFixed(1)}%
                   </span>
                 </div>
-                <span className="text-slate-800 font-semibold tracking-tight text-sm font-mono tabular-nums">
+                <span className="text-slate-800 font-bold tracking-tight text-base font-mono tabular-nums">
                   {formatN(stats.spent + stats.planned)} <span className="text-slate-300 font-normal mx-0.5">/</span>{' '}
                   <InlineEditCell
                     cellId={`${cat.id}:totalBudget`}
@@ -307,26 +307,26 @@ const BudgetCategoryCardItemComponent = ({
                     }}
                     onNavigate={(dir) => handleCellNavigate(`${cat.id}:totalBudget`, dir)}
                     displayFormatter={(v) => formatN(Number(v))}
-                    className="inline-block text-slate-900 font-bold font-mono"
-                    inputClassName="w-28 text-right"
+                    className="inline-block text-slate-900 font-bold font-mono tabular-nums"
+                    inputClassName="w-32 text-right"
                   />
                 </span>
               </div>
               <div className="flex flex-col items-end">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-[11px] font-semibold font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200/80 text-emerald-700" title="통계목 미집행률(잔여율)">
+                  <span className="text-xs font-bold font-mono tabular-nums px-2 py-0.5 rounded bg-white border border-slate-200/80 text-emerald-700" title="통계목 미집행률(잔여율)">
                     미집행 {(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%
                   </span>
-                  <span className="text-slate-500 font-medium text-xs">잔여금액</span>
+                  <span className="text-slate-500 font-semibold text-[13px]">잔여금액</span>
                 </div>
-                <span className={`font-bold tracking-tight text-sm font-mono tabular-nums ${stats.remaining < 0 ? 'text-rose-600' : 'text-slate-900'}`}>
+                <span className={`font-black tracking-tight text-[17px] font-mono tabular-nums ${stats.remaining < 0 ? 'text-rose-600' : 'text-slate-900'}`}>
                   {formatN(stats.remaining)}원
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5">
-              <div className="flex-1 h-1.5 bg-slate-200/70 rounded-full overflow-hidden flex" title={`집행률: ${(stats.usageRate || 0).toFixed(1)}% | 미집행률: ${(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%`}>
+              <div className="flex-1 h-2 bg-slate-200/70 rounded-full overflow-hidden flex" title={`집행률: ${(stats.usageRate || 0).toFixed(1)}% | 미집행률: ${(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%`}>
                 <div 
                   className={`h-full ${isVisible ? 'transition-all duration-500 ease-out' : ''} ${(stats.usageRate || 0) >= 95 ? 'bg-rose-500' : (stats.usageRate || 0) >= 80 ? 'bg-amber-500' : 'bg-slate-800'}`} 
                   style={{ width: `${Math.min(100, stats.usageRate || 0)}%` }} 
@@ -336,23 +336,23 @@ const BudgetCategoryCardItemComponent = ({
                   style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, stats.usageRate || 0), cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0))}%` }} 
                 />
               </div>
-              <span className="text-[11px] font-semibold text-slate-500 w-10 text-right font-mono tabular-nums">{(stats.usageRate || 0).toFixed(1)}%</span>
+              <span className="text-[12.5px] font-bold text-slate-600 w-12 text-right font-mono tabular-nums">{(stats.usageRate || 0).toFixed(1)}%</span>
             </div>
           </div>
 
           {/* Calculation Basis (Sub-Items) */}
           {cat.subItems && cat.subItems.length > 0 && (
-            <div className="bg-white border border-slate-200/70 rounded-xl p-3">
-              <div className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-1.5">
-                <div className="w-1 h-3 bg-slate-400 rounded-full"/> 산출 기초 (세부 항목)
+            <div className="bg-white border border-slate-200/70 rounded-xl p-4">
+              <div className="text-[15px] font-bold text-slate-600 mb-2.5 flex items-center gap-2">
+                <div className="w-1.5 h-4 bg-slate-400 rounded-full"/> 산출 기초 (세부 항목)
               </div>
               <div className="divide-y divide-slate-100">
                 {cat.subItems.map((sub, subIdx) => (
-                  <div key={subIdx} className="py-2 first:pt-0 last:pb-0 flex flex-col gap-1">
+                  <div key={subIdx} className="py-2.5 first:pt-0 last:pb-0 flex flex-col gap-1.5">
                     <div className="flex flex-col">
                       <div className="flex justify-between items-baseline gap-2">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          {sub.prefix && <span className="text-[11px] bg-slate-100 border border-slate-200/80 text-slate-600 font-semibold px-1.5 py-0.5 rounded shrink-0">{sub.prefix}</span>}
+                        <div className="flex items-center gap-2 min-w-0">
+                          {sub.prefix && <span className="text-[15px] bg-slate-100 border border-slate-200/80 text-slate-700 font-bold px-2 py-0.5 rounded shrink-0">{sub.prefix}</span>}
                           <InlineEditCell
                             cellId={`${cat.id}:sub:${subIdx}:name`}
                             value={sub.name}
@@ -362,7 +362,7 @@ const BudgetCategoryCardItemComponent = ({
                             onCancelEdit={() => setActiveCellId(null)}
                             onSave={(newVal) => handleSubItemUpdate(subIdx, 'name', newVal)}
                             onNavigate={(dir) => handleCellNavigate(`${cat.id}:sub:${subIdx}:name`, dir)}
-                            className="text-[13px] text-slate-800 font-semibold tracking-tight"
+                            className="text-[18px] text-slate-800 font-black tracking-tight"
                           />
                         </div>
                         <div className="flex flex-col items-end shrink-0">
@@ -376,32 +376,32 @@ const BudgetCategoryCardItemComponent = ({
                             onSave={(newVal) => handleSubItemUpdate(subIdx, 'amount', newVal)}
                             onNavigate={(dir) => handleCellNavigate(`${cat.id}:sub:${subIdx}:amount`, dir)}
                             displayFormatter={(v) => Number(v) > 0 ? `${formatN(Number(v))}원` : '-'}
-                            className="font-semibold text-slate-900 tracking-tight text-[13px] font-mono tabular-nums"
-                            inputClassName="w-28 text-right"
+                            className="font-black text-slate-900 tracking-tight text-[17px] font-mono tabular-nums"
+                            inputClassName="w-32 text-right"
                           />
                         </div>
                       </div>
                       
                       {!sub.calculations || sub.calculations.length === 0 ? (
-                        sub.calculation && <div className="text-xs text-slate-500 font-mono tracking-tight mt-0.5 pl-0.5">{sub.calculation}</div>
+                        sub.calculation && <div className="text-[13px] text-slate-500 font-mono tracking-tight mt-1 pl-0.5">{sub.calculation}</div>
                       ) : (
-                        <div className="mt-1.5 bg-slate-50/70 border-l-2 border-slate-300 rounded-r-lg py-1.5 flex flex-col gap-1 ml-1 text-xs text-slate-600">
+                        <div className="mt-2 bg-slate-50/70 border-l-2 border-slate-300 rounded-r-lg py-2 flex flex-col gap-1.5 ml-1 text-[13px] text-slate-600">
                           {sub.calculations.map((calc, cIdx) => (
-                            <div key={cIdx} className="flex flex-col px-2.5 py-0.5 border-b border-slate-200/40 last:border-0 last:pb-0">
+                            <div key={cIdx} className="flex flex-col px-3 py-1 border-b border-slate-200/40 last:border-0 last:pb-0">
                               <div className="flex justify-between items-center gap-2">
-                                <div className="flex gap-1.5 items-center flex-1 min-w-0">
-                                  {calc.name && <span className="font-medium text-slate-700 truncate">{calc.name}</span>}
-                                  {calc.calculation && <span className="font-mono text-[11px] text-slate-400 truncate">({calc.calculation})</span>}
+                                <div className="flex gap-2 items-center flex-1 min-w-0">
+                                  {calc.name && <span className="font-semibold text-slate-700 truncate">{calc.name}</span>}
+                                  {calc.calculation && <span className="font-mono text-[12px] text-slate-400 truncate">({calc.calculation})</span>}
                                 </div>
-                                <span className="font-mono font-medium text-slate-700 tabular-nums shrink-0">{formatN(calc.amount)}원</span>
+                                <span className="font-mono font-bold text-slate-700 tabular-nums shrink-0">{formatN(calc.amount)}원</span>
                               </div>
                               {calc.isCustomFunding && calc.fundingSplits && calc.fundingSplits.length > 0 && (
-                                <div className="inline-flex w-fit items-center gap-1.5 mt-1 bg-white px-2 py-0.5 rounded border border-slate-200/80 whitespace-nowrap text-[10px]">
+                                <div className="inline-flex w-fit items-center gap-1.5 mt-1 bg-white px-2 py-0.5 rounded border border-slate-200/80 whitespace-nowrap text-xs">
                                   <span className="text-slate-500 font-semibold">개별재원</span>
                                   {calc.fundingSplits.map((fs, fsIdx) => (
                                     <span key={fsIdx} className="text-slate-700 font-medium flex items-center gap-1 border-r border-slate-200 last:border-0 pr-1.5 last:pr-0">
                                       <span className="text-slate-500">{fs.source.replace('구비(자체)', '구비')}</span>
-                                      <span className="font-mono font-semibold">{formatN(fs.amount)}</span>
+                                      <span className="font-mono font-semibold tabular-nums">{formatN(fs.amount)}</span>
                                     </span>
                                   ))}
                                 </div>
@@ -413,12 +413,12 @@ const BudgetCategoryCardItemComponent = ({
                     </div>
 
                     {sub.isCustomFunding && sub.fundingSplits && sub.fundingSplits.length > 0 && (
-                      <div className="inline-flex w-fit items-center gap-1.5 mt-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-200/80 whitespace-nowrap text-[11px]">
+                      <div className="inline-flex w-fit items-center gap-1.5 mt-1 bg-slate-50 px-2.5 py-1 rounded border border-slate-200/80 whitespace-nowrap text-xs">
                         <span className="text-slate-500 font-semibold">개별재원</span>
                         {sub.fundingSplits.map((fs, fsIdx) => (
                           <span key={fsIdx} className="text-slate-700 font-medium flex items-center gap-1 border-r border-slate-200 last:border-0 pr-1.5 last:pr-0">
                             <span className="text-slate-500">{fs.source.replace('구비(자체)', '구비')}</span>
-                            <span className="font-mono font-semibold">{formatN(fs.amount)}</span>
+                            <span className="font-mono font-semibold tabular-nums">{formatN(fs.amount)}</span>
                           </span>
                         ))}
                       </div>
@@ -431,12 +431,12 @@ const BudgetCategoryCardItemComponent = ({
 
           {/* General Expenditure Entries */}
           {generalEntries.length > 0 && (
-            <div className="bg-slate-50/50 border border-slate-200/70 rounded-xl p-3">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5 mb-2 pb-1.5 border-b border-slate-200/60">
-                <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"/> 일반 지출 (품의 및 집행) 현황
+            <div className="bg-slate-50/50 border border-slate-200/70 rounded-xl p-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2.5 pb-2 border-b border-slate-200/60">
+                <div className="text-[14px] sm:text-[15px] font-bold text-slate-700 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full"/> 일반 지출 (품의 및 집행) 현황
                 </div>
-                <div className="flex bg-white px-2 py-0.5 rounded border border-slate-200/80 text-[11px] gap-2 items-center flex-wrap font-mono tabular-nums">
+                <div className="flex bg-white px-2.5 py-1 rounded border border-slate-200/80 text-[13px] gap-2 items-center flex-wrap font-mono tabular-nums">
                   <span className="text-slate-600">진행중 품의: <strong className="text-slate-900">{formatN(stats.planned)}</strong></span>
                   <span className="text-slate-300">|</span>
                   <span className="text-slate-600">완료된 지출: <strong className="text-indigo-600">{formatN(stats.generalSpent)}</strong></span>
@@ -445,14 +445,14 @@ const BudgetCategoryCardItemComponent = ({
                 </div>
               </div>
               
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {generalEntries.map(e => (
-                  <div key={e.id} className="flex justify-between items-center text-xs sm:text-[13px] hover:bg-white py-1.5 px-2 rounded-md transition-colors border border-transparent hover:border-slate-200/80">
-                    <div className="flex gap-2 items-center truncate pr-2 min-w-0 flex-1">
-                      <span onClick={() => onEditEntry(e)} title="상세 모달 수정" className={`font-semibold px-1.5 py-0.5 rounded text-[11px] cursor-pointer hover:opacity-80 shrink-0 ${e.isPlanned && !e.isSettled ? 'bg-amber-50 text-amber-700 border border-amber-200/80' : 'bg-slate-100 text-slate-700 border border-slate-200/80'}`}>
+                  <div key={e.id} className="flex justify-between items-center text-[15.5px] hover:bg-white py-2 px-2.5 rounded-md transition-colors border border-transparent hover:border-slate-200/80">
+                    <div className="flex gap-2.5 items-center truncate pr-2 min-w-0 flex-1">
+                      <span onClick={() => onEditEntry(e)} title="상세 모달 수정" className={`font-bold px-2 py-0.5 rounded text-xs cursor-pointer hover:opacity-80 shrink-0 ${e.isPlanned && !e.isSettled ? 'bg-amber-50 text-amber-700 border border-amber-200/80' : 'bg-slate-100 text-slate-700 border border-slate-200/80'}`}>
                         {e.isPlanned && !e.isSettled ? '품의(원인행위)' : '실지출'}
                       </span>
-                      <span className="text-slate-400 font-mono text-xs shrink-0">{e.date.replace(/-/g, '.')}</span>
+                      <span className="text-slate-400 font-mono text-[13px] shrink-0">{e.date.replace(/-/g, '.')}</span>
                       <InlineEditCell
                         cellId={`${e.id}:cat_purpose`}
                         value={e.purpose || ''}
@@ -462,7 +462,7 @@ const BudgetCategoryCardItemComponent = ({
                         onCancelEdit={() => setActiveCellId(null)}
                         onSave={(newVal) => updateEntry && updateEntry(e.id, { purpose: String(newVal) })}
                         onNavigate={(dir) => handleCellNavigate(`${e.id}:cat_purpose`, dir)}
-                        className={`${e.purpose?.includes('(일상경비 교부)') ? 'text-amber-700 font-semibold' : 'text-slate-800 font-medium'} truncate`}
+                        className={`${e.purpose?.includes('(일상경비 교부)') ? 'text-amber-700 font-bold' : 'text-slate-800 font-semibold'} truncate`}
                       />
                     </div>
                     <InlineEditCell
@@ -478,8 +478,8 @@ const BudgetCategoryCardItemComponent = ({
                       }}
                       onNavigate={(dir) => handleCellNavigate(`${e.id}:cat_amount`, dir)}
                       displayFormatter={(v) => `${formatN(Number(v))}원`}
-                      className="font-semibold text-slate-900 tabular-nums shrink-0 font-mono"
-                      inputClassName="w-28 text-right"
+                      className="font-bold text-slate-900 tabular-nums shrink-0 font-mono"
+                      inputClassName="w-32 text-right"
                     />
                   </div>
                 ))}
@@ -489,12 +489,12 @@ const BudgetCategoryCardItemComponent = ({
 
           {/* Daily Expense Entries */}
           {(totalIssuance > 0 || totalDailyExpense > 0) && (
-            <div className="bg-slate-50/50 border border-slate-200/70 rounded-xl p-3">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5 mb-2 pb-1.5 border-b border-slate-200/60">
-                <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"/> 일상경비 (교부액) 집행 현황
+            <div className="bg-slate-50/50 border border-slate-200/70 rounded-xl p-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2.5 pb-2 border-b border-slate-200/60">
+                <div className="text-[14px] sm:text-[15px] font-bold text-slate-700 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"/> 일상경비 (교부액) 집행 현황
                 </div>
-                <div className="flex bg-white px-2 py-0.5 rounded border border-slate-200/80 text-[11px] gap-2 items-center flex-wrap font-mono tabular-nums">
+                <div className="flex bg-white px-2.5 py-1 rounded border border-slate-200/80 text-[13px] gap-2 items-center flex-wrap font-mono tabular-nums">
                   <span className="text-slate-600">총 교부액: <strong className="text-slate-900">{formatN(totalIssuance)}</strong></span>
                   <span className="text-slate-300">|</span>
                   <span className="text-slate-600">집행액: <strong className="text-rose-600">{formatN(totalDailyExpense)}</strong></span>
@@ -503,14 +503,14 @@ const BudgetCategoryCardItemComponent = ({
                 </div>
               </div>
               
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {dailyExpenseEntries.map(e => (
-                  <div key={e.id} className="flex justify-between items-center text-xs sm:text-[13px] hover:bg-white py-1.5 px-2 rounded-md transition-colors border border-transparent hover:border-slate-200/80">
-                    <div className="flex gap-2 items-center truncate pr-2 min-w-0 flex-1">
-                      <span onClick={() => onEditEntry(e)} title="상세 모달 수정" className={`font-semibold px-1.5 py-0.5 rounded text-[11px] cursor-pointer hover:opacity-80 shrink-0 ${e.actionType === 'issuance' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80' : 'bg-rose-50/70 text-rose-700 border border-rose-200/70'}`}>
+                  <div key={e.id} className="flex justify-between items-center text-[15px] hover:bg-white py-2 px-2.5 rounded-md transition-colors border border-transparent hover:border-slate-200/80">
+                    <div className="flex gap-2.5 items-center truncate pr-2 min-w-0 flex-1">
+                      <span onClick={() => onEditEntry(e)} title="상세 모달 수정" className={`font-bold px-2 py-0.5 rounded text-xs cursor-pointer hover:opacity-80 shrink-0 ${e.actionType === 'issuance' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80' : 'bg-rose-50/70 text-rose-700 border border-rose-200/70'}`}>
                         {e.actionType === 'issuance' ? '교부' : '지출'}
                       </span>
-                      <span className="text-slate-400 font-mono text-xs shrink-0">{e.date.replace(/-/g, '.')}</span>
+                      <span className="text-slate-400 font-mono text-[13px] shrink-0">{e.date.replace(/-/g, '.')}</span>
                       <InlineEditCell
                         cellId={`${e.id}:cat_daily_purpose`}
                         value={e.purpose || ''}
@@ -520,7 +520,7 @@ const BudgetCategoryCardItemComponent = ({
                         onCancelEdit={() => setActiveCellId(null)}
                         onSave={(newVal) => updateEntry && updateEntry(e.id, { purpose: String(newVal) })}
                         onNavigate={(dir) => handleCellNavigate(`${e.id}:cat_daily_purpose`, dir)}
-                        className={`${e.purpose?.includes('(일상경비 교부)') ? 'text-amber-700 font-semibold' : 'text-slate-800 font-medium'} truncate`}
+                        className={`${e.purpose?.includes('(일상경비 교부)') ? 'text-amber-700 font-bold' : 'text-slate-800 font-semibold'} truncate`}
                       />
                     </div>
                     <InlineEditCell
@@ -536,8 +536,8 @@ const BudgetCategoryCardItemComponent = ({
                       }}
                       onNavigate={(dir) => handleCellNavigate(`${e.id}:cat_daily_amount`, dir)}
                       displayFormatter={(v) => `${formatN(Number(v))}원`}
-                      className="font-semibold text-slate-900 tabular-nums shrink-0 font-mono"
-                      inputClassName="w-28 text-right"
+                      className="font-bold text-slate-900 tabular-nums shrink-0 font-mono"
+                      inputClassName="w-32 text-right"
                     />
                   </div>
                 ))}
@@ -547,19 +547,19 @@ const BudgetCategoryCardItemComponent = ({
 
           {/* Funding Splits */}
           {cat.fundingSplits && cat.fundingSplits.length > 0 && (
-            <div className="bg-slate-50/50 border border-slate-200/70 rounded-xl p-3">
-              <div className="text-xs font-bold text-slate-600 mb-2 flex items-center gap-1.5"><FileCheck size={12} className="text-slate-400"/> 재원 분할 내역</div>
+            <div className="bg-slate-50/50 border border-slate-200/70 rounded-xl p-4">
+              <div className="text-[14px] font-bold text-slate-600 mb-2 flex items-center gap-1.5"><FileCheck size={14} className="text-slate-400"/> 재원 분할 내역</div>
               <div className="divide-y divide-slate-200/50">
                 {cat.fundingSplits.map((split, splitIdx) => {
                   const splitRatio = cat.totalBudget > 0 ? (split.amount / cat.totalBudget) * 100 : 0;
                   return (
-                    <div key={splitIdx} className="flex justify-between items-center text-xs py-1 first:pt-0 last:pb-0">
+                    <div key={splitIdx} className="flex justify-between items-center text-[13px] py-1.5 first:pt-0 last:pb-0">
                       <div className="flex items-center gap-2">
-                        <div className="w-1 h-1 rounded-full bg-slate-400" />
-                        <span className="font-medium text-slate-700">{split.source.replace('구비(자체)', '구비')}</span>
-                        <span className="text-[11px] bg-white border border-slate-200/80 text-slate-500 px-1.5 py-0.5 rounded font-mono">{splitRatio.toFixed(1)}%</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                        <span className="font-semibold text-slate-700">{split.source.replace('구비(자체)', '구비')}</span>
+                        <span className="text-xs bg-white border border-slate-200/80 text-slate-500 px-2 py-0.5 rounded font-mono tabular-nums">{splitRatio.toFixed(1)}%</span>
                       </div>
-                      <span className="font-semibold text-slate-900 font-mono tabular-nums">{formatN(split.amount)}원</span>
+                      <span className="font-bold text-slate-900 font-mono tabular-nums">{formatN(split.amount)}원</span>
                     </div>
                   );
                 })}

@@ -146,24 +146,6 @@ describe('Auditor M2 Forensic Verification Suite', () => {
       const budgetEl = screen.getByTestId('budget-dashboard');
       expect(budgetEl.parentElement).toHaveClass('block');
 
-      // Switch to Inventory tab
-      const inventoryBtn = screen.getByRole('button', { name: /홍보물 관리/ });
-      await act(async () => {
-        fireEvent.click(inventoryBtn);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('inventory-list')).toBeInTheDocument();
-      });
-
-      expect(inventoryMountSpy).toHaveBeenCalledTimes(1);
-      // Budget component MUST remain mounted (no unmount call)
-      expect(budgetUnmountSpy).not.toHaveBeenCalled();
-      expect(budgetEl.parentElement).toHaveClass('hidden');
-
-      const inventoryEl = screen.getByTestId('inventory-list');
-      expect(inventoryEl.parentElement).toHaveClass('block');
-
       // Switch to Simulator tab
       const simulatorBtn = screen.getByRole('button', { name: /예산 시뮬레이터/ });
       await act(async () => {
@@ -175,8 +157,12 @@ describe('Auditor M2 Forensic Verification Suite', () => {
       });
 
       expect(simulatorMountSpy).toHaveBeenCalledTimes(1);
+      // Budget component MUST remain mounted (no unmount call)
       expect(budgetUnmountSpy).not.toHaveBeenCalled();
-      expect(inventoryUnmountSpy).not.toHaveBeenCalled();
+      expect(budgetEl.parentElement).toHaveClass('hidden');
+
+      const simulatorEl = screen.getByTestId('budget-simulator');
+      expect(simulatorEl.parentElement).toHaveClass('block');
 
       // Switch back to Budget tab
       const budgetBtn = screen.getByRole('button', { name: /예산 대조보드/ });
@@ -187,8 +173,9 @@ describe('Auditor M2 Forensic Verification Suite', () => {
       // No new mount calls, no unmounts, display toggled to block
       expect(budgetMountSpy).toHaveBeenCalledTimes(1);
       expect(budgetUnmountSpy).not.toHaveBeenCalled();
+      expect(simulatorUnmountSpy).not.toHaveBeenCalled();
       expect(budgetEl.parentElement).toHaveClass('block');
-      expect(inventoryEl.parentElement).toHaveClass('hidden');
+      expect(simulatorEl.parentElement).toHaveClass('hidden');
     });
 
     it('remediation verified: static initialTab does not lock tab switching; user can switch tabs smoothly', async () => {
@@ -223,20 +210,20 @@ describe('Auditor M2 Forensic Verification Suite', () => {
         expect(screen.getByTestId('budget-dashboard')).toBeInTheDocument();
       });
 
-      const inventoryBtn = screen.getByRole('button', { name: /홍보물 관리/ });
+      const simulatorBtn = screen.getByRole('button', { name: /예산 시뮬레이터/ });
       await act(async () => {
-        fireEvent.click(inventoryBtn);
+        fireEvent.click(simulatorBtn);
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('inventory-list')).toBeInTheDocument();
+        expect(screen.getByTestId('budget-simulator')).toBeInTheDocument();
       });
 
-      // Remediation verified: activeTab successfully switches to inventory
+      // Remediation verified: activeTab successfully switches to simulator
       const budgetEl = screen.getByTestId('budget-dashboard');
       expect(budgetEl.parentElement).toHaveClass('hidden');
-      const inventoryEl = screen.getByTestId('inventory-list');
-      expect(inventoryEl.parentElement).toHaveClass('block');
+      const simulatorEl = screen.getByTestId('budget-simulator');
+      expect(simulatorEl.parentElement).toHaveClass('block');
     });
   });
 

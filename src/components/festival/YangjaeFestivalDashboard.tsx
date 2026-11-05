@@ -2310,7 +2310,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 p-3.5 space-y-3.5 bg-slate-50/60">
+        <div className="flex-1 p-3.5 space-y-4 bg-slate-50/60">
           
           {/* Section 1: Official Event Overview (Administrative Korean Document Style 󰏚 개 요) */}
           <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs">
@@ -2562,7 +2562,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
               <button
                 key={tab.id}
                 onClick={() => handleSelectTab(tab.id)}
-                className={`${isLargeFont ? 'py-2.5 text-sm' : 'py-2 text-xs'} rounded-lg transition-all cursor-pointer text-center border ${
+                className={`${isLargeFont ? 'py-3 text-base font-black' : 'py-2.5 text-xs font-extrabold'} rounded-lg transition-all cursor-pointer text-center border ${
                   selectedTab === tab.id
                     ? 'bg-white text-slate-900 shadow-2xs border-slate-200/80 font-extrabold'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 border-transparent font-bold'
@@ -2575,7 +2575,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
           {/* TAB 1: 추진과제별 현황 (협조부서 통합) */}
           {visitedFestivalTabs.milestones && (
-            <div className={selectedTab === 'milestones' ? 'block space-y-3' : 'hidden'}>
+            <div className={selectedTab === 'milestones' ? 'block space-y-3.5' : 'hidden'}>
               {/* Top Controls: 전체 펼치기/접기 + 과제 추가 */}
               <div className="px-1 flex items-center justify-between">
                 <button
@@ -2924,7 +2924,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
           {/* TAB 2: 부스 현황 */}
           {visitedFestivalTabs.booths && (
-            <div className={selectedTab === 'booths' ? 'block space-y-3' : 'hidden'}>
+            <div className={selectedTab === 'booths' ? 'block space-y-3.5' : 'hidden'}>
               <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-2 px-1">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <h3 className={`${isLargeFont ? 'text-base' : 'text-sm'} font-extrabold text-slate-900 flex items-center gap-1.5 whitespace-nowrap shrink-0`}>
@@ -3554,7 +3554,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
           {/* TAB 4: 행사식순 (당일 17개 세부 타임테이블 - 한 화면 칼정렬 뷰) */}
           {visitedFestivalTabs.schedule && (
-            <div className={selectedTab === 'schedule' ? 'block space-y-2.5' : 'hidden'}>
+            <div className={selectedTab === 'schedule' ? 'block space-y-3' : 'hidden'}>
               {/* Header Bar: Clean 2-Row Layout (Zero-Clipping Alignment) */}
               <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs space-y-2.5">
                 {/* Row 1: Title, Count Badge & Add Schedule Button */}
@@ -3916,7 +3916,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
           {/* TAB 3: 업무분장 (실무 과업 및 비상연락망) */}
           {visitedFestivalTabs.duties && (
-            <div className={selectedTab === 'duties' ? 'block space-y-3' : 'hidden'}>
+            <div className={selectedTab === 'duties' ? 'block space-y-3.5' : 'hidden'}>
               {/* Header Stats Bar */}
               <div className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-4 shadow-2xs space-y-2.5">
                 {/* Header Bar: Clean 1-Row Layout */}

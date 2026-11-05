@@ -11,10 +11,10 @@
 4. **시맨틱 온톨로지 그래프 및 업무 암묵지·스케줄 자산화 ($\mathcal{J}_{\text{Ontology}}$)**:
    - `OntologyCanvasEngine`(Dirty Flag, LOD, 32비트 정수 인코딩, Zero-Allocation) 기반 인물·부서·업무 관계망 시각화, `TaskWisdomView` 업무 암묵지 자산화, 자연어 스케줄러 및 Google Calendar / RFC 5545 iCal(`/api/calendar/feed.ics`) 실시간 양방향 연동 수행함.
 5. **개인정보 보호법(PIPA) 가드레일 및 Zero-Trust 하네스 무결성 ($\mathcal{J}_{\text{Security}}$)**:
-   - `privacy_guard.py` 기반 고유식별·민감정보 사전 비식별화(Rule Q), PBKDF2 WebCrypto 인증 미들웨어(`src/middleware.ts`), Zod Loud-Failure 스키마 검증(`schemas.ts`), 33개 Jest 테스트 스위트(315+ 테스트) 및 무결점 정적 타입 게이트키퍼 통과 강제함.
+   - `privacy_guard.py` 기반 고유식별·민감정보 사전 비식별화(Rule Q), PBKDF2 WebCrypto 인증 미들웨어(`src/middleware.ts`), 9대 도메인 Zod Loud-Failure 스키마 하네스(`schemas.ts` $\leftrightarrow$ `run-harness.js`), 38개 Jest 테스트 스위트(390+ 테스트) 및 무결점 정적 타입 게이트키퍼 통과 강제함.
 
 ## 1. 시스템 온톨로지 (M-V-C & Hybrid Edge)
-수정된 FSD(Feature-Sliced Design) 아키텍처 준거 (전체 `src/` **168개 TS/TSX 파일, 54,035 LOC**):
+수정된 FSD(Feature-Sliced Design) 아키텍처 준거 (전체 `src/` **168개 TS/TSX 파일, 54,230+ LOC**):
 - **모델 (SSOT)**: `src/app/api/data/route.ts` 등 **14개 API 라우트** 및 로컬 `data/*.json`이 단일 진실 공급원(SSOT)임 (20개 변경 백업, 글로벌 툼스톤, 60ms 디바운스 쓰기; `localStorage`는 휘발성 캐시 전용).
 - **뷰 (UI)**: `src/components/` 산하 12개 도메인 **총 64개 UI 컴포넌트(28,867 LOC)**임 (React 19.2.7, TailwindCSS v4 고대비·모바일 퍼스트 반응형).
 - **컨트롤러 (Hooks)**: 모든 페칭·시뮬레이션·뮤테이션은 `src/hooks/` 내 **40개 커스텀 훅(9,598 LOC)**(`useTasks`, `useBudget`, `useBudgetSimulator`, `useYangjaeFestival`, `useInventory` 등)만 사용하며 컴포넌트 내 직접 fetch 호출을 금지함.
@@ -56,8 +56,9 @@
 - 행정 문서 생성 또는 변환 지시 시 다음 4단계 프로세스를 엄수함:
   * **1단계 (아카이브 및 법령 RAG 정립)**: `D:/Desktop/공공문서 폴더` 및 `F:\_Organized_Archive` 실무 문서와 관련 상위 법령(지역보건법 등)·조례를 대조함.
   * **2단계 (개조식 초안 마크다운 생성)**: 팩트와 법적 근거를 융합하여 공공기관 개조식 마크다운(`.md`)을 생성함.
-  * **3단계 (비파괴 HWPX 복제 빌드)**: 원본 템플릿을 덮어쓰지 않고 복제 빌드함 (`python scratch/generate_new_hwpx.py --template <템플릿> --output <신규경로> --markdown <초안경로>`).
+  * **3단계 (비파괴 복제 빌드 및 5대 겹침 차단)**: 원본 템플릿 복제 빌드 시(`python scratch/generate_new_hwpx.py --template <템플릿> --output <신규경로> --markdown <초안경로>`), ① `<hp:linesegarray>`(`vertpos`/`textpos`) 재계산·후미 배치, ② 셀·병합셀(`rowSpan`)·표 높이(`sync_table_geometry`)·섹션 Y좌표(`layout_sec_paragraph`) 동기화, ③ `treatAsChar="1"` 인라인 배치, ④ `SQUEEZE`·음수 내어쓰기 교정 및 `0xFFFFFFFF` 여백 방어, ⑤ 다중 런·`<hp:lineBreak/>` 클린업 후 `verify_hwpx_no_overlap()`을 통과시킴.
   * **4단계 (한글 표준 지침 준수)**: [docs/HWP_GENERATION_GUIDELINES.md](docs/HWP_GENERATION_GUIDELINES.md)의 여백(상하 15mm, 좌우 20mm), 서체(대제목 22pt, 본문 15pt, 참고 13pt), 다단계 기호, 2타 띄기 및 문장부호 표기법을 준수함.
+
 
 ### H. 서버 하이드레이션 및 청크 격리 규격 (Initial Server Hydration & Staggered Chunk Isolation)
 - 대용량 컴포넌트는 `dynamic(() => import(...), { ssr: false })` 및 실치수 Skeleton UI를 적용하며, 미노출 모듈(`MindMap3D`, `ProjectManagementPage`, `AIAssistantModal`)은 백그라운드 프리로드에서 제외하고 노출 모듈만 유휴 타이머(3.5s, 5.5s, 7.5s)로 프리로딩함.
@@ -144,11 +145,11 @@
   - `scripts/run-harness.js` & `scripts/privacy_guard.py` & `scratch/generate_new_hwpx.py`: 하네스 게이트키퍼, PIPA 비식별화 엔진, HWPX 비파괴 빌더.
 
 ## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)
-- **최신 동기화 일자:** 2026-10-20
+- **최신 동기화 일자:** 2026-11-05
 - **동기화된 마일스톤:**
-  - [Milestone 270: 메인 페이지(통합 대시보드·글로벌 앱 셸·주소록) 및 양재천 페스티벌 페이지(React 뷰·4-Way 정적 엣지 레플리카) 미니멀리즘 디자인 전면 개편 (100% SSOT 데이터 및 인라인 관제 무결성 보존)] (2026-10-20)
-  - [Milestone 269: 예산 시뮬레이터 미니멀리즘 디자인 전면 개편 및 일반지출·일상경비 듀얼 파이프라인 수리 무결성 확립 (100% SSOT 데이터 보존, 9개 컴포넌트 슬레이트 단일 톤앤매너 통일, 이중 합산·자기자신 차감·0원 폴백 엣지 케이스 완전 해소)] (2026-10-20)
-  - [Milestone 268: 예산관리 대시보드 미니멀리즘 디자인 및 가독성 전면 개편 (100% 데이터 무결성 보존, 슬레이트 저채도 타이포그래피 위계, 메모이제이션·인라인 편집·키보드 탐색 정합성 확립)] (2026-10-20)
-  - [Milestone 267: 무손실 안전 경량화(Option A) 패치 — 미노출 모듈 백그라운드 프리로드 차단, 초기 대시보드 /api/data 동시 요청 축소(7건→2건) 및 /api/app-logs PBKDF2 100,000회 복호화 제거] (2026-10-19)
-  - [Milestone 266: 2027 신체활동 사업설명서(10.15.판, 331,436천원) 전수 정합성 검증 및 하위 2)번 부기 개별 천원 올림 후 상위 1)번 합산 표준 규칙(Rule R.2 & vital-budget-audit) 명문화] (2026-10-16)
-  - 그 외 과거 누적 마일스톤 총 292건 통합 보존 (2026-07-16 ~ 2026-10-15 상세 내역은 Engineering Report.md 및 Engineering Milestones.md 참조)
+  - [Milestone 279: 범용 HWPX 컴파일러(`generate_new_hwpx.py`) 5대 텍스트 겹침 원천 차단·기하학 재계산 엔진 통합 및 한글 문서 작성 룰셋(`HWP_GENERATION_GUIDELINES.md` V3·`SKILL.md`) 영구 패치] (2026-11-04)
+  - [Milestone 278: PWA `manifest.json` 프록시 리다이렉트 파싱 오류 해소 및 메인 대시보드 중첩 동적 청크(`ChunkLoadError`) 크래시 원천 차단] (2026-10-29)
+  - [Milestone 277: 작업기억 보조 포스트잇 보드, 맥락 인지 하단 고정 배너 및 모바일 클라우드 KV 메모 우체통 구축] (2026-10-26)
+  - [Milestone 276: 마스터 아카이브(`F:\_Organized_Archive`) 물리적 폴더 9대 사업 통폐합, 본문·사진 문맥 추론 색인(`ARCHIVE_INDEX.json`) 및 VITAL 아카이브 통합 탐색기 구축] (2026-10-26)
+  - [Milestone 275: 9대 도메인 Zod 하네스 게이트키퍼 확장 및 스키마 드리프트(Schema Drift) 원천 차단 고도화] (2026-10-26)
+  - 그 외 과거 누적 마일스톤 총 301건 통합 보존 (2026-07-16 ~ 2026-10-23 상세 내역은 Engineering Report.md 및 Engineering Milestones.md 참조)

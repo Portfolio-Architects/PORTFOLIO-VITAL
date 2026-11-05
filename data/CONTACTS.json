@@ -1618,5 +1618,14 @@
     "id": "mv6cdt9j8dh9lrp93",
     "createdAt": "2026-10-13T07:10:59.431Z",
     "updatedAt": "2026-10-13T07:10:59.431Z"
+  },
+  {
+    "name": "도시관리공단",
+    "phone": "02-2176-0563",
+    "email": "",
+    "notes": "공영주차장 협조",
+    "id": "mvouzt0do7htbmvqa",
+    "createdAt": "2026-10-26T06:11:49.789Z",
+    "updatedAt": "2026-10-26T06:11:49.789Z"
   }
 ]

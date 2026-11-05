@@ -18,7 +18,8 @@ const ALLOWED_SHEETS = new Set([
   'EXTERNAL_DOCS',
   'CLASSIFICATION_WORDS',
   'SCHEDULES',
-  'CONTACTS'
+  'CONTACTS',
+  'WORKING_MEMORY'
 ]);
 
 function validateSheet(sheet: string): boolean {

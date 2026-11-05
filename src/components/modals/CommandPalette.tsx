@@ -12,6 +12,7 @@ import {
   Package,
   User,
   Calendar,
+  StickyNote,
   X,
   ArrowRight
 } from 'lucide-react';
@@ -49,6 +50,12 @@ const STATIC_NAV_ITEMS: { module: ModuleType; title: string; subtitle: string; i
     title: '대시보드 (Dashboard)',
     subtitle: '메인 업무 인사이트, 주간 일정 및 시그널 피드',
     icon: <LayoutDashboard className="w-4 h-4 text-emerald-400" />
+  },
+  {
+    module: 'memory',
+    title: '작업기억 보조 보드 (Working Memory)',
+    subtitle: '메모보고·구두지시·예산 증감액 1초 캡처 및 업무 트랙별 대조 보드',
+    icon: <StickyNote className="w-4 h-4 text-amber-400" />
   },
   {
     module: 'workspace',

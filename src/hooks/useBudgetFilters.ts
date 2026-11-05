@@ -62,7 +62,7 @@ const getFiltersServerSnapshot = () => DEFAULT_SAVED_FILTERS;
 export function useBudgetFilters(
   categories: BudgetCategory[],
   entries: BudgetEntry[],
-  getCategoryStats: (id: string) => any
+  getCategoryStats: (id: string, excludePlanned?: boolean) => any
 ) {
   const savedFilters = useSyncExternalStore(subscribeFiltersStorage, getFiltersSnapshot, getFiltersServerSnapshot);
 
@@ -339,6 +339,7 @@ export function useBudgetFilters(
 
     filteredCategoriesTree.forEach(cat => {
       const catStats = getCategoryStats(cat.id);
+      const pureStats = getCategoryStats(cat.id, true);
       if (catStats) {
         totalBudget += catStats.totalBudget;
         remaining += catStats.remaining;
@@ -346,7 +347,7 @@ export function useBudgetFilters(
         totalPlanned += catStats.planned;
         dailyExpenseIssued += catStats.dailyExpenseIssued;
         dailyExpenseSpent += catStats.dailyExpenseSpent;
-        dailyExpenseRemaining += catStats.dailyExpenseRemaining;
+        dailyExpenseRemaining += pureStats ? pureStats.dailyExpenseRemaining : (catStats.dailyExpenseIssued - catStats.dailyExpenseSpent);
       }
     });
 

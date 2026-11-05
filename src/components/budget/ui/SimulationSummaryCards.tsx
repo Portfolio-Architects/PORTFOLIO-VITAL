@@ -33,6 +33,7 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
     let totalDailySpent = 0;
     let totalDailyRemaining = 0;
     let totalFinalDailyRemaining = 0;
+    let totalShortfall = 0;
 
     for (let i = 0; i < projectSummaries.length; i++) {
       const p = projectSummaries[i];
@@ -45,6 +46,7 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
       totalDailySpent += (p.dailyExpenseSpent || 0);
       totalDailyRemaining += (p.dailyExpenseRemaining || 0);
       totalFinalDailyRemaining += (p.finalDailyExpenseRemaining ?? p.dailyExpenseRemaining ?? 0);
+      totalShortfall += (p.dailyExpenseShortfall || 0);
 
       if (p.finalExpectedBalance < 0) {
         deficitCount += 1;
@@ -76,31 +78,34 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
       totalDailySpent,
       totalDailyRemaining,
       totalFinalDailyRemaining,
+      totalShortfall,
     };
   }, [projectSummaries]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
       {/* Card 1: 총 예산액 (Total Budget) */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+      <div className="bg-white border border-slate-200/80 rounded-xl p-4 sm:p-4.5 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500">총 예산액</span>
-            <Wallet size={15} className="text-slate-400 shrink-0" />
+          <div className="h-8 flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">총 예산액</span>
+            <div className="p-1.5 rounded-xl bg-slate-50 border border-slate-200/70">
+              <Wallet size={16} className="text-slate-500 shrink-0" />
+            </div>
           </div>
-          <div className="flex items-baseline gap-1" title={`${metrics.totalBudget.toLocaleString('ko-KR')}원`}>
-            <span className="text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight text-slate-900 truncate">
+          <div className="h-9 flex items-baseline gap-1" title={`${metrics.totalBudget.toLocaleString('ko-KR')}원`}>
+            <span className="text-lg sm:text-xl xl:text-[21px] 2xl:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900 truncate">
               {metrics.totalBudget.toLocaleString('ko-KR')}
             </span>
-            <span className="text-xs font-normal text-slate-400 shrink-0">원</span>
+            <span className="text-xs sm:text-sm font-semibold text-slate-400 shrink-0">원</span>
           </div>
-          <div className="mt-1.5 text-[11px] text-slate-400 leading-snug">
+          <div className="mt-1.5 min-h-[44px] text-[11px] text-slate-400 leading-snug">
             <div>2026 회계연도 배정 예산</div>
             <div>본예산 및 추경 합계</div>
           </div>
         </div>
 
-        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono tabular-nums">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs font-mono tabular-nums">
           <span className="text-slate-600 font-medium">
             집행 <strong className="text-slate-900">{metrics.currentExecutionRate.toFixed(1)}%</strong>
           </span>
@@ -111,22 +116,24 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
       </div>
 
       {/* Card 2: 현재 집행액 & 집행률 (Current Spent) */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+      <div className="bg-white border border-slate-200/80 rounded-xl p-4 sm:p-4.5 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500">현재 집행액</span>
-            <CreditCard size={15} className="text-slate-400 shrink-0" />
+          <div className="h-8 flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">현재 집행액</span>
+            <div className="p-1.5 rounded-xl bg-slate-50 border border-slate-200/70">
+              <CreditCard size={16} className="text-slate-500 shrink-0" />
+            </div>
           </div>
-          <div className="flex items-baseline gap-1" title={`${metrics.totalSpent.toLocaleString('ko-KR')}원`}>
-            <span className="text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight text-slate-900 truncate">
+          <div className="h-9 flex items-baseline gap-1" title={`${metrics.totalSpent.toLocaleString('ko-KR')}원`}>
+            <span className="text-lg sm:text-xl xl:text-[21px] 2xl:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900 truncate">
               {metrics.totalSpent.toLocaleString('ko-KR')}
             </span>
-            <span className="text-xs font-normal text-slate-400 shrink-0">원</span>
+            <span className="text-xs sm:text-sm font-semibold text-slate-400 shrink-0">원</span>
           </div>
-          <div className="mt-1.5 text-[11px] leading-snug">
+          <div className="mt-1.5 min-h-[44px] text-[11px] leading-snug">
             {metrics.totalDailyIssued > 0 ? (
               <>
-                <div className="text-amber-700 font-medium font-mono tabular-nums truncate">
+                <div className="text-amber-700 font-semibold font-mono tabular-nums truncate">
                   교부 {metrics.totalDailyIssued.toLocaleString('ko-KR')}원 포함
                 </div>
                 <div className="text-slate-400">본청 원인행위 및 지출원인</div>
@@ -140,10 +147,10 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           </div>
         </div>
 
-        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-slate-500">현재 집행률</span>
           <span
-            className={`font-semibold font-mono tabular-nums px-1.5 py-0.5 rounded ${
+            className={`font-bold font-mono tabular-nums px-2 py-0.5 rounded ${
               metrics.currentExecutionRate > 90
                 ? 'bg-amber-50 text-amber-700 border border-amber-200/70'
                 : 'bg-slate-100 text-slate-700'
@@ -155,25 +162,27 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
       </div>
 
       {/* Card 3: 현재 집행 잔액 (Current Remaining) */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+      <div className="bg-white border border-slate-200/80 rounded-xl p-4 sm:p-4.5 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500">현재 집행 잔액</span>
-            <PiggyBank size={15} className="text-slate-400 shrink-0" />
+          <div className="h-8 flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">현재 집행 잔액</span>
+            <div className="p-1.5 rounded-xl bg-slate-50 border border-slate-200/70">
+              <PiggyBank size={16} className="text-slate-500 shrink-0" />
+            </div>
           </div>
-          <div className="flex items-baseline gap-1" title={`${metrics.totalRemaining.toLocaleString('ko-KR')}원`}>
-            <span className="text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight text-slate-900 truncate">
+          <div className="h-9 flex items-baseline gap-1" title={`${metrics.totalRemaining.toLocaleString('ko-KR')}원`}>
+            <span className="text-lg sm:text-xl xl:text-[21px] 2xl:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900 truncate">
               {metrics.totalRemaining.toLocaleString('ko-KR')}
             </span>
-            <span className="text-xs font-normal text-slate-400 shrink-0">원</span>
+            <span className="text-xs sm:text-sm font-semibold text-slate-400 shrink-0">원</span>
           </div>
-          <div className="mt-1.5 text-[11px] leading-snug">
+          <div className="mt-1.5 min-h-[44px] text-[11px] leading-snug">
             {metrics.totalDailyRemaining > 0 ? (
               <>
-                <div className="text-amber-700 font-medium font-mono tabular-nums truncate">
+                <div className="text-amber-700 font-semibold font-mono tabular-nums truncate">
                   + 일상 미집행 {metrics.totalDailyRemaining.toLocaleString('ko-KR')}원
                 </div>
-                <div className="text-emerald-700 font-semibold font-mono tabular-nums truncate">
+                <div className="text-emerald-700 font-bold font-mono tabular-nums truncate">
                   실가용: {(metrics.totalRemaining + metrics.totalDailyRemaining).toLocaleString('ko-KR')}원
                 </div>
               </>
@@ -186,36 +195,38 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           </div>
         </div>
 
-        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-slate-500">현재 미집행률</span>
-          <span className="font-semibold font-mono tabular-nums px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+          <span className="font-bold font-mono tabular-nums px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/60">
             {metrics.currentRemainingRate.toFixed(1)}%
           </span>
         </div>
       </div>
 
       {/* Card 4: 시뮬레이션 지출 예정액 (Simulated Expenditure) */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+      <div className="bg-white border border-slate-200/80 rounded-xl p-4 sm:p-4.5 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500">지출 예정액</span>
-            <Calculator size={15} className="text-slate-400 shrink-0" />
+          <div className="h-8 flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">지출 예정액</span>
+            <div className="p-1.5 rounded-xl bg-slate-50 border border-slate-200/70">
+              <Calculator size={16} className="text-slate-500 shrink-0" />
+            </div>
           </div>
-          <div className="flex items-baseline gap-1" title={`${metrics.simulatedExpenditure.toLocaleString('ko-KR')}원`}>
-            <span className="text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight text-indigo-600 truncate">
+          <div className="h-9 flex items-baseline gap-1" title={`${metrics.simulatedExpenditure.toLocaleString('ko-KR')}원`}>
+            <span className="text-lg sm:text-xl xl:text-[21px] 2xl:text-2xl font-black font-mono tabular-nums tracking-tight text-indigo-600 truncate">
               {metrics.simulatedExpenditure.toLocaleString('ko-KR')}
             </span>
-            <span className="text-xs font-normal text-slate-400 shrink-0">원</span>
+            <span className="text-xs sm:text-sm font-semibold text-slate-400 shrink-0">원</span>
           </div>
-          <div className="mt-1.5 text-[11px] leading-snug">
-            <div className="text-slate-600 font-medium">확정 지출 예정 항목 합계</div>
+          <div className="mt-1.5 min-h-[44px] text-[11px] leading-snug">
+            <div className="text-slate-600 font-semibold">확정 지출 예정 항목 합계</div>
             <div className="text-slate-400">품의·소진 계획 등록액</div>
           </div>
         </div>
 
-        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-slate-500">소진 예정률</span>
-          <span className="font-semibold font-mono tabular-nums px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+          <span className="font-bold font-mono tabular-nums px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200/60">
             {((metrics.simulatedExpenditure / (metrics.totalBudget || 1)) * 100).toFixed(1)}%
           </span>
         </div>
@@ -223,36 +234,48 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
 
       {/* Card 5: 최종 예상 잔액 (Final Expected Balance) */}
       <div
-        className={`bg-white rounded-xl p-4 flex flex-col justify-between shadow-2xs transition-colors border ${
+        className={`bg-white rounded-xl p-4 sm:p-4.5 flex flex-col justify-between shadow-2xs transition-colors border ${
           metrics.finalExpectedBalance < 0
             ? 'border-rose-200/90 hover:border-rose-300'
             : 'border-slate-200/80 hover:border-slate-300'
         }`}
       >
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500">최종 예상 잔액</span>
-            {metrics.finalExpectedBalance < 0 ? (
-              <AlertTriangle size={15} className="text-rose-500 shrink-0" />
-            ) : (
-              <ShieldCheck size={15} className="text-emerald-600 shrink-0" />
-            )}
+          <div className="h-8 flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">최종 예상 잔액</span>
+            <div className="p-1.5 rounded-xl bg-slate-50 border border-slate-200/70">
+              {metrics.finalExpectedBalance < 0 ? (
+                <AlertTriangle size={16} className="text-rose-500 shrink-0" />
+              ) : (
+                <ShieldCheck size={16} className="text-emerald-600 shrink-0" />
+              )}
+            </div>
           </div>
-          <div className="flex items-baseline gap-1" title={`${metrics.finalExpectedBalance.toLocaleString('ko-KR')}원`}>
+          <div className="h-9 flex items-baseline gap-1" title={`${metrics.finalExpectedBalance.toLocaleString('ko-KR')}원`}>
             <span
-              className={`text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight truncate ${
+              className={`text-lg sm:text-xl xl:text-[21px] 2xl:text-2xl font-black font-mono tabular-nums tracking-tight truncate ${
                 metrics.finalExpectedBalance < 0 ? 'text-rose-600' : 'text-emerald-700'
               }`}
             >
               {metrics.finalExpectedBalance.toLocaleString('ko-KR')}
             </span>
-            <span className="text-xs font-normal text-slate-400 shrink-0">원</span>
+            <span className="text-xs sm:text-sm font-semibold text-slate-400 shrink-0">원</span>
           </div>
-          <div className="mt-1.5 text-[11px] leading-snug">
-            {metrics.totalFinalDailyRemaining > 0 ? (
+          <div className="mt-1.5 min-h-[44px] text-[11px] leading-snug">
+            {metrics.totalShortfall > 0 ? (
+              <>
+                <div className="text-rose-600 font-bold flex items-center gap-1">
+                  <span>추가 교부 필요</span>
+                  <span className="font-mono tabular-nums text-rose-700">₩{metrics.totalShortfall.toLocaleString('ko-KR')}원</span>
+                </div>
+                <div className="text-slate-500 font-mono tabular-nums truncate">
+                  일상경비 포함 실질: {(metrics.finalExpectedBalance + metrics.totalFinalDailyRemaining).toLocaleString('ko-KR')}원
+                </div>
+              </>
+            ) : metrics.totalFinalDailyRemaining > 0 ? (
               <>
                 <div className="text-slate-500">일상경비 포함 실질 수지</div>
-                <div className="text-slate-700 font-semibold font-mono tabular-nums truncate">
+                <div className="text-slate-700 font-bold font-mono tabular-nums truncate">
                   {(metrics.finalExpectedBalance + metrics.totalFinalDailyRemaining).toLocaleString('ko-KR')}원 예상
                 </div>
               </>
@@ -265,10 +288,10 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           </div>
         </div>
 
-        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-slate-500">예상 최종 집행률</span>
           <span
-            className={`font-semibold font-mono tabular-nums px-1.5 py-0.5 rounded border ${
+            className={`font-bold font-mono tabular-nums px-2 py-0.5 rounded border ${
               metrics.projectedExecutionRate > 100
                 ? 'bg-rose-50 border-rose-200/70 text-rose-700'
                 : metrics.projectedExecutionRate > 90
@@ -283,39 +306,51 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
 
       {/* Card 6: 적자 세부사업 수 & 추가 필요 예납액 (Deficit Count & Required Balance) */}
       <div
-        className={`bg-white rounded-xl p-4 flex flex-col justify-between shadow-2xs transition-colors border ${
+        className={`bg-white rounded-xl p-4 sm:p-4.5 flex flex-col justify-between shadow-2xs transition-colors border ${
           metrics.deficitCount > 0
             ? 'border-rose-200/90 hover:border-rose-300'
+            : metrics.totalShortfall > 0
+            ? 'border-amber-200/90 hover:border-amber-300'
             : 'border-slate-200/80 hover:border-slate-300'
         }`}
       >
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500">적자 발생 세부사업</span>
-            <AlertOctagon size={15} className={metrics.deficitCount > 0 ? 'text-rose-500 shrink-0' : 'text-slate-400 shrink-0'} />
+          <div className="h-8 flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">적자 발생 세부사업</span>
+            <div className="p-1.5 rounded-xl bg-slate-50 border border-slate-200/70">
+              <AlertOctagon size={16} className={metrics.deficitCount > 0 ? 'text-rose-500 shrink-0' : metrics.totalShortfall > 0 ? 'text-amber-600 shrink-0' : 'text-slate-500 shrink-0'} />
+            </div>
           </div>
-          <div className="flex items-baseline gap-1">
+          <div className="h-9 flex items-baseline gap-1">
             <span
-              className={`text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight ${
+              className={`text-lg sm:text-xl xl:text-[21px] 2xl:text-2xl font-black font-mono tabular-nums tracking-tight ${
                 metrics.deficitCount > 0 ? 'text-rose-600' : 'text-slate-900'
               }`}
             >
               {metrics.deficitCount}개
             </span>
             <span
-              className={`text-xs font-medium shrink-0 ${
-                metrics.deficitCount > 0 ? 'text-rose-600' : 'text-emerald-700'
+              className={`text-xs sm:text-sm font-bold shrink-0 ${
+                metrics.deficitCount > 0 ? 'text-rose-600' : metrics.totalShortfall > 0 ? 'text-amber-700' : 'text-emerald-700'
               }`}
             >
-              {metrics.deficitCount > 0 ? '(예산 초과)' : '(정상)'}
+              {metrics.deficitCount > 0 ? '(예산 초과)' : metrics.totalShortfall > 0 ? '(교부 필요)' : '(정상)'}
             </span>
           </div>
-          <div className="mt-1.5 text-[11px] leading-snug">
+          <div className="mt-1.5 min-h-[44px] text-[11px] leading-snug">
             {metrics.deficitCount > 0 ? (
               <>
-                <div className="text-rose-600 font-medium">추가 소요 예산액</div>
+                <div className="text-rose-600 font-semibold">추가 소요 예산액</div>
                 <div className="text-rose-700 font-mono font-bold tabular-nums truncate">
                   {metrics.requiredBalance.toLocaleString('ko-KR')}원
+                  {metrics.totalShortfall > 0 && ` (추가교부 ₩${metrics.totalShortfall.toLocaleString('ko-KR')}원 포함)`}
+                </div>
+              </>
+            ) : metrics.totalShortfall > 0 ? (
+              <>
+                <div className="text-amber-700 font-semibold">일상경비 추가 교부 필요</div>
+                <div className="text-amber-800 font-mono font-bold tabular-nums truncate">
+                  총 {metrics.totalShortfall.toLocaleString('ko-KR')}원
                 </div>
               </>
             ) : (
@@ -327,16 +362,18 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           </div>
         </div>
 
-        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-slate-500">수지 건전성</span>
           <span
-            className={`font-semibold px-1.5 py-0.5 rounded border ${
+            className={`font-bold px-2 py-0.5 rounded border ${
               metrics.deficitCount > 0
                 ? 'bg-rose-50 border-rose-200/70 text-rose-700'
+                : metrics.totalShortfall > 0
+                ? 'bg-amber-50 border-amber-200/70 text-amber-800'
                 : 'bg-emerald-50 border-emerald-200/60 text-emerald-700'
             }`}
           >
-            {metrics.deficitCount > 0 ? '초과 경고' : '건전'}
+            {metrics.deficitCount > 0 ? '초과 경고' : metrics.totalShortfall > 0 ? '교부 필요' : '건전'}
           </span>
         </div>
       </div>

@@ -4,7 +4,7 @@ import React from 'react';
 
 export const BudgetSimulatorSkeleton: React.FC = () => {
   return (
-    <div className="w-full space-y-4 animate-pulse">
+    <div className="w-full space-y-6 animate-pulse">
       {/* Header Title Skeleton */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <div className="space-y-1.5">
@@ -19,7 +19,7 @@ export const BudgetSimulatorSkeleton: React.FC = () => {
       </div>
 
       {/* Summary Cards Skeleton (6 cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}

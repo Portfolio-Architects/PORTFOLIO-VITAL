@@ -53,6 +53,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { SplashView } from '@/components/SplashView';
 import { ContactsBox } from '@/components/dashboard/ContactsBox';
 import { PortfolioDashboardView } from '@/components/dashboard/PortfolioDashboardView';
+import { PortfolioDashboardViewSkeleton } from '@/components/ProtectedApp';
 import { YangjaeFestivalSkeleton } from '@/components/skeletons/YangjaeFestivalSkeleton';
 
 describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270)', () => {
@@ -214,6 +215,150 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
 
       expect(screen.getAllByText('0').length).toBeGreaterThan(0);
       expect(screen.getAllByText(/0\.0%/).length).toBeGreaterThan(0);
+      expect(screen.getByText('집행 없음')).toBeInTheDocument();
+    });
+
+    it('replaces English ALL-CAPS clichés and KRW with Korean accounting terms and 원 units', () => {
+      const { container } = render(
+        <PortfolioDashboardView
+          budgetCategories={sampleCategories}
+          budgetEntries={sampleEntries}
+          appMode="VITAL"
+        />
+      );
+
+      // Verify Korean accounting headings and labels are present
+      expect(screen.getByText('세부사업별 예산 편성 현황')).toBeInTheDocument();
+      expect(screen.getByText('총 편성 예산')).toBeInTheDocument();
+      expect(screen.getByText('예산 집행률')).toBeInTheDocument();
+      expect(screen.getByText('예산 잔여율')).toBeInTheDocument();
+      expect(screen.getByText('누적 집행액')).toBeInTheDocument();
+      expect(screen.getByText('가용 잔액')).toBeInTheDocument();
+      expect(screen.getByText('월별 예산 집행 추이')).toBeInTheDocument();
+      expect(screen.getByText('최대 집행월')).toBeInTheDocument();
+      expect(screen.getByText('월 권장 집행액 (11월 기준)')).toBeInTheDocument();
+      expect(screen.getByText('목표 대비 잔여액')).toBeInTheDocument();
+      expect(screen.getByText('5월')).toBeInTheDocument();
+
+      // Verify legacy English ALL-CAPS clichés and KRW are completely removed
+      const text = container.textContent || '';
+      expect(text).not.toContain('Budget Allocation');
+      expect(text).not.toContain('TOTAL BUDGET');
+      expect(text).not.toContain('BUDGET EXECUTION');
+      expect(text).not.toContain('REMAINING BUDGET');
+      expect(text).not.toContain('EXECUTED AMOUNT');
+      expect(text).not.toContain('REMAINING AMOUNT');
+      expect(text).not.toContain('Monthly Budget Execution');
+      expect(text).not.toContain('PEAK SPENDING');
+      expect(text).not.toContain('REQ. SPEND / MO');
+      expect(text).not.toContain('REMAINING TARGET');
+      expect(text).not.toContain('KRW');
+    });
+
+    it('aligns donut chart slices and breakdown list colors and share percentages across multiple categories', () => {
+      const multiCategories = [
+        {
+          id: 'cat-a',
+          policyProject: '건강증진사업',
+          unitProject: '신체활동 증진',
+          detailedProject: '강남 AI 메디헬스센터 운영',
+          formationItem: '기간제근로자등보수',
+          statItem: '101-04 기간제근로자등보수',
+          name: '운동사 인건비',
+          totalBudget: 60000000,
+          allocated: 60000000,
+          spent: 30000000,
+          remaining: 30000000,
+        },
+        {
+          id: 'cat-b',
+          policyProject: '건강증진사업',
+          unitProject: '신체활동 증진',
+          detailedProject: '건강생활실천사업',
+          formationItem: '행사운영비',
+          statItem: '201-03 행사운영비',
+          name: '양재천 걷기 운영',
+          totalBudget: 40000000,
+          allocated: 40000000,
+          spent: 10000000,
+          remaining: 30000000,
+        },
+      ] as any[];
+
+      render(
+        <PortfolioDashboardView
+          budgetCategories={multiCategories}
+          budgetEntries={[]}
+          appMode="VITAL"
+        />
+      );
+
+      // Verify share percentages (60.0% and 40.0%) in breakdown list
+      expect(screen.getByText('60.0%')).toBeInTheDocument();
+      expect(screen.getByText('40.0%')).toBeInTheDocument();
+
+      // Verify color swatches match VITAL_THEME_COLORS
+      const swatches = screen.getAllByTestId('breakdown-color-swatch');
+      expect(swatches).toHaveLength(2);
+      expect(swatches[0]).toHaveStyle({ backgroundColor: '#0f172a' });
+      expect(swatches[1]).toHaveStyle({ backgroundColor: '#2563eb' });
+
+      // Filter by specific detailed project and verify breakdown updates to formationItem + category name
+      const select = screen.getByRole('combobox');
+      fireEvent.change(select, { target: { value: '강남 AI 메디헬스센터 운영' } });
+      expect(screen.getByText('기간제근로자등보수')).toBeInTheDocument();
+      expect(screen.getByText('운동사 인건비')).toBeInTheDocument();
+      expect(screen.getAllByText('100.0%').length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('preserves 0-won mathematical parity when categories lack detailedProject, avoids 7-slice circular color collision, and formats <0.1% positive shares cleanly', () => {
+      const edgeCategories = [
+        { id: 'c1', detailedProject: '사업1', name: '항목1', totalBudget: 20000000 },
+        { id: 'c2', detailedProject: '사업2', name: '항목2', totalBudget: 20000000 },
+        { id: 'c3', detailedProject: '사업3', name: '항목3', totalBudget: 20000000 },
+        { id: 'c4', detailedProject: '사업4', name: '항목4', totalBudget: 20000000 },
+        { id: 'c5', detailedProject: '사업5', name: '항목5', totalBudget: 10000000 },
+        { id: 'c6', detailedProject: '사업6', name: '항목6', totalBudget: 9970000 },
+        // Missing detailedProject (falls back to unitProject '미분류단위사업') with tiny positive budget (0.03% -> '<0.1%')
+        { id: 'c7', detailedProject: '', unitProject: '미분류단위사업', name: '소액항목', totalBudget: 30000 },
+      ] as any[];
+
+      render(
+        <PortfolioDashboardView
+          budgetCategories={edgeCategories}
+          budgetEntries={[]}
+          appMode="VITAL"
+        />
+      );
+
+      // Missing detailedProject category is NOT dropped; its fallback project name and <0.1% share are rendered
+      expect(screen.getAllByText('미분류단위사업').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('30,000')).toBeInTheDocument();
+      expect(screen.getByText('<0.1%')).toBeInTheDocument();
+
+      // 7 items -> 7th swatch (idx 6) must NOT collide with 1st swatch (idx 0, #0f172a) or 6th swatch (idx 5, #94a3b8)
+      const swatches = screen.getAllByTestId('breakdown-color-swatch');
+      expect(swatches).toHaveLength(7);
+      expect(swatches[0]).toHaveStyle({ backgroundColor: '#0f172a' });
+      expect(swatches[5]).toHaveStyle({ backgroundColor: '#94a3b8' });
+      expect(swatches[6]).toHaveStyle({ backgroundColor: '#2563eb' });
+    });
+
+    it('renders 4 KPI cards and ContactsBox placeholder in PortfolioDashboardViewSkeleton and removes English clichés in ProtectedApp.tsx', () => {
+      render(<PortfolioDashboardViewSkeleton />);
+      const kpiSkeletons = screen.getAllByTestId('dashboard-skeleton-kpi-card');
+      expect(kpiSkeletons).toHaveLength(4);
+      expect(screen.getByTestId('dashboard-skeleton-contacts')).toBeInTheDocument();
+
+      const protectedAppSrc = fs.readFileSync(
+        path.join(process.cwd(), 'src/components/ProtectedApp.tsx'),
+        'utf-8'
+      );
+      expect(protectedAppSrc).toContain('통합 대시보드');
+      expect(protectedAppSrc).toContain('로그아웃');
+      expect(protectedAppSrc).not.toContain('Precision Operations Intelligence');
+      expect(protectedAppSrc).not.toContain('>SECURE<');
+      expect(protectedAppSrc).not.toContain('Vital Information & Task Architecture Ledger');
     });
   });
 

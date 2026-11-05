@@ -1,0 +1,81 @@
+[
+  {
+    "id": "wm-urgent-mayor-secretariat-1029",
+    "content": "10/29(목) 비서실 최상문(☎5008) 메모보고 회신 마감: 10.31.(토) 09:00 양재천 페스티벌 청장님 자료 6종 (①원페이퍼·진행시간 재확인[08:55 도착~10:35 환송], ②인사말씀[양식 엄수·정책홍보실 김아름 주임 검토], ③참석자 명단[47명], ④좌석배치도, ⑤차량[144두2259 카니발 검정] 남부혈액원 전용주차·하차·도보동선, ⑥무대·19개 부스·청장님 전용 단축 걷기코스[밀미리교 좌측 분기] + 정책홍보실 이정실·옥신해 주임 사진촬영 사전 소통)",
+    "category": "festival",
+    "tags": [
+      "[양재천 행사]",
+      "[비서실 최상문]",
+      "[긴급 현안]"
+    ],
+    "numericHighlight": "144두2259 카니발 검정",
+    "dateHighlight": "10. 29.",
+    "status": "pending",
+    "source": "pc",
+    "pinned": true,
+    "createdAt": "2026-10-27T15:50:00.000Z",
+    "updatedAt": "2026-10-27T15:50:00.000Z"
+  },
+  {
+    "id": "wm-seed-budget-2027",
+    "content": "9/21 통합건강증진사업 가내시 메모보고: 2027 건강생활실천사업 본예산 증액 반영 필요 (기존 6,500만 원 → 변경 7,800만 원)",
+    "category": "budget",
+    "tags": [
+      "[2027 예산편성]",
+      "[팀장님 지시]"
+    ],
+    "numericHighlight": "6,500만 원 → 7,800만 원",
+    "dateHighlight": "9. 21.",
+    "status": "pending",
+    "source": "pc",
+    "pinned": true,
+    "createdAt": "2026-09-21T09:30:00.000Z",
+    "updatedAt": "2026-09-21T09:30:00.000Z"
+  },
+  {
+    "id": "wm-seed-directive-audit",
+    "content": "10/26 팀장님 구두지시: 행정감사 요구자료 제출 시 2026년 신체활동 사업 추진실적 및 예산 집행률 최신 수치(10월 말 기준) 재확인 후 보고",
+    "category": "directive",
+    "tags": [
+      "[팀장님 지시]",
+      "[행정감사]",
+      "[2027 예산편성]"
+    ],
+    "dateHighlight": "10. 26.",
+    "status": "pending",
+    "source": "mobile",
+    "pinned": true,
+    "createdAt": "2026-10-26T01:15:00.000Z",
+    "updatedAt": "2026-10-26T01:15:00.000Z"
+  },
+  {
+    "id": "wm-seed-audit-qna",
+    "content": "10/28 행정감사 대비 예상 질의 답변서: 강남 AI 메디헬스센터 기간제근로자(운동사) 산출내역 및 일상경비 집행 잔액 대조표 첨부",
+    "category": "audit",
+    "tags": [
+      "[행정감사]",
+      "[2027 예산편성]"
+    ],
+    "dateHighlight": "10. 28.",
+    "status": "pending",
+    "source": "pc",
+    "pinned": false,
+    "createdAt": "2026-10-25T14:20:00.000Z",
+    "updatedAt": "2026-10-25T14:20:00.000Z"
+  },
+  {
+    "id": "wm-seed-festival-yangjae",
+    "content": "10/30 양재천 페스티벌 사전설치 점검: 운영본부 몽골텐트 5동 → 6동 변경 및 20개 부스 현수막·전기 배선 최종 확인",
+    "category": "festival",
+    "tags": [
+      "[양재천 행사]"
+    ],
+    "numericHighlight": "5동 → 6동",
+    "dateHighlight": "10. 30.",
+    "status": "pending",
+    "source": "mobile",
+    "pinned": false,
+    "createdAt": "2026-10-25T17:45:00.000Z",
+    "updatedAt": "2026-10-25T17:45:00.000Z"
+  }
+]

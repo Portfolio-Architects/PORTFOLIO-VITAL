@@ -577,111 +577,6 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   }, [resolveCategoryId, setEntries]);
 
   // 5. Calculate Real-Time Memoized Summaries (projectSummaries & statItemSummaries)
-  const projectSummaries = useMemo<ProjectSimulationSummary[]>(() => {
-    if (!categories) return [];
-
-    const map = new Map<string, {
-      totalBudget: number;
-      currentSpent: number;
-      simulatedExpenditure: number;
-      simulatedGeneralExpenditure: number;
-      simulatedDailyExpenditure: number;
-      unsyncedDailyExpense: number;
-      dailyExpenseIssued: number;
-      dailyExpenseSpent: number;
-      dailyExpenseRemaining: number;
-    }>();
-
-    // Initialize with existing categories
-    for (let i = 0; i < categories.length; i++) {
-      const cat = categories[i];
-      const dp = cat.detailedProject || '기타';
-      let target = map.get(dp);
-      if (!target) {
-        target = {
-          totalBudget: 0,
-          currentSpent: 0,
-          simulatedExpenditure: 0,
-          simulatedGeneralExpenditure: 0,
-          simulatedDailyExpenditure: 0,
-          unsyncedDailyExpense: 0,
-          dailyExpenseIssued: 0,
-          dailyExpenseSpent: 0,
-          dailyExpenseRemaining: 0,
-        };
-        map.set(dp, target);
-      }
-      const stats = getCategoryStats(cat.id);
-      target.totalBudget += cat.totalBudget || 0;
-      target.currentSpent += stats?.spent || 0;
-      target.dailyExpenseIssued += stats?.dailyExpenseIssued || 0;
-      target.dailyExpenseSpent += stats?.dailyExpenseSpent || 0;
-      target.dailyExpenseRemaining += stats?.dailyExpenseRemaining || 0;
-    }
-
-    // Add simulation entries (excluding settled ones)
-    for (let i = 0; i < mergedEntries.length; i++) {
-      const entry = mergedEntries[i];
-      if (entry.status === 'SETTLED') continue;
-      const dp = entry.detailedProject || '기타';
-      let target = map.get(dp);
-      if (!target) {
-        target = {
-          totalBudget: 0,
-          currentSpent: 0,
-          simulatedExpenditure: 0,
-          simulatedGeneralExpenditure: 0,
-          simulatedDailyExpenditure: 0,
-          unsyncedDailyExpense: 0,
-          dailyExpenseIssued: 0,
-          dailyExpenseSpent: 0,
-          dailyExpenseRemaining: 0,
-        };
-        map.set(dp, target);
-      }
-      const amt = entry.amount || 0;
-      target.simulatedExpenditure += amt;
-      if (entry.actionType === 'daily_expense') {
-        target.simulatedDailyExpenditure += amt;
-        if (!entry.budgetEntryId) {
-          target.unsyncedDailyExpense += amt;
-        }
-      } else {
-        target.simulatedGeneralExpenditure += amt;
-      }
-    }
-
-    // Convert map to summary objects
-    const results: ProjectSimulationSummary[] = [];
-    for (const [dp, val] of map) {
-      const currentRemaining = val.totalBudget - val.currentSpent;
-      const finalExpectedBalance = currentRemaining - val.simulatedGeneralExpenditure;
-      const finalDailyExpenseRemaining = Math.max(0, val.dailyExpenseRemaining - val.unsyncedDailyExpense);
-      const executionRate = val.totalBudget > 0 
-        ? ((val.currentSpent + val.simulatedExpenditure) / val.totalBudget) * 100 
-        : 0;
-      
-      results.push({
-        detailedProject: dp,
-        totalBudget: val.totalBudget,
-        currentSpent: val.currentSpent,
-        currentRemaining,
-        simulatedExpenditure: val.simulatedExpenditure,
-        simulatedGeneralExpenditure: val.simulatedGeneralExpenditure,
-        simulatedDailyExpenditure: val.simulatedDailyExpenditure,
-        finalExpectedBalance,
-        finalDailyExpenseRemaining,
-        executionRate,
-        isDeficit: finalExpectedBalance < 0,
-        dailyExpenseIssued: val.dailyExpenseIssued,
-        dailyExpenseSpent: val.dailyExpenseSpent,
-        dailyExpenseRemaining: val.dailyExpenseRemaining,
-      });
-    }
-
-    return results.sort((a, b) => a.detailedProject.localeCompare(b.detailedProject));
-  }, [categories, getCategoryStats, mergedEntries]);
-
   const statItemSummaries = useMemo<StatItemSimulationSummary[]>(() => {
     if (!categories) return [];
 
@@ -693,10 +588,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       simulatedExpenditure: number;
       simulatedGeneralExpenditure: number;
       simulatedDailyExpenditure: number;
-      unsyncedDailyExpense: number;
       dailyExpenseIssued: number;
       dailyExpenseSpent: number;
       dailyExpenseRemaining: number;
+      lockedAmount: number;
     }>();
 
     // Key format: `${dp}::${st}`
@@ -716,19 +611,20 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           simulatedExpenditure: 0,
           simulatedGeneralExpenditure: 0,
           simulatedDailyExpenditure: 0,
-          unsyncedDailyExpense: 0,
           dailyExpenseIssued: 0,
           dailyExpenseSpent: 0,
           dailyExpenseRemaining: 0,
+          lockedAmount: 0,
         };
         map.set(key, target);
       }
-      const stats = getCategoryStats(cat.id);
+      const stats = getCategoryStats(cat.id, true);
       target.totalBudget += cat.totalBudget || 0;
       target.currentSpent += stats?.spent || 0;
       target.dailyExpenseIssued += stats?.dailyExpenseIssued || 0;
       target.dailyExpenseSpent += stats?.dailyExpenseSpent || 0;
       target.dailyExpenseRemaining += stats?.dailyExpenseRemaining || 0;
+      target.lockedAmount += stats?.locked || 0;
     }
 
     // Add simulation entries (excluding settled ones)
@@ -749,10 +645,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           simulatedExpenditure: 0,
           simulatedGeneralExpenditure: 0,
           simulatedDailyExpenditure: 0,
-          unsyncedDailyExpense: 0,
           dailyExpenseIssued: 0,
           dailyExpenseSpent: 0,
           dailyExpenseRemaining: 0,
+          lockedAmount: 0,
         };
         map.set(key, target);
       }
@@ -760,9 +656,6 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       target.simulatedExpenditure += amt;
       if (entry.actionType === 'daily_expense') {
         target.simulatedDailyExpenditure += amt;
-        if (!entry.budgetEntryId) {
-          target.unsyncedDailyExpense += amt;
-        }
       } else {
         target.simulatedGeneralExpenditure += amt;
       }
@@ -772,8 +665,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     const results: StatItemSimulationSummary[] = [];
     for (const val of map.values()) {
       const currentRemaining = val.totalBudget - val.currentSpent;
-      const finalExpectedBalance = currentRemaining - val.simulatedGeneralExpenditure;
-      const finalDailyExpenseRemaining = Math.max(0, val.dailyExpenseRemaining - val.unsyncedDailyExpense);
+      const actualDailyRemaining = Math.max(0, val.dailyExpenseIssued - val.dailyExpenseSpent);
+      const shortfall = Math.max(0, val.simulatedDailyExpenditure - actualDailyRemaining);
+      const finalDailyExpenseRemaining = Math.max(0, actualDailyRemaining - val.simulatedDailyExpenditure);
+      const finalExpectedBalance = currentRemaining - val.simulatedGeneralExpenditure - shortfall;
 
       results.push({
         statItem: val.statItem,
@@ -786,10 +681,13 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
         simulatedDailyExpenditure: val.simulatedDailyExpenditure,
         finalExpectedBalance,
         finalDailyExpenseRemaining,
+        dailyExpenseShortfall: shortfall,
+        needsAdditionalIssuance: shortfall > 0,
         isDeficit: finalExpectedBalance < 0,
         dailyExpenseIssued: val.dailyExpenseIssued,
         dailyExpenseSpent: val.dailyExpenseSpent,
-        dailyExpenseRemaining: val.dailyExpenseRemaining,
+        dailyExpenseRemaining: actualDailyRemaining,
+        lockedAmount: val.lockedAmount,
       });
     }
 
@@ -799,6 +697,65 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       return a.statItem.localeCompare(b.statItem);
     });
   }, [categories, getCategoryStats, mergedEntries]);
+
+  const projectSummaries = useMemo<ProjectSimulationSummary[]>(() => {
+    if (!statItemSummaries || statItemSummaries.length === 0) return [];
+
+    const map = new Map<string, ProjectSimulationSummary>();
+
+    for (const item of statItemSummaries) {
+      const dp = item.detailedProject;
+      let target = map.get(dp);
+      if (!target) {
+        target = {
+          detailedProject: dp,
+          totalBudget: 0,
+          currentSpent: 0,
+          currentRemaining: 0,
+          simulatedExpenditure: 0,
+          simulatedGeneralExpenditure: 0,
+          simulatedDailyExpenditure: 0,
+          finalExpectedBalance: 0,
+          finalDailyExpenseRemaining: 0,
+          executionRate: 0,
+          isDeficit: false,
+          dailyExpenseIssued: 0,
+          dailyExpenseSpent: 0,
+          dailyExpenseRemaining: 0,
+          dailyExpenseShortfall: 0,
+          needsAdditionalIssuance: false,
+          lockedAmount: 0,
+        };
+        map.set(dp, target);
+      }
+
+      target.totalBudget += item.totalBudget;
+      target.currentSpent += item.currentSpent;
+      target.currentRemaining += item.currentRemaining;
+      target.simulatedExpenditure += item.simulatedExpenditure;
+      target.simulatedGeneralExpenditure = (target.simulatedGeneralExpenditure || 0) + (item.simulatedGeneralExpenditure || 0);
+      target.simulatedDailyExpenditure = (target.simulatedDailyExpenditure || 0) + (item.simulatedDailyExpenditure || 0);
+      target.dailyExpenseIssued = (target.dailyExpenseIssued || 0) + (item.dailyExpenseIssued || 0);
+      target.dailyExpenseSpent = (target.dailyExpenseSpent || 0) + (item.dailyExpenseSpent || 0);
+      target.dailyExpenseRemaining = (target.dailyExpenseRemaining || 0) + (item.dailyExpenseRemaining || 0);
+      target.dailyExpenseShortfall = (target.dailyExpenseShortfall || 0) + (item.dailyExpenseShortfall || 0);
+      target.finalDailyExpenseRemaining = (target.finalDailyExpenseRemaining || 0) + (item.finalDailyExpenseRemaining || 0);
+      target.finalExpectedBalance += item.finalExpectedBalance;
+      target.lockedAmount = (target.lockedAmount || 0) + (item.lockedAmount || 0);
+    }
+
+    const results: ProjectSimulationSummary[] = [];
+    for (const target of map.values()) {
+      target.executionRate = target.totalBudget > 0
+        ? ((target.currentSpent + target.simulatedExpenditure) / target.totalBudget) * 100
+        : 0;
+      target.isDeficit = target.finalExpectedBalance < 0;
+      target.needsAdditionalIssuance = (target.dailyExpenseShortfall || 0) > 0;
+      results.push(target);
+    }
+
+    return results.sort((a, b) => a.detailedProject.localeCompare(b.detailedProject));
+  }, [statItemSummaries]);
 
   return {
     categories,

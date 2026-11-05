@@ -276,4 +276,209 @@ describe('StatItemDetailModal & SimulationResultTable Integration', () => {
       expect(screen.queryByText('세부 지출원장 및 시뮬레이션')).not.toBeInTheDocument();
     });
   });
+
+  describe('Zero-issuance categories & daily expense shortfall guardrails', () => {
+    test('renders shortfall badge and appropriateness warning when simulated daily expense exceeds issued amount', () => {
+      const shortfallSummary: StatItemSimulationSummary = {
+        detailedProject: '강남체력인증센터 운영',
+        statItem: '201-01 사무관리비',
+        totalBudget: 17339000,
+        currentSpent: 4154000,
+        currentRemaining: 13185000,
+        simulatedExpenditure: 1500000,
+        simulatedGeneralExpenditure: 0,
+        simulatedDailyExpenditure: 1500000,
+        finalExpectedBalance: 12185000,
+        isDeficit: false,
+        dailyExpenseIssued: 1000000,
+        dailyExpenseSpent: 500000,
+        dailyExpenseRemaining: 500000,
+        dailyExpenseShortfall: 1000000,
+        needsAdditionalIssuance: true,
+      };
+
+      render(
+        <StatItemDetailModal
+          isOpen={true}
+          onClose={jest.fn()}
+          detailedProject="강남체력인증센터 운영"
+          statItem="201-01 사무관리비"
+          summary={shortfallSummary}
+          categories={mockCategories}
+          actualEntries={mockActualEntries}
+          simulationEntries={[]}
+        />
+      );
+
+      // Appropriateness badge
+      expect(screen.getByText('추가 교부 필요')).toBeInTheDocument();
+      // Shortfall in header
+      expect(screen.getAllByText('1,000,000').length).toBeGreaterThanOrEqual(1);
+      // Card 6 shortfall pill
+      expect(screen.getByText(/부족 1,000,000원/)).toBeInTheDocument();
+    });
+
+    test('SimulationResultTable displays shortfall pills on stat item row and table totals', () => {
+      const shortfallSummary: StatItemSimulationSummary = {
+        detailedProject: '강남체력인증센터 운영',
+        statItem: '201-01 사무관리비',
+        totalBudget: 17339000,
+        currentSpent: 4154000,
+        currentRemaining: 13185000,
+        simulatedExpenditure: 1500000,
+        simulatedGeneralExpenditure: 0,
+        simulatedDailyExpenditure: 1500000,
+        finalExpectedBalance: 12185000,
+        isDeficit: false,
+        dailyExpenseIssued: 0,
+        dailyExpenseSpent: 0,
+        dailyExpenseRemaining: 0,
+        dailyExpenseShortfall: 1500000,
+        needsAdditionalIssuance: true,
+      };
+
+      const projSummary: ProjectSimulationSummary = {
+        detailedProject: '강남체력인증센터 운영',
+        totalBudget: 17339000,
+        currentSpent: 4154000,
+        currentRemaining: 13185000,
+        simulatedExpenditure: 1500000,
+        simulatedDailyExpenditure: 1500000,
+        dailyExpenseShortfall: 1500000,
+        needsAdditionalIssuance: true,
+        finalExpectedBalance: 11685000,
+        executionRate: 24.0,
+        isDeficit: false,
+        dailyExpenseIssued: 0,
+        dailyExpenseSpent: 0,
+        dailyExpenseRemaining: 0,
+      };
+
+      render(
+        <SimulationResultTable
+          categories={mockCategories}
+          budgetEntries={mockActualEntries}
+          projectSummaries={[projSummary]}
+          statItemSummaries={[shortfallSummary]}
+          entries={[]}
+          onDeleteEntry={jest.fn()}
+        />
+      );
+
+      // Should display additional issuance badge in stat item row
+      expect(screen.getAllByText(/추가 교부 필요/).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/교부 부족/).length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('SubItems isLocked guardrails and budget appropriateness badges', () => {
+    const lockedCategories: BudgetCategory[] = [
+      {
+        id: 'cat-locked',
+        name: '방문건강관리사업 - 인건비',
+        detailedProject: '방문건강관리',
+        statItem: '101-04 기간제근로자등보수',
+        totalBudget: 50000000,
+        color: '#4f46e5',
+        subItems: [
+          {
+            id: 'sub-locked-1',
+            name: '전담인력 기본급',
+            amount: 30000000,
+            isLocked: true,
+            calculations: [
+              {
+                id: 'calc-locked-1',
+                name: '기본급여',
+                calculation: '1,000,000원*30개월=',
+                amount: 30000000,
+                isLocked: true,
+              },
+            ],
+          },
+          {
+            id: 'sub-normal-2',
+            name: '일반 여비',
+            amount: 5000000,
+            isLocked: false,
+          },
+        ],
+      },
+    ];
+
+    test('displays locked amount badge in modal header and isLocked pills in Tab 3', () => {
+      const lockedSummary: StatItemSimulationSummary = {
+        detailedProject: '방문건강관리',
+        statItem: '101-04 기간제근로자등보수',
+        totalBudget: 50000000,
+        currentSpent: 10000000,
+        currentRemaining: 40000000,
+        simulatedExpenditure: 5000000,
+        finalExpectedBalance: 35000000,
+        isDeficit: false,
+        lockedAmount: 30000000,
+      };
+
+      render(
+        <StatItemDetailModal
+          isOpen={true}
+          onClose={jest.fn()}
+          detailedProject="방문건강관리"
+          statItem="101-04 기간제근로자등보수"
+          summary={lockedSummary}
+          categories={lockedCategories}
+          actualEntries={[]}
+          simulationEntries={[]}
+        />
+      );
+
+      // Header shows locked limit
+      expect(screen.getByText(/잠금 한도/)).toBeInTheDocument();
+      expect(screen.getByText('30,000,000')).toBeInTheDocument();
+
+      // Appropriateness badge is 정상/안전 because 35,000,000 >= 30,000,000
+      expect(screen.getByText('정상/안전')).toBeInTheDocument();
+
+      // Switch to SubItems Tab
+      const subItemsTabButton = screen.getByRole('button', { name: /본예산 산출 기초/i });
+      fireEvent.click(subItemsTabButton);
+
+      // Tab 3 shows locked warning banner
+      expect(screen.getByText(/법정 필수경비\(인건비\/보험료 등\) 잠금 한도 총액:/)).toBeInTheDocument();
+      expect(screen.getByText('임의 삭감 불가')).toBeInTheDocument();
+
+      // Locked badge pills
+      expect(screen.getAllByText('잠금').length).toBeGreaterThanOrEqual(1);
+    });
+
+    test('displays "잠금한도 침범" warning badge when expected balance drops below lockedAmount', () => {
+      const violatedSummary: StatItemSimulationSummary = {
+        detailedProject: '방문건강관리',
+        statItem: '101-04 기간제근로자등보수',
+        totalBudget: 50000000,
+        currentSpent: 10000000,
+        currentRemaining: 40000000,
+        simulatedExpenditure: 15000000,
+        finalExpectedBalance: 25000000,
+        isDeficit: false,
+        lockedAmount: 30000000,
+      };
+
+      render(
+        <StatItemDetailModal
+          isOpen={true}
+          onClose={jest.fn()}
+          detailedProject="방문건강관리"
+          statItem="101-04 기간제근로자등보수"
+          summary={violatedSummary}
+          categories={lockedCategories}
+          actualEntries={[]}
+          simulationEntries={[]}
+        />
+      );
+
+      // Appropriateness badge must be 잠금한도 침범
+      expect(screen.getByText('잠금한도 침범')).toBeInTheDocument();
+    });
+  });
 });

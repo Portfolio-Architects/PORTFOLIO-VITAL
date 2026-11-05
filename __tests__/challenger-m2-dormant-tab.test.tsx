@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -152,7 +152,7 @@ describe('Milestone M2 Empirical Challenger: Dormant Tab & Zombie Polling Defens
       expect(screen.queryByTestId('mock-budget-simulator')).toBeNull();
     });
 
-    it('preserves mounted DOM instances and state when switching between budget, inventory, and simulator', () => {
+    it('preserves mounted DOM instances and state when switching between budget and simulator', () => {
       render(<WorkspaceView {...defaultProps} />);
 
       // Step A: Enter draft text in Budget tab
@@ -160,53 +160,35 @@ describe('Milestone M2 Empirical Challenger: Dormant Tab & Zombie Polling Defens
       fireEvent.change(budgetInput, { target: { value: '2026년 방역 예산 신규 배정안' } });
       expect(budgetInput).toHaveValue('2026년 방역 예산 신규 배정안');
 
-      // Step B: Switch to Inventory tab ("홍보물 관리")
-      const inventoryTabBtn = screen.getByRole('button', { name: /홍보물 관리/i });
-      fireEvent.click(inventoryTabBtn);
-
-      // Verify DOM: Budget container is hidden, Inventory container is block
-      const budgetEl = screen.getByTestId('mock-budget-dashboard');
-      const inventoryEl = screen.getByTestId('mock-inventory-list');
-      expect(budgetEl.parentElement).toHaveClass('hidden');
-      expect(inventoryEl.parentElement).toHaveClass('block');
-
-      // Crucial: Budget input is STILL in the document and retains its state!
-      expect(screen.getByTestId('budget-stateful-input')).toHaveValue('2026년 방역 예산 신규 배정안');
-
-      // Step C: Enter draft text in Inventory tab
-      const inventoryInput = screen.getByTestId('inventory-stateful-input');
-      fireEvent.change(inventoryInput, { target: { value: '비축 마스크 10,000개 검수 완료' } });
-      expect(inventoryInput).toHaveValue('비축 마스크 10,000개 검수 완료');
-
-      // Step D: Switch to Simulator tab ("예산 시뮬레이터")
+      // Step B: Switch to Simulator tab ("예산 시뮬레이터")
       const simulatorTabBtn = screen.getByRole('button', { name: /예산 시뮬레이터/i });
       fireEvent.click(simulatorTabBtn);
 
+      const budgetEl = screen.getByTestId('mock-budget-dashboard');
       const simulatorEl = screen.getByTestId('mock-budget-simulator');
       expect(budgetEl.parentElement).toHaveClass('hidden');
-      expect(inventoryEl.parentElement).toHaveClass('hidden');
       expect(simulatorEl.parentElement).toHaveClass('block');
 
-      // All 3 components are mounted in the DOM simultaneously
+      // Both components are mounted in the DOM simultaneously
       expect(screen.getByTestId('mock-budget-dashboard')).toBeInTheDocument();
-      expect(screen.getByTestId('mock-inventory-list')).toBeInTheDocument();
       expect(screen.getByTestId('mock-budget-simulator')).toBeInTheDocument();
+
+      // Crucial: Budget input is STILL in the document and retains its state!
+      expect(screen.getByTestId('budget-stateful-input')).toHaveValue('2026년 방역 예산 신규 배정안');
 
       // Enter state in Simulator tab
       const simulatorInput = screen.getByTestId('simulator-stateful-input');
       fireEvent.change(simulatorInput, { target: { value: '시뮬레이션 시나리오 A 검토' } });
 
-      // Step E: Switch back to Budget tab ("예산 대조보드")
+      // Step C: Switch back to Budget tab ("예산 대조보드")
       const budgetTabBtn = screen.getByRole('button', { name: /예산 대조보드/i });
       fireEvent.click(budgetTabBtn);
 
       expect(budgetEl.parentElement).toHaveClass('block');
-      expect(inventoryEl.parentElement).toHaveClass('hidden');
       expect(simulatorEl.parentElement).toHaveClass('hidden');
 
-      // Verify all 3 stateful values are fully intact
+      // Verify both stateful values are fully intact
       expect(screen.getByTestId('budget-stateful-input')).toHaveValue('2026년 방역 예산 신규 배정안');
-      expect(screen.getByTestId('inventory-stateful-input')).toHaveValue('비축 마스크 10,000개 검수 완료');
       expect(screen.getByTestId('simulator-stateful-input')).toHaveValue('시뮬레이션 시나리오 A 검토');
     });
 
@@ -216,19 +198,17 @@ describe('Milestone M2 Empirical Challenger: Dormant Tab & Zombie Polling Defens
       fireEvent.change(screen.getByTestId('budget-stateful-input'), { target: { value: '안전성 스트레스 테스트' } });
 
       const tabs = [
-        screen.getByRole('button', { name: /홍보물 관리/i }),
         screen.getByRole('button', { name: /예산 시뮬레이터/i }),
         screen.getByRole('button', { name: /예산 대조보드/i }),
       ];
 
       // Rapidly toggle tabs 15 times
       for (let i = 0; i < 15; i++) {
-        fireEvent.click(tabs[i % 3]);
+        fireEvent.click(tabs[i % 2]);
       }
 
       // Check DOM integrity: exactly 1 instance of each mounted component
       expect(screen.getAllByTestId('mock-budget-dashboard')).toHaveLength(1);
-      expect(screen.getAllByTestId('mock-inventory-list')).toHaveLength(1);
       expect(screen.getAllByTestId('mock-budget-simulator')).toHaveLength(1);
 
       // Verify state was never reset

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ModuleType } from '@/types';
-import { Archive, LayoutDashboard, Sparkles } from 'lucide-react';
+import { Archive, LayoutDashboard, Sparkles, FolderSearch, StickyNote } from 'lucide-react';
 
 import { LocalhostStatusHUD } from '@/components/layout/LocalhostStatusHUD';
 
@@ -18,8 +18,10 @@ interface TopNavProps {
 
 const navItems: { id: ModuleType; label: string; icon: React.ElementType }[] = [
   { id: 'dashboard', label: '대시보드', icon: LayoutDashboard },
+  { id: 'memory', label: '작업기억 보드', icon: StickyNote },
   { id: 'workspace', label: '예산관리', icon: Archive },
   { id: 'festival', label: '양재천 페스티벌', icon: Sparkles },
+  { id: 'archive', label: '아카이브 탐색기', icon: FolderSearch },
 ];
 
 const NAV_ITEM_LABEL_MAP = new Map<ModuleType, string>(navItems.map(i => [i.id, i.label]));
@@ -36,8 +38,8 @@ function SidebarComponent({ activeModule, onModuleChange, onPreloadModule, onOpe
             {/* Left side: Navigation Items */}
             <div className="flex items-center gap-3">
               {/* Mobile Header Title */}
-              <div className="flex sm:hidden items-center px-1">
-                <h1 className="text-base font-bold tracking-tight text-slate-900">
+              <div className="flex sm:hidden items-center pt-0.5 px-1">
+                <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
                   {activeLabel}
                 </h1>
               </div>
@@ -53,14 +55,14 @@ function SidebarComponent({ activeModule, onModuleChange, onPreloadModule, onOpe
                       onClick={() => onModuleChange(item.id)}
                       onMouseEnter={() => onPreloadModule?.(item.id)}
                       onFocus={() => onPreloadModule?.(item.id)}
-                      className={`flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap cursor-pointer transition-all relative ${
+                      className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold whitespace-nowrap cursor-pointer transition-all relative ${
                         isActive
                           ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/80'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 border border-transparent'
                       }`}
                       title={item.label}
                     >
-                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-900' : 'text-slate-500'}`} strokeWidth={isActive ? 2.0 : 1.75} />
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-slate-900' : 'text-slate-500'}`} strokeWidth={isActive ? 2.0 : 1.75} />
                       <span>{item.label}</span>
                     </button>
                   );
@@ -69,7 +71,7 @@ function SidebarComponent({ activeModule, onModuleChange, onPreloadModule, onOpe
             </div>
 
             {/* Right side: Localhost Health & Daemon Status HUD */}
-            <div className="flex items-center gap-2 pr-1">
+            <div className="flex items-center gap-2 pr-1.5">
               <LocalhostStatusHUD onOpenLogs={onOpenLogs} />
             </div>
 
@@ -78,7 +80,7 @@ function SidebarComponent({ activeModule, onModuleChange, onPreloadModule, onOpe
       </header>
 
       {/* Mobile Floating Dock */}
-      <div className="sm:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[300px] transition-all duration-200">
+      <div className="sm:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[320px] transition-all duration-200">
         <nav className="flex items-center justify-around p-1.5 bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-lg rounded-2xl">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -88,7 +90,7 @@ function SidebarComponent({ activeModule, onModuleChange, onPreloadModule, onOpe
                 key={item.id}
                 onClick={() => onModuleChange(item.id)}
                 onTouchStart={() => onPreloadModule?.(item.id)}
-                className={`relative flex flex-col items-center justify-center w-12 h-11 rounded-xl transition-colors ${
+                className={`relative flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-colors ${
                   isActive
                     ? 'bg-slate-900 text-white shadow-2xs'
                     : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/80'
@@ -96,7 +98,7 @@ function SidebarComponent({ activeModule, onModuleChange, onPreloadModule, onOpe
                 aria-label={item.label}
               >
                 <Icon 
-                  className="w-4.5 h-4.5" 
+                  className="w-6 h-6" 
                   strokeWidth={isActive ? 2.0 : 1.75} 
                 />
               </button>
