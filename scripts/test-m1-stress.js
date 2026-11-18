@@ -104,35 +104,8 @@ runTest('Planner Agent - createPlan handles special character prompt', async () 
   assert.ok(result.length >= 1);
 });
 
-// 7. Report Generator POST with undefined budgetData & null tasks
-runTest('Report Generator API - handles undefined budgetData and null tasks', async () => {
-  const { POST } = require('../src/app/api/report-generator/route.ts');
-  const req = {
-    json: async () => ({
-      nodeLabel: '건강증진사업',
-      wikiText: null,
-      budgetData: undefined,
-      tasks: null,
-      files: null
-    })
-  };
-  const res = await POST(req);
-  const json = await res.json();
-  assert.strictEqual(res.status, 200);
-  assert.strictEqual(json.success, true);
-});
-
-// 8. File Radar GET with regex special characters in nodeLabel
-runTest('File Radar API - handles regex special characters in nodeLabel', async () => {
-  const { GET } = require('../src/app/api/file-radar/route.ts');
-  const req = {
-    url: 'http://localhost:3001/api/file-radar?nodeLabel=' + encodeURIComponent('사업(2026) [특수문자] + * ?')
-  };
-  const res = await GET(req);
-  const json = await res.json();
-  assert.strictEqual(res.status, 200);
-  assert.ok(Array.isArray(json.files));
-});
+// 7. Report Generator POST (Pruned in Phase 4 Task 4.2 - Orphan Route cleanup)
+// 8. File Radar GET (Pruned in Phase 4 Task 4.2 - Orphan Route cleanup)
 
 (async () => {
   console.log('\n====================================================');

@@ -24,7 +24,7 @@ from collections import Counter, defaultdict
 
 ARCHIVE_ROOT = r"F:\_Organized_Archive"
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MIGRATION_LOG_PATH = os.path.join(REPO_ROOT, "data", "ARCHIVE_MIGRATION_LOG.json")
+MIGRATION_LOG_PATH = os.path.join(REPO_ROOT, "data", "archive", "ARCHIVE_MIGRATION_LOG.json")
 INDEX_OUTPUT_PATH = os.path.join(REPO_ROOT, "data", "ARCHIVE_INDEX.json")
 
 DUPLICATES_DIR_NAME = "_Archive_Duplicates"
@@ -202,7 +202,7 @@ def classify_2026_project_by_filename(filename: str) -> str:
 
 
 def classify_root_file_destination(filename: str) -> tuple[str, str]:
-    """Return (year_folder, subfolder) for a loose file sitting in F:\_Organized_Archive root."""
+    r"""Return (year_folder, subfolder) for a loose file sitting in F:\_Organized_Archive root."""
     if filename.startswith("2023년"):
         return ("2023년", "기타_일반행정")
     if filename.startswith(("20240115", "20240626")):
@@ -443,6 +443,17 @@ def organize_archive():
     print(f"[ORGANIZE] Completed! Logged {len(migration_records)} operations to {MIGRATION_LOG_PATH}")
 
 
+def _to_win_long_path(p: str) -> str:
+    if os.name != "nt":
+        return p
+    ap = os.path.abspath(p)
+    if ap.startswith("\\\\?\\"):
+        return ap
+    if ap.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + ap[2:]
+    return "\\\\?\\" + ap
+
+
 def rollback_archive():
     """Rollback all file movements recorded in data/ARCHIVE_MIGRATION_LOG.json in reverse order."""
     if not os.path.exists(MIGRATION_LOG_PATH):
@@ -455,11 +466,11 @@ def rollback_archive():
     records = data.get("records", [])
     restored = 0
     for rec in reversed(records):
-        src = rec["src"]
-        dst = rec["dst"]
-        if os.path.exists(dst):
-            os.makedirs(os.path.dirname(src), exist_ok=True)
-            shutil.move(dst, src)
+        lp_src = _to_win_long_path(rec["src"])
+        lp_dst = _to_win_long_path(rec["dst"])
+        if os.path.exists(lp_dst):
+            os.makedirs(_to_win_long_path(os.path.dirname(rec["src"])), exist_ok=True)
+            shutil.move(lp_dst, lp_src)
             restored += 1
 
     print(f"[ROLLBACK] Restored {restored} items to original locations.")
@@ -494,11 +505,81 @@ def verify_organization():
 # PART 2: FULL-TEXT EXTRACTION, PIPA MASKING & PHOTO CONTEXT TAGGING
 # ==============================================================================
 
-RRN_PATTERN = re.compile(r"\b(\d{6})-[1-4]\d{6}\b")
-PHONE_PATTERN = re.compile(r"\b(01[016789])-\d{3,4}-(\d{4})\b")
+CONTROL_CHAR_PATTERN = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]+")
+NAME_BEFORE_RRN_PATTERN = re.compile(
+    r"([가-힣]{2,4})(\s*\([\u4e00-\u9fff]{2,4}\))?"
+    r"(?=\s*\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])(?:\s*[-~–—_.]\s*|\s+)?[1-8]\d{6}(?![\d*-]))"
+)
+RRN_PATTERN = re.compile(
+    r"(?<![\d*-])(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01]))(?:\s*[-~–—_.]\s*|\s+)?([1-4]\d{6})(?![\d*-])"
+)
+FRN_PATTERN = re.compile(
+    r"(?<![\d*-])(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01]))(?:\s*[-~–—_.]\s*|\s+)?([5-8]\d{6})(?![\d*-])"
+)
+PHONE_PATTERN = re.compile(
+    r"(?<![\dA-Za-z*-])(01[016789])(?:\s*[-.~–—)]\s*|\s+)?(\d{3,4})(?:\s*[-.~–—]\s*|\s+)?(\d{4})(?![\d*-])"
+)
+TEL_PATTERN = re.compile(
+    r"(?<![\dA-Za-z*-])(\(?(?:02|0[3-6]\d|070)\)?)[\s.\-~–—)]+(\d{3,4})[\s.\-~–—]+(\d{4})(?![\d*-])"
+)
+TEL_NOSEP_PATTERN = re.compile(
+    r"(?<![\dA-Za-z*-])(02|0[3-6]\d|070)(\d{3,4})(\d{4})(?![\d*-])"
+)
+CARD_SEP_PATTERN = re.compile(
+    r"(?<![\d*-])(\d{4})(?:\s*[-~–—]\s*|\s+)(\d{4})(?:\s*[-~–—]\s*|\s+)(\d{4})(?:\s*[-~–—]\s*|\s+)(\d{4})(?![\d*-])"
+)
+CARD_NOSEP_PATTERN = re.compile(r"(?<![\d*-])(\d{4})(\d{4})(\d{4})(\d{4})(?![\d*-])")
+BANK_CONTEXT_ACCOUNT_PATTERN = re.compile(
+    r"((?:NH농협|IBK기업|SC제일|스탠다드차타드|카카오뱅크|케이뱅크|토스뱅크|새마을금고|"
+    r"국민|신한|우리|하나|농협|기업|새마을|신협|우체국|수협|씨티|부산|대구|경남|광주|전북|제주)"
+    r"(?:은행)?[\s:：()]*)"
+    r"(\d{2,6}(?:\s*[-–—]\s*\d{1,8}){1,5}|\d{3,6}(?:\s+\d{2,6}){1,2}\s+\d{2,8}|\d{10,16})"
+    r"(?![\d,%.-])"
+)
+ACCOUNT_PATTERN = re.compile(
+    r"(?<![\d*–—-])(\d{2,6})\s*[-–—]\s*(\d{2,6})\s*[-–—]\s*(\d{2,8})(?:\s*[-–—]\s*(\d{1,4}))?(?!(?:\s*[-–—]\s*\d|\d|\*))"
+)
+EMAIL_PATTERN = re.compile(r"([A-Za-z0-9_.+-]{1,3})[A-Za-z0-9_.+-]*@([A-Za-z0-9-]+\.[A-Za-z0-9-.]+)")
+LABELED_NAME_PATTERN = re.compile(
+    r"((?:성명|이름|예금주|수령인|강사명)\s*[:：]\s*)([가-힣]{2,4})(?=$|[\s,()|/\d])"
+)
+PDOC_BEFORE_NAME_PATTERN = re.compile(
+    r"(신분증(?:사본)?|통장\s*사본|이력서|근로기록부|주민등록\s*초본|초본|학위증명서|재직증명서|경력증명서|수료증|개인정보\s*동의(?:서)?|증빙양식)"
+    r"([\s_\-(]+)"
+    r"([가-힣]{2,4})"
+    r"(?=$|[\s_()\-. ,\d])"
+)
+PDOC_AFTER_NAME_PATTERN = re.compile(
+    r"(?:^|(?<=[\s_\-.(]))"
+    r"([가-힣]{2,4}?)"
+    r"(?:(?=\s*(?:강사|트레이너)[\s_\-]+(?:신분증|통장|이력서))|"
+    r"(?=[\s_\-(]+(?:신분증(?:사본)?|통장\s*사본|이력서|근로기록부|(?:주민등록\s*)?초본|교원자격증|자격증|수료증)))"
+)
 XML_TAG_PATTERN = re.compile(r"<[^>]+>")
 WHITESPACE_PATTERN = re.compile(r"\s+")
 KOREAN_WORD_PATTERN = re.compile(r"[가-힣A-Za-z0-9]{2,15}")
+
+OS_JUNK_FILENAMES = {".ds_store", "thumbs.db", "desktop.ini"}
+
+NON_PERSON_TOKENS = {
+    "신분증", "신분증사본", "사본", "통장", "통장사본", "이력서", "근로기록부", "개인정보", "동의", "동의서",
+    "수료증", "강사", "감사", "트레이너", "연수", "연사", "연단", "연맹", "연극", "양식", "서식", "표준", "최종",
+    "수정", "별첨", "붙임", "안내", "안내문", "제공", "관련", "계약", "계약서", "물품", "용역", "구매", "내역",
+    "증빙", "증빙양식", "주민등록", "주민등록초본", "초본", "등본", "등기부등본", "법인", "법인도장", "사업자",
+    "사업자등록증", "재직증명서", "학위증명서", "경력증명서", "증명서", "자격증", "교원자격증", "위촉장", "보안점검",
+    "자살예방교육", "교육", "노르딕워킹", "체력", "측정", "강사료", "지급", "온누리상품권", "모바일", "기간제",
+    "강남구", "보건소", "강남구보건소", "서울형", "주거래", "건보연", "국민", "신한", "우리", "하나", "농협", "기업",
+    "하나은행", "우리은행", "국민은행", "신한은행", "농협은행", "기업은행", "제세부담", "한글",
+    "커뮤니디", "메이즈컴퍼니", "스튜디오그레이", "진파트너", "인바디", "지니즈웰", "에이치이", "에이치씨메디칼",
+    "제이제이교육", "몽땅희망", "제이엠스포츠", "위드어스", "위더스", "위너스", "위드헬스", "더유니폼", "세움플래닛",
+    "드림포", "모두케어스", "예스기술", "엔제이컴퍼니", "애드인", "라이브액션픽쳐스", "푸드스케치", "럭키출판",
+    "앤드프로덕션", "제이힐", "글로벌", "스마트링크", "제일손", "서울대학교", "한양대학교", "강남대학교", "상명대학교",
+    "양재동",
+}
+
+KOREAN_SURNAME_CHARS = set(
+    "김이박최정강조윤장임한오서신권황안송류유전홍고문양손배백허남심노하곽성차주우구신라나진민엄채원천방공현함변염여추도소석선설마길연위표명기반왕금옥육인맹제모탁국어은편용"
+)
 
 STOPWORDS = {
     "있음", "없음", "해당", "관련", "대한", "위한", "따른", "통한", "기준", "결과",
@@ -509,19 +590,135 @@ STOPWORDS = {
 }
 
 
+def is_os_metadata_or_lock_file(filename: str) -> bool:
+    """Return True for macOS AppleDouble forks (._*), Office locks (~$*), and OS metadata files."""
+    if not filename:
+        return True
+    low = filename.lower()
+    if low in OS_JUNK_FILENAMES:
+        return True
+    if filename.startswith(("._", "~$")):
+        return True
+    if "__._" in filename:
+        return True
+    return False
+
+
+def _mask_korean_name_token(name: str) -> str:
+    n = name.strip()
+    if len(n) <= 1:
+        return n
+    if len(n) == 2:
+        return f"{n[0]}*"
+    return f"{n[0]}{'*' * (len(n) - 2)}{n[-1]}"
+
+
+def _is_likely_korean_person_name(token: str) -> bool:
+    if not (2 <= len(token) <= 4) or not re.fullmatch(r"[가-힣]{2,4}", token):
+        return False
+    if token in NON_PERSON_TOKENS or token[0] not in KOREAN_SURNAME_CHARS:
+        return False
+    if len(token) >= 3 and token.endswith("스"):
+        return False
+    if token.endswith((
+        "학교", "대학", "재단", "센터", "은행", "병원", "의원", "약국", "협회", "학회",
+        "공사", "공단", "구민", "주민", "사본", "통장", "증명", "교육", "사업", "팀장",
+        "과장", "소장", "주임", "선생", "위원", "회장", "원장", "교수", "강사", "박사",
+        "헬스", "어스", "컴퍼니", "스포츠", "메디칼", "링크", "기술", "출판", "희망",
+    )):
+        return False
+    return True
+
+
+def _mask_card(match: re.Match) -> str:
+    gs = match.groups()
+    if all(g.startswith(("19", "20")) and 1990 <= int(g) <= 2039 for g in gs):
+        return match.group(0)
+    return f"{gs[0]}-****-****-{gs[3]}"
+
+
+def _mask_bank_context_account(match: re.Match) -> str:
+    prefix, raw_acct = match.group(1), match.group(2)
+    digits = re.sub(r"\D", "", raw_acct)
+    if len(digits) < 10 or len(digits) > 16:
+        return match.group(0)
+    parts = [p for p in re.split(r"[\s\-–—]+", raw_acct.strip()) if p]
+    if len(parts) == 3 and len(parts[0]) == 3 and len(parts[1]) == 2 and len(parts[2]) == 5:
+        return match.group(0)
+    if len(parts) >= 2:
+        head = parts[0]
+        tail = parts[-1] if len(parts[-1]) <= 4 else digits[-4:]
+    else:
+        head = digits[:4] if len(digits) >= 13 else digits[:3]
+        tail = digits[-4:]
+    return f"{prefix}{head}-****-{tail}"
+
+
+def _mask_bank_account(match: re.Match) -> str:
+    if re.search(r"\d\s*[-–—]\s*$", match.string[:match.start()]):
+        return match.group(0)
+    g1, g2, g3, g4 = match.group(1), match.group(2), match.group(3), match.group(4)
+    total_digits = len(g1) + len(g2) + len(g3) + (len(g4) if g4 else 0)
+    # Preserve 8-digit dates (YYYY-MM-DD) and 10-digit 3-2-5 business registration numbers (사업자등록번호)
+    if g4 is None and len(g1) == 3 and len(g2) == 2 and len(g3) == 5:
+        return match.group(0)
+    if total_digits < 11 or total_digits > 16:
+        return match.group(0)
+    tail = g4 if g4 else g3[-4:]
+    return f"{g1}-****-{tail}"
+
+
+def _mask_personal_names(text: str) -> str:
+    found_names = set()
+    for m in PDOC_BEFORE_NAME_PATTERN.finditer(text):
+        cand = m.group(3)
+        if _is_likely_korean_person_name(cand):
+            found_names.add(cand)
+    for m in PDOC_AFTER_NAME_PATTERN.finditer(text):
+        cand = m.group(1)
+        if _is_likely_korean_person_name(cand):
+            found_names.add(cand)
+    for nm in sorted(found_names, key=len, reverse=True):
+        text = text.replace(nm, _mask_korean_name_token(nm))
+    text = LABELED_NAME_PATTERN.sub(
+        lambda m: f"{m.group(1)}{_mask_korean_name_token(m.group(2))}"
+        if _is_likely_korean_person_name(m.group(2))
+        else m.group(0),
+        text,
+    )
+    return text
+
+
 def sanitize_pipa(text: str) -> str:
-    """Mask Resident Registration Numbers and Mobile Phone Numbers per AGENTS.md Rule Q."""
+    """Mask RRN/FRN, Mobile/Landline Phones, Card/Account Numbers, Emails, and Personal-Doc Names per AGENTS.md Rule Q."""
     if not text:
         return ""
+    text = CONTROL_CHAR_PATTERN.sub("", text)
+    text = BANK_CONTEXT_ACCOUNT_PATTERN.sub(_mask_bank_context_account, text)
+    text = NAME_BEFORE_RRN_PATTERN.sub(
+        lambda m: _mask_korean_name_token(m.group(1)) + (" (***)" if m.group(2) else "")
+        if _is_likely_korean_person_name(m.group(1))
+        else m.group(0),
+        text,
+    )
     text = RRN_PATTERN.sub(r"\1-*******", text)
-    text = PHONE_PATTERN.sub(r"\1-****-\2", text)
+    text = FRN_PATTERN.sub(r"\1-*******", text)
+    text = PHONE_PATTERN.sub(r"\1-****-\3", text)
+    text = TEL_PATTERN.sub(lambda m: f"{m.group(1).strip('()')}-***-{m.group(3)}", text)
+    text = TEL_NOSEP_PATTERN.sub(r"\1-***-\3", text)
+    text = CARD_SEP_PATTERN.sub(_mask_card, text)
+    text = CARD_NOSEP_PATTERN.sub(_mask_card, text)
+    text = ACCOUNT_PATTERN.sub(_mask_bank_account, text)
+    text = EMAIL_PATTERN.sub(r"\1***@\2", text)
+    text = _mask_personal_names(text)
     return text
 
 
 def clean_extracted_text(raw: str, max_len: int = 2500) -> str:
     if not raw:
         return ""
-    cleaned = WHITESPACE_PATTERN.sub(" ", raw).strip()
+    cleaned = CONTROL_CHAR_PATTERN.sub(" ", raw)
+    cleaned = WHITESPACE_PATTERN.sub(" ", cleaned).strip()
     cleaned = sanitize_pipa(cleaned)
     return cleaned[:max_len]
 
@@ -727,9 +924,12 @@ def build_archive_index():
         sub_folder = "/".join(parts[2:]) if len(parts) >= 3 else ""
 
         for fname in sorted(filenames):
+            if is_os_metadata_or_lock_file(fname):
+                continue
+
             fpath = os.path.join(dirpath, fname)
             try:
-                stat = os.stat(fpath)
+                stat = os.stat(_to_win_long_path(fpath))
             except OSError:
                 continue
 
@@ -755,17 +955,19 @@ def build_archive_index():
             if file_Category in ("doc", "sheet", "slide"):
                 body_text = extract_document_text(fpath, ext)
 
-            # Collect keywords for folder context inheritance
-            path_tokens = KOREAN_WORD_PATTERN.findall(f"{project_folder} {sub_folder} { os.path.splitext(fname)[0] }")
-            doc_keywords = extract_top_keywords(f"{fname} {body_text}", limit=10)
+            safe_display_name = sanitize_pipa(fname)
+
+            # Collect keywords for folder context inheritance using PIPA-sanitized name & body
+            path_tokens = KOREAN_WORD_PATTERN.findall(
+                f"{project_folder} {sub_folder} {os.path.splitext(safe_display_name)[0]}"
+            )
+            doc_keywords = extract_top_keywords(f"{safe_display_name} {body_text}", limit=10)
             for kw in path_tokens + doc_keywords:
                 if kw not in STOPWORDS and not kw.isdigit() and len(kw) >= 2:
                     folder_keyword_Waitlist[rel_dir][kw] += 2
                     if len(parts) >= 2:
                         parent_key = os.path.join(parts[0], parts[1])
                         folder_keyword_Waitlist[parent_key][kw] += 1
-
-            safe_display_name = sanitize_pipa(fname)
 
             item = {
                 "id": f"arc-{file_id_counter:05d}",
@@ -843,8 +1045,10 @@ def build_archive_index():
     }
 
     os.makedirs(os.path.dirname(INDEX_OUTPUT_PATH), exist_ok=True)
-    with open(INDEX_OUTPUT_PATH, "w", encoding="utf-8") as f:
+    tmp_index_path = f"{INDEX_OUTPUT_PATH}.{os.getpid()}.tmp"
+    with open(tmp_index_path, "w", encoding="utf-8") as f:
         json.dump(index_payload, f, ensure_ascii=False)
+    os.replace(tmp_index_path, INDEX_OUTPUT_PATH)
 
     elapsed = time.time() - t0
     print(f"[INDEX] Indexed {len(raw_items)} files in {elapsed:.2f}s -> {INDEX_OUTPUT_PATH}")
@@ -853,6 +1057,12 @@ def build_archive_index():
 
 
 def main():
+    if sys.platform == "win32":
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
     parser = argparse.ArgumentParser(description="Organize and index F:\\_Organized_Archive")
     parser.add_argument("--organize", action="store_true", help="Organize physical folders losslessly")
     parser.add_argument("--rollback", action="store_true", help="Rollback physical folder movements")

@@ -1,9 +1,41 @@
 const fs = require('fs');
 const path = require('path');
+const { evaluateText } = require('./rsi_evaluator');
 
-const REPORT_PATH = path.join(__dirname, '..', 'PORTFOLIO VITAL - Engineering Report.md');
-const MILESTONES_MIRROR_PATH = path.join(__dirname, '..', 'PORTFOLIO VITAL - Engineering Milestones.md');
-const AGENTS_PATH = path.join(__dirname, '..', 'AGENTS.md');
+const ROOT_DIR = path.join(__dirname, '..');
+const REPORT_PATH = path.join(ROOT_DIR, 'PORTFOLIO VITAL - Engineering Report.md');
+const MILESTONES_MIRROR_PATH = path.join(ROOT_DIR, 'PORTFOLIO VITAL - Engineering Milestones.md');
+const AGENTS_PATH = path.join(ROOT_DIR, 'AGENTS.md');
+const AGENTS_MAX_BYTES = 23800;
+
+const SKILL_DOC_PATHS = [
+  '.agents/skills/vital-budget-audit/SKILL.md',
+  '.agents/skills/vital-hwpx-docgen/SKILL.md',
+  '.agents/skills/vital-festival-4way-sync/SKILL.md',
+  '.agents/skills/vital-public-infographic/SKILL.md',
+  '.agents/skills/vital-governance-ops/SKILL.md',
+];
+
+const GUIDELINE_DOC_PATHS = [
+  'docs/HWP_GENERATION_GUIDELINES.md',
+  'docs/VLDS_DESIGN_SYSTEM.md',
+  'docs/PERSONAL_INFO_PROTECTION_GUIDE.md',
+];
+
+const GOVERNANCE_DOC_PATHS = [
+  'AGENTS.md',
+  ...SKILL_DOC_PATHS,
+  ...GUIDELINE_DOC_PATHS,
+];
+
+const EPHEMERAL_EXAMPLE_PATHS = new Set([
+  'out/festival/yangjae/index.html',
+  'scratch/output.hwpx',
+  'scratch/draft.md',
+  'scratch/draft_policy.md',
+  'scratch/draft_proposal.md',
+  'scratch/clean_doc.md',
+]);
 
 function extractMilestoneBlocks(reportContent) {
   const lines = reportContent.split(/\r?\n/);
@@ -105,7 +137,7 @@ function updateAgentsManifest(milestones) {
 
   const marker = '## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)';
 
-  const LIMIT = 5;
+  let LIMIT = 4;
   const recentMilestones = milestones.slice(0, LIMIT).map(compactMilestoneHeading);
   const olderCount = milestones.length - LIMIT;
 
@@ -169,9 +201,98 @@ ${milestoneList ? milestoneList : '- (동기화된 내역 없음)'}
   return true;
 }
 
+function auditGovernanceAndSkillDocs(rootDir = ROOT_DIR, docPaths = GOVERNANCE_DOC_PATHS) {
+  const errors = [];
+  const docStats = [];
+
+  for (const relPath of docPaths) {
+    const absPath = path.join(rootDir, relPath);
+    if (!fs.existsSync(absPath)) {
+      errors.push(`[MISSING DOC] 필수 거버넌스/스킬/지침 문서가 존재하지 않습니다: ${relPath}`);
+      continue;
+    }
+
+    const content = fs.readFileSync(absPath, 'utf8');
+    const byteSize = Buffer.byteLength(content, 'utf8');
+
+    if (relPath === 'AGENTS.md') {
+      if (byteSize > AGENTS_MAX_BYTES) {
+        errors.push(`[SIZE OVERFLOW] AGENTS.md 용량(${byteSize}B)이 상한(${AGENTS_MAX_BYTES}B)을 초과했습니다.`);
+      }
+      const expectedRules = 'ABCDEFGHIJKLMNOPQRS'.split('');
+      for (const r of expectedRules) {
+        if (!new RegExp(`^###\\s+${r}\\.\\s+`, 'm').test(content)) {
+          errors.push(`[MISSING RULE] AGENTS.md 내 Rule ${r} 섹션 헤더가 누락되었습니다.`);
+        }
+      }
+      for (const skillPath of SKILL_DOC_PATHS) {
+        if (!content.includes(skillPath)) {
+          errors.push(`[MISSING SKILL LINK] AGENTS.md 내 스킬 경로 참조가 누락되었습니다: ${skillPath}`);
+        }
+      }
+      for (const guidePath of GUIDELINE_DOC_PATHS) {
+        if (!content.includes(guidePath)) {
+          errors.push(`[MISSING GUIDE LINK] AGENTS.md 내 지침 경로 참조가 누락되었습니다: ${guidePath}`);
+        }
+      }
+    }
+
+    const puaMatches = content.match(/\u{F03DA}/gu) || [];
+    if (puaMatches.length > 0) {
+      errors.push(`[BROKEN PUA] ${relPath}: 깨짐 유발 한컴 PUA(U+F03DA) 리터럴 ${puaMatches.length}건이 검출되었습니다.`);
+    }
+
+    const dblBullets = content.match(/^\s*-\s+[❍•※]/gm) || [];
+    if (dblBullets.length > 0) {
+      errors.push(`[DOUBLE BULLET] ${relPath}: 금지된 이중 불릿(- ❍ / - • / - ※) ${dblBullets.length}건이 검출되었습니다.`);
+    }
+
+    const rsiResult = evaluateText(content);
+    if (rsiResult.violationCount > 0) {
+      errors.push(`[RSI VIOLATION] ${relPath}: 평어체/규범/사과 배제 위반 ${rsiResult.violationCount}건 (${JSON.stringify(rsiResult.violations)})`);
+    }
+
+    if (GUIDELINE_DOC_PATHS.includes(relPath)) {
+      if (!/\s{2}끝\.\s*$/.test(content)) {
+        errors.push(`[MISSING KEUT] ${relPath}: 영구 지침 문서 말미 '  끝.' 표기가 누락되었습니다.`);
+      }
+    }
+
+    const pathRegex = /(?<![A-Za-z0-9_\/])(?:\.\.\/)*((?:src|scripts|functions|docs|data|public|scratch|__tests__|\.agents)\/[A-Za-z0-9_.\-\/]+\.(?:ts|tsx|js|py|md|json|html|hwpx))\b/g;
+    let match;
+    const missingRefs = [];
+    while ((match = pathRegex.exec(content)) !== null) {
+      const refRel = match[1];
+      if (refRel.includes('<') || refRel.includes('>') || refRel.includes('*') || EPHEMERAL_EXAMPLE_PATHS.has(refRel)) {
+        continue;
+      }
+      if (!fs.existsSync(path.join(rootDir, refRel))) {
+        missingRefs.push(refRel);
+      }
+    }
+    if (missingRefs.length > 0) {
+      errors.push(`[DEAD PATH REF] ${relPath}: 존재하지 않는 참조 경로 [${[...new Set(missingRefs)].join(', ')}]`);
+    }
+
+    docStats.push({
+      path: relPath,
+      bytes: byteSize,
+      puaCount: puaMatches.length,
+      doubleBullets: dblBullets.length,
+      rsiViolations: rsiResult.violationCount,
+    });
+  }
+
+  return {
+    passed: errors.length === 0,
+    errors,
+    docStats,
+  };
+}
+
 function main() {
   console.log('🔄 ==========================================');
-  console.log('🔄 AGENTS.md & Engineering Report 3-Way 동기화 도구');
+  console.log('🔄 AGENTS.md & Engineering Report 3-Way 동기화 및 9대 문서 감사 도구');
   console.log('🔄 ==========================================\n');
 
   const sourcePath = fs.existsSync(REPORT_PATH) ? REPORT_PATH : MILESTONES_MIRROR_PATH;
@@ -191,17 +312,35 @@ function main() {
     syncMilestonesMirror(blocks);
 
     const success = updateAgentsManifest(milestones);
-    if (success) {
-      console.log('🎉 AGENTS.md 및 Engineering Milestones.md 동기화가 완료되었습니다!');
-      console.log(`   -> 대상 파일: ${path.relative(process.cwd(), AGENTS_PATH)}`);
-    } else {
+    if (!success) {
       console.log('❌ 동기화 실패');
       process.exit(1);
     }
+
+    const audit = auditGovernanceAndSkillDocs();
+    if (!audit.passed) {
+      console.error('❌ [GOVERNANCE AUDIT ERROR] 거버넌스·스킬·지침 문서 무결성 감사 실패:');
+      audit.errors.forEach((e) => console.error(`   - ${e}`));
+      process.exit(1);
+    }
+
+    console.log(`  ↳ 🛡️  [AUDIT] 9대 거버넌스·스킬·지침 문서 무결성 감사 통과 (PUA 0, 이중불릿 0, RSI 위반 0, 데드링크 0)`);
+    console.log('🎉 AGENTS.md, Engineering Milestones.md 및 9대 문서 감사가 완료되었습니다!');
+    console.log(`   -> 대상 파일: ${path.relative(process.cwd(), AGENTS_PATH)}`);
   } catch (err) {
     console.error('❌ 동기화 중 오류 발생:', err);
     process.exit(1);
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  extractMilestoneBlocks,
+  compactMilestoneHeading,
+  updateAgentsManifest,
+  auditGovernanceAndSkillDocs,
+  GOVERNANCE_DOC_PATHS,
+};

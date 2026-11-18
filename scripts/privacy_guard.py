@@ -26,15 +26,15 @@ if sys.platform == "win32":
 PATTERNS = [
     {
         "type": "주민등록번호(RRN)",
-        "regex": re.compile(r"\b(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01]))[- ]?([1-4]\d{6})\b"),
-        "replace": r"\1-*******",
+        "regex": re.compile(r"\b(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01]))[- ]?([1-4])\d{6}\b"),
+        "replace": r"\1-\2******",
         "severity": "CRITICAL",
         "legal_basis": "개인정보 보호법 제24조 (고유식별정보의 처리 제한)"
     },
     {
         "type": "외국인등록번호(FRN)",
-        "regex": re.compile(r"\b(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01]))[- ]?([5-8]\d{6})\b"),
-        "replace": r"\1-*******",
+        "regex": re.compile(r"\b(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01]))[- ]?([5-8])\d{6}\b"),
+        "replace": r"\1-\2******",
         "severity": "CRITICAL",
         "legal_basis": "개인정보 보호법 제24조 (고유식별정보의 처리 제한)"
     },
@@ -95,23 +95,46 @@ SENSITIVE_KEYWORDS = [
     "진료기록", "질병명", "복용약물", "신체질환", "환자명단", "우울증", "치매"
 ]
 
+def _is_account_false_positive(val: str, line_prefix: str = "") -> bool:
+    """계좌번호 패턴 오탐 필터링 (연도-월-일, 주민/외국인등록번호, 전화번호, 카드/면허번호, 조달청 G2B 세부품명번호 또는 10자리 미만 제외)"""
+    digits_only = val.replace("-", "").replace(" ", "")
+    if len(digits_only) < 10:
+        return True
+    if re.match(r"^(19|20)\d{2}[-/.](0[1-9]|1[0-2])[-/.](0[1-9]|[12]\d|3[01])$", val):
+        return True
+    if re.match(r"^\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[- ]?[1-8]\d{6}$", val):
+        return True
+    if re.match(r"^(?:01[016789]|02|0[3-6]\d|070)[- ]?\d{3,4}[- ]?\d{4}$", val):
+        return True
+    if re.match(r"^\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}$", val):
+        return True
+    if re.match(r"^\d{2}[- ]?\d{2}[- ]?\d{6}[- ]?\d{2}$", val):
+        return True
+    if re.match(r"^\d{8}[- ]\d{2}$", val):
+        return True
+    if len(digits_only) == 10 and re.search(r"(?:세부품명번호|물품분류번호|물품식별번호|G2B)[\s:：\-]*$", line_prefix):
+        return True
+    return False
+
 def scan_text(content: str) -> List[Dict[str, Any]]:
     """텍스트 내 개인정보 탐지 및 상세 결과 리스트 반환"""
     findings = []
     lines = content.splitlines()
 
     for line_idx, line in enumerate(lines, start=1):
+        matched_spans: List[Tuple[int, int]] = []
         # 1. 정규식 패턴 검사
         for p in PATTERNS:
             for match in p["regex"].finditer(line):
                 val = match.group(0)
-                # 계좌번호 패턴 오탐 필터링 (연도-월-일 또는 단순 숫자 나열 제외)
+                start_pos, end_pos = match.span()
                 if p["type"] == "은행계좌번호(ACCOUNT)":
-                    if re.match(r"^(19|20)\d{2}[-/.](0[1-9]|1[0-2])[-/.](0[1-9]|[12]\d|3[01])$", val):
+                    if any(not (end_pos <= s or start_pos >= e) for s, e in matched_spans):
                         continue
-                    if len(val.replace("-", "").replace(" ", "")) < 10:
+                    if _is_account_false_positive(val, line[:start_pos]):
                         continue
 
+                matched_spans.append((start_pos, end_pos))
                 findings.append({
                     "line": line_idx,
                     "type": p["type"],
@@ -145,9 +168,8 @@ def sanitize_text(content: str) -> Tuple[str, int]:
             nonlocal replacement_count
             val = match.group(0)
             if p["type"] == "은행계좌번호(ACCOUNT)":
-                if re.match(r"^(19|20)\d{2}[-/.](0[1-9]|1[0-2])[-/.](0[1-9]|[12]\d|3[01])$", val):
-                    return val
-                if len(val.replace("-", "").replace(" ", "")) < 10:
+                prefix = match.string[max(0, match.start() - 30):match.start()]
+                if _is_account_false_positive(val, prefix):
                     return val
             replacement_count += 1
             return p["regex"].sub(p["replace"], val)

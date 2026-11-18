@@ -20,7 +20,7 @@ const rootDir = path.resolve(__dirname, '..');
 const dataDir = path.join(rootDir, 'data');
 const budgetSimPath = path.join(dataDir, 'BUDGET_SIMULATIONS.json');
 const budgetEntriesPath = path.join(dataDir, 'BUDGET_ENTRIES.json');
-const wikiHookPath = path.join(rootDir, 'src', 'hooks', 'useWikiStorage.ts');
+const wikiHookPath = path.join(rootDir, 'src', '__tests__', 'fixtures', 'useWikiStorage.ts');
 const simHookPath = path.join(rootDir, 'src', 'hooks', 'useBudgetSimulator.ts');
 
 // ----------------------------------------------------

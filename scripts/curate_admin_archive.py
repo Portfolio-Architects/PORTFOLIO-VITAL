@@ -19,6 +19,7 @@ import re
 import json
 import zipfile
 import datetime
+import time
 from typing import Dict, List, Optional, Any, Tuple
 
 # Reconfigure stdout to UTF-8
@@ -42,23 +43,23 @@ SEP = r"[\s_]*"
 # 5 Core Administrative Document Patterns
 PATTERNS = {
     "WEEKLY_REPORT": re.compile(
-        rf"(?:주간{SEP}업무{SEP}실적{SEP}및{SEP}계획|주간{SEP}업무{SEP}보고|주간{SEP}업무|주간{SEP}보고|주요{SEP}업무{SEP}보고.*작성서식|주요{SEP}업무{SEP}보고{SEP}제안설명서|구정{SEP}주요{SEP}업무{SEP}보고|업무실적{SEP}및{SEP}계획)",
+        rf"(?:주{SEP}간{SEP}업{SEP}무{SEP}보{SEP}고|주간{SEP}업무{SEP}실적{SEP}및{SEP}계획|주간{SEP}업무{SEP}보고|주간{SEP}업무|주간{SEP}보고|주요{SEP}업무{SEP}보고.*작성서식|주요{SEP}업무{SEP}보고{SEP}제안설명서|구정{SEP}주요{SEP}업무{SEP}보고|업무실적{SEP}및{SEP}계획)",
         re.I,
     ),
     "ADMIN_AUDIT": re.compile(
-        rf"(?:행정{SEP}사무{SEP}감사|행감|감사{SEP}자료|행정{SEP}감사|수감{SEP}자료|시정{SEP}요구|조치{SEP}계획|처리{SEP}결과{SEP}보고서|보충자료\(공통|보충자료\(개별)",
+        rf"(?:행{SEP}정{SEP}사{SEP}무{SEP}감{SEP}사|행정{SEP}사무{SEP}감사|행감|감사{SEP}자료|행정{SEP}감사|수감{SEP}자료|시정{SEP}요구|조치{SEP}계획|처리{SEP}결과{SEP}보고서|보충자료\(공통|보충자료\(개별)",
         re.I,
     ),
     "BUDGET_PLAN": re.compile(
-        rf"(?:사업{SEP}설명서|예산{SEP}요구서|예산{SEP}편성(?:요구)?|본예산.*사업{SEP}설명서|본예산.*편성|세출{SEP}예산.*편성|예산\(가내시\)|편성{SEP}총괄표)",
+        rf"(?:사{SEP}업{SEP}설{SEP}명{SEP}서|사업{SEP}설명서|예산{SEP}요구서|예산{SEP}편성(?:요구)?|본예산.*사업{SEP}설명서|본예산.*편성|세출{SEP}예산.*편성|예산\(가내시\)|편성{SEP}총괄표)",
         re.I,
     ),
     "RESULT_REPORT": re.compile(
-        rf"(?:결과{SEP}보고(?:서)?|추진{SEP}결과(?:보고)?|실적{SEP}보고(?:서)?|성과{SEP}평가(?:보고)?|운영{SEP}결과(?:보고)?|실시{SEP}결과(?:보고)?|정산{SEP}보고(?:서)?|평가{SEP}보고(?:서)?|결과보고서|결과보고)",
+        rf"(?:결{SEP}과{SEP}보{SEP}고{SEP}(?:서)?|결과{SEP}보고(?:서)?|추진{SEP}결과(?:보고)?|실적{SEP}보고(?:서)?|성과{SEP}평가(?:보고)?|운영{SEP}결과(?:보고)?|실시{SEP}결과(?:보고)?|정산{SEP}보고(?:서)?|평가{SEP}보고(?:서)?|결과보고서|결과보고)",
         re.I,
     ),
     "POLICY_PLAN": re.compile(
-        rf"(?:방침(?:서)?|기본{SEP}계획(?:서)?|시행{SEP}계획(?:서)?|추진{SEP}계획(?:서)?|운영{SEP}계획(?:서)?|종합{SEP}계획(?:서)?|사업{SEP}총괄{SEP}계획|실행{SEP}계획(?:서)?|사업{SEP}기획(?:서)?|사업{SEP}계획(?:서)?)",
+        rf"(?:방{SEP}침{SEP}(?:서)?|기본{SEP}계획(?:서)?|시행{SEP}계획(?:서)?|추진{SEP}계획(?:서)?|운영{SEP}계획(?:서)?|종합{SEP}계획(?:서)?|사업{SEP}총괄{SEP}계획|실행{SEP}계획(?:서)?|사업{SEP}기획(?:서)?|사업{SEP}계획(?:서)?|예산지원{SEP}계획(?:서)?|지원{SEP}계획(?:서)?|구매{SEP}계획(?:서)?)",
         re.I,
     ),
 }
@@ -67,9 +68,9 @@ PATTERNS = {
 EXCLUSIONS = {
     "WEEKLY_REPORT": re.compile(rf"(?:사진|포스터)", re.I),
     "ADMIN_AUDIT": re.compile(rf"(?:주간{SEP}업무|사진|리플릿|포스터)", re.I),
-    "BUDGET_PLAN": re.compile(rf"(?:주간{SEP}업무|사진|리플릿)", re.I),
-    "RESULT_REPORT": re.compile(rf"(?:행정{SEP}사무{SEP}감사자료|행감자료|주간{SEP}업무|사업{SEP}설명서|방침서|출석부|사진|명단)", re.I),
-    "POLICY_PLAN": re.compile(rf"(?:결과{SEP}보고|추진{SEP}결과|실적{SEP}보고|정산{SEP}보고|행정{SEP}사무{SEP}감사|행감|사업{SEP}설명서|주간{SEP}업무|주간{SEP}보고|참석자|명단|출석부|사진)", re.I),
+    "BUDGET_PLAN": re.compile(rf"(?:주간{SEP}업무|사진|리플릿|결{SEP}과{SEP}보{SEP}고|실적{SEP}보고)", re.I),
+    "RESULT_REPORT": re.compile(rf"(?:행{SEP}정{SEP}사{SEP}무{SEP}감{SEP}사자료|행감자료|주간{SEP}업무|사{SEP}업{SEP}설{SEP}명{SEP}서|방{SEP}침{SEP}(?:서)?|출석부|사진|명단)", re.I),
+    "POLICY_PLAN": re.compile(rf"(?:결{SEP}과{SEP}보{SEP}고|추진{SEP}결과|실적{SEP}보고|정산{SEP}보고|행{SEP}정{SEP}사{SEP}무{SEP}감{SEP}사|행감|사{SEP}업{SEP}설{SEP}명{SEP}서|주간{SEP}업무|주간{SEP}보고|참석자|명단|출석부|사진)", re.I),
 }
 
 TYPE_LABELS = {
@@ -105,17 +106,25 @@ PROJECT_IDS = {
 }
 
 # PIPA Sanitization (Rule Q)
-RRN_REGEX = re.compile(r"\b(\d{6})[-_ ]?([1-4]\d{6})\b")
+RRN_REGEX = re.compile(r"\b(\d{6})[-_ ]?([1-4])\d{6}\b")
+FRN_REGEX = re.compile(r"\b(\d{6})[-_ ]?([5-8])\d{6}\b")
 PHONE_REGEX = re.compile(r"\b(01[016789])[-_ ]?(\d{3,4})[-_ ]?(\d{4})\b")
+TEL_REGEX = re.compile(r"\b(02|0[3-6]\d)[- ]?(\d{3,4})[- ]?(\d{4})\b")
 CARD_REGEX = re.compile(r"\b(\d{4})[-_ ]?(\d{4})[-_ ]?(\d{4})[-_ ]?(\d{4})\b")
+EMAIL_REGEX = re.compile(r"\b([a-zA-Z0-9_.+-]{1,3})[a-zA-Z0-9_.+-]*@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)\b")
+NAME_LABEL_REGEX = re.compile(r"(?:성명|담당자|작성자)[\s:：]+([가-힣]{2,4})\b")
 
 def sanitize_pipa(text: str) -> str:
     """Masks personal identifiable information according to Rule Q."""
     if not text:
         return ""
-    t = RRN_REGEX.sub(r"\1-*******", text)
+    t = RRN_REGEX.sub(r"\1-\2******", text)
+    t = FRN_REGEX.sub(r"\1-\2******", t)
     t = PHONE_REGEX.sub(r"010-****-\3", t)
+    t = TEL_REGEX.sub(r"\1-***-\3", t)
     t = CARD_REGEX.sub(r"****-****-****-****", t)
+    t = EMAIL_REGEX.sub(r"\1***@\2", t)
+    t = NAME_LABEL_REGEX.sub(r"담당자 총괄주무관", t)
     return t
 
 def extract_project(text: str) -> Tuple[str, str]:
@@ -126,56 +135,109 @@ def extract_project(text: str) -> Tuple[str, str]:
             return proj, PROJECT_IDS.get(proj, "hchps-p0")
     return "신체활동_건강생활실천", "hchps-p0"
 
+def _is_valid_date(y: int, m: int, d: int) -> bool:
+    """Validates calendar bounds and leap year correctness."""
+    try:
+        datetime.date(y, m, d)
+        return True
+    except (ValueError, TypeError, OverflowError):
+        return False
+
+def _parse_budget_match(text: str, budget_keyword_match: re.Match) -> Optional[int]:
+    """Parses a single regex match into a 1-KRW integer if a valid unit or '금' prefix is present."""
+    raw_val_str = budget_keyword_match.group(1).strip()
+    unit = (budget_keyword_match.group(2) or "").strip()
+
+    clean_digits_or_dot = re.sub(r"[^\d.]", "", raw_val_str)
+    if not clean_digits_or_dot or not re.search(r"\d", clean_digits_or_dot):
+        return None
+
+    # Multiplier selection
+    if unit == "원":
+        multiplier = 1
+    elif unit == "천원":
+        multiplier = 1_000
+    elif unit == "백만원":
+        multiplier = 1_000_000
+    elif unit == "억원":
+        multiplier = 100_000_000
+    else:
+        # Evaluate lookahead ONLY if unit is empty
+        lookahead = text[budget_keyword_match.end():]
+        m_look = re.match(r"^\s*(천원|백만원|억원)(?:\b|[^가-힣]|$)", lookahead)
+        if m_look:
+            look_unit = m_look.group(1)
+            if look_unit == "천원":
+                multiplier = 1_000
+            elif look_unit == "백만원":
+                multiplier = 1_000_000
+            elif look_unit == "억원":
+                multiplier = 100_000_000
+            else:
+                multiplier = 1
+        elif raw_val_str.startswith("금"):
+            multiplier = 1
+        else:
+            return None
+
+    # Apply multiplier: float with rounding if decimal exists, otherwise exact int
+    if "." in clean_digits_or_dot:
+        return int(round(float(clean_digits_or_dot) * multiplier))
+    else:
+        return int(clean_digits_or_dot) * multiplier
+
+
 def extract_budget(text: str) -> Optional[int]:
-    """Accurately parses budget amounts into 1-KRW integers (Rule R compliance)."""
+    """Accurately parses budget amounts into 1-KRW integers with 3-tier priority (Rule R compliance)."""
     if not text:
         return None
 
-    # Check for budget context keyword
-    budget_keyword_match = re.search(
-        r"(?:총사업비|소요예산액|소요예산|예산액|편성액|소요재원|사업비|집행액|본예산|세출예산)[\s:：]*([금\d,]+)\s*(천원|원|백만원|억원)?",
-        text,
-        re.I,
-    )
-    if not budget_keyword_match:
-        return None
+    # Priority 1: Explicit total budget headers (총사업비, 총 소요예산, 총 구매 소요예산, 총 예산액)
+    # Priority 2: Standard budget context keywords (소요예산, 예산액, 편성액, 사업비, etc.)
+    # Priority 3: Shorthand '총 <금액><통화단위>' (requires explicit currency unit to avoid '총 4,500명')
+    patterns = [
+        r"(?:총\s*사업비|총\s*소요예산(?:액)?|총\s*구매\s*소요예산|총\s*예산(?:액)?)[\s:：]*([금\d,]+(?:\.\d+)?)\s*(천원|원|백만원|억원)?",
+        r"(?:소요예산액|소요예산|예산액|편성액|소요재원|사업비|집행액|본예산|세출예산)[\s:：]*([금\d,]+(?:\.\d+)?)\s*(천원|원|백만원|억원)?",
+        r"(?:총)[\s:：]+([금\d,]+(?:\.\d+)?)\s*(천원|원|백만원|억원)",
+    ]
 
-    raw_val_str = budget_keyword_match.group(1).strip()
-    unit = budget_keyword_match.group(2) or ""
+    for pat in patterns:
+        for m in re.finditer(pat, text, re.I):
+            parsed = _parse_budget_match(text, m)
+            if parsed is not None:
+                return parsed
 
-    clean_digits = re.sub(r"[^\d]", "", raw_val_str)
-    if not clean_digits:
-        return None
-
-    val = int(clean_digits)
-    if "천원" in unit or "천원" in text[budget_keyword_match.start():budget_keyword_match.end()+4]:
-        return val * 1_000
-    elif "백만원" in unit or "백만원" in text[budget_keyword_match.start():budget_keyword_match.end()+4]:
-        return val * 1_000_000
-    elif "억원" in unit or "억원" in text[budget_keyword_match.start():budget_keyword_match.end()+4]:
-        return val * 100_000_000
-    else:
-        return val
+    return None
 
 def extract_date(text: str, filename: str = "", mtime: float = 0.0) -> str:
-    """Extracts date in strict YYYY-MM-DD format."""
+    """Extracts date in strict YYYY-MM-DD format with calendar validation."""
     # From filename: e.g. (20261104) or (261026)
     m_fn8 = re.search(r"20(\d{2})(\d{2})(\d{2})", filename)
     if m_fn8:
-        return f"20{m_fn8.group(1)}-{m_fn8.group(2)}-{m_fn8.group(3)}"
+        y, m, d = int(f"20{m_fn8.group(1)}"), int(m_fn8.group(2)), int(m_fn8.group(3))
+        if _is_valid_date(y, m, d):
+            return f"{y:04d}-{m:02d}-{d:02d}"
+
     m_fn6 = re.search(r"\((\d{2})(\d{2})(\d{2})\)", filename)
     if m_fn6:
-        return f"20{m_fn6.group(1)}-{m_fn6.group(2)}-{m_fn6.group(3)}"
+        y, m, d = int(f"20{m_fn6.group(1)}"), int(m_fn6.group(2)), int(m_fn6.group(3))
+        if _is_valid_date(y, m, d):
+            return f"{y:04d}-{m:02d}-{d:02d}"
+
     m_fn_dot = re.search(r"'?(\d{2})\.(\d{1,2})\.(\d{1,2})\.?", filename)
     if m_fn_dot:
-        return f"20{m_fn_dot.group(1)}-{int(m_fn_dot.group(2)):02d}-{int(m_fn_dot.group(3)):02d}"
+        y, m, d = int(f"20{m_fn_dot.group(1)}"), int(m_fn_dot.group(2)), int(m_fn_dot.group(3))
+        if _is_valid_date(y, m, d):
+            return f"{y:04d}-{m:02d}-{d:02d}"
 
     # From text: 2026. 10. 16.
     m_txt = re.search(r"202[4-7]\.\s*(\d{1,2})\.\s*(\d{1,2})\.?", text)
     if m_txt:
         p = re.findall(r"\d+", m_txt.group(0))
         if len(p) >= 3:
-            return f"{p[0]}-{int(p[1]):02d}-{int(p[2]):02d}"
+            y, m, d = int(p[0]), int(p[1]), int(p[2])
+            if _is_valid_date(y, m, d):
+                return f"{y:04d}-{m:02d}-{d:02d}"
 
     # Fallback to file mtime
     if mtime > 0:
@@ -189,46 +251,60 @@ def classify_document(filename: str, snippet: str = "", ext: str = "") -> Option
     if ext not in [".hwpx", ".hwp", ".pdf", ".xlsx", ".docx"]:
         return None
 
+    # Strip zero-width spaces and normalize unicode whitespace
+    fn = re.sub(r"[\u200b\u200c\u200d\ufeff]", "", filename)
+    fn = re.sub(r"[\u00a0\u3000]", " ", fn)
+    sn = re.sub(r"[\u200b\u200c\u200d\ufeff]", "", snippet)
+    sn = re.sub(r"[\u00a0\u3000]", " ", sn)
+
     # 1. WEEKLY_REPORT
-    if PATTERNS["WEEKLY_REPORT"].search(filename) and not EXCLUSIONS["WEEKLY_REPORT"].search(filename):
+    if PATTERNS["WEEKLY_REPORT"].search(fn) and not EXCLUSIONS["WEEKLY_REPORT"].search(fn):
         return "WEEKLY_REPORT"
-    if PATTERNS["WEEKLY_REPORT"].search(snippet) and "업무실적" in snippet and "업무계획" in snippet:
+    if PATTERNS["WEEKLY_REPORT"].search(sn) and "업무실적" in sn and "업무계획" in sn:
         return "WEEKLY_REPORT"
 
     # 2. ADMIN_AUDIT (Audit review takes precedence over Outcome report)
-    if PATTERNS["ADMIN_AUDIT"].search(filename) and not EXCLUSIONS["ADMIN_AUDIT"].search(filename):
+    if PATTERNS["ADMIN_AUDIT"].search(fn) and not EXCLUSIONS["ADMIN_AUDIT"].search(fn):
         return "ADMIN_AUDIT"
 
     # 3. BUDGET_PLAN (Budget plan takes precedence over Policy plan)
-    if PATTERNS["BUDGET_PLAN"].search(filename) and not EXCLUSIONS["BUDGET_PLAN"].search(filename):
+    if PATTERNS["BUDGET_PLAN"].search(fn) and not EXCLUSIONS["BUDGET_PLAN"].search(fn):
         return "BUDGET_PLAN"
-    if "사업설명서" in snippet and ("총사업비" in snippet or "산출내역" in snippet):
+    if "사업설명서" in sn and ("총사업비" in sn or "산출내역" in sn):
         return "BUDGET_PLAN"
 
     # 4. RESULT_REPORT
-    if PATTERNS["RESULT_REPORT"].search(filename) and not EXCLUSIONS["RESULT_REPORT"].search(filename):
+    if PATTERNS["RESULT_REPORT"].search(fn) and not EXCLUSIONS["RESULT_REPORT"].search(fn):
         return "RESULT_REPORT"
-    if ("결과보고" in snippet or "실시결과" in snippet) and ("추진실적" in snippet or "운영실적" in snippet):
+    if ("결과보고" in sn or "실시결과" in sn) and ("추진실적" in sn or "운영실적" in sn):
         return "RESULT_REPORT"
 
     # 5. POLICY_PLAN
-    if PATTERNS["POLICY_PLAN"].search(filename) and not EXCLUSIONS["POLICY_PLAN"].search(filename):
+    if PATTERNS["POLICY_PLAN"].search(fn) and not EXCLUSIONS["POLICY_PLAN"].search(fn):
         return "POLICY_PLAN"
-    if ("추진계획" in snippet or "운영계획" in snippet) and ("추진목적" in snippet or "사업개요" in snippet):
+    if ("추진계획" in sn or "운영계획" in sn) and ("추진목적" in sn or "사업개요" in sn):
         return "POLICY_PLAN"
 
     return None
 
 def extract_text_hwpx(path: str, max_sections: int = 5) -> str:
-    """Non-destructive read-only text extraction from HWPX."""
+    """Non-destructive read-only text extraction from HWPX (<hp:t> text nodes only)."""
     try:
+        import xml.etree.ElementTree as ET
+        hp_t = "{http://www.hancom.co.kr/hwpml/2011/paragraph}t"
         with zipfile.ZipFile(path, "r") as z:
-            secs = [n for n in z.namelist() if n.startswith("Contents/section") and n.endswith(".xml")]
+            secs = sorted(n for n in z.namelist() if n.startswith("Contents/section") and n.endswith(".xml"))
             texts = []
             for s in secs[:max_sections]:
-                raw = z.read(s).decode("utf-8", errors="ignore")
-                plain = re.sub(r"<[^>]+>", " ", raw)
-                texts.append(plain)
+                raw = z.read(s)
+                try:
+                    root = ET.fromstring(raw)
+                    for t_node in root.iter(hp_t):
+                        if t_node.text and t_node.text.strip():
+                            texts.append(t_node.text.strip())
+                except Exception:
+                    plain = re.sub(r"<[^>]+>", " ", raw.decode("utf-8", errors="ignore"))
+                    texts.append(plain)
             return re.sub(r"\s+", " ", " ".join(texts)).strip()
     except Exception:
         return ""
@@ -328,6 +404,69 @@ def curate_documents() -> List[Dict[str, Any]]:
             "projectId": "hchps-p7",
             "date": "2026-11-04",
             "summary": "2026. 11. 4.(수) 제출 기준 건강증진팀 신체활동 분야 주간업무실적 및 계획. 메디런 사업 정산 및 차년도 예산안 설명회 준비 사항 수록.",
+        },
+        "서울체력장 운영 계획.hwpx": {
+            "budgetAmount": 210120000,
+            "project": "04_서울체력장_AI메디헬스_메디런",
+            "projectId": "hchps-p7",
+            "date": "2026-11-16",
+            "summary": "2026 서울체력장 통합 운영 계획 방침서(부구청장 전결). 거점형 강남센터(보건소 3층)와 권역·출장형 찾아가는 AI 서울체력장(세곡보건지소 및 순회 8종) 통합 운영, 2026년 총사업비 금210,120,000원 내 금회 장비 구매 금28,630,000원(추정가격 26,027,273원) 및 2027년 계속 매칭분(129,349,000원) 편성 연계.",
+        },
+        "찾아가는 AI 서울체력장 측정 장비 구매 계획 2.hwpx": {
+            "budgetAmount": 28630000,
+            "project": "04_서울체력장_AI메디헬스_메디런",
+            "projectId": "hchps-p7",
+            "date": "2026-11-11",
+            "summary": "2026 찾아가는 AI 서울체력장 측정 장비 구매 계획 방침서(과장 전결). 거점형 AI 동작인식 체력측정 장비 1식(세곡보건지소, 세부품명번호 60109399-01, 금22,000,000원) 및 순회형 출장 체력측정 장비 8종 8점(체성분분석기·자동혈압계 외 6종, 금6,630,000원) 자산취득비(405-01) 총 금28,630,000원(추정가격 26,027,273원, 납품기한 계약일로부터 40일 이내).",
+        },
+        "찾아가는 AI 서울체력장 측정 장비 구매 계획 2 - 복사본.hwpx": {
+            "budgetAmount": 22000000,
+            "project": "04_서울체력장_AI메디헬스_메디런",
+            "projectId": "hchps-p7",
+            "date": "2026-11-11",
+            "summary": "2026 찾아가는 AI 서울체력장 측정 장비 구매 계획 방침서(사본). 거점형 AI 동작인식 체력측정 장비 시스템 1식 우선 구매(소요예산 금22,000,000원, 추정가격 20,000,000원, 시비 특별조정교부금 32,000,000원 내 집행).",
+        },
+        "방침서 예시.hwpx": {
+            "budgetAmount": None,
+            "project": "신체활동_건강생활실천",
+            "projectId": "hchps-p0",
+            "date": "2026-11-12",
+            "summary": "공공기관 3단 표준 방침서 예시 양식(1쪽 전자결재 표지 + 2쪽 관련 규정 및 제반사항 사전검토서 + 3쪽 로마숫자 배지 본문).",
+        },
+        "2027년도 본예산 편성 서브자료(건강증진팀).hwpx": {
+            "budgetAmount": 1557192000,
+            "project": "신체활동_건강생활실천",
+            "projectId": "hchps-p0",
+            "date": "2026-10-26",
+            "summary": "2027년도 건강증진팀 본예산 편성 서브자료 총괄. 건강생활실천 및 신체활동 특화사업 세출예산 요구 내역 수록.",
+        },
+        "★2027년도 보건행정과 본예산 편성 서브자료(과장님용).hwpx": {
+            "budgetAmount": 1742152000,
+            "project": "08_보건소_기능유지_청사관리",
+            "projectId": "hchps-p8",
+            "date": "2026-10-26",
+            "summary": "2027년도 보건행정과 본예산 편성 보고용 서브자료. 부서 총괄 세출예산 편성안 및 주요 증감 내역 수록.",
+        },
+        "1. [본문] - 서울형 서울체력장 조성 및 운영을 위한 -자치구 특별조정교부금 예산지원 계획.hwpx": {
+            "budgetAmount": 1044000000,
+            "project": "04_서울체력장_AI메디헬스_메디런",
+            "projectId": "hchps-p7",
+            "date": "2026-04-06",
+            "summary": "서울형 서울체력장 조성 및 운영을 위한 자치구 특별조정교부금 예산지원 계획(시민건강국 보건의료정책과-11890). 자치구별 체력인증센터 인프라 조성 교부금 지원 기준 수록.",
+        },
+        "찾아가는 AI 서울체력장 장비 검토 결과보고서.hwpx": {
+            "budgetAmount": 28630000,
+            "project": "04_서울체력장_AI메디헬스_메디런",
+            "projectId": "hchps-p7",
+            "date": "2026-11-11",
+            "summary": "2026 찾아가는 AI 서울체력장 측정 장비 3차 시연회 참석 및 장비 규격 검토 결과보고서. 거점형 AI 동작인식 체력측정 장비 1식(금22,000,000원) 및 순회형 출장 체력측정 장비 8종 8점(금6,630,000원) 총 소요예산 금28,630,000원 현장 적합성 검증.",
+        },
+        "건강 페스티벌, 구민 체감형 건강 부스 운영 계획.pdf": {
+            "budgetAmount": 63520000,
+            "project": "01_양재천_페스티벌",
+            "projectId": "hchps-p1",
+            "date": "2026-10-12",
+            "summary": "2026 양재천 건강 페스티벌 구민 체감형 건강 부스 운영 계획. 20개 테마 부스(37동) 배치 및 유관기관 협력 체험존 운영 총괄.",
         },
     }
 
@@ -583,8 +722,8 @@ def build_ontology_graph(curated: List[Dict[str, Any]]) -> Dict[str, Any]:
                 },
                 "fundingSplits": [{"source": "구비", "amount": total_bgt}],
                 "itemizedBreakdown": [
-                    {"item": "안전관리 및 훈련용품비", "amount": 2663000},
-                    {"item": "프로그램 운영비", "amount": total_bgt - 2663000 if total_bgt > 2663000 else total_bgt},
+                    {"item": "안전관리 및 훈련용품비", "amount": 2663000 if total_bgt > 2663000 else (total_bgt // 2)},
+                    {"item": "프로그램 운영비", "amount": total_bgt - 2663000 if total_bgt > 2663000 else total_bgt - (total_bgt // 2)},
                 ],
                 "remediatedAuditIds": [f"AUD-2026-005"],
                 "sourceDocPath": d["filePath"],
@@ -749,6 +888,22 @@ def build_ontology_graph(curated: List[Dict[str, Any]]) -> Dict[str, Any]:
         "relations": relations,
     }
 
+def safe_atomic_replace(temp_path: str, target_path: str, max_retries: int = 20, base_delay: float = 0.05) -> None:
+    """Performs atomic swap with exponential backoff retry on Windows file lock contention."""
+    for attempt in range(max_retries):
+        try:
+            os.replace(temp_path, target_path)
+            return
+        except (PermissionError, OSError):
+            if attempt == max_retries - 1:
+                if os.path.exists(temp_path):
+                    try:
+                        os.remove(temp_path)
+                    except Exception:
+                        pass
+                raise
+            time.sleep(base_delay * (1.3 ** attempt))
+
 def main():
     print("=" * 60)
     print("🚀 VITAL Archive Curation & Indexing Engine Starting...")
@@ -775,18 +930,18 @@ def main():
 
     # 2. Save data/ADMIN_DOC_INDEX.json (Single JSON Array SSOT)
     os.makedirs(os.path.dirname(OUTPUT_DOC_INDEX_PATH), exist_ok=True)
-    temp_doc_index = OUTPUT_DOC_INDEX_PATH + ".tmp"
+    temp_doc_index = f"{OUTPUT_DOC_INDEX_PATH}.{os.getpid()}.tmp"
     with open(temp_doc_index, "w", encoding="utf-8") as f_out:
         json.dump(curated_docs, f_out, ensure_ascii=False, indent=2)
-    os.replace(temp_doc_index, OUTPUT_DOC_INDEX_PATH)
+    safe_atomic_replace(temp_doc_index, OUTPUT_DOC_INDEX_PATH)
     print(f"  ↳ 💾 Successfully saved SSOT: {OUTPUT_DOC_INDEX_PATH}")
 
     # 3. Build & Save data/SEED_ONTOLOGY_DOCS.json (Graph SSOT)
     ontology_graph = build_ontology_graph(curated_docs)
-    temp_seed_path = OUTPUT_SEED_ONTOLOGY_PATH + ".tmp"
+    temp_seed_path = f"{OUTPUT_SEED_ONTOLOGY_PATH}.{os.getpid()}.tmp"
     with open(temp_seed_path, "w", encoding="utf-8") as f_seed:
         json.dump(ontology_graph, f_seed, ensure_ascii=False, indent=2)
-    os.replace(temp_seed_path, OUTPUT_SEED_ONTOLOGY_PATH)
+    safe_atomic_replace(temp_seed_path, OUTPUT_SEED_ONTOLOGY_PATH)
     print(f"  ↳ 💾 Successfully saved Ontology Seed SSOT: {OUTPUT_SEED_ONTOLOGY_PATH}")
 
     print("=" * 60)

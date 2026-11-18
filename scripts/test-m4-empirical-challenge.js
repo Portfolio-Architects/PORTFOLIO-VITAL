@@ -447,18 +447,18 @@ challenge('Forensic', 'M2: ExpenseEntryModal Subitems indexed Map lookup', () =>
   assert.ok(content.includes('subitemMap') || content.includes('Map'));
 });
 
-challenge('Forensic', 'M2: MindMap3D search query filter memoization', () => {
-  const p = path.join(__dirname, '..', 'src', 'components', 'MindMap3D.tsx');
+challenge('Forensic', 'M2: AdminOntologyExplorer search query filter memoization', () => {
+  const p = path.join(__dirname, '..', 'src', 'components', 'ontology', 'AdminOntologyExplorer.tsx');
   assert.ok(fs.existsSync(p));
   const content = fs.readFileSync(p, 'utf-8');
   assert.ok(content.includes('searchQuery') || content.includes('filteredNodes') || content.includes('useMemo'));
 });
 
-challenge('Forensic', 'M2: MindMapInspector O(1) nodeMap lookups & Jaccard optimization', () => {
-  const p = path.join(__dirname, '..', 'src', 'components', 'MindMapInspector.tsx');
+challenge('Forensic', 'M2: AdminOntologyExplorer O(1) Map lookups & orbit indexing', () => {
+  const p = path.join(__dirname, '..', 'src', 'components', 'ontology', 'AdminOntologyExplorer.tsx');
   assert.ok(fs.existsSync(p));
   const content = fs.readFileSync(p, 'utf-8');
-  assert.ok(content.includes('nodeMap') || content.includes('Map'));
+  assert.ok(content.includes('allNodeMap') || content.includes('Map'));
 });
 
 challenge('Forensic', 'M2: SemanticReviewModal label pre-indexing', () => {
