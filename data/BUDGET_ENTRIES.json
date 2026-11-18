@@ -2,9 +2,9 @@
   {
     "id": "mnsdy1li8fuk42zys",
     "categoryId": "mnrcir0vhyhg1xb87",
-    "amount": 3000000,
+    "amount": 2994720,
     "date": "2026-03-16",
-    "purpose": "건강생활실천사업(건강증진) 운영을 위한 일상경비",
+    "purpose": "(일상경비 교부)건강생활실천사업(건강증진) 운영을 위한 일상경비",
     "memo": "",
     "actionType": "issuance",
     "docRegNum": "보건행정과-3084",
@@ -15,7 +15,7 @@
     "categoryId": "mnrcir0vhyhg1xb87",
     "amount": 6000000,
     "date": "2026-03-16",
-    "purpose": "건강생활실천사업(건강증진) 운영을 위한 일상경비",
+    "purpose": "(일상경비 교부)건강생활실천사업(건강증진) 운영을 위한 일상경비",
     "memo": "",
     "actionType": "issuance",
     "docRegNum": "보건행정과-3083",
@@ -594,10 +594,10 @@
   },
   {
     "categoryId": "mnrcir0vhyhg1xb87",
-    "amount": 2880000,
+    "amount": 1440000,
     "date": "2026-09-09",
     "purpose": "중년여성 비만예방 프로그램 강사비",
-    "memo": "[시뮬레이션] 단가 ₩2,880,000 × 1개",
+    "memo": "[시뮬레이션] ",
     "isPlanned": true,
     "isSettled": false,
     "actionType": "general",
@@ -638,18 +638,6 @@
     "actionType": "general",
     "simulationEntryId": "mu4yrmo4pu5k9x484",
     "id": "mu4yrmo4hl8d0bvkr"
-  },
-  {
-    "categoryId": "mnrcir0v0vx5ae1qd",
-    "amount": 1920000,
-    "date": "2026-09-17",
-    "purpose": "헬스체크업 강사료",
-    "memo": "[시뮬레이션] ",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general",
-    "simulationEntryId": "mu5aau7ouusgerzby",
-    "id": "mu5aau7ognvzo8ucm"
   },
   {
     "categoryId": "mnrcir0v56b8pixdb",
@@ -708,18 +696,6 @@
   },
   {
     "categoryId": "mnrcir0vl18vfnb68",
-    "amount": 1351600,
-    "date": "2026-10-06",
-    "purpose": "리플릿 2쇄",
-    "memo": "[시뮬레이션] ",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general",
-    "simulationEntryId": "muwlf8vlqle9ejhqg",
-    "id": "muwlf8vlka6c2lmft"
-  },
-  {
-    "categoryId": "mnrcir0vl18vfnb68",
     "amount": 3300000,
     "date": "2026-10-08",
     "purpose": "(일상경비) 서울체력장 강남센터, 안내 리플릿 제작비 지급",
@@ -750,18 +726,6 @@
     "actionType": "general",
     "isPlanned": false,
     "id": "mv60ipkfm4tcao84w"
-  },
-  {
-    "categoryId": "mnrcir0vl18vfnb68",
-    "amount": 300000,
-    "date": "2026-10-15",
-    "purpose": "기타 사무용품 구매비",
-    "memo": "[시뮬레이션] 단가 ₩300,000 × 1개",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "general",
-    "simulationEntryId": "mv96us56i6jup4oop",
-    "id": "mv96us5672b4fybvl"
   },
   {
     "categoryId": "mnrcir0vbxmmvztoq",
@@ -845,21 +809,9 @@
   },
   {
     "categoryId": "mnrcir0voap2bpm8z",
-    "amount": 1600000,
-    "date": "2026-10-20",
-    "purpose": "페스티벌 홍보 물품",
-    "memo": "[일상경비 시뮬레이션] 단가 ₩1,600,000 × 1개",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "daily_expense",
-    "simulationEntryId": "mvggo69i97oe8ihhe",
-    "id": "mvggo69iboras63x6"
-  },
-  {
-    "categoryId": "mnrcir0voap2bpm8z",
     "amount": 2856800,
     "date": "2026-10-20",
-    "purpose": "서울체력장 인센티브",
+    "purpose": "절주 행사 부스 운영비",
     "memo": "[시뮬레이션] ",
     "isPlanned": true,
     "isSettled": false,
@@ -868,52 +820,16 @@
     "id": "mvggomtkofbbt8xp4"
   },
   {
-    "categoryId": "mnrcir0vhyhg1xb87",
-    "amount": 3300000,
-    "date": "2026-10-21",
-    "purpose": "페스티벌 응원 타올",
-    "memo": "[일상경비 시뮬레이션] 단가 ₩3,300,000 × 1개",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "daily_expense",
-    "simulationEntryId": "mvhdx9in05zxpanyw",
-    "id": "mvhdx9in52xzp2wbg"
-  },
-  {
-    "categoryId": "mnrcir0vhyhg1xb87",
-    "amount": 605000,
-    "date": "2026-10-21",
-    "purpose": "페스티벌 환경정비 용역",
-    "memo": "[일상경비 시뮬레이션] 단가 ₩605,000 × 1개",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "daily_expense",
-    "simulationEntryId": "mvhdxp4h6jfkczo69",
-    "id": "mvhdxp4hn9szrkeoe"
-  },
-  {
     "categoryId": "mnrcir0voap2bpm8z",
     "amount": 400000,
     "date": "2026-10-21",
-    "purpose": "서울체력장 인센티브",
-    "memo": "[시뮬레이션] 단가 ₩400,000 × 1개",
+    "purpose": "절주 행사 부스 운영비",
+    "memo": "[시뮬레이션] ",
     "isPlanned": true,
     "isSettled": false,
     "actionType": "general",
     "simulationEntryId": "mvhm2g6bt90vda0pv",
     "id": "mvhm2g6bojn0auzpu"
-  },
-  {
-    "categoryId": "mnrcir0vkiq1dafm3",
-    "amount": 3000000,
-    "date": "2026-10-21",
-    "purpose": "구민 다과비",
-    "memo": "[일상경비 시뮬레이션] 단가 ₩3,000,000 × 1개",
-    "isPlanned": true,
-    "isSettled": false,
-    "actionType": "daily_expense",
-    "simulationEntryId": "mvhm749f2cse7x5tf",
-    "id": "mvhm749gbn6svcd4p"
   },
   {
     "categoryId": "mnrcir0voap2bpm8z",
@@ -958,5 +874,154 @@
     "actionType": "daily_expense",
     "isPlanned": false,
     "id": "mvt73f3btm2k0qwts"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 605000,
+    "date": "2026-11-04",
+    "purpose": "(일상경비) 2026 양재천 걷자! 건강 페스티벌 행사장 환경정비 추진 비용 지급",
+    "memo": "",
+    "docRegNum": "보건행정과-13769",
+    "actionType": "daily_expense",
+    "isPlanned": false,
+    "id": "mw4o5j6jqkv9sm0op"
+  },
+  {
+    "categoryId": "mnrcir0vkiq1dafm3",
+    "amount": 3000000,
+    "date": "2026-11-04",
+    "purpose": "(일상경비) 2026 양재천 걷자! 건강 페스티벌 다과도시락 구매비 지급",
+    "memo": "",
+    "docRegNum": "보건행정과-13767",
+    "actionType": "daily_expense",
+    "isPlanned": false,
+    "id": "mw4o7axgm3cgzvdmc"
+  },
+  {
+    "categoryId": "mnrcir0v0vx5ae1qd",
+    "amount": 1920000,
+    "date": "2026-11-06",
+    "purpose": "헬스체크업 운동 프로그램 강사료 지급(10월)",
+    "memo": "",
+    "docRegNum": "보건행정과-13893",
+    "actionType": "general",
+    "isPlanned": false,
+    "id": "mw4oa714kas38o64j"
+  },
+  {
+    "categoryId": "mnrcir0voap2bpm8z",
+    "amount": 1600000,
+    "date": "2026-11-06",
+    "purpose": "(일상경비)2026 양재천 걷자! 건강 페스티벌 홍보 물품 구매비 지급",
+    "memo": "",
+    "docRegNum": "보건행정과-13889",
+    "actionType": "daily_expense",
+    "isPlanned": false,
+    "id": "mw4ob3gwqz8i1y2o9"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 1440000,
+    "date": "2026-11-05",
+    "purpose": "비만예방 운동 프로그램 강사료 지급(10월)",
+    "memo": "",
+    "docRegNum": "보건행정과-13853",
+    "actionType": "general",
+    "isPlanned": false,
+    "id": "mw4obwmghir4ozijz"
+  },
+  {
+    "categoryId": "mnrcir0vl18vfnb68",
+    "amount": 6162600,
+    "date": "2026-11-04",
+    "purpose": "(일상경비 교부요청) 서울체력장 강남센터 측정 안내 영상 제작비 및 운영 용품 구매비 교부",
+    "memo": "",
+    "docRegNum": "보건행정과-13813",
+    "actionType": "issuance",
+    "isPlanned": false,
+    "id": "mw4ohhfkwjan42mun"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 1386000,
+    "date": "2026-11-06",
+    "purpose": "타올 외상",
+    "memo": "[시뮬레이션] ",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mw4omdzaw9jlqxw8t",
+    "id": "mw4omdza2i3vi9e0x"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 90000,
+    "date": "2026-11-06",
+    "purpose": "현수막 외상",
+    "memo": "[시뮬레이션] 단가 ₩90,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mw4on0kbu8px14prh",
+    "id": "mw4on0kbzicegoxxs"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 1500000,
+    "date": "2026-11-06",
+    "purpose": "부스운영비 외상",
+    "memo": "[시뮬레이션] 단가 ₩1,500,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mw4oodpq3i05jyefs",
+    "id": "mw4oodpq7r67i6iol"
+  },
+  {
+    "categoryId": "mnrcir0vl18vfnb68",
+    "amount": 3300000,
+    "date": "2026-11-06",
+    "purpose": "서울체력장 리플릿 2쇄",
+    "memo": "[일상경비 시뮬레이션] 단가 ₩3,300,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "daily_expense",
+    "simulationEntryId": "mw4ot53kgbos1cdo3",
+    "id": "mw4ot53ke3jxd8pln"
+  },
+  {
+    "categoryId": "mnrcir0vl18vfnb68",
+    "amount": 2862600,
+    "date": "2026-11-06",
+    "purpose": "서울체력장 영상 촬영",
+    "memo": "[시뮬레이션] ",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "daily_expense",
+    "simulationEntryId": "mw4ote3sx3zft908u",
+    "id": "mw4ote3sc58yixccd"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 1454000,
+    "date": "2026-11-10",
+    "purpose": "스포츠링크 행사비 외상",
+    "memo": "[시뮬레이션] 단가 ₩1,454,000 × 1개",
+    "isPlanned": true,
+    "isSettled": false,
+    "actionType": "general",
+    "simulationEntryId": "mwa29gi7qotrytnp8",
+    "id": "mwa29gi70esiv8psa"
+  },
+  {
+    "categoryId": "mnrcir0vhyhg1xb87",
+    "amount": 3300000,
+    "date": "2026-11-12",
+    "purpose": "(일상경비) 2026 양재천 걷자! 건강 페스티벌 스트레칭 타올 구매비 지급",
+    "memo": "",
+    "docRegNum": "보건행정과-14233",
+    "actionType": "daily_expense",
+    "isPlanned": false,
+    "id": "mwej82ustufrm9fbz"
   }
 ]
