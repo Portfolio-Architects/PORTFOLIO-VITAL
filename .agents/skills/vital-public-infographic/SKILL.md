@@ -1,129 +1,97 @@
 ---
 name: vital-public-infographic
 description: >-
-  16:9 및 2:3 비율의 공공 캠페인 인포그래픽 포스터와 걷기 코스도 시각 디자인을 수학적 좌표 기반으로 생성·감수하는 스킬.
-  캠페인 포스터 기획, 5대 코스 수직 그리드 0.1px 칼정렬, AI 오탈자 감수, HY견고딕 2톤 텍스트 및 순수 2D QR 매트릭스 합성 시 사용.
+  16:9 및 2:3 비율의 공공 캠페인 인포그래픽 포스터·걷기 코스도·행사 키비주얼·간판·공문서 삽입용 다중 품목 격자 화보를 수학적 좌표 기반으로 생성·감수하는 스킬.
+  캠페인 포스터 기획, 5대 코스 수직 그리드 0.1px 정렬, AI 오탈자 감수, HY견고딕 2톤·캘리그래피 서체, 순수 2D QR 매트릭스 및 HWPX BinData용 품목 화보 합성 시 사용
+  (행사 현장 운영·식순 연동은 vital-festival-4way-sync, HWPX 보고서·구매계획 화보 BinData 3중 매핑은 vital-hwpx-docgen, 마일스톤 기록은 vital-governance-ops 연계).
 ---
 
 # 공공 캠페인 인포그래픽 및 시각 디자인 설계 스킬 (vital-public-infographic)
 
-## 󰏚 1. 개요 및 목적 함수 (Overview & Objective Function)
+## ▣ 1. 개요 및 목적 함수
 
-### ▢ 1. 시스템 목적 함수 매핑
+### ▢ 1. 시스템 목적 함수 및 SSOT 경계
+- 본 스킬은 **$\mathcal{J}_{\text{DocAuto}}$ (공공 디자인·무오탈자 포스터 산출)** 및 `AGENTS.md` `Rule N`을 전담하며 행사 현장 시각물(`Rule L, S`)과 연계함.
+- **캠페인 지표·기획 SSOT:** `src/lib/physicalActivityMetrics.ts`, `scratch/2027_gangnam_physical_activity_plan.md`, `scratch/2026_yangjae_incentive_spec.md`
+- **키비주얼·간판 스크립트:** `scratch/build_yangjae_keyvisuals.py` (백월·현수막·캘리그래피), `scratch/add_signboards_modern_seamless.py`, `scratch/test_blend_widescreen.py` (센터 표지판)
+- **산출물 규격:** `<산출_포스터_16x9>.png`, `<산출_포스터_2x3>.png` (아티팩트 디렉토리 또는 지정 경로 저장)
 
-- ❍ 본 스킬은 시스템 5대 목적 함수 중 **$\mathcal{J}_{\text{DocAuto}}$ 및 $\mathcal{J}_{\text{FieldSync}}$ (공공 디자인 자동화 및 무오탈자 포스터 산출)**를 지원함.
-- ❍ 공공보건 캠페인(손목닥터9988, 걷기 챌린지 등)의 디지털 사이니지용 16:9 가로형 및 공공게시판·모바일용 2:3 세로형 듀얼 포맷 포스터를 수학적 좌표 격자 기반으로 설계하고, AI 생성 특유의 오탈자·글리프 왜곡을 원천 차단함.
-
-### ▢ 2. 도메인 경계 및 단일 진실 공급원(SSOT)
-
-- ❍ **포스터 디자인 규격서:** `scratch/손목닥터9988_공공캠페인_포스터_디자인_규격서.md`
-- ❍ **시각 렌더링 스크립트:** `scratch/add_signboards_modern_seamless.py`, `scratch/test_blend_widescreen.py`
-- ❍ **릴리즈 아티팩트:** `horizontal_poster_with_qr.png`, `vertical_poster_with_qr.png`
+### ▢ 2. 타 스킬 연계 핸드오프 및 $\mathcal{J}_{\text{Ontology}}$ 역방향 환류
+- **행사 4-Way 싱크 (`vital-festival-4way-sync`):** 행사 일시·장소·부스·공동주관 로고·QR 연결 URL을 `vital-festival-4way-sync` SSOT와 동기화함.
+- **화보 `BinData` 3중 매핑 (`vital-hwpx-docgen`):** 포스터·다중 품목 격자 화보(`Pillow` 합성 이미지) HWPX 첨부 시 `BinData/imageN.png` + `Contents/content.hpf` + `Contents/section0.xml` `<hp:pic treatAsChar="1">` `px×75` HWPUnits 3중 매핑 규격을 연계함.
+- **거버넌스·역방향 환류 (`vital-governance-ops`):** 스크립트 개선 시 마일스톤 기록·`sync-rules.js`·연락처/QR 개인정보 스캔을 수행하고, 확정 운영 기간·리워드 지급 일정을 `data/SCHEDULES.json`·`data/WORKING_MEMORY.json`에 환류함.
 
 ---
 
-## 󰏚 2. 활성화 조건 및 트리거 (Triggers & Activation Scenarios)
+## ▣ 2. 활성화·비활성화 조건
 
-### ▢ 1. 사용자 대표 발화 패턴
-
-- ❍ "손목닥터9988 걷기 챌린지 포스터 16:9 가로형이랑 2:3 세로형으로 만들어줘"
-- ❍ "포스터에서 텍스트 오탈자 감수하고 5개 코스 쿼터(4,500명) 맞는지 확인해줘"
-- ❍ "QR코드 주위에 잡다한 설명 박스 치우고 순수 QR만 우측 상단에 깔끔하게 올려줘"
-- ❍ "HY견고딕 폰트 적용해서 코스도 수직 그리드 0.1px 단위로 정렬해줘"
+### ▢ 1. 활성화 발화 패턴
+- "손목닥터9988 걷기 챌린지 16:9·2:3 포스터 제작", "오탈자·5대 코스 쿼터(4,500명) 검수", "순수 2D QR 우상단 무테 배치", "HY견고딕 적용·0.1px 수직 그리드 정렬·다중 품목 격자 화보 합성".
 
 ### ▢ 2. 비활성화 조건
-
-- ❍ 한글(HWPX) 공문서 본문 표 변환 및 XML 텍스트 치환 (`vital-hwpx-docgen` 호출).
-- ❍ 축제 당일 현장 타임테이블 및 4-Way 클라우드 배포 (`vital-festival-4way-sync` 호출).
-
----
-
-## 󰏚 3. 선행 조건 및 의존성 (Prerequisites & Dependencies)
-
-### ▢ 1. 디자인 헌장 및 서체 환경
-
-- ❍ `AGENTS.md` Rule N (16:9 공공 캠페인 인포그래픽 포스터 표준 디자인 헌장)
-- ❍ Windows 표준 공문서 글꼴: HY견고딕 (`C:\Windows\Fonts\H2GTRE.TTF`)
-- ❍ 공식 슬로건 3단 원형: "강남을 힘차게! / 구민을 신나게! / 강남 대전환!!" (강남구 공식 슬로건)
-
-### ▢ 2. 필수 조판 라이브러리
-
-- ❍ Python `Pillow` (PIL), `qrcode`, `numpy`
+- HWPX 공문서 본문 표 변환 및 XML 치환 (`vital-hwpx-docgen`).
+- 축제 당일 현장 타임테이블 및 4-Way 클라우드 배포 (`vital-festival-4way-sync`).
 
 ---
 
-## 󰏚 4. 단계별 실행 런북 (Step-by-Step Execution Runbook)
+## ▣ 3. 선행 조건 및 디자인 환경
 
-### ▢ Phase 1. 듀얼 포맷 조판 아키텍처 (Dual Layout Optimization)
+- **디자인 헌장:** `AGENTS.md` `Rule N`, 공식 3단 슬로건 원형 `"강남을 힘차게! / 구민을 신나게! / 강남 대전환!!"`.
+- **서체 및 라이브러리:** Windows `HY견고딕`(`C:\Windows\Fonts\H2GTRE.TTF`), Python `Pillow` (PIL), `qrcode`, `numpy`.
 
-- ❍ **16:9 가로형 포스터 (Landscape - 사이니지/웹용):**
-  - **상단 좌측:** 굵고 또렷한 2~3줄 메인 헤드라인 + 기간 뱃지 (`(9.16~12.31)`).
-  - **상단 중앙:** 3대 핵심 리워드 캡슐 카드 (선착순 인원, 총 리워드 규모, 건당 지급액).
-  - **상단 우측:** 공식 3단 붓글씨 슬로건 원형 배치.
-  - **하단부:** 5대 릴레이 코스 카드를 수평 1열로 균등 배치함.
-- ❍ **2:3 세로형 포스터 (Portrait - 공공게시판/모바일용):**
-  - **상단부:** 슬로건 + 메인 헤드라인 + 3대 캡슐 카드 수직 집약.
-  - **중앙부:** S자 하향 산책로 리본 패스를 따라 지그재그(1 $\to$ 2 $\to$ 3 $\to$ 4 $\to$ 5) Z-패턴 시선 유도.
-  - **우측 상단:** 순수 2D QR 매트릭스를 순백색 배경 여백에 무테 조판함.
+---
 
-### ▢ Phase 2. 수치 쿼터 100% 정합성 검증 (Quota Consistency Theorem)
+## ▣ 4. 단계별 실행 런북
 
-- ❍ **코스별 세부 배정 인원의 합계 검증:**
-  $$\sum_{i=1}^{5} \text{CourseQuota}_i = 1,000\text{명} + 1,000\text{명} + 500\text{명} + 1,000\text{명} + 1,000\text{명} = 4,500\text{명}$$
-- ❍ 상단 공식 캡슐 배지 쿼터(**선착순 4,500명 / 총 900만P**)와 단 1명의 오차도 없이 100.0% 수학적 일치를 보장함.
+### ▢ Phase 1. 듀얼 포맷 조판 아키텍처
+- **16:9 가로형 (사이니지/웹용):** 상단 좌측 2~3줄 메인 헤드라인+기간 뱃지(`(9.16~12.31)`), 상단 중앙 3대 리워드 캡슐 카드(선착순·총 규모·건당 지급액), 상단 우측 공식 3단 붓글씨 슬로건, 하단 5대 릴레이 코스 수평 1열 배치.
+- **2:3 세로형 (공공게시판/모바일용):** 상단 슬로건+메인 헤드라인+3대 캡슐 수직 집약, 중앙 S자 산책로 리본 Z-패턴(1→5), 우측 상단 순수 2D QR 매트릭스 순백색 여백 무테 조판.
 
-### ▢ Phase 3. 순수 2D 매트릭스 QR 정밀 조판 규칙 (Pure QR Compositing)
+### ▢ Phase 2. 수치 쿼터 100% 정합성 검증
+$$\sum_{i=1}^{5} \text{CourseQuota}_i = 1,000\text{명} + 1,000\text{명} + 500\text{명} + 1,000\text{명} + 1,000\text{명} = 4,500\text{명}$$
+- 상단 공식 캡슐 배지(**선착순 4,500명 / 총 900만P**)와 단 1명 오차 없이 일치시킴.
 
-- ❍ **설명 군더더기 전면 소거:** "스마트폰 카메라로 스캔하세요", 박스 테두리, 카드 배경 배지를 완전히 제거함.
-- ❍ **조판 규격:**
-  - 세로형: $85 \times 85\text{px}$, 가로형: $105 \times 105\text{px}$.
-  - 서브픽셀 알파 블렌딩 합성을 통해 우측 상단 순백색 여백에 무광 배치하여 0.1초 즉시 인식을 보장함.
-- ❍ **라우팅 대상 URL:** 손목닥터9988 앱 다운로드 공식 스토어 URI.
+### ▢ Phase 3. 순수 2D 매트릭스 QR 정밀 조판
+- 스캔 유도 안내 문구·박스·배지 등 시각 노이즈를 전면 소거하고 순수 2D QR(세로형 `85×85px`, 가로형 `105×105px`)만 우측 상단 순백색 여백에 서브픽셀 알파 블렌딩으로 단독 배치함(라우팅: 손목닥터9988 앱 공식 스토어 URI).
 
 ### ▢ Phase 4. 타이포그래피 정렬 및 오탈자 0건 감수
+- 각 코스 중심축($X_n$)에 [순번 마커]-[코스명]-[일러스트]-[하단 배지]를 `0.1px` 수직 1열 정렬함.
+- AI 이미지 내 긴 한글 렌더링을 금지하고 `Pillow` + `HY견고딕`으로 직접 합성해 글리프 왜곡('3산 트로케킹' → ｢3대 명산 트레킹｣, 월차 `9월`, `10월 ①`, `10월 ②`, `11월`, `12월`) 및 무단 지자체 CI 삽입을 차단함.
 
-- ❍ **0.1px 단위 수직 그리드 칼정렬:** 각 코스 컬럼의 중심축($X_n$)에 [상단 원형 순번 마커(1~N)] - [코스명] - [대표 일러스트] - [하단 지표 배지]의 중심점을 수직 1열 일치시킴.
-- ❍ **오탈자 사전 차단 (Anti-Hallucination):**
-  - AI 이미지 생성 시 발생하는 글리프 왜곡 방어: '3산 트로케킹' (X) $\to$ ｢3대 명산 트레킹｣ (O).
-  - 정식 월차: `9월`, `10월 ①`, `10월 ②`, `11월`, `12월`.
-- ❍ **기관 CI 로고 무단 남발 금지:** 승인되지 않은 구청·시청 CI 로고를 무단으로 삽입하지 않으며, 텍스트와 캡슐 위주의 고시인성 디자인을 유지함.
+### ▢ Phase 5. 공문서용 다중 품목 격자 화보(`Pillow`) 및 HWPX `BinData` 3중 매핑
+- 다수 장비·소모품 참고 사진은 `Pillow`로 2열×N행 또는 3열×N행 균등 카드 격자(다크네이비 헤더 + 품목 번호 + 규격·수량·단가 라벨 + 실물 사진, `1500px` 폭) 단일 고해상도 PNG로 합성함.
+- HWPX 삽입 시 ① `BinData/imageN.png` 물리 저장 + ② `Contents/content.hpf` `<opf:item id="imageN" href="BinData/imageN.png" media-type="image/png" isEmbeded="1"/>` 등록 + ③ `Contents/section0.xml` `<hp:pic treatAsChar="1">` (`orgSz`/`imgRect`/`imgClip`/`imgDim`=`px×75` HWPUnits, `curSz`=`42,000~42,500`, `scaMatrix`=`curSz/orgSz`) 및 호스트 `<hp:lineseg vertsize>`를 3중 일치시킴.
 
 ---
 
-## 󰏚 5. 전용 스크립트 및 검증 CLI (Utility Scripts & Verification Commands)
+## ▣ 5. 전용 스크립트 및 검증 CLI
 
 ```bash
-# 1. 포스터 렌더링 및 QR 코드 합성 파이썬 스크립트 실행
-python scratch/add_signboards_modern_seamless.py
+# 1. 키비주얼·간판 합성 스크립트 구문 점검
+python -m py_compile scratch/build_yangjae_keyvisuals.py scratch/add_signboards_modern_seamless.py scratch/test_blend_widescreen.py
 
-# 2. 가로형 및 세로형 포스터 파일 무결성 및 해상도 확인
-python -c "from PIL import Image; h=Image.open('horizontal_poster_with_qr.png'); v=Image.open('vertical_poster_with_qr.png'); print(f'Horizontal: {h.size}, Vertical: {v.size}')"
+# 2. HY견고딕 폰트 실존 점검
+python -c "import os; print('H2GTRE:', os.path.exists(r'C:\Windows\Fonts\H2GTRE.TTF'))"
 ```
 
 ---
 
-## 󰏚 6. 금지 패턴 및 안티패턴 체크리스트 (Anti-Patterns & Quality Guard)
+## ▣ 6. 금지 패턴 및 안티패턴 체크리스트
 
 | 구분 | 안티패턴 (Strictly Prohibited) | 정상 표준 대응책 (Compliant Standard) |
 |:---:|:---|:---|
-| **AP-N1** | AI 이미지 생성 모델에 긴 문장의 한글 텍스트 렌더링을 직접 위임하여 외계어 글리프 생성 | 배경 그래픽만 생성 후 파이썬 Pillow로 HY견고딕 텍스트 직접 합성 |
-| **AP-N2** | 상단 캡슐 총인원(4,500명)과 하단 5개 코스별 정원의 합계가 불일치 | $1,000+1,000+500+1,000+1,000 = 4,500$ 수학적 일치 강제 |
-| **AP-N3** | QR코드 주변에 "앱 다운로드", 네모 박스, 화살표 등 시각적 노이즈 과다 배치 | 우측 상단 순백색 여백에 순수 2D 매트릭스 QR만 무테 단독 배치 |
-| **AP-N4** | 확인되지 않은 지자체 CI 로고를 장식용으로 무단 삽입 | 공식 3단 붓글씨 슬로건 원형을 배치하고 무단 CI 로고 배제 |
-| **AP-N5** | 코스별 마커와 텍스트의 중심축이 어긋나 시각적 비대칭 발생 | 중심 X좌표 기준 0.1px 수직 칼정렬 공식 적용 |
+| **AP-N1** | AI 생성 모델에 긴 한글 텍스트 렌더링 직접 위임 | 배경 그래픽만 생성 후 `Pillow` + `HY견고딕` 직접 합성 |
+| **AP-N2** | 상단 캡슐(4,500명)과 5개 코스 정원 합계 불일치 | $1,000+1,000+500+1,000+1,000 = 4,500$ 수학적 일치 강제 |
+| **AP-N3** | QR 주변 안내 문구·네모 박스·화살표 등 노이즈 배치 | 우측 상단 순백색 여백에 순수 2D QR만 무테 단독 배치 |
+| **AP-N4** | 미승인 지자체 CI 로고 무단 삽입 | 공식 3단 붓글씨 슬로건 원형 배치 및 무단 CI 배제 |
+| **AP-N5** | 코스 마커·텍스트 중심축 비대칭 | 중심 X좌표 기준 0.1px 수직 칼정렬 적용 |
+| **AP-N6** | HWPX 화보 `BinData` 단독 복사 또는 `px×75` 기하학 불일치 | `Pillow` 격자 합성 후 `BinData`+`content.hpf`+`<hp:pic>` 3중 매핑 |
 
 ---
 
-## 󰏚 7. 응답 출력 포맷 및 자가 점검 프로토콜 (Output Formatting & Self-Verification Protocol)
+## ▣ 7. 출력 기준 및 사후 검증 게이트
 
-### ▢ 1. 개조식 문단 분리 및 문장별 강제 엔터(줄바꿈) 규칙 (Mandatory Line-Break Standard)
-
-- ❍ **단일 문단 줄글 병합 절대 금지:** 마크다운 파서가 `󰏚`, `▢`, `❍`, `•`, `※` 등 비표준 기호의 단일 개행(`\n`)을 한 줄로 합쳐버리는 현상을 막기 위해, 반드시 마크다운 헤딩(`## 󰏚`, `### ▢`) 또는 마크다운 리스트 불릿 결합(`- ❍ `, `  - `, `    - • `) 및 문단 간 **빈 줄(`\n\n`, Double Enter)**을 삽입하여 줄바꿈을 강제함.
-- ❍ **1문장 1줄(1-Sentence-Per-Line) 원칙:** 하나의 항목 줄에 마침표(`.`)로 끝나는 문장을 2개 이상 이어 쓰지 않으며, 문장이 끝날 때마다 반드시 엔터(줄바꿈)하여 다음 줄의 하위 항목으로 분리함.
-- ❍ **종결어미 엄수:** 모든 문장은 개조식 명사형 종결(`-함`, `-됨`, `-임`, `-음`)로 끝맺으며 문서 말미에 `  끝.`을 표기함.
-
-### ▢ 2. 사후 검증 체크리스트
-
-- ❍ 16:9 가로형 및 2:3 세로형 듀얼 이미지 파일이 정상적으로 빌드되었는지 확인함.
-- ❍ 스마트폰 카메라로 생성된 포스터 내 QR코드를 직접 스캔하여 0.1초 내 공식 스토어로 라우팅되는지 확인함.
-- ❍ 포스터 내 모든 코스명, 기간, 쿼터 인원 수치에 오탈자가 없음을 육안 및 스크립트로 전수 감수함.
+- **공통 출력·평어체 SSOT 위임:** 채팅 출력·표 우선·1문장 1줄·`Rule M`·`Rule P`·4대 자가 점검 게이트는 `AGENTS.md`를 준수함.
+- **도메인 사후 검증 게이트:**
+  - `16:9`·`2:3` 해상도·여백·공식 3단 슬로건 배치 및 순수 2D QR 단독 배치·0.1초 인식을 확인함.
+  - 5대 코스 정원(4,500명 / 총 900만P), 기간 표기, 한글 오탈자 0건을 전수 검수함.

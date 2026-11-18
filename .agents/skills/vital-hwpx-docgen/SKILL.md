@@ -1,151 +1,129 @@
 ---
 name: vital-hwpx-docgen
 description: >-
-  당해연도 실무 공문서와 전사 아카이브 RAG 검색을 결합하여 공공기관 표준 서식에 부합하는 한글(HWPX) 문서를 비파괴 방식으로 신규 빌드하는 스킬.
-  공문서 기안서 초안 작성, 사업계획서 한글 변환, 법정 공문서 위계 및 행정 문장부호 표기, 보고서 한글 조판 요구 시 사용.
+  당해연도 실무 공문서와 전사 아카이브 RAG 검색을 결합하여 공공기관 표준 서식에 부합하는 한글(HWPX) 문서를 비파괴 신규 빌드 또는 인플레이스 치유·업데이트하는 스킬.
+  방침서(3단 표준)·물품구매 계획·주간업무·일반 공문서 기안, 품목 화보 BinData 3중 매핑, G2B 물품분류번호 하이픈 표기 및 5대 겹침 차단 한글 조판 요구 시 사용
+  (예산 산출표·405-01 검산은 vital-budget-audit, PIPA 스캔·온톨로지 환류·마일스톤 동기화는 vital-governance-ops, 포스터·품목 화보 합성은 vital-public-infographic과 연계).
 ---
 
 # 한글(HWPX) 공문서 자동 생성 및 서식 컴파일 스킬 (vital-hwpx-docgen)
 
-## 󰏚 1. 개요 및 목적 함수 (Overview & Objective Function)
+## ▣ 1. 개요 및 목적 함수
 
-### ▢ 1. 시스템 목적 함수 매핑
+### ▢ 1. 시스템 목적 함수 및 SSOT 경계
+- 본 스킬은 **$\mathcal{J}_{\text{DocAuto}}$ (법령·아카이브 RAG 기반 HWPX 자동화)**와 `AGENTS.md` `Rule F, G, M`을 전담함.
+- **조판·문체 SSOT:** `docs/HWP_GENERATION_GUIDELINES.md`, `src/lib/administrativeFormatter.ts`
+- **컴파일·주간 엔진:** `scratch/generate_new_hwpx.py`, `scripts/generate_weekly_hwpx.py`
+- **표준 템플릿:** `방침서 예시.hwpx`(방침서 1순위) · `5. 방침서.hwpx`(폴백 갑지, `D:\Desktop`·`D:\Desktop\_Organized_Archive`·`F:\_Organized_Archive` 자동 탐색), `public/templates/template.hwpx`(일반 공문, 백업 `scratch/user_template_backup.hwpx`), `public/templates/template_weekly.hwpx`(주간업무)
+- **사전 가드:** `scripts/privacy_guard.py`, `scripts/rsi_evaluator.js`
 
-- ❍ 본 스킬은 시스템 5대 목적 함수 중 **$\mathcal{J}_{\text{DocAuto}}$ (법령·아카이브 RAG 기반 HWPX 공문서 및 공공 디자인 자동화)**를 주관함.
-- ❍ 공공 행정 실무관 수준의 품격 있는 개조식 공문서 문체를 구현하고, 템플릿 비파괴 복제 및 XML 텍스트 인플레이스 치환을 통해 한컴오피스 한글 문서 생성을 100% 자동화함.
-
-### ▢ 2. 도메인 경계 및 단일 진실 공급원(SSOT)
-
-- ❍ **서식 및 조판 표준 SSOT:** `docs/HWP_GENERATION_GUIDELINES.md`
-- ❍ **HWPX 무손실 컴파일러:** `scratch/generate_new_hwpx.py`
-- ❍ **행정 문체 및 문장부호 정규화 모듈:** `src/lib/administrativeFormatter.ts`
-- ❍ **개인정보 비식별화 가드:** `scripts/privacy_guard.py`
+### ▢ 2. 타 스킬 연계 핸드오프 및 $\mathcal{J}_{\text{Ontology}}$ 역방향 환류
+- **예산·물품구매 (`vital-budget-audit`):** 세출예산·`101-04` 인건비·`405-01` 물품구매(추정가격 $\lfloor\text{총액}/1.1\rfloor$, 부가세, 계약 사전절차) 표 작성 전 3중 총액 오차 0원을 확정함.
+- **거버넌스 (`vital-governance-ops`):** 초안 빌드 전 `privacy_guard.py --scan`(G2B 10자리 코드는 `세부품명번호 60109399-01` 하이픈 표기로 계좌 오탐 방어)을 실행하고 스크립트 개선 시 `sync-rules.js`를 연계함.
+- **시각물·행사 (`vital-public-infographic`, `vital-festival-4way-sync`):** 포스터·다중 품목 격자 화보(`BinData` 3중 매핑)·행사 식순 확정 스펙을 HWPX에 반영함.
+- **역방향 환류 (Closed-Loop):** 확정된 법정 기한(납품기한, 일상감사·계약심사 후 14일 이내 집행전말보고 등)은 `data/SCHEDULES.json`(`scripts/sync-schedules.js`), 신규 공문 메타데이터는 `data/ADMIN_DOC_INDEX.json`(`scripts/curate_admin_archive.py`), 후속 과업은 `data/WORKING_MEMORY.json`에 환류함.
 
 ---
 
-## 󰏚 2. 활성화 조건 및 트리거 (Triggers & Activation Scenarios)
+## ▣ 2. 활성화·비활성화 조건
 
-### ▢ 1. 사용자 대표 발화 패턴
-
-- ❍ "공문서 초안 작성해줘", "기안서 마크다운으로 뽑아줘", "사업계획서 한글(HWPX)로 변환해줘"
-- ❍ "작년 양재천 행사 결과보고서 참고해서 2026년 기획서 만들어줘"
-- ❍ "지침 서식에 맞게 딩뱃 기호랑 2타 띄기 교정해서 출력해줘"
+### ▢ 1. 활성화 발화 패턴
+- "공문서/기안서/방침서 초안 작성 및 한글(HWPX) 변환", "전년도 결과보고서·견적서 참고 2026년 계획서 작성", "지침 서식(딩뱃·2타 띄기) 교정 및 기존 HWPX 인플레이스 업데이트".
 
 ### ▢ 2. 비활성화 조건
-
-- ❍ 예산의 단수 산출 및 5대 보험료 수리적 정합성 감사 (`vital-budget-audit` 호출).
-- ❍ 16:9 가로형 포스터 및 코스도 이미지 시각 렌더링 (`vital-public-infographic` 호출).
-
----
-
-## 󰏚 3. 선행 조건 및 의존성 (Prerequisites & Dependencies)
-
-### ▢ 1. 데이터 소스 및 아카이브 경로
-
-- ❍ **현행 실무 워크스페이스:** `D:\Desktop\공공문서 폴더\2026년` (현행 견적서, 기본계획, 공문)
-- ❍ **전사 마스터 아카이브:** `F:\_Organized_Archive` (2015년~2026년 누적 실무 공문서)
-- ❍ **국가법령 및 자치법규 RAG:** `src/app/api/law/route.ts` 및 국가법령정보센터 표준 조문
-
-### ▢ 2. 기본 HWPX 원본 서식 템플릿
-
-- ❍ `scratch/template.hwpx` (표준 용지 여백, 헤더/푸터 스타일, 문단 모양 내장)
+- 예산 단수 산출·5대 보험료·`405-01` 수리 감사 (`vital-budget-audit`).
+- 16:9·2:3 포스터·코스도·격자 화보 PNG 합성 (`vital-public-infographic`).
 
 ---
 
-## 󰏚 4. 단계별 실행 런북 (Step-by-Step Execution Runbook)
+## ▣ 3. 데이터 소스 · 양식 · 법령 RAG 규격
 
-### ▢ Phase 1. 실무 아카이브 스캔 및 법적 근거 RAG 정립 (Fact & Statutory Grounding)
+### ▢ 1. 아카이브·바탕화면 및 법령·조례 RAG (`src/app/api/law/route.ts` & 법제처 DRF)
+- **아카이브 및 색인:** `F:\_Organized_Archive`(2015~2026년, `2026년`·`공공문서 폴더` 포함), `D:\Desktop\_Organized_Archive`, `D:\Desktop`(읽기 전용 최신본·신규 방침서 출력), `data/ADMIN_DOC_INDEX.json`, `data/ARCHIVE_INDEX.json`, `data/SEED_ONTOLOGY_DOCS.json`.
+- **인증키 소스:** `.env.local` 내 `LAW_API_KEY` (`open.law.go.kr` 50자 `OC` 식별값 + 등록 공인 IP 사용, 평문 노출 금지).
+- **로컬 엔드포인트:** 목록 `/api/law?target=law|ordin|admrul&query=<검색어>` · 본문 `/api/law?target=law|ordin|admrul&mst=<일련번호>&type=XML|HTML` (`admrul`은 `ID=`, `law`/`ordin`은 `MST=` 자동 분기).
+- **직접 DRF 조회:** 목록 `http://www.law.go.kr/DRF/lawSearch.do?OC=$LAW_API_KEY&target={law|ordin|admrul}&type=XML&query=<검색어>`, 본문 `http://www.law.go.kr/DRF/lawService.do?OC=$LAW_API_KEY&target={law|ordin}&type=XML&MST=<일련번호>` (`admrul`은 `ID=<행정규칙일련번호>`) 호출 후 `<law id="...">`/`<admrul id="...">`/`<ordin id="...">` 및 `<![CDATA[...]]>` 값을 파싱함.
 
-- ❍ **아카이브 팩트 수집:** 임의의 가상 시나리오 작성을 엄격히 금지하고, `D:\Desktop\공공문서 폴더\2026년` 및 `F:\_Organized_Archive` 내 유사 사업의 직전 연도 결과보고서, 지출결의서, 과업내역서를 검색하여 실측 수치와 세부 사업명을 확보함.
-- ❍ **상위 법령 및 자치법규 조항 명시:** 모호한 "관련 법령에 따라" 서술을 배제하고, 반드시 현행 법조문 번호와 항·호·목을 특정함 (예: ｢지역보건법｣ 제11조 제1항 제5호 가목, ｢강남구 구민체육진흥 조례｣ 제4조).
-
-### ▢ Phase 2. 공공 표준 개조식 마크다운 초안 작성 (Draft Formulation)
-
-- ❍ **행정 개조식 문체 및 종결어미 의무 준수 (Rule M & Rule P):**
-  - 구어체 종결어미("~하겠습니다", "~인 것 같습니다") 및 불필요한 친근감 표명을 전면 배제함.
-  - 명사형 또는 간결한 개조식 종결어미를 적용함 (`-조치 완료함`, `-반영함`, `-구현함`, `-추진 예정임`, `-으로 확인됨`).
-  - **Zero Psychological Ventriloquism (Rule P):** 사용자의 내면 심리(예: "주무관님이 화가 난", "답답한 심정")나 협상 상대방의 심리를 소설화하여 서술하는 감정적 표현을 전면 차단하고, 오직 객관적 계약 조항과 사실관계만을 기술함.
-- ❍ **다단계 항목 기호 및 위계 체계 준수:**
-  - 기획서/보고서 딩뱃: `󰏚` (U+F03DA) $\to$ `▢` (U+25A2) $\to$ `❍` (U+274D) $\to$ `-` $\to$ `•` (U+2022) $\to$ `※` (U+203B).
-  - 법정 공문서 위계: `1.` $\to$ `가.` $\to$ `1)` $\to$ `가)` $\to$ `⑴` $\to$ `㈎` $\to$ `①` $\to$ `㉮`.
-- ❍ **문장별 강제 엔터(개행) 및 단락 분리:**
-  - 마크다운 초안 및 채팅 응답에서 비표준 기호(`󰏚`, `▢`, `❍`, `가.`, `1)`)가 한 줄로 병합되지 않도록 반드시 마크다운 리스트 불릿 결합(`- ❍ `, `  - `) 또는 줄 끝 스페이스 2칸(`  \n`) / 빈 줄(`\n\n`)을 적용하여 **1문장 = 1줄(Enter)**로 분리함.
-
-### ▢ Phase 3. 비파괴 HWPX 복제, XML 인플레이스 컴파일 및 5대 텍스트 겹침 원천 차단
-
-- ❍ **비파괴 복제 실행:** 원본 템플릿(`scratch/template.hwpx`)을 직접 수정하지 않고 신규 출력 경로로 복제함.
-- ❍ **Python 컴파일러 가동:**
-  ```bash
-  python scratch/generate_new_hwpx.py \
-    --template "scratch/template.hwpx" \
-    --output "d:/Desktop/공공문서 폴더/2026년/2026_신규공문서.hwpx" \
-    --markdown "scratch/draft.md"
-  ```
-- ❍ **5대 텍스트 겹침(Text Overlap) 원천 차단 엔진 의무 가동 (`scratch/generate_new_hwpx.py`):**
-  - **[1] `<hp:linesegarray>` (`vertpos`/`textpos`) 동적 재계산 및 자식 순서 강제 (`recalc_tc_linesegs`, `layout_sec_paragraph`, `ensure_linesegarray_last`):** 텍스트 치환 또는 `copy.deepcopy` 복제 시 정적 캐시된 `vertpos="0"`이 중복되어 줄이 겹치는 현상을 차단하기 위해 `wrap_text_positions`로 줄바꿈 오프셋(`textpos`)과 단조 증가 `vertpos`를 재계산하고, `<hp:linesegarray>`를 항상 모든 `<hp:run>` 뒤인 `<hp:p>`의 마지막 자식으로 배치함.
-  - **[2] 표 셀 높이(`<hp:cellSz>`), 중첩 표(Nested Table) 상향 전파, 표 전체 높이(`<hp:tbl>/<hp:sz>`) 및 직속 호스트 문단 `<hp:lineseg>` 동기화 (`sync_table_geometry`, `heal_section_tables_and_layout`):** 셀 내부 다중 줄 개행 및 하위 중첩 표 확장 시 `<hp:cellSz height>`를 확장하고, 동일 행(`<hp:tr>`) 내 `rowSpan == 1` 셀 높이를 최대 행 높이로 통일하며, 결재란 등 엇갈린 병합 행(Staggered `rowSpan > 1`)과 수직 병합 셀을 병합 구간 행 합산 높이로 역산·일치시키고 최하위 중첩 표부터 외곽 표까지 깊이 역순(`heal_section_tables_and_layout`)으로 `<hp:tbl>/<hp:sz height>` 및 직속 호스트 문단 `<hp:lineseg vertsize>`를 연쇄 동기화함.
-  - **[3] 표 개체 인라인 배치(`treatAsChar="1"`) 강제 (`enforce_inline_table_flow`):** 가변 행 표의 `<hp:pos treatAsChar="0"/>`(부유 객체)로 인해 표 확장 시 하단 본문과 겹치는 현상을 막기 위해 `treatAsChar="1" vertOffset="0"`으로 정규화함.
-  - **[4] 엑셀 복사 압축 스타일 정규화 및 `0xFFFFFFFF`(`4294967295`) 셀 여백 오버플로우 차단 (`normalize_header_styles`, `get_excel_defective_ids`, `get_cell_margins`):** `Contents/header.xml`의 `lineWrap="SQUEEZE"`를 `"BREAK"`로, `paraPr 129` 음수 들여쓰기를 `0`으로, 100% 미만 줄간격을 `130%`로 정규화하고, `header.xml`에서 실제 결함이 감지된 엑셀 문단 참조만 비압축(`condense="0"`) 문단 스타일로 치환하며, `<hp:cellMargin>`의 `4294967295`(`0xFFFFFFFF = -1`) 상속값을 `141` HWPUnits로 클램핑하여 42.9억 HWPUnit 오버플로우를 차단함.
-  - **[5] 다중 `<hp:run>` / `<hp:t>` 및 인라인 `<hp:lineBreak/>`·`<hp:fwSpace/>`·`<hp:markpenBegin/>` 정리 (`flatten_t_node`, `set_p_text`, `set_tc_lines`):** `<hp:t>` 내부의 자식 태그(`.tail` 및 구버전 형광펜 유령 꼬리 텍스트)를 평탄화·제거하고, 잉여 `hp:t`는 부모 `hp:run`에서, 잉여 `hp:run`은 부모 `hp:p`에서 정확히 제거함.
-- ❍ **XML 제어 객체 격리 및 ZIP 헤더 패치 (`patch_zip_flags`):**
-  - 표(`hp:tbl`), 글상자(`hp:box`), 이미지, 수식 등의 제어 노드를 파괴하지 않고 순수 본문 `hp:t` 텍스트만 치환함.
-  - `struct.pack_into`를 통해 ZIP 압축 플래그 비트(Bit 2 Fast Deflating, value 4)를 바이너리 복원하여 한컴오피스 100% 호환성을 확보함.
-
-### ▢ Phase 4. 한글 표준 준거 지침 및 레이아웃 무결성 최종 검증 (Compliance Audit)
-
-- ❍ `docs/HWP_GENERATION_GUIDELINES.md` 14대 항목 및 `verify_hwpx_no_overlap` 전수 대조:
-  - 용지 여백(상하 15.0mm, 좌우 20.0mm, 머리말/꼬리말 10.0mm).
-  - 서체 크기(대제목 22pt, 중간제목 16~18pt, 본문 15pt, 세부 13pt).
-  - 2타 띄기(기호 뒤 1~2타, 들여쓰기 2타, 붙임 뒤 2타, 문서 끝 `  끝.`).
-  - 문장부호(날짜 마침표+공백 `2026. 9. 14.`, 24시각제 `14:00`, 금액 병기 `금10,000,000원(금일천만원)`, 홑낫표 `｢ ｣`).
-  - 5대 텍스트 겹침 무결성(`inverted_order_p == 0`, `dup_vpos_cells == 0`, `huge_height_cells == 0`, `narrow_hsize_cells == 0`, `squeeze_count == 0`, `compressed_lspacing == 0`, `ghost_t_nodes == 0`).
+### ▢ 2. 방침서 3단 표준 양식 및 원본 보호 가드
+- **탐색 순위 (`--policy`):** `방침서 예시.hwpx` (`D:\Desktop\` $\to$ `D:\Desktop\_Organized_Archive\` $\to$ `F:\_Organized_Archive\`) $\to$ 폴백 `D:\Desktop\5. 방침서.hwpx` (1쪽 공백 갑지 전용).
+- **3단 구조:** ① **1쪽 전자결재 표지**(`P000` 결재·협조란 + `P001` 소제목·본제목 + `P002` 강남구 심볼 `image1.png`·표지 연월 + `P003` 기관·부서명) $\to$ ② **2쪽 사전검토서**(`P004` 9개 법정 검토항목 및 `[계속/신규]`·협조 체크박스) $\to$ ③ **3쪽 이후 본문**(제목배너 + 목적요약 상자 + `#AE3E5A` 버건디 로마숫자 `Ⅰ~Ⅴ` 배지 + `▢` 15pt·`❍` 14pt·`-` 12pt·`※` 13pt + 좌우 개방형 `#F2F2F2` 표 + `  끝.`).
+- **비파괴 출력 가드:** 반드시 **`D:\Desktop\<방침서명>.hwpx`**에 신규 저장하며 원본 덮어쓰기를 영구 금지함(`assert_non_destructive_paths`, 미참조 예시 사진 `prune_unreferenced_bindata`, `Preview/PrvText.txt` 재합성).
+- **일반·주간 서식:** `public/templates/template.hwpx`(백업 `scratch/user_template_backup.hwpx`), `public/templates/template_weekly.hwpx`(`scripts/generate_weekly_hwpx.py`).
 
 ---
 
-## 󰏚 5. 전용 스크립트 및 검증 CLI (Utility Scripts & Verification Commands)
+## ▣ 4. 단계별 실행 런북
+
+### ▢ Phase 1. 실무 아카이브 스캔 및 법령 근거 RAG 정립
+- 가상 수치를 배제하고 `ADMIN_DOC_INDEX.json`·`ARCHIVE_INDEX.json`·`F:\_Organized_Archive`·`D:\Desktop`의 직전 결과보고서·지출결의서·견적서 실측 수치를 확보함.
+- `/api/law` 또는 DRF로 현행 법령·조례·행정규칙 시행일자와 조·항·호·목을 대조하여 2쪽 `사전검토서`와 본문 `Ⅰ 추진근거`에 특정함(예: ｢지역보건법｣ 제11조 제1항 제5호 가목).
+
+### ▢ Phase 2. 공공 표준 개조식 마크다운 초안 작성
+- 구어체·청유형·내면 심리 묘사(Rule P)를 배제하고 개조식 종결어미(`-함`, `-됨`, `-임`) 및 **1문장 = 1줄**을 적용함(HWPX XML 딩뱃 `U+F03DA` $\to$ `▢` $\to$ `❍` $\to$ `-` $\to$ `•` $\to$ `※` 및 법정 위계 `1.` $\to$ `가.` $\to$ `1)` $\to$ `가)` 세부 치수는 `docs/HWP_GENERATION_GUIDELINES.md` 참조).
+- 방침서 메타데이터 키(`소제목:`, `작성일:`, `소관부서:`, `협조부서:`, `사업유형:`, `공직선거법:`, `추진경위:`, `예산사항:`, `수혜자:`, `> 목적요약`)를 포함하고, 조달청 G2B 10자리 코드는 `세부품명번호 60109399-01`(`8자리-2자리`) 하이픈 표준으로 표기해 계좌 오탐을 차단함.
+
+### ▢ Phase 3. 비파괴 빌드 · 인플레이스 치유 · 화보 BinData 매핑 · 5대 겹침 차단
+- **기작성 HWPX 인플레이스 치유:** 기존 표지·사전검토서(`P[00]~P[06]`) 원본 `<hp:linesegarray>`를 보존한 채 3쪽 이후 본문·신규 표에 대해서만 `normalize_header_styles` $\to$ `heal_section_tables_and_layout` $\to$ `layout_sec_paragraph` $\to$ `ensure_linesegarray_last`를 적용함.
+- **화보 `BinData` 3중 매핑 프로토콜:** ① `BinData/imageN.png` 물리 저장 + ② `Contents/content.hpf` `<opf:item id="imageN" href="BinData/imageN.png" media-type="image/png" isEmbeded="1"/>` 등록 + ③ `Contents/section0.xml` `<hp:pic treatAsChar="1">`의 `orgSz`/`imgRect`/`imgClip`/`imgDim`=`px×75` HWPUnits, `curSz`(`42,000~42,500`), `scaMatrix` 및 호스트 `<hp:lineseg vertsize>` 3중 동기화.
+- **5대 텍스트 겹침 원천 차단 엔진 (`scratch/generate_new_hwpx.py`, 상세 규격: `docs/HWP_GENERATION_GUIDELINES.md` 제7장):**
+
+| 차단 규격 | 핵심 함수 | 적용 메커니즘 |
+|:---:|:---|:---|
+| **1. 줄세그먼트 재계산** | `recalc_tc_linesegs`, `layout_sec_paragraph`, `ensure_linesegarray_last` | `wrap_text_positions`로 `textpos`·단조 증가 `vertpos` 재계산 및 `<hp:linesegarray>` 최하단 자식 배치 |
+| **2. 표 기하학 상향 전파** | `sync_table_geometry`, `heal_section_tables_and_layout` | `<hp:cellSz height>`·엇갈린 `rowSpan` 역산 및 최하위 중첩 표→외곽 표 `<hp:sz height>`·호스트 `<hp:lineseg>` 연쇄 동기화 |
+| **3. 인라인 표 flow** | `enforce_inline_table_flow` | `<hp:pos treatAsChar="1" vertOffset="0"/>` 정규화로 부유 객체 겹침 차단 |
+| **4. 압축·여백 오버플로우 차단** | `normalize_header_styles`, `get_excel_defective_ids`, `get_cell_margins` | `lineWrap="SQUEEZE"`→`BREAK`, `paraPr 129` 음수 들여쓰기 `0`, 줄간격 `130%`+, `0xFFFFFFFF` 여백 `141` 클램핑 |
+| **5. 다중 런·유령 꼬리 제거** | `flatten_t_node`, `set_p_text`, `set_tc_lines` | `<hp:lineBreak/>`·`<hp:markpenBegin/>` `.tail` 평탄화 및 `r0.remove(extra_t)`/`p_elem.remove(extra_r)` 정리 |
+
+- **제어 객체 격리 및 ZIP 패치:** 표·글상자·수식을 보존하고 `patch_zip_flags`(`struct.pack_into`)로 Bit 2 Fast Deflating(value 4)을 복원함.
+
+### ▢ Phase 4. 표준 준거 및 무결성 최종 검증
+- `docs/HWP_GENERATION_GUIDELINES.md` 여백(15/20/10mm)·서체·2타 띄기·행정 문장부호(`2026. 9. 14.`, `14:00`, `금10,000,000원(금일천만원)`, `  끝.`) 및 `verify_hwpx_no_overlap()`(`inverted_order_p`, `dup_vpos_cells`, `huge_height_cells`, `narrow_hsize_cells`, `squeeze_count`, `compressed_lspacing`, `ghost_t_nodes` 모두 `0`)를 검증함.
+
+---
+
+## ▣ 5. 전용 스크립트 및 검증 CLI
 
 ```bash
-# 1. 초안 마크다운 문서 내 개인정보(주민등록번호, 전화번호 등) 정밀 스캔
-python scripts/privacy_guard.py --scan scratch/draft.md
+# 1. 초안 개인정보·G2B 오탐 사전 스캔
+python scripts/privacy_guard.py --scan scratch/draft_policy.md
 
-# 2. HWPX 무손실 자동 생성 및 5대 텍스트 겹침 차단 게이트키퍼 실행
-python scratch/generate_new_hwpx.py --template scratch/template.hwpx --output scratch/output.hwpx --markdown scratch/draft.md
+# 2-A. [방침서 1순위] 바탕화면 '방침서 예시.hwpx' 3단 표준 참조 바탕화면 신규 빌드
+python scratch/generate_new_hwpx.py --policy --output "D:/Desktop/2026_신규사업_추진계획.hwpx" --markdown scratch/draft_policy.md
 
-# 3. 행정 문체 포매터 단위 테스트 검증
-npm test -- __tests__/administrative-formatter.test.ts
+# 2-B. [방침서 폴백] 1쪽 공백 갑지('5. 방침서.hwpx') 전용 빌드
+python scratch/generate_new_hwpx.py --template "D:/Desktop/_Organized_Archive/5. 방침서.hwpx" --output "D:/Desktop/2026_신규사업_약식방침.hwpx" --markdown scratch/draft_policy.md
+
+# 2-C. [일반 공문 / 주간업무] 기본 템플릿 및 주간 2단 비교 빌드
+python scratch/generate_new_hwpx.py --template public/templates/template.hwpx --output scratch/output.hwpx --markdown scratch/draft.md
+python scripts/generate_weekly_hwpx.py --help
+
+# 3. 행정 포매터 및 주간 HWPX 단위 테스트
+npx jest __tests__/administrative-formatter.test.ts __tests__/weekly-hwpx.test.ts
 ```
 
 ---
 
-## 󰏚 6. 금지 패턴 및 안티패턴 체크리스트 (Anti-Patterns & Quality Guard)
+## ▣ 6. 금지 패턴 및 안티패턴 체크리스트
 
 | 구분 | 안티패턴 (Strictly Prohibited) | 정상 표준 대응책 (Compliant Standard) |
 |:---:|:---|:---|
-| **AP-H1** | 원본 `scratch/template.hwpx`를 직접 열어 수정하거나 덮어쓰기 | 항상 신규 출력 경로를 지정하여 복제 빌드 |
-| **AP-H2** | "주무관님이 답답해하시는", "업체의 무책임한 태도에 화가 났다" 등 심리 대변 | 탈감정적 객관 사실 및 계약서 조항 명시 (Rule P) |
-| **AP-H3** | "관련 법령에 의거하여" 등 법조문 번호가 누락된 추상적 서술 | ｢지역보건법｣ 제11조 등 조항·호·목 정확히 인용 |
-| **AP-H4** | 연월일 표기 시 끝 마침표 누락(`2026. 9. 14`) 또는 일 뒤 공백 누락 | `2026. 9. 14.` (일 뒤 마침표 찍고 1공백 필수) |
-| **AP-H5** | 문서 종결 시 공백 없이 `끝.` 표기하거나 붙임 뒤 1공백만 띄움 | 붙임 뒤 2공백(`붙임  `), 문서 마감 시 2공백 후 `  끝.` |
-| **AP-H6** | 마크다운에서 `❍ 문장1\n❍ 문장2`를 단일 개행만 하여 한 줄로 병합됨 | `- ❍ 문장` 리스트 결합 또는 문단 간 빈 줄(`\n\n`)로 1문장 1줄 엔터 강제 |
-| **AP-H7** | `<hp:t>` 수정 또는 `copy.deepcopy` 후 `<hp:linesegarray>` 미갱신·`<hp:run>` 앞에 배치 | `recalc_tc_linesegs`·`layout_sec_paragraph` 재계산 및 `ensure_linesegarray_last` 강제 |
-| **AP-H8** | 셀 텍스트 개행·중첩 표 확장 후 `<hp:cellSz>`·`<hp:tbl>/<hp:sz>` 및 상위 표 미동기화 | `heal_section_tables_and_layout` 및 `sync_table_geometry`로 중첩 표 상향 전파·병합 행 동기화 |
-| **AP-H9** | 가변 행 데이터 표를 `<hp:pos treatAsChar="0"/>`(부유 객체)로 방치하여 본문과 겹침 | `enforce_inline_table_flow`를 통해 `treatAsChar="1" vertOffset="0"` 인라인 배치 강제 |
-| **AP-H10** | 엑셀 복사 `lineWrap="SQUEEZE"` 방치 및 `<hp:cellMargin>` `4294967295` 직접 연산 | `normalize_header_styles`로 `BREAK` 변환 및 `get_cell_margins`에서 `141` HWPUnits로 클램핑 |
-| **AP-H11** | `p_node.remove(extra_t)` 잘못된 부모 삭제 호출 또는 `<hp:t>` 내 `<hp:lineBreak/>`·`<hp:markpenBegin/>` 방치 | `set_p_text` 및 `flatten_t_node`를 사용하여 `r0.remove(extra_t)` 및 자식·유령 꼬리 평탄화 수행 |
+| **AP-H1** | 원본 `방침서 예시.hwpx`, `5. 방침서.hwpx`, `template.hwpx` 직접 덮어쓰기 또는 임의 폴더 출력 | `--policy` 3단 표준 복제 후 바탕화면(`D:\Desktop\<방침서명>.hwpx`) 신규 저장 |
+| **AP-H2** | 내면 심리 대변·추상적 법령 서술("관련 법령에 의거") | 탈감정 사실 및 ｢지역보건법｣ 등 조·항·호·목 정확 인용 (Rule P) |
+| **AP-H3** | 날짜 마침표 누락(`2026. 9. 14`), 붙임 1공백, `  끝.` 앞 2공백 누락 | `2026. 9. 14.`, `붙임  `, 문서 마감 `  끝.` 엄수 |
+| **AP-H4** | 마크다운·채팅 내 깨짐 PUA(`U+F03DA`), 이중 불릿(`- ❍`), 문단 병합 | 채팅·마크다운 `## ▣`·`### ▢`·단일 `- ` 1문장 1줄(`U+F03DA`는 XML 전용) |
+| **AP-H5** | `<hp:t>` 수정·복제 후 `<hp:linesegarray>` 미갱신·`<hp:run>` 앞 배치 | `recalc_tc_linesegs`·`layout_sec_paragraph` 재계산 및 `ensure_linesegarray_last` |
+| **AP-H6** | 셀 개행·중첩 표 확장 후 `<hp:cellSz>`·병합 행·`<hp:tbl>/<hp:sz>` 미동기화 | `heal_section_tables_and_layout`·`sync_table_geometry` 상향 전파 |
+| **AP-H7** | 가변 표 `treatAsChar="0"` 부유 배치, `SQUEEZE`·`paraPr 129`·`0xFFFFFFFF` 방치 | `enforce_inline_table_flow`, `normalize_header_styles`, `get_cell_margins`(`141`) 적용 |
+| **AP-H8** | 잘못된 `p_node.remove(extra_t)` 호출 또는 `<hp:lineBreak/>`·형광펜 꼬리 방치 | `set_p_text`·`flatten_t_node`로 `r0.remove(extra_t)` 및 유령 꼬리 제거 |
+| **AP-H9** | 기작성 업데이트 시 `P[00]~P[06]` 덮어쓰기, `BinData` 3중 매핑·G2B 하이픈 누락 | `P[00]~P[06]` 보존, `BinData`+`content.hpf`+`<hp:pic>` `px×75`, G2B `60109399-01` 적용 |
 
 ---
 
-## 󰏚 7. 응답 출력 포맷 및 자가 점검 프로토콜 (Output Formatting & Self-Verification Protocol)
+## ▣ 7. 출력 기준 및 사후 검증 게이트
 
-### ▢ 1. 개조식 문단 분리 및 문장별 강제 엔터(줄바꿈) 규칙 (Mandatory Line-Break Standard)
-
-- ❍ **단일 문단 줄글 병합 절대 금지:** 마크다운 파서가 `󰏚`, `▢`, `❍`, `•`, `※`, `가.`, `1)` 등 비표준 기호의 단일 개행(`\n`)을 한 줄로 합쳐버리는 현상을 막기 위해, 반드시 마크다운 헤딩(`## 󰏚`, `### ▢`) 또는 마크다운 리스트 불릿 결합(`- ❍ `, `  - `, `    - • `) 및 문단 간 **빈 줄(`\n\n`, Double Enter)**을 삽입하여 줄바꿈을 강제함.
-- ❍ **1문장 1줄(1-Sentence-Per-Line) 원칙:** 하나의 항목 줄에 마침표(`.`)로 끝나는 문장을 2개 이상 이어 쓰지 않으며, 문장이 끝날 때마다 반드시 엔터(줄바꿈)하여 다음 줄의 하위 항목으로 분리함.
-- ❍ **종결어미 엄수:** 모든 문장은 개조식 명사형 종결(`-함`, `-됨`, `-임`, `-음`)로 끝맺으며 문서 말미에 `  끝.`을 표기함.
-
-### ▢ 2. 사후 검증 체크리스트
-
-- ❍ `python scripts/privacy_guard.py --scan <초안.md>`를 실행하여 주민등록번호 및 개인식별정보 노출이 0건인지 입증함.
-- ❍ `python scratch/generate_new_hwpx.py` 실행 로그에서 `Verified 0 overlap defects` 및 `Successfully built HWPX with 100% identical ZIP headers`를 확인함.
-- ❍ 생성된 HWPX의 텍스트 겹침, 셀 높이 오버플로우, 표 서식 밀림이 0건인지 최종 승인함.
-
+- **공통 출력·평어체 SSOT 위임:** 채팅 출력 형식·표 우선·1문장 1줄·`Rule M`·`Rule P`·4대 자가 점검 게이트는 `AGENTS.md`를 준수함.
+- **도메인 사후 검증 게이트:**
+  - `python scripts/privacy_guard.py --scan <초안.md>` 개인식별정보 및 G2B 오탐 0건 확인함.
+  - `scratch/generate_new_hwpx.py` 로그 내 `Verified 0 overlap defects` 및 `100% identical ZIP headers` 확인함.
+  - 확정 법정 기한·문서 색인·후속 과업의 `SCHEDULES.json`·`ADMIN_DOC_INDEX.json`·`WORKING_MEMORY.json` 환류 완료 확인함.
