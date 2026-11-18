@@ -4,9 +4,8 @@
  * 같은 문장에 함께 등장한 키워드 간에 엣지를 생성
  */
 
-import { OntologyGraph, OntologyNode, OntologyEdge, OntologyGroup } from './ontology.types';
+import { OntologyGraph, OntologyNode, OntologyEdge, OntologyGroup, NodeOverride } from './ontology.types';
 import { SignalEntry } from '@/hooks/useSignal';
-import { NodeOverride } from '@/hooks/useGraphCustomization';
 import { computeCentrality } from './ontology.service';
 
 export type PartialOntologyEdge = OntologyEdge & { isCustom?: boolean };

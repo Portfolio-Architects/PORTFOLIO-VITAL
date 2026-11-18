@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useGraphCustomization, NodeOverride } from '@/hooks/useGraphCustomization';
+import { useGraphCustomization, NodeOverride } from '@/__tests__/fixtures/useGraphCustomization';
 import { globalYDoc } from '@/hooks/useYjsStore';
 import { OntologyNode, OntologyEdge } from '@/lib/ontology.types';
 import * as Y from 'yjs';

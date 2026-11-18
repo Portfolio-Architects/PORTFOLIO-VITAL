@@ -275,7 +275,7 @@ function ExpenseEntryModalComponent({
               { id: 'issuance', label: '일상경비 교부', desc: '일상경비 재원 배정(교부)' },
               { id: 'daily_expense', label: '일상경비 지출', desc: '교부된 일상경비 범위 내 지출' },
             ].map(type => (
-              <label key={type.id} className={`flex flex-col p-2.5 rounded-lg border-2 cursor-pointer transition-all ${actionType === type.id ? 'border-blue-500 bg-blue-50/50 shadow-sm' : 'border-gray-200 bg-white hover:border-blue-200 hover:bg-gray-50'}`}>
+              <label key={type.id} className={`flex flex-col p-2.5 rounded-lg border-2 cursor-pointer transition-colors duration-150 ${actionType === type.id ? 'border-blue-500 bg-blue-50/50 shadow-sm' : 'border-gray-200 bg-white hover:border-blue-200 hover:bg-gray-50'}`}>
                 <div className="flex items-center gap-2">
                   <input type="radio" name="actionType" value={type.id} checked={actionType === type.id} onChange={() => {
                      setActionType(type.id as BudgetActionType);

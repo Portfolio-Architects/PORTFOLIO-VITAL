@@ -7,28 +7,60 @@ export interface ExtractedGraph {
 }
 
 /**
- * 로컬 AI(Gemini) 추출 API를 호출하여 텍스트로부터 노드 및 관계(SPO) 구조를 추출합니다.
+ * 한국어 라벨에서 끝나는 조사(은/는/이/가/을/를/의/에/에서/등) 및 불필요한 따옴표를 정제합니다.
  */
-export async function extractSemanticGraph(text: string): Promise<ExtractedGraph> {
-  const response = await fetch('/api/llm/extract', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ text }),
+export function cleanKoreanLabel(label: string): string {
+  if (!label) return '';
+  let cleaned = label.trim();
+
+  // Remove trailing Korean postpositions (조사)
+  const postpositions = ['에서', '에게', '으로', '까지', '부터', '은', '는', '이', '가', '을', '를', '의', '에', '와', '과', '로'];
+  for (const post of postpositions) {
+    if (cleaned.endsWith(post) && cleaned.length > post.length) {
+      const base = cleaned.substring(0, cleaned.length - post.length);
+      if (/[\uac00-\ud7a30-9a-zA-Z]$/.test(base)) {
+        cleaned = base;
+        break;
+      }
+    }
+  }
+
+  // Eliminate quotes and unnecessary outer spaces
+  cleaned = cleaned.replace(/^['"“‘]+|['"”’]+$/g, '').trim();
+
+  return cleaned;
+}
+
+/**
+ * 추출된 온톨로지 노드/엣지를 후처리합니다:
+ * 1. 노드 라벨 한국어 조사 정제
+ * 2. baseValue 기준 상위 15개 노드로 제한
+ * 3. 15개 범위 밖 dangling 엣지 및 self-reference 엣지 제거
+ */
+export function postProcessGraph(nodes: any[], edges: any[]): { nodes: any[]; edges: any[] } {
+  if (!nodes) nodes = [];
+  if (!edges) edges = [];
+
+  // 1. cleanKoreanLabel on all node labels
+  const cleanedNodes = nodes
+    .map(n => ({
+      ...n,
+      label: cleanKoreanLabel(n.label || '')
+    }))
+    .filter(n => n.label.length > 0 && n.id);
+
+  // 2. Limit nodes to 15 (sort by baseValue descending and slice)
+  const sortedNodes = [...cleanedNodes].sort((a, b) => (b.baseValue || 0) - (a.baseValue || 0));
+  const limitedNodes = sortedNodes.slice(0, 15);
+  const nodeIds = new Set(limitedNodes.map(n => n.id));
+
+  // 3. Prune dangling edges (edges where source or target is not in the 15 nodes list)
+  // Also prune self-references (source === target)
+  const prunedEdges = edges.filter(e => {
+    return e.source && e.target && nodeIds.has(e.source) && nodeIds.has(e.target) && e.source !== e.target;
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || '시맨틱 추출 실패');
-  }
-
-  const result = await response.json();
-  if (!result.success) {
-    throw new Error(result.error || '시맨틱 추출 실패');
-  }
-
-  return result.data as ExtractedGraph;
+  return { nodes: limitedNodes, edges: prunedEdges };
 }
 
 /**

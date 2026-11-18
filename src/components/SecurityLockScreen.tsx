@@ -32,7 +32,7 @@ const SecurityLockScreenComponent: React.FC<Props> = ({ hasSetupPIN, onVerify, o
     if (hasSetupPIN) {
       const isValid = await onVerify(currentPin);
       if (!isValid) {
-        triggerError('비밀번호가 일치하지 않습니다.');
+        triggerError('PIN 불일치 · 재입력 필요');
       }
     } else {
       if (setupStep === 1) {
@@ -45,7 +45,7 @@ const SecurityLockScreenComponent: React.FC<Props> = ({ hasSetupPIN, onVerify, o
         } else {
           setSetupStep(1);
           setFirstPin('');
-          triggerError('비밀번호가 서로 다릅니다. 다시 설정해주세요.');
+          triggerError('PIN 불일치 · 처음부터 재설정');
         }
       }
     }
@@ -105,10 +105,10 @@ const SecurityLockScreenComponent: React.FC<Props> = ({ hasSetupPIN, onVerify, o
         <h2 className="text-xl font-bold text-white mb-2 tracking-tight">
           {hasSetupPIN 
             ? `${appMode} 시스템 잠금 해제` 
-            : setupStep === 1 ? '새로운 접근 비밀번호 설정' : '비밀번호를 한 번 더 입력해주세요'}
+            : setupStep === 1 ? '신규 접근 PIN 설정' : '접근 PIN 재입력 확인'}
         </h2>
         <p className={`text-sm ${errorMsg ? 'text-red-400' : 'text-slate-400'}`}>
-          {errorMsg || (hasSetupPIN ? '설정하신 4자리 PIN을 입력하세요.' : '자신만이 알 수 있는 4자리를 선택하세요.')}
+          {errorMsg || (hasSetupPIN ? '4자리 PIN 입력' : '4자리 숫자 PIN 선택')}
         </p>
       </div>
 
@@ -117,7 +117,7 @@ const SecurityLockScreenComponent: React.FC<Props> = ({ hasSetupPIN, onVerify, o
         {PIN_INDICES.map((i) => (
           <div 
             key={i} 
-            className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
+            className={`w-4 h-4 rounded-full border-2 transition-colors duration-200 ${
               i < pin.length 
                 ? 'bg-blue-500 border-blue-500 scale-110 shadow-[0_0_10px_rgba(59,130,246,0.6)]' 
                 : 'bg-transparent border-slate-600'

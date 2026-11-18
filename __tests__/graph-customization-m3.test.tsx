@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { renderHook, act } from '@testing-library/react';
-import { useGraphCustomization } from '@/hooks/useGraphCustomization';
+import { useGraphCustomization } from '@/__tests__/fixtures/useGraphCustomization';
 import { globalYDoc } from '@/hooks/useYjsStore';
 import * as Y from 'yjs';
 import { OntologyNode } from '@/lib/ontology.types';

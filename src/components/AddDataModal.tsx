@@ -146,7 +146,7 @@ function AddDataModalComponent({ isOpen, initialMode = 'memo', onClose, onAddSig
                 {!content ? (
                   <label 
                     htmlFor="pdf-upload" 
-                    className={`flex flex-col items-center justify-center gap-3 w-full h-[300px] border-2 border-dashed rounded-lg cursor-pointer transition-all ${isParsing ? 'bg-amber-50 border-amber-300 pointer-events-none' : 'bg-gray-50 border-gray-200 hover:bg-amber-50/50 hover:border-amber-300'}`}
+                    className={`flex flex-col items-center justify-center gap-3 w-full h-[300px] border-2 border-dashed rounded-lg cursor-pointer transition-colors duration-150 ${isParsing ? 'bg-amber-50 border-amber-300 pointer-events-none' : 'bg-gray-50 border-gray-200 hover:bg-amber-50/50 hover:border-amber-300'}`}
                   >
                     <input 
                       type="file" 

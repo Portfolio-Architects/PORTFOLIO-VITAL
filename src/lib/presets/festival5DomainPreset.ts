@@ -1,5 +1,4 @@
-import { OntologyNode, OntologyEdge, OntologyGroup, VerificationStatus } from '@/lib/ontology.types';
-import { NodeOverride } from '@/hooks/useGraphCustomization';
+import { OntologyNode, OntologyEdge, OntologyGroup, VerificationStatus, NodeOverride } from '@/lib/ontology.types';
 import { SimulationEntry } from '@/types';
 
 export interface FestivalDomainChild {

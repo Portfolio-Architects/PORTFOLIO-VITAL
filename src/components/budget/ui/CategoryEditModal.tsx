@@ -429,7 +429,7 @@ function CategoryEditModalComponent({ isOpen, onClose, categoriesLength, initial
                   const displayAmount = hasCalculations ? autoComputedAmount?.toLocaleString() : sub.amount;
 
                   return (
-                  <div key={sub.id || `subitem-${sub.prefix || ''}-${sub.name || ''}-${idx}`} className="flex flex-col gap-2 transition-all duration-200 bg-white p-2.5 rounded-lg border border-gray-200 shadow-sm relative mb-2">
+                  <div key={sub.id || `subitem-${sub.prefix || ''}-${sub.name || ''}-${idx}`} className="flex flex-col gap-2 transition-colors duration-200 bg-white p-2.5 rounded-lg border border-gray-200 shadow-sm relative mb-2">
                     <div className="flex gap-2 items-center">
                       <input type="text" value={sub.prefix} onChange={e => {
                           const newSubs = [...catSubItems];

@@ -167,7 +167,6 @@ describe('Milestone 1 Empirical Verification Suite', () => {
       'src/hooks/useBudget.ts',
       'src/hooks/useContacts.ts',
       'src/hooks/useInventory.ts',
-      'src/hooks/useNotificationAlerts.ts',
       'src/hooks/useAIChat.ts',
       'src/hooks/useBudgetSimulator.ts',
       'src/components/WikiEditor.tsx'

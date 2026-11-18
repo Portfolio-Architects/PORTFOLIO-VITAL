@@ -173,7 +173,7 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
         label: '초과 경고',
         color: 'bg-rose-50 border-rose-200/80 text-rose-700',
         icon: <AlertTriangle size={13} className="text-rose-600" />,
-        desc: '최종 예상 잔액이 마이너스로 예산 초과가 발생합니다.',
+        desc: '최종 예상 잔액 마이너스 · 예산 초과',
       };
     }
     if ((summary?.dailyExpenseShortfall || 0) > 0) {
@@ -181,7 +181,7 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
         label: '추가 교부 필요',
         color: 'bg-amber-50 border-amber-200/80 text-amber-800',
         icon: <AlertTriangle size={13} className="text-amber-600" />,
-        desc: `일상경비 교부 잔액이 ${(summary?.dailyExpenseShortfall || 0).toLocaleString('ko-KR')}원 부족합니다.`,
+        desc: `일상경비 교부 부족 ${(summary?.dailyExpenseShortfall || 0).toLocaleString('ko-KR')}원`,
       };
     }
     if (totalLockedAmount > 0 && finalExpectedBalance < totalLockedAmount) {
@@ -189,14 +189,14 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
         label: '잠금한도 침범',
         color: 'bg-rose-50 border-rose-200/80 text-rose-700',
         icon: <Lock size={13} className="text-rose-600" />,
-        desc: `법정 의무 잠금 한도(${totalLockedAmount.toLocaleString('ko-KR')}원) 대비 가용 잔액이 부족합니다.`,
+        desc: `법정 잠금 한도(${totalLockedAmount.toLocaleString('ko-KR')}원) 대비 잔액 부족`,
       };
     }
     return {
       label: '정상/안전',
       color: 'bg-emerald-50/70 border-emerald-200/80 text-emerald-700',
       icon: <CheckCircle2 size={13} className="text-emerald-600" />,
-      desc: '예산 집행 및 시뮬레이션 상태가 양호합니다.',
+      desc: '예산 집행 · 시뮬레이션 건전',
     };
   }, [isDeficit, summary?.dailyExpenseShortfall, totalLockedAmount, finalExpectedBalance]);
 
@@ -487,7 +487,7 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
               <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white">
                 <div className="max-h-[380px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-xs border-b border-slate-200/80 z-10 text-slate-500 font-bold whitespace-nowrap">
+                    <thead className="sticky top-0 bg-slate-50 border-b border-slate-200/80 z-10 text-slate-500 font-bold whitespace-nowrap">
                       <tr>
                         <th className="py-3 px-4 min-w-[90px]">집행일자</th>
                         <th className="py-3 px-4 min-w-[200px]">지출 목적 / 품의 내용</th>
@@ -576,7 +576,7 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
               <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white">
                 <div className="max-h-[380px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-xs border-b border-slate-200/80 z-10 text-slate-500 font-bold whitespace-nowrap">
+                    <thead className="sticky top-0 bg-slate-50 border-b border-slate-200/80 z-10 text-slate-500 font-bold whitespace-nowrap">
                       <tr>
                         <th className="py-3 px-4 min-w-[160px]">예정 지출 항목명</th>
                         <th className="py-3 px-4 text-right min-w-[110px]">단가</th>
@@ -611,7 +611,7 @@ export const StatItemDetailModal: React.FC<StatItemDetailModalProps> = React.mem
                               ₩{formatN(sim.unitPrice || 0)}
                             </td>
                             <td className="py-3 px-4 text-center align-middle tabular-nums text-slate-700 font-bold whitespace-nowrap">
-                              {sim.quantity || 1}개
+                              <span>{sim.quantity || 1}</span>개
                             </td>
                             <td className="py-3 px-4 text-right align-middle font-extrabold tabular-nums text-indigo-600 text-sm whitespace-nowrap">
                               ₩{formatN(sim.amount)}

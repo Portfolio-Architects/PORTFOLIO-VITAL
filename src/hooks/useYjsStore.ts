@@ -50,12 +50,14 @@ let globalPartyKitProvider: YPartyKitProvider | null = null;
 if (typeof window !== 'undefined') {
   window.__globalYDoc = globalYDoc;
 
-  // Initialize global IndexedDB persistence once
-  if (!window.__globalYIndexeddb) {
-    globalIndexeddbProvider = new IndexeddbPersistence('hchps-global', globalYDoc);
-    window.__globalYIndexeddb = globalIndexeddbProvider;
-  } else {
-    globalIndexeddbProvider = window.__globalYIndexeddb;
+  // Initialize global IndexedDB persistence once (guarded for JSDOM / restricted environments)
+  if (typeof indexedDB !== 'undefined') {
+    if (!window.__globalYIndexeddb) {
+      globalIndexeddbProvider = new IndexeddbPersistence('hchps-global', globalYDoc);
+      window.__globalYIndexeddb = globalIndexeddbProvider;
+    } else {
+      globalIndexeddbProvider = window.__globalYIndexeddb;
+    }
   }
 
   // Handle periodic compaction

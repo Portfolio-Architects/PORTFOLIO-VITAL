@@ -2,11 +2,11 @@ import React from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { WorkspaceView } from '@/components/WorkspaceView';
-import { MindMap3DSkeleton } from '@/components/skeletons/MindMap3DSkeleton';
+import { PortfolioDashboardViewSkeleton } from '@/components/skeletons/PortfolioDashboardViewSkeleton';
 import { YangjaeFestivalSkeleton } from '@/components/skeletons/YangjaeFestivalSkeleton';
 import { useYangjaeFestival } from '@/hooks/useYangjaeFestival';
 import { useQuery } from '@tanstack/react-query';
-import DefaultMindMapNoteEditor, { MindMapNoteEditor } from '@/components/mindmap/ui/MindMapNoteEditor';
+import { SegmentedTabs, Badge, NumericText, KpiStatCard, Modal } from '@/components/ui';
 
 // Mock tanstack useQuery to inspect arguments
 jest.mock('@tanstack/react-query', () => {
@@ -258,11 +258,11 @@ describe('Auditor M2 Forensic Verification Suite', () => {
   });
 
   describe('3. Skeleton UI Guards (Rule H)', () => {
-    it('renders MindMap3DSkeleton with high-contrast layout and data-testid', () => {
-      render(<MindMap3DSkeleton />);
-      const skeleton = screen.getByTestId('mindmap-skeleton');
-      expect(skeleton).toBeInTheDocument();
-      expect(skeleton).toHaveClass('animate-pulse');
+    it('renders PortfolioDashboardViewSkeleton with zero-CLS KPI placeholders', () => {
+      render(<PortfolioDashboardViewSkeleton />);
+      const kpiCards = screen.getAllByTestId('dashboard-skeleton-kpi-card');
+      expect(kpiCards).toHaveLength(4);
+      expect(screen.queryByTestId('dashboard-skeleton-contacts')).not.toBeInTheDocument();
     });
 
     it('renders YangjaeFestivalSkeleton with high-contrast layout and data-testid', () => {
@@ -273,161 +273,62 @@ describe('Auditor M2 Forensic Verification Suite', () => {
     });
   });
 
-  describe('4. MindMapNoteEditor Keystroke Debounce & Auto-Flush', () => {
-    it('debounces title updates by 250ms and flushes immediately on blur', () => {
-      jest.useFakeTimers();
-      const onUpdateTitle = jest.fn();
-      const onUpdateMemo = jest.fn();
-
-      const mockNode: any = {
-        id: 'node-1',
-        label: 'Initial Title',
-        memo: 'Initial Memo',
-      };
+  describe('4. VLDS Localhost Design System Primitives Integrity', () => {
+    it('renders SegmentedTabs with active selection, preload hover callback, and tabular badge count', () => {
+      const onChange = jest.fn();
+      const onPreload = jest.fn();
+      const items = [
+        { id: 'budget', label: '예산 대조보드', badgeCount: 12 },
+        { id: 'simulator', label: '예산 시뮬레이터', badgeCount: 3 },
+      ] as const;
 
       render(
-        <MindMapNoteEditor
-          node={mockNode}
-          allNodes={[mockNode]}
-          allEdges={[]}
-          onClose={jest.fn()}
-          onSelectNode={jest.fn()}
-          onUpdateTitle={onUpdateTitle}
-          onUpdateMemo={onUpdateMemo}
-          onUpdateColor={jest.fn()}
-          onAddChildNode={jest.fn()}
-          onDeleteNode={jest.fn()}
-          onConnectNode={jest.fn()}
-          onDisconnectNode={jest.fn()}
+        <SegmentedTabs
+          items={items}
+          activeId="budget"
+          onChange={onChange}
+          onPreload={onPreload}
         />
       );
 
-      const titleInput = screen.getByDisplayValue('Initial Title');
+      const simTab = screen.getByRole('button', { name: /예산 시뮬레이터/ });
+      fireEvent.mouseEnter(simTab);
+      expect(onPreload).toHaveBeenCalledWith('simulator');
 
-      // Type new title
-      fireEvent.change(titleInput, { target: { value: 'Updated Title' } });
-
-      // Before 250ms expires, onUpdateTitle should NOT be called yet
-      expect(onUpdateTitle).not.toHaveBeenCalled();
-
-      // Advance by 100ms
-      act(() => {
-        jest.advanceTimersByTime(100);
-      });
-      expect(onUpdateTitle).not.toHaveBeenCalled();
-
-      // Trigger onBlur -> MUST flush immediately
-      act(() => {
-        fireEvent.blur(titleInput);
-      });
-      expect(onUpdateTitle).toHaveBeenCalledWith('node-1', 'Updated Title');
-
-      jest.useRealTimers();
+      fireEvent.click(simTab);
+      expect(onChange).toHaveBeenCalledWith('simulator');
     });
 
-    it('flushes pending memo updates on unmount', () => {
-      jest.useFakeTimers();
-      const onUpdateTitle = jest.fn();
-      const onUpdateMemo = jest.fn();
+    it('renders NumericText, KpiStatCard, and domain Badges with tabular-nums formatting', () => {
+      render(
+        <div>
+          <NumericText value={17339000} unit="원" />
+          <KpiStatCard label="본청 가용잔액" value="7,440,600원" subLabel="달성 108.5%" />
+          <Badge variant="daily">일상경비</Badge>
+          <Badge variant="general">일반지출</Badge>
+        </div>
+      );
 
-      const mockNode: any = {
-        id: 'node-2',
-        label: 'Node 2',
-        memo: 'Original Memo',
-      };
+      expect(screen.getByText('17,339,000')).toBeInTheDocument();
+      expect(screen.getByText('본청 가용잔액')).toBeInTheDocument();
+      expect(screen.getByText('일상경비')).toBeInTheDocument();
+      expect(screen.getByText('일반지출')).toBeInTheDocument();
+    });
 
+    it('closes VLDS Modal immediately on Escape key and cleans up body overflow', () => {
+      const onClose = jest.fn();
       const { unmount } = render(
-        <MindMapNoteEditor
-          node={mockNode}
-          allNodes={[mockNode]}
-          allEdges={[]}
-          onClose={jest.fn()}
-          onSelectNode={jest.fn()}
-          onUpdateTitle={onUpdateTitle}
-          onUpdateMemo={onUpdateMemo}
-          onUpdateColor={jest.fn()}
-          onAddChildNode={jest.fn()}
-          onDeleteNode={jest.fn()}
-          onConnectNode={jest.fn()}
-          onDisconnectNode={jest.fn()}
-        />
+        <Modal isOpen={true} onClose={onClose} title="예산 상세 검증">
+          <div>검증 본문</div>
+        </Modal>
       );
 
-      const memoTextarea = screen.getByDisplayValue('Original Memo');
-      fireEvent.change(memoTextarea, { target: { value: 'Unsaved typing in progress...' } });
+      expect(document.body.style.overflow).toBe('hidden');
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(onClose).toHaveBeenCalledTimes(1);
 
-      expect(onUpdateMemo).not.toHaveBeenCalled();
-
-      // Unmount while timer is still running
-      act(() => {
-        unmount();
-      });
-
-      // MUST flush pending update to onUpdateMemo on unmount!
-      expect(onUpdateMemo).toHaveBeenCalledWith('node-2', 'Unsaved typing in progress...');
-
-      jest.useRealTimers();
-    });
-
-    it('exports MindMapNoteEditor as default export', () => {
-      expect(DefaultMindMapNoteEditor).toBeDefined();
-      expect(DefaultMindMapNoteEditor).toBe(MindMapNoteEditor);
-    });
-
-    it('flushes pending edits to previous node on node switch without cross-node pollution', () => {
-      jest.useFakeTimers();
-      const onUpdateTitle = jest.fn();
-      const onUpdateMemo = jest.fn();
-
-      const nodeA: any = { id: 'node-a', label: 'Node A Label', memo: 'Node A Memo' };
-      const nodeB: any = { id: 'node-b', label: 'Node B Label', memo: 'Node B Memo' };
-
-      const { rerender } = render(
-        <MindMapNoteEditor
-          node={nodeA}
-          allNodes={[nodeA, nodeB]}
-          allEdges={[]}
-          onClose={jest.fn()}
-          onSelectNode={jest.fn()}
-          onUpdateTitle={onUpdateTitle}
-          onUpdateMemo={onUpdateMemo}
-          onUpdateColor={jest.fn()}
-          onAddChildNode={jest.fn()}
-          onDeleteNode={jest.fn()}
-          onConnectNode={jest.fn()}
-          onDisconnectNode={jest.fn()}
-        />
-      );
-
-      const titleInput = screen.getByDisplayValue('Node A Label');
-      fireEvent.change(titleInput, { target: { value: 'Node A Modified Draft' } });
-
-      // Before timer expires, switch node prop to nodeB
-      rerender(
-        <MindMapNoteEditor
-          node={nodeB}
-          allNodes={[nodeA, nodeB]}
-          allEdges={[]}
-          onClose={jest.fn()}
-          onSelectNode={jest.fn()}
-          onUpdateTitle={onUpdateTitle}
-          onUpdateMemo={onUpdateMemo}
-          onUpdateColor={jest.fn()}
-          onAddChildNode={jest.fn()}
-          onDeleteNode={jest.fn()}
-          onConnectNode={jest.fn()}
-          onDisconnectNode={jest.fn()}
-        />
-      );
-
-      // Pending title edit must be flushed to node-a, NOT node-b!
-      expect(onUpdateTitle).toHaveBeenCalledWith('node-a', 'Node A Modified Draft');
-      expect(onUpdateTitle).not.toHaveBeenCalledWith('node-b', expect.anything());
-
-      // Editor should now display nodeB's label
-      expect(screen.getByDisplayValue('Node B Label')).toBeInTheDocument();
-
-      jest.useRealTimers();
+      unmount();
+      expect(document.body.style.overflow).toBe('');
     });
   });
 });

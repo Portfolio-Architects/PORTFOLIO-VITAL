@@ -24,7 +24,7 @@ export function SplashView() {
           </p>
           <div className="h-px bg-slate-100 my-1 w-full max-w-[180px] mx-auto" />
           <p className="text-[11px] text-slate-500 font-medium leading-relaxed max-w-[260px] mx-auto">
-            로컬 단일 진실 공급원(SSOT) 및 지능형 워크스페이스를 연결하고 있습니다.
+            로컬 SSOT · 워크스페이스 연결 중
           </p>
         </div>
       </div>

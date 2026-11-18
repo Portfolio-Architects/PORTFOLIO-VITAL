@@ -281,7 +281,7 @@ function AIAssistantModalComponent({ isOpen, onClose, contextData, appMode = 'VI
         className="flex-1 flex flex-col glass-panel rounded-2xl shadow-2xl border border-white/30 overflow-hidden h-full"
       >
         {/* Header */}
-        <div className="flex justify-between items-center px-5 py-3.5 border-b border-slate-200/50 bg-white/30 backdrop-blur-xs">
+        <div className="flex justify-between items-center px-5 py-3.5 border-b border-slate-200/50 bg-white/95">
           <div className="flex items-center gap-2 group">
             <Sparkles size={18} className="text-blue-500 group-hover:rotate-12 transition-transform duration-300" />
             <div className="flex flex-col">
@@ -374,8 +374,8 @@ function AIAssistantModalComponent({ isOpen, onClose, contextData, appMode = 'VI
         </div>
   
         {/* Bottom Input Area */}
-        <div className="p-3 bg-white/30 backdrop-blur-xs border-t border-slate-200/50">
-          <form onSubmit={handleSubmit} className="relative flex items-center bg-white/50 backdrop-blur-xs rounded-xl border border-slate-200 focus-within:border-blue-500/80 focus-within:ring-2 focus-within:ring-blue-500/15 focus-within:bg-white transition-all shadow-3xs">
+        <div className="p-3 bg-white/95 border-t border-slate-200/50">
+          <form onSubmit={handleSubmit} className="relative flex items-center bg-white/95 rounded-xl border border-slate-200 focus-within:border-blue-500/80 focus-within:ring-2 focus-within:ring-blue-500/15 focus-within:bg-white transition-colors duration-150 shadow-3xs">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}

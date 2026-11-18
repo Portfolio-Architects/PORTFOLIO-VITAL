@@ -104,7 +104,7 @@ function WeeklyReportViewComponent({ addSignal }: WeeklyReportViewProps) {
           <button
             onClick={handleOpenFilePicker}
             disabled={isProcessing}
-            className="mt-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:opacity-90 transition-all font-semibold"
+            className="mt-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:opacity-90 transition-colors duration-150 font-semibold"
           >
             {isProcessing ? '스캔 분석 중...' : 'PDF 파일 선택하기'}
           </button>
@@ -130,7 +130,7 @@ function WeeklyReportViewComponent({ addSignal }: WeeklyReportViewProps) {
              </button>
              <button 
                onClick={handleSendToSignal}
-               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-bold shadow-md hover:opacity-90 transition-all flex items-center gap-2"
+               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-bold shadow-md hover:opacity-90 transition-colors duration-150 flex items-center gap-2"
              >
                데이터 메모로 전송하기
              </button>

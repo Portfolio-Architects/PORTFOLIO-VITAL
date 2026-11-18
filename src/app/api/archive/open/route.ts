@@ -4,6 +4,80 @@ import fs from 'fs';
 import path from 'path';
 
 const ARCHIVE_ROOT = path.resolve('F:\\_Organized_Archive');
+const DESKTOP_ROOT = path.resolve('D:\\Desktop');
+const ALLOWED_ROOTS = [ARCHIVE_ROOT, DESKTOP_ROOT];
+
+/**
+ * Validates that the requested target path resolves strictly within
+ * the authorized roots (F:\_Organized_Archive or D:\Desktop).
+ * Defends against:
+ * 1. Poison null bytes (\0, %00, %2500)
+ * 2. URL-encoded path traversal (%2e%2e%2f, %2e%2e%5c, ..%2f, multi-encoded %252e%252e)
+ * 3. Prefix spoofing attacks (e.g. D:\DesktopFake)
+ * 4. Case-insensitive Windows filesystem semantics
+ */
+export function resolveAndValidatePath(
+  rawPath: string
+): { ok: true; fullPath: string } | { ok: false; status: number; error: string } {
+  if (!rawPath || typeof rawPath !== 'string') {
+    return { ok: false, status: 400, error: 'Missing path' };
+  }
+
+  // Reject poison null bytes before URI decoding
+  if (rawPath.includes('\0') || /%00/i.test(rawPath)) {
+    return { ok: false, status: 400, error: 'Null bytes forbidden in path' };
+  }
+
+  // Safely decode URI components recursively (up to 3 passes to catch multi-encoded traversal)
+  let decodedPath = rawPath;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const next = decodeURIComponent(decodedPath);
+      if (next === decodedPath) break;
+      decodedPath = next;
+    } catch {
+      // If the initial rawPath fails decodeURIComponent, reject with 400 for malformed URI encoding
+      if (i === 0) {
+        return { ok: false, status: 400, error: 'Malformed URI encoding in path' };
+      }
+      // If a subsequent iteration fails (e.g. decoded string has literal '%'), terminate recursion
+      break;
+    }
+  }
+
+  // Reject poison null bytes after URI decoding
+  if (decodedPath.includes('\0')) {
+    return { ok: false, status: 400, error: 'Null bytes forbidden in path' };
+  }
+
+  // Resolve absolute path or relative to ARCHIVE_ROOT
+  const fullPath = path.isAbsolute(decodedPath)
+    ? path.resolve(decodedPath)
+    : path.resolve(ARCHIVE_ROOT, decodedPath);
+
+  const normalizedTarget = path.normalize(fullPath).toLowerCase();
+
+  const isAllowed = ALLOWED_ROOTS.some((root) => {
+    const normalizedRoot = path.normalize(root).toLowerCase();
+    const rootWithSep = normalizedRoot.endsWith(path.sep)
+      ? normalizedRoot
+      : normalizedRoot + path.sep;
+    return (
+      normalizedTarget === normalizedRoot ||
+      normalizedTarget.startsWith(rootWithSep)
+    );
+  });
+
+  if (!isAllowed) {
+    return {
+      ok: false,
+      status: 403,
+      error: 'Forbidden path traversal: Path outside allowed roots (F:\\_Organized_Archive, D:\\Desktop)',
+    };
+  }
+
+  return { ok: true, fullPath };
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,31 +95,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true, mode: 'reindex' });
     }
 
-    const relPath = body.path || '';
-    if (!relPath) {
-      return NextResponse.json({ error: 'Missing path' }, { status: 400 });
+    const rawPath = body.path || '';
+    const validation = resolveAndValidatePath(rawPath);
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: validation.status });
     }
 
-    const fullPath = path.resolve(ARCHIVE_ROOT, relPath);
-    if (!fullPath.startsWith(ARCHIVE_ROOT + path.sep) && fullPath !== ARCHIVE_ROOT) {
-      return NextResponse.json({ error: 'Forbidden path traversal' }, { status: 403 });
-    }
+    const { fullPath } = validation;
 
     if (!fs.existsSync(fullPath)) {
-      return NextResponse.json({ error: 'Target file does not exist' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Target file does not exist', path: fullPath },
+        { status: 404 }
+      );
     }
 
+    const isDir = fs.statSync(fullPath).isDirectory();
+
     if (mode === 'folder') {
-      const child = spawn('explorer.exe', [`/select,${fullPath}`], {
+      const targetArg = isDir ? fullPath : `/select,${fullPath}`;
+      const child = spawn('explorer.exe', [targetArg], {
         detached: true,
         stdio: 'ignore',
       });
       child.unref();
     } else {
-      const child = spawn('cmd.exe', ['/c', 'start', '""', fullPath], {
+      const child = spawn('explorer.exe', [fullPath], {
         detached: true,
         stdio: 'ignore',
-        windowsVerbatimArguments: false,
       });
       child.unref();
     }

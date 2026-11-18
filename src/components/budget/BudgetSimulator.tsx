@@ -7,6 +7,7 @@ import { SimulationBurnUpChart } from './ui/SimulationBurnUpChart';
 import { SimulationInputForm } from './ui/SimulationInputForm';
 import { SimulationResultTable } from './ui/SimulationResultTable';
 import { SimulationEntry } from '@/types';
+import { SectionHeader } from '@/components/ui';
 import { Sparkles, RotateCcw, ShieldAlert, CheckCircle2 } from 'lucide-react';
 export const BudgetSimulator: React.FC = React.memo(() => {
   const {
@@ -84,56 +85,53 @@ export const BudgetSimulator: React.FC = React.memo(() => {
 
   return (
     <div className="w-full space-y-6 text-slate-800">
-      {/* 1. Minimalist Top Header Bar */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-5 md:p-6 shadow-2xs flex items-center justify-between flex-wrap gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">예산 시뮬레이터</h2>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 border border-slate-200/80 text-slate-600 font-mono">
-              Commitment Balance Engine
-            </span>
+      {/* 1. Minimalist Top Header Bar (VLDS SectionHeader) */}
+      <div className="bg-white border border-slate-200/80 rounded-xl p-5 md:p-6 shadow-2xs">
+        <SectionHeader
+          title="예산 시뮬레이터"
+          subtitle="집행 잔액 - 예정액 · 과목별 예상 잔액"
+          noBorder
+          titleClassName="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight"
+          badge={
             <span className="text-xs sm:text-sm text-slate-400 font-medium hidden sm:inline">
               {projectSummaries.length}개 세부사업 · {statItemSummaries.length}개 통계목 · {entries.length}건 예정
             </span>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500">
-            현재 집행 잔액을 기준으로 미집행 확정 지출 예정액을 차감하여 세부사업 및 통계목별 예상 잔액과 추가 필요 예산을 실시간 시뮬레이션합니다.
-          </p>
-        </div>
+          }
+          actions={
+            <>
+              {deficitProjectsCount > 0 ? (
+                <div className="flex items-center gap-1.5 px-3.5 py-2 bg-rose-50 border border-rose-200/80 rounded-lg text-rose-700 text-xs font-bold">
+                  <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{deficitProjectsCount}개 사업 초과 경고</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50/80 border border-emerald-200/70 rounded-lg text-emerald-700 text-xs font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>전 사업 잔액 안전</span>
+                </div>
+              )}
 
-        {/* Global Preset & Status Summary Header Actions */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {deficitProjectsCount > 0 ? (
-            <div className="flex items-center gap-1.5 px-3.5 py-2 bg-rose-50 border border-rose-200/80 rounded-lg text-rose-700 text-xs font-bold">
-              <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>{deficitProjectsCount}개 세부사업 예산 초과 경고</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50/80 border border-emerald-200/70 rounded-lg text-emerald-700 text-xs font-bold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>전체 세부사업 안전 잔액 수지</span>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={loadTestPreset}
-            className="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-            title="표준 보건소 & AI 메디헬스 테스트 지출 항목을 로드합니다."
-          >
-            <Sparkles className="w-4 h-4" />
-            테스트 프리셋 로드
-          </button>
-          <button
-            type="button"
-            onClick={resetEntries}
-            className="px-3.5 py-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-600 hover:text-slate-900 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-            title="등록된 시뮬레이션 지출 내역을 모두 초기화합니다."
-          >
-            <RotateCcw className="w-4 h-4" />
-            초기화
-          </button>
-        </div>
+              <button
+                type="button"
+                onClick={loadTestPreset}
+                className="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                title="표준 테스트 항목 로드"
+              >
+                <Sparkles className="w-4 h-4" />
+                프리셋 로드
+              </button>
+              <button
+                type="button"
+                onClick={resetEntries}
+                className="px-3.5 py-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-600 hover:text-slate-900 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="시뮬레이션 항목 초기화"
+              >
+                <RotateCcw className="w-4 h-4" />
+                초기화
+              </button>
+            </>
+          }
+        />
       </div>
 
       {/* 1-1. Risk Monitoring Quick Filter Chips (Minimalist Bar) */}
@@ -145,11 +143,11 @@ export const BudgetSimulator: React.FC = React.memo(() => {
                 <ShieldAlert className="w-4 h-4" />
               </div>
               <span className="text-sm font-bold text-slate-900">
-                3분기 불용 위험 사업 ({riskProjects.length}개) — 집중 소진 계획 수립 권고
+                불용 위험 사업 ({riskProjects.length}개)
               </span>
             </div>
             <span className="text-xs text-slate-400 font-medium">
-              클릭 시 해당 사업으로 폼 자동 매핑
+              클릭 시 입력폼 자동 선택
             </span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -230,7 +228,7 @@ export const BudgetSimulator: React.FC = React.memo(() => {
 
       {/* 5. Settlement Confirmation Dialog */}
       {settlingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl border border-slate-200/90 space-y-4">
             <div className="flex items-center gap-3 pb-3.5 border-b border-slate-100">
               <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
@@ -238,7 +236,7 @@ export const BudgetSimulator: React.FC = React.memo(() => {
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900">실제 지출 집행 (정산) 전환</h3>
-                <p className="text-xs text-slate-500">지출 계획을 실제 e-호조 집행 내역으로 영속 등록합니다.</p>
+                <p className="text-xs text-slate-500">선택 항목 → e-호조 실집행 전환</p>
               </div>
             </div>
 

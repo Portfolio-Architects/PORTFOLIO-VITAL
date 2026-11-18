@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useContext } from 'react';
+import { useQuery, QueryClientContext } from '@tanstack/react-query';
+import { queryClient as defaultQueryClient } from '@/lib/query-client';
 import { WorkingMemoryCategory, WorkingMemoryMemo, WorkingMemorySource } from '@/types';
 import { readSheet, addRow, updateRow, deleteRow } from '@/lib/sheets-api';
 import {
@@ -18,7 +20,6 @@ const PIN_STORAGE_KEY = 'hchps-memo-pin';
 const TOMBSTONE_STORAGE_KEY = 'hchps-global-tombstones';
 
 let memoryStore: WorkingMemoryMemo[] | null = null;
-let hasFetchedFromServer = false;
 const storeListeners = new Set<(memos: WorkingMemoryMemo[]) => void>();
 
 function readLocalTombstoneIds(): string[] {
@@ -100,12 +101,19 @@ function updateStoreAndNotify(nextMemos: WorkingMemoryMemo[]) {
       // Ignore storage quota errors
     }
   }
+  try {
+    defaultQueryClient.setQueryData(['WORKING_MEMORY'], nextMemos);
+  } catch {
+    // Ignore if default query client is uninitialized
+  }
   storeListeners.forEach((listener) => listener(nextMemos));
 }
 
 export function resetWorkingMemoryStoreForTest(seed: WorkingMemoryMemo[] = DEFAULT_WORKING_MEMORY_MEMOS) {
-  hasFetchedFromServer = false;
   updateStoreAndNotify([...seed]);
+  try {
+    defaultQueryClient.setQueryData(['WORKING_MEMORY'], [...seed]);
+  } catch {}
 }
 
 export interface UseWorkingMemoryOptions {
@@ -115,6 +123,9 @@ export interface UseWorkingMemoryOptions {
 
 export function useWorkingMemory(options: UseWorkingMemoryOptions = {}) {
   const { contextModule = 'dashboard', autoFetch = true } = options;
+  const queryClientContext = useContext(QueryClientContext);
+  const queryClient = queryClientContext || defaultQueryClient;
+
   const [memos, setMemos] = useState<WorkingMemoryMemo[]>(() => loadInitialStore());
   const [isSyncingInbox, setIsSyncingInbox] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
@@ -138,19 +149,40 @@ export function useWorkingMemory(options: UseWorkingMemoryOptions = {}) {
       const remote = await readSheet<WorkingMemoryMemo>(SHEET_NAME);
       if (Array.isArray(remote) && remote.length > 0) {
         const deletedSet = new Set(readLocalTombstoneIds());
-        updateStoreAndNotify(remote.filter((m) => !deletedSet.has(m.id)));
+        const filtered = remote.filter((m) => !deletedSet.has(m.id));
+        updateStoreAndNotify(filtered);
+        queryClient.setQueryData(['WORKING_MEMORY'], filtered);
       }
     } catch {
       // Offline or test environment without fetch: keep current local/seed store
     }
-  }, []);
+  }, [queryClient]);
 
-  useEffect(() => {
-    if (!autoFetch || hasFetchedFromServer) return;
-    if (typeof fetch !== 'function') return;
-    hasFetchedFromServer = true;
-    void refreshFromSSOT();
-  }, [autoFetch, refreshFromSSOT]);
+  // Route re-entry and stale revalidation query with 5-second staleTime
+  useQuery({
+    queryKey: ['WORKING_MEMORY'],
+    queryFn: async () => {
+      if (typeof document !== 'undefined' && document.hidden) return memoryStore || loadInitialStore();
+      if (typeof fetch !== 'function') return memoryStore || loadInitialStore();
+      try {
+        const remote = await readSheet<WorkingMemoryMemo>(SHEET_NAME);
+        if (Array.isArray(remote) && remote.length > 0) {
+          const deletedSet = new Set(readLocalTombstoneIds());
+          const filtered = remote.filter((m) => !deletedSet.has(m.id));
+          updateStoreAndNotify(filtered);
+          return filtered;
+        }
+      } catch {
+        // Offline or test environment
+      }
+      return memoryStore || loadInitialStore();
+    },
+    enabled: autoFetch,
+    staleTime: 5000,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: false,
+  }, queryClient);
+
 
   const addMemo = useCallback(
     async (

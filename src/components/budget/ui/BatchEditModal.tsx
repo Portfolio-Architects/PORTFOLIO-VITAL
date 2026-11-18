@@ -51,7 +51,7 @@ function BatchEditModalComponent({ isOpen, onClose, title, categories, onApply }
     onApply(updates, hasBatchRatios ? batchFundingSplits : undefined);
   };
 
-  const inputClass = "w-full border-slate-200 border rounded-lg px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 outline-none transition-all bg-white";
+  const inputClass = "w-full border-slate-200 border rounded-lg px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 outline-none transition-colors duration-150 bg-white";
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`[${title}] 일괄 수정`} size="md">

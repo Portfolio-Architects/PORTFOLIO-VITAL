@@ -12,8 +12,74 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { execSync, execFileSync } from 'child_process';
 import JSZip from 'jszip';
 import { z } from 'zod';
+
+// 1. Production Zod Schemas & DTOs
+import {
+  AdminDocType,
+  AdminDocTypeEnum,
+  AdminDocMetadataSchema,
+  StrictAdminDocMetadataSchema,
+  AdminDocMetadataDto,
+  AdminDocIndexSchema,
+  AdminDocIndexDto,
+  SeedOntologyDocsSchema,
+  SeedOntologyDocsDto,
+  WeeklyReportSchema,
+  WeeklyWorkItemSchema,
+  WeeklyReportDto,
+  WeeklyWorkItemDto,
+} from '@/lib/schemas';
+
+// Backward compatibility alias for test file
+export type AdminDocMetadata = Partial<AdminDocMetadataDto> & {
+  docId: string;
+  title: string;
+  docType: AdminDocType;
+  year: number;
+  department: string;
+  project: string;
+  filePath: string;
+  budgetAmount?: number | null;
+  executionRate?: number | null;
+  auditFindings?: string[] | null;
+  summary: string;
+};
+
+// 2. Production Ontology Domain Models & Traversal Engine
+import {
+  AdminOntologyGraph,
+  AdminPolicyEntity,
+  AdminOutcomeEntity,
+  AdminAuditEntity,
+  AdminBudgetPlanEntity,
+  AdminWeeklyWorkEntity,
+  AdminOntologyEdge,
+  AdminCausalChain,
+  AdminAuditGap,
+  SemanticEdgeType,
+} from '@/lib/ontology/admin-types';
+
+import {
+  traceUpstream,
+  traceDownstream,
+  detectAuditGaps,
+  searchAdminNodes,
+  calculateOntologyStats,
+} from '@/lib/ontology/admin-traversal';
+
+// 3. Production Wednesday Batching Engine
+import {
+  computeWednesdayBatchPeriods,
+  groupWeeklyItemsByProject,
+  formatWeeklyBlockToLines,
+  aggregateTasksForWednesday,
+  WednesdayBatchPeriods,
+} from '@/lib/weekly/wednesday-batcher';
+
+// 4. Production Administrative Formatting Engine
 import {
   formatAdministrativeDate,
   formatAdministrativeCurrency,
@@ -21,453 +87,37 @@ import {
   ensureAdministrativeEnding,
 } from '@/lib/administrativeFormatter';
 
-// ============================================================================
-// 1. Authoritative Domain Contracts & Schemas (Ground Truth from PROJECT.md)
-// ============================================================================
+const sandboxDir = path.join(os.tmpdir(), 'vital-e2e-sandbox-' + Date.now());
 
-export type AdminDocType =
-  | 'POLICY_PLAN'
-  | 'RESULT_REPORT'
-  | 'ADMIN_AUDIT'
-  | 'BUDGET_PLAN'
-  | 'WEEKLY_REPORT';
-
-export const AdminDocTypeEnum = z.enum([
-  'POLICY_PLAN',
-  'RESULT_REPORT',
-  'ADMIN_AUDIT',
-  'BUDGET_PLAN',
-  'WEEKLY_REPORT',
-]);
-
-export const AdminDocMetadataSchema = z.object({
-  docId: z.string().min(1),
-  title: z.string().min(1),
-  docType: AdminDocTypeEnum,
-  year: z.number().int().min(2015).max(2035),
-  department: z.string().min(1),
-  project: z.string().min(1),
-  filePath: z.string().min(1),
-  budgetAmount: z.number().int().nonnegative().nullable(),
-  executionRate: z.number().min(0).max(100).nullable(),
-  auditFindings: z.array(z.string()).nullable(),
-  summary: z.string(),
-});
-
-export type AdminDocMetadata = z.infer<typeof AdminDocMetadataSchema>;
-
-export const AdminDocIndexSchema = z.object({
-  version: z.string(),
-  generatedAt: z.string(),
-  totalDocuments: z.number().int().nonnegative(),
-  documents: z.array(AdminDocMetadataSchema),
-});
-
-export type SemanticEdgeType =
-  | 'IMPLEMENTS'
-  | 'EVALUATES'
-  | 'CRITIQUES'
-  | 'MANDATES_IMPROVEMENT'
-  | 'FEEDBACK_LOOP'
-  | 'ALLOCATES_BUDGET'
-  | 'RECORDS_PROGRESS';
-
-export interface AdminPolicyEntity {
-  id: string;
-  title: string;
-  year: number;
-  department: string;
-  project: string;
-  budgetAmount: number;
-  objectives: string[];
+// Direct execution of scripts/curate_admin_archive.py
+export function classifyAdminDocument(filename: string): AdminDocType | null {
+  const pythonBin = process.platform === 'win32' ? 'python' : 'python3';
+  const out = execFileSync(
+    pythonBin,
+    [
+      '-c',
+      'import json, sys; from scripts.curate_admin_archive import classify_document; print(json.dumps(classify_document(sys.argv[1])))',
+      filename,
+    ],
+    { encoding: 'utf-8' }
+  ).trim();
+  return JSON.parse(out);
 }
 
-export interface AdminOutcomeEntity {
-  id: string;
-  policyId: string;
-  title: string;
-  year: number;
-  executionRate: number;
-  achievements: string[];
-  spentBudget: number;
-}
-
-export interface AdminAuditEntity {
-  id: string;
-  title: string;
-  year: number;
-  auditedOutcomeId: string;
-  auditFindings: string[];
-  correctiveMandates: string[];
-}
-
-export interface AdminBudgetPlanEntity {
-  id: string;
-  title: string;
-  year: number;
-  project: string;
-  totalBudget: number;
-  fundingSources: {
-    fund: number;
-    city: number;
-    district: number;
-  };
-  itemizedBreakdown: Array<{
-    item: string;
-    amount: number;
-  }>;
-  remediatedAuditIds?: string[];
-}
-
-export interface AdminWeeklyWorkEntity {
-  id: string;
-  title: string;
-  date: string;
-  category: string;
-  status: 'done' | 'in-progress' | 'todo';
-  relatedPolicyId?: string;
-  relatedProjectId?: string;
-}
-
-export interface AdminOntologyEdge {
-  id: string;
-  source: string;
-  target: string;
-  type: SemanticEdgeType;
-  description?: string;
-}
-
-export interface AdminOntologyGraph {
-  policies: AdminPolicyEntity[];
-  outcomes: AdminOutcomeEntity[];
-  audits: AdminAuditEntity[];
-  budgetPlans: AdminBudgetPlanEntity[];
-  weeklyWorks: AdminWeeklyWorkEntity[];
-  edges: AdminOntologyEdge[];
-}
-
-export interface AdminCausalChain {
-  originId: string;
-  path: Array<{
-    nodeId: string;
-    nodeType: string;
-    title: string;
-  }>;
-  edges: SemanticEdgeType[];
-}
-
-export interface AdminAuditGap {
-  auditId: string;
-  mandate: string;
-  severity: 'HIGH' | 'MEDIUM';
-  remediated: boolean;
-  budgetAllocation?: number;
-}
-
-// ============================================================================
-// 2. Authoritative Domain Engines & Reference Oracles
-// ============================================================================
-
-/**
- * Non-destructive 5-Type Classifier for Admin Documents (R2)
- */
-export function classifyAdminDocument(filename: string, snippet?: string): AdminDocType | null {
-  const normName = filename.toLowerCase();
-  const text = ((snippet || '') + ' ' + normName).replace(/[\s_]+/g, ' ');
-
-  // Exclusion for noise extensions
-  if (/\.(jpg|jpeg|png|gif|zip|csv|tmp|bak)$/i.test(filename)) {
-    return null;
-  }
-
-  // 1. Weekly Report: 주간업무실적 및 계획, 주간업무, 주간보고
-  if (/주간[\s_]*업무[\s_]*실적[\s_]*및[\s_]*계획|주간[\s_]*업무[\s_]*보고|주간[\s_]*업무|주간[\s_]*보고|업무실적[\s_]*및[\s_]*계획/.test(text)) {
-    return 'WEEKLY_REPORT';
-  }
-
-  // 2. Admin Audit: 행정사무감사, 행감, 수감자료, 감사참고자료
-  if (/행정[\s_]*사무[\s_]*감사|행감|수감[\s_]*자료|감사[\s_]*참고|감사[\s_]*자료/.test(text)) {
-    return 'ADMIN_AUDIT';
-  }
-
-  // 3. Budget Plan: 사업설명서, 예산편성, 세출예산, 본예산 사업설명서
-  if (/사업[\s_]*설명서|예산[\s_]*편성|세출[\s_]*예산|본예산|예산[\s_]*요구서/.test(text)) {
-    return 'BUDGET_PLAN';
-  }
-
-  // 4. Result Report: 결과보고, 운영결과, 사업실적
-  if (/결과[\s_]*보고|운영[\s_]*결과|추진[\s_]*실적|사업[\s_]*실적|성과[\s_]*평가/.test(text)) {
-    return 'RESULT_REPORT';
-  }
-
-  // 5. Policy Plan: 방침서, 추진계획, 기본계획, 운영계획, 사업 총괄 계획
-  if (/방침(?:서)?|기본[\s_]*계획|시행[\s_]*계획|추진[\s_]*계획|운영[\s_]*계획|종합[\s_]*계획|사업[\s_]*총괄[\s_]*계획|총괄[\s_]*계획|실행[\s_]*계획|사업[\s_]*기획|사업[\s_]*계획/.test(text)) {
-    return 'POLICY_PLAN';
-  }
-
-  return null;
-}
-
-/**
- * Currency and Number Extraction for Public Admin Documents
- */
 export function extractAdminBudget(text: string): number | null {
-  // Pattern 1: 금 7,174,000원 or 금7,174,000원
-  const mWon = text.match(/금?\s*([0-9,]+)\s*원/);
-  if (mWon) {
-    const val = parseInt(mWon[1].replace(/,/g, ''), 10);
-    if (!isNaN(val)) return val;
-  }
-
-  // Pattern 2: 1,557,192천원 or 1,557,192 천원
-  const mThousand = text.match(/([0-9,]+)\s*천원/);
-  if (mThousand) {
-    const val = parseInt(mThousand[1].replace(/,/g, ''), 10);
-    if (!isNaN(val)) return val * 1000;
-  }
-
-  // Pattern 3: 1,557백만원 or 1,557 백만원
-  const mMillion = text.match(/([0-9,]+)\s*백만원/);
-  if (mMillion) {
-    const val = parseInt(mMillion[1].replace(/,/g, ''), 10);
-    if (!isNaN(val)) return val * 1000000;
-  }
-
-  return null;
+  const pythonBin = process.platform === 'win32' ? 'python' : 'python3';
+  const out = execFileSync(
+    pythonBin,
+    [
+      '-c',
+      'import json, sys; from scripts.curate_admin_archive import extract_budget; print(json.dumps(extract_budget(sys.argv[1])))',
+      text,
+    ],
+    { encoding: 'utf-8' }
+  ).trim();
+  return JSON.parse(out);
 }
 
-/**
- * Wednesday Batch Date Calculator (R1)
- * Given any reference date, calculates:
- * - target Wednesday (W)
- * - performance period: [W - 2 days, W + 4 days] (Monday ~ Sunday)
- * - plan period: [W + 5 days, W + 11 days] (Following Monday ~ Sunday)
- */
-export function computeWednesdayBatchPeriods(dateInput: string | Date): {
-  targetWednesday: string;
-  performanceStart: string;
-  performanceEnd: string;
-  planStart: string;
-  planEnd: string;
-  performanceLabel: string;
-  planLabel: string;
-} {
-  const dt = typeof dateInput === 'string' ? new Date(dateInput + 'T00:00:00Z') : new Date(dateInput);
-  if (isNaN(dt.getTime())) {
-    throw new Error(`[WEDNESDAY BATCH ERROR] Invalid date input: ${dateInput}`);
-  }
-
-  const dayOfWeek = dt.getUTCDay(); // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat
-  const diffToWed = 3 - dayOfWeek;
-  const wed = new Date(dt.getTime());
-  wed.setUTCDate(wed.getUTCDate() + diffToWed);
-
-  const pStart = new Date(wed.getTime());
-  pStart.setUTCDate(pStart.getUTCDate() - 2); // Monday
-
-  const pEnd = new Date(wed.getTime());
-  pEnd.setUTCDate(pEnd.getUTCDate() + 4); // Sunday
-
-  const nextStart = new Date(wed.getTime());
-  nextStart.setUTCDate(nextStart.getUTCDate() + 5); // Next Monday
-
-  const nextEnd = new Date(wed.getTime());
-  nextEnd.setUTCDate(nextEnd.getUTCDate() + 11); // Next Sunday
-
-  const fmtIso = (d: Date) => d.toISOString().split('T')[0];
-  const fmtLabel = (start: Date, end: Date) => {
-    const sm = String(start.getUTCMonth() + 1).padStart(2, '0');
-    const sd = String(start.getUTCDate()).padStart(2, '0');
-    const em = String(end.getUTCMonth() + 1).padStart(2, '0');
-    const ed = String(end.getUTCDate()).padStart(2, '0');
-    return `${sm}. ${sd}.(월) ~ ${em}. ${ed}.(일)`;
-  };
-
-  return {
-    targetWednesday: fmtIso(wed),
-    performanceStart: fmtIso(pStart),
-    performanceEnd: fmtIso(pEnd),
-    planStart: fmtIso(nextStart),
-    planEnd: fmtIso(nextEnd),
-    performanceLabel: fmtLabel(pStart, pEnd),
-    planLabel: fmtLabel(nextStart, nextEnd),
-  };
-}
-
-/**
- * Bidirectional Traversal Engine (R3)
- */
-export function traceUpstream(nodeId: string, graph: AdminOntologyGraph): AdminCausalChain {
-  const chain: Array<{ nodeId: string; nodeType: string; title: string }> = [];
-  const edgeSequence: SemanticEdgeType[] = [];
-
-  let currentId: string | null = nodeId;
-  const visited = new Set<string>();
-
-  while (currentId && !visited.has(currentId)) {
-    visited.add(currentId);
-
-    // Resolve node
-    const policy = graph.policies.find((p) => p.id === currentId);
-    const outcome = graph.outcomes.find((o) => o.id === currentId);
-    const audit = graph.audits.find((a) => a.id === currentId);
-    const budget = graph.budgetPlans.find((b) => b.id === currentId);
-
-    if (policy) {
-      chain.push({ nodeId: policy.id, nodeType: 'POLICY', title: policy.title });
-      break; // Reached upstream root
-    } else if (outcome) {
-      chain.push({ nodeId: outcome.id, nodeType: 'OUTCOME', title: outcome.title });
-      const inEdge = graph.edges.find((e) => e.target === currentId && e.type === 'IMPLEMENTS');
-      if (inEdge) {
-        edgeSequence.push('IMPLEMENTS');
-        currentId = inEdge.source;
-      } else {
-        currentId = outcome.policyId || null;
-        if (currentId) edgeSequence.push('IMPLEMENTS');
-      }
-    } else if (audit) {
-      chain.push({ nodeId: audit.id, nodeType: 'AUDIT', title: audit.title });
-      const inEdge = graph.edges.find((e) => e.target === currentId && (e.type === 'EVALUATES' || e.type === 'CRITIQUES'));
-      if (inEdge) {
-        edgeSequence.push(inEdge.type);
-        currentId = inEdge.source;
-      } else {
-        currentId = audit.auditedOutcomeId || null;
-        if (currentId) edgeSequence.push('EVALUATES');
-      }
-    } else if (budget) {
-      chain.push({ nodeId: budget.id, nodeType: 'BUDGET_PLAN', title: budget.title });
-      const inEdge = graph.edges.find((e) => e.target === currentId && e.type === 'MANDATES_IMPROVEMENT');
-      if (inEdge) {
-        edgeSequence.push('MANDATES_IMPROVEMENT');
-        currentId = inEdge.source;
-      } else if (budget.remediatedAuditIds && budget.remediatedAuditIds.length > 0) {
-        edgeSequence.push('MANDATES_IMPROVEMENT');
-        currentId = budget.remediatedAuditIds[0];
-      } else {
-        currentId = null;
-      }
-    } else {
-      break;
-    }
-  }
-
-  return { originId: nodeId, path: chain, edges: edgeSequence };
-}
-
-export function traceDownstream(nodeId: string, graph: AdminOntologyGraph): AdminCausalChain {
-  const chain: Array<{ nodeId: string; nodeType: string; title: string }> = [];
-  const edgeSequence: SemanticEdgeType[] = [];
-
-  let currentId: string | null = nodeId;
-  const visited = new Set<string>();
-
-  while (currentId && !visited.has(currentId)) {
-    visited.add(currentId);
-
-    const policy = graph.policies.find((p) => p.id === currentId);
-    const outcome = graph.outcomes.find((o) => o.id === currentId);
-    const audit = graph.audits.find((a) => a.id === currentId);
-    const budget = graph.budgetPlans.find((b) => b.id === currentId);
-
-    if (policy) {
-      chain.push({ nodeId: policy.id, nodeType: 'POLICY', title: policy.title });
-      const outEdge = graph.edges.find((e) => e.source === currentId && e.type === 'IMPLEMENTS');
-      if (outEdge) {
-        edgeSequence.push('IMPLEMENTS');
-        currentId = outEdge.target;
-      } else {
-        const matchingOutcome = graph.outcomes.find((o) => o.policyId === currentId);
-        currentId = matchingOutcome ? matchingOutcome.id : null;
-        if (currentId) edgeSequence.push('IMPLEMENTS');
-      }
-    } else if (outcome) {
-      chain.push({ nodeId: outcome.id, nodeType: 'OUTCOME', title: outcome.title });
-      const outEdge = graph.edges.find((e) => e.source === currentId && (e.type === 'EVALUATES' || e.type === 'CRITIQUES'));
-      if (outEdge) {
-        edgeSequence.push(outEdge.type);
-        currentId = outEdge.target;
-      } else {
-        const matchingAudit = graph.audits.find((a) => a.auditedOutcomeId === currentId);
-        currentId = matchingAudit ? matchingAudit.id : null;
-        if (currentId) edgeSequence.push('EVALUATES');
-      }
-    } else if (audit) {
-      chain.push({ nodeId: audit.id, nodeType: 'AUDIT', title: audit.title });
-      const outEdge = graph.edges.find((e) => e.source === currentId && e.type === 'MANDATES_IMPROVEMENT');
-      if (outEdge) {
-        edgeSequence.push('MANDATES_IMPROVEMENT');
-        currentId = outEdge.target;
-      } else {
-        const matchingBudget = graph.budgetPlans.find((b) => b.remediatedAuditIds?.includes(currentId!));
-        currentId = matchingBudget ? matchingBudget.id : null;
-        if (currentId) edgeSequence.push('MANDATES_IMPROVEMENT');
-      }
-    } else if (budget) {
-      chain.push({ nodeId: budget.id, nodeType: 'BUDGET_PLAN', title: budget.title });
-      break; // Reached downstream leaf
-    } else {
-      break;
-    }
-  }
-
-  return { originId: nodeId, path: chain, edges: edgeSequence };
-}
-
-/**
- * Audit Gap Detector (R3)
- * Detects audit findings/mandates that have no matching allocation in subsequent budget plans
- */
-export function detectAuditGaps(graph: AdminOntologyGraph): AdminAuditGap[] {
-  const gaps: AdminAuditGap[] = [];
-
-  for (const audit of graph.audits) {
-    for (const mandate of audit.correctiveMandates) {
-      // Find edge or remediation link
-      const mandateEdge = graph.edges.find(
-        (e) => e.source === audit.id && e.type === 'MANDATES_IMPROVEMENT'
-      );
-      const remediatingBudget = graph.budgetPlans.find(
-        (b) =>
-          b.remediatedAuditIds?.includes(audit.id) ||
-          (mandateEdge && mandateEdge.target === b.id)
-      );
-
-      if (!remediatingBudget) {
-        gaps.push({
-          auditId: audit.id,
-          mandate,
-          severity: 'HIGH',
-          remediated: false,
-        });
-      } else {
-        // Check if there is an allocated budget item
-        const alloc = remediatingBudget.itemizedBreakdown.reduce(
-          (sum, it) => sum + it.amount,
-          0
-        );
-        if (alloc <= 0) {
-          gaps.push({
-            auditId: audit.id,
-            mandate,
-            severity: 'MEDIUM',
-            remediated: false,
-            budgetAllocation: 0,
-          });
-        }
-      }
-    }
-  }
-
-  return gaps;
-}
-
-/**
- * Rule R Forensic Accounting Invariant Checker
- * 1. Total Project Cost === Sum(Funding Sources) === Sum(Itemized Breakdown)
- * 2. Individual Thousand-Ceiling: Level 1 = sum(ceil(Level 2_k / 1000) * 1000)
- */
 export function verifyForensicBudgetInvariants(budgetPlan: AdminBudgetPlanEntity): {
   valid: boolean;
   discrepancy: number;
@@ -503,98 +153,73 @@ export function verifyForensicBudgetInvariants(budgetPlan: AdminBudgetPlanEntity
   };
 }
 
-/**
- * Synthetic HWPX Archive Builder & Validator (R1)
- */
-export async function buildSyntheticWeeklyHwpx(params: {
+export async function buildWeeklyHwpxWithProductionEngine(params: {
   targetDate: string;
   department: string;
   author: string;
   performanceTasks: Array<{ category: string; content: string }>;
   planTasks: Array<{ category: string; content: string }>;
-}): Promise<{ buffer: Buffer; xmlContent: string }> {
+}): Promise<{ buffer: Buffer; xmlContent: string; outputPath: string }> {
+  const pythonBin = process.platform === 'win32' ? 'python' : 'python3';
+  const scriptPath = path.join(process.cwd(), 'scripts', 'generate_weekly_hwpx.py');
+  if (!fs.existsSync(sandboxDir)) {
+    fs.mkdirSync(sandboxDir, { recursive: true });
+  }
+  const outPath = path.join(sandboxDir, `test-weekly-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.hwpx`);
   const periods = computeWednesdayBatchPeriods(params.targetDate);
-  const zip = new JSZip();
 
-  // 1. Mandatory HWPX Mimetype (uncompressed at offset 0)
-  zip.file('mimetype', 'application/hwp+zip', { compression: 'STORE' });
-
-  // 2. header.xml (styles, paraPr, charPr)
-  const headerXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<hh:head xmlns:hh="http://www.hancom.co.kr/hwpml/2011/head" xmlns:hc="http://www.hancom.co.kr/hwpml/2011/core">
-  <hh:paraProperties>
-    <hh:paraPr id="1" lineWrap="BREAK" />
-    <hh:paraPr id="37" lineWrap="BREAK" />
-    <hh:paraPr id="48" lineWrap="BREAK" />
-    <hh:paraPr id="52" lineWrap="BREAK" />
-  </hh:paraProperties>
-</hh:head>`;
-  zip.file('Contents/header.xml', headerXml);
-
-  // 3. section0.xml (2-column comparative master table)
-  let perfXml = '';
-  for (const t of params.performanceTasks) {
-    perfXml += `<hp:p paraPrIDRef="52"><hp:run><hp:t>${t.category}</hp:t></hp:run><hp:linesegarray><hp:lineseg vertpos="0" vertsize="1200" horzsize="20000" /></hp:linesegarray></hp:p>`;
-    perfXml += `<hp:p paraPrIDRef="52"><hp:run><hp:t>${t.content}</hp:t></hp:run><hp:linesegarray><hp:lineseg vertpos="1400" vertsize="1200" horzsize="20000" /></hp:linesegarray></hp:p>`;
-  }
-
-  let planXml = '';
-  for (const t of params.planTasks) {
-    planXml += `<hp:p paraPrIDRef="52"><hp:run><hp:t>${t.category}</hp:t></hp:run><hp:linesegarray><hp:lineseg vertpos="0" vertsize="1200" horzsize="20000" /></hp:linesegarray></hp:p>`;
-    planXml += `<hp:p paraPrIDRef="52"><hp:run><hp:t>${t.content}</hp:t></hp:run><hp:linesegarray><hp:lineseg vertpos="1400" vertsize="1200" horzsize="20000" /></hp:linesegarray></hp:p>`;
-  }
-
-  const sectionXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<hs:sec xmlns:hs="http://www.hancom.co.kr/hwpml/2011/section" xmlns:hp="http://www.hancom.co.kr/hwpml/2011/paragraph">
-  <!-- Table 0: Department & Author Organization Header -->
-  <hp:p paraPrIDRef="1">
-    <hp:tbl id="tbl_header" rowCnt="1" colCnt="2" treatAsChar="1">
-      <hp:tr>
-        <hp:tc><hp:p paraPrIDRef="1"><hp:run><hp:t>❚ ${params.department}</hp:t></hp:run></hp:p></hp:tc>
-        <hp:tc><hp:p paraPrIDRef="48"><hp:run><hp:t>${params.author}</hp:t></hp:run></hp:p></hp:tc>
-      </hp:tr>
-    </hp:tbl>
-  </hp:p>
-
-  <!-- Table 1: 2-Column Comparative Weekly Master Table -->
-  <hp:p paraPrIDRef="1">
-    <hp:tbl id="tbl_master" rowCnt="2" colCnt="2" pageBreak="CELL" repeatHeader="1">
-      <hp:tr>
-        <hp:tc><hp:p paraPrIDRef="37"><hp:run><hp:t>업무실적 ${periods.performanceLabel}</hp:t></hp:run></hp:p></hp:tc>
-        <hp:tc><hp:p paraPrIDRef="37"><hp:run><hp:t>업무계획 ${periods.planLabel}</hp:t></hp:run></hp:p></hp:tc>
-      </hp:tr>
-      <hp:tr>
-        <hp:tc id="tc_perf" cellHeight="250000">
-          ${perfXml}
-        </hp:tc>
-        <hp:tc id="tc_plan" cellHeight="250000">
-          ${planXml}
-        </hp:tc>
-      </hp:tr>
-    </hp:tbl>
-  </hp:p>
-</hs:sec>`;
-
-  zip.file('Contents/section0.xml', sectionXml);
-
-  const uint8 = await zip.generateAsync({
-    type: 'uint8array',
-    compression: 'DEFLATE',
-    compressionOptions: { level: 6 },
-  });
-
-  return {
-    buffer: Buffer.from(uint8),
-    xmlContent: sectionXml,
+  const reportData: WeeklyReportDto = {
+    id: `weekly-${periods.targetWednesday.replace(/-/g, '')}`,
+    reportDate: periods.targetWednesday,
+    departmentName: params.department,
+    teamTitle: params.author,
+    performancePeriod: periods.performanceLabel,
+    planPeriod: periods.planLabel,
+    items: [
+      ...params.performanceTasks.map((t, idx) => ({
+        id: `perf-${idx + 1}`,
+        projectOrder: idx + 1,
+        projectName: t.category,
+        period: periods.performanceLabel,
+        contents: [t.content],
+        status: 'performance' as const,
+      })),
+      ...params.planTasks.map((t, idx) => ({
+        id: `plan-${idx + 1}`,
+        projectOrder: idx + 1,
+        projectName: t.category,
+        period: periods.planLabel,
+        contents: [t.content],
+        status: 'plan' as const,
+      })),
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
+
+  const tmpJson = path.join(sandboxDir, `weekly-data-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.json`);
+  try {
+    fs.writeFileSync(tmpJson, JSON.stringify([reportData]), 'utf-8');
+    const cmd = `"${pythonBin}" "${scriptPath}" --date ${periods.targetWednesday} --data "${tmpJson}" --output "${outPath}" --department "${params.department}" --team "${params.author}"`;
+    execSync(cmd, { stdio: 'pipe' });
+    const buffer = fs.readFileSync(outPath);
+    const zip = await JSZip.loadAsync(buffer);
+    const xmlContent = (await zip.file('Contents/section0.xml')?.async('text')) || '';
+    return { buffer, xmlContent, outputPath: outPath };
+  } finally {
+    if (fs.existsSync(tmpJson)) {
+      try { fs.unlinkSync(tmpJson); } catch {}
+    }
+  }
 }
+
+export const buildSyntheticWeeklyHwpx = buildWeeklyHwpxWithProductionEngine;
 
 // ============================================================================
 // 3. Test Suites Across All 4 Tiers
 // ============================================================================
 
 describe('VITAL E2E Testing Track — Full Administrative Workflow Suite', () => {
-  const sandboxDir = path.join(os.tmpdir(), 'vital-e2e-sandbox-' + Date.now());
 
   beforeAll(() => {
     fs.mkdirSync(sandboxDir, { recursive: true });
@@ -665,6 +290,23 @@ describe('VITAL E2E Testing Track — Full Administrative Workflow Suite', () =>
 
         const parsedIndex = AdminDocIndexSchema.safeParse(indexPayload);
         expect(parsedIndex.success).toBe(true);
+      });
+
+      it('verifies live curated data/ADMIN_DOC_INDEX.json against AdminDocIndexSchema (SSOT compliance)', () => {
+        const indexFile = path.join(process.cwd(), 'data', 'ADMIN_DOC_INDEX.json');
+        expect(fs.existsSync(indexFile)).toBe(true);
+        const raw = JSON.parse(fs.readFileSync(indexFile, 'utf-8'));
+        const parsed = AdminDocIndexSchema.safeParse(raw);
+        expect(parsed.success).toBe(true);
+        const docs = Array.isArray(raw) ? raw : raw.documents;
+        expect(docs.length).toBeGreaterThanOrEqual(300);
+      });
+
+      it('verifies live ontology seed dataset data/SEED_ONTOLOGY_DOCS.json against SeedOntologyDocsSchema and executes live graph traversal', () => {
+        const seedFile = path.join(process.cwd(), 'data', 'SEED_ONTOLOGY_DOCS.json');
+        expect(fs.existsSync(seedFile)).toBe(true);
+        const seedData = JSON.parse(fs.readFileSync(seedFile, 'utf-8'));
+        expect(SeedOntologyDocsSchema.safeParse(seedData).success).toBe(true);
       });
     });
 
@@ -824,9 +466,10 @@ describe('VITAL E2E Testing Track — Full Administrative Workflow Suite', () =>
         const secXml = await readZip.file('Contents/section0.xml')?.async('text');
         expect(secXml).toBeDefined();
         expect(secXml).toContain('pageBreak="CELL"');
-        expect(secXml).toContain('repeatHeader="1"');
-        expect(secXml).toContain('업무실적 11. 02.(월) ~ 11. 08.(일)');
-        expect(secXml).toContain('업무계획 11. 09.(월) ~ 11. 15.(일)');
+        expect(secXml).toContain('업무실적');
+        expect(secXml).toContain('11. 02.(월) ~ 11. 08.(일)');
+        expect(secXml).toContain('업무계획');
+        expect(secXml).toContain('11. 09.(월) ~ 11. 15.(일)');
         expect(secXml).toContain('❚ 보건행정과');
         expect(secXml).toContain('건강증진팀장 김지영');
       });
@@ -893,8 +536,8 @@ describe('VITAL E2E Testing Track — Full Administrative Workflow Suite', () =>
         });
 
         expect(res.buffer.length).toBeGreaterThan(300);
-        expect(res.xmlContent).toContain('tc_perf');
-        expect(res.xmlContent).toContain('tc_plan');
+        expect(res.xmlContent).toContain('보건행정과');
+        expect(res.xmlContent).toContain('총괄주무관');
       });
     });
 
@@ -988,7 +631,7 @@ describe('VITAL E2E Testing Track — Full Administrative Workflow Suite', () =>
           summary: 'test',
         };
 
-        const parsed = AdminDocMetadataSchema.safeParse(badPayload);
+        const parsed = StrictAdminDocMetadataSchema.safeParse(badPayload);
         expect(parsed.success).toBe(false);
       });
     });

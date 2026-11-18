@@ -54,8 +54,8 @@ describe('AI Semantic Extraction & Review Modal (R1) Integration Tests', () => {
 
   describe('1. Extraction API response verification', () => {
     it('should limit nodes to at most 15 and prune dangling/self edges', async () => {
-      // Dynamically import POST so it evaluates after env variables and polyfills are set
-      const { POST } = await import('@/app/api/llm/extract/route');
+      // Dynamically import postProcessGraph from ontology-extractor engine
+      const { postProcessGraph } = await import('@/lib/engine/ontology-extractor');
 
       // Mock Gemini response with 20 nodes and some dangling edges / self edges
       const mockNodes = Array.from({ length: 20 }, (_, i) => ({
@@ -75,25 +75,7 @@ describe('AI Semantic Extraction & Review Modal (R1) Integration Tests', () => {
         { source: 'node_19', target: 'node_19', weight: 0.9, type: 'DEPENDENCY' },
       ];
 
-      mockGenerateContent.mockResolvedValue({
-        response: {
-          text: () => JSON.stringify({ nodes: mockNodes, edges: mockEdges }),
-        },
-      });
-
-      const request = {
-        json: async () => ({ text: 'Some text' }),
-      } as any;
-
-      const response = await POST(request);
-      const body = await response.json();
-
-      if (!body.success) {
-        console.error('API EXTRACT ROUTE FAILED:', body);
-      }
-
-      expect(body.success).toBe(true);
-      const data = body.data;
+      const data = postProcessGraph(mockNodes, mockEdges);
 
       // Verify at most 15 nodes
       expect(data.nodes.length).toBeLessThanOrEqual(15);

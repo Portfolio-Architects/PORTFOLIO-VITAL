@@ -93,7 +93,7 @@ const EditingInput: React.FC<EditingInputProps> = ({
       onBlur={handleCommit}
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
-      className={`w-full min-w-0 px-1.5 py-0.5 text-sm border border-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 rounded outline-none bg-white font-mono text-slate-900 transition-all ${inputClassName || className}`}
+      className={`w-full min-w-0 px-1.5 py-0.5 text-sm border border-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 rounded outline-none bg-white font-mono text-slate-900 transition-colors duration-150 ${inputClassName || className}`}
     />
   );
 };

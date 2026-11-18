@@ -112,6 +112,45 @@ export interface OntologyNode {
   _cachedTextWidth?: Record<string, number>; // canvas layout rendering optimization cache
 }
 
+// ============ Node Override ============
+
+export interface NodeOverride {
+  id?: string;
+  label?: string;
+  category?: string;
+  x?: number;
+  y?: number;
+  department?: string;
+  budgetAmount?: number;
+  fixedX?: number | null;
+  fixedY?: number | null;
+  customColor?: string | null;
+  customLabel?: string | null;
+  customGroup?: string | null;
+  customParent?: string | null;
+  customOrbitIndex?: number | null;
+  customSortOrder?: number | null;
+  dueDate?: string | null;
+  isHighlighted?: boolean | null;
+  isCompleted?: boolean | null;
+  verificationStatus?: VerificationStatus | null;
+  hidden?: boolean | null;
+  hideDefaultGraph?: boolean | null;
+  useCustomContext?: boolean | null;
+  customContextText?: string | null;
+  story5W1H?: {
+    who?: string;
+    when?: string;
+    where?: string;
+    what?: string;
+    how?: string;
+    why?: string;
+    contact?: string;
+    department?: string;
+    title?: string;
+  } | null;
+}
+
 // ============ Orbital Node (Runtime) ============
 
 export interface OrbitalNode extends OntologyNode {

@@ -132,7 +132,7 @@ export default function LawSystemPage() {
       <div className="flex border-b border-slate-200 gap-1 overflow-x-auto pb-px">
         <button
           onClick={() => setActiveTab('search')}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-colors duration-150 cursor-pointer whitespace-nowrap ${
             activeTab === 'search'
               ? 'border-indigo-600 text-indigo-600 bg-indigo-50/20'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
@@ -143,7 +143,7 @@ export default function LawSystemPage() {
         </button>
         <button
           onClick={() => setActiveTab('dictionary')}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-colors duration-150 cursor-pointer whitespace-nowrap ${
             activeTab === 'dictionary'
               ? 'border-indigo-600 text-indigo-600 bg-indigo-50/20'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
@@ -154,7 +154,7 @@ export default function LawSystemPage() {
         </button>
         <button
           onClick={() => setActiveTab('guide')}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-colors duration-150 cursor-pointer whitespace-nowrap ${
             activeTab === 'guide'
               ? 'border-indigo-600 text-indigo-600 bg-indigo-50/20'
               : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
@@ -197,7 +197,7 @@ export default function LawSystemPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredTerms.map((item, idx) => (
-                  <div key={idx} className="bg-white/70 backdrop-blur-xs border border-slate-200/75 rounded-[2rem] p-5 shadow-3xs flex flex-col justify-between hover:shadow-md hover:border-indigo-250 transition-all group">
+                  <div key={idx} className="bg-white/95 border border-slate-200/75 rounded-[2rem] p-5 shadow-3xs flex flex-col justify-between hover:shadow-md hover:border-indigo-250 transition-colors duration-150 group">
                     <div className="flex flex-col gap-2">
                       <div className="flex items-start justify-between">
                         <div className="text-left">

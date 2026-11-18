@@ -210,12 +210,12 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
           <button
             type="button"
             onClick={() => setViewMode('grouped')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${
               viewMode === 'grouped'
                 ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
-            title="통계목별로 그룹화하여 목록을 확인합니다."
+            title="통계목별 그룹 보기"
           >
             <Layers className="w-3.5 h-3.5" />
             <span>통계목별 그룹 ({groupedEntries.length})</span>
@@ -223,12 +223,12 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
           <button
             type="button"
             onClick={() => setViewMode('table')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${
               viewMode === 'table'
                 ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
-            title="간편 테이블 표 형식으로 확인합니다."
+            title="테이블 표 보기"
           >
             <TableIcon className="w-3.5 h-3.5" />
             <span>테이블 뷰</span>
@@ -236,12 +236,12 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
           <button
             type="button"
             onClick={() => setViewMode('cards')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${
               viewMode === 'cards'
                 ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
-            title="카드 타일 형태로 확인합니다."
+            title="카드 타일 보기"
           >
             <LayoutGrid className="w-3.5 h-3.5" />
             <span>카드 뷰</span>

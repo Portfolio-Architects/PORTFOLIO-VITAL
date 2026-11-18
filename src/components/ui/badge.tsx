@@ -1,25 +1,44 @@
 import React from 'react';
 
-type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger';
+export type BadgeVariant =
+  | 'default'
+  | 'primary'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'general'
+  | 'daily'
+  | 'directive'
+  | 'audit';
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default: 'bg-gray-100 text-[var(--color-text-secondary)]',
-  primary: 'bg-[rgba(74,108,247,0.1)] text-[var(--color-primary)]',
-  success: 'bg-[rgba(16,185,129,0.1)] text-[var(--color-success)]',
-  warning: 'bg-[rgba(245,158,11,0.1)] text-[var(--color-warning)]',
-  danger: 'bg-[rgba(239,68,68,0.1)] text-[var(--color-danger)]',
+  default: 'bg-slate-100 text-slate-700 border border-slate-200/80',
+  primary: 'bg-indigo-50 text-indigo-700 border border-indigo-200/80',
+  success: 'bg-emerald-50 text-emerald-700 border border-emerald-200/80',
+  warning: 'bg-amber-50 text-amber-800 border border-amber-200/80',
+  danger: 'bg-rose-50 text-rose-700 border border-rose-200/80',
+  general: 'bg-slate-100 text-slate-800 border border-slate-200',
+  daily: 'bg-amber-50 text-amber-900 border border-amber-200',
+  directive: 'bg-rose-50 text-rose-800 border border-rose-200',
+  audit: 'bg-sky-50 text-sky-800 border border-sky-200',
 };
 
-interface BadgeProps {
+export interface BadgeProps {
   children: React.ReactNode;
   variant?: BadgeVariant;
   className?: string;
 }
 
-export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
+export const Badge = React.memo(function Badge({
+  children,
+  variant = 'default',
+  className = '',
+}: BadgeProps) {
   return (
-    <span className={`badge ${variantClasses[variant]} ${className}`}>
+    <span
+      className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full leading-tight ${variantClasses[variant]} ${className}`}
+    >
       {children}
     </span>
   );
-}
+});

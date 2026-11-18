@@ -50,7 +50,7 @@ function QuickInputComponent({ onCreateTask, onAddSignal, onSearch, onNavigate }
     } else if (parsed.type === 'signal' && onAddSignal) {
       onAddSignal(parsed.rawText);
       setCreatedLabel('📡 시그널 기록 완료!');
-      onNavigate('mindmap');
+      onNavigate('archive');
     } else {
       onCreateTask({
         title: parsed.title,
@@ -83,7 +83,7 @@ function QuickInputComponent({ onCreateTask, onAddSignal, onSearch, onNavigate }
 
   return (
     <div className="relative overflow-visible">
-      <div className="flex items-center gap-2 glass-panel rounded-2xl shadow-sm px-3.5 sm:px-4 py-2.5 transition-all duration-200 focus-within:shadow-[0_0_18px_rgba(74,108,247,0.15)] focus-within:border-[var(--color-primary)]/80 min-w-0">
+      <div className="flex items-center gap-2 glass-panel rounded-2xl shadow-sm px-3.5 sm:px-4 py-2.5 transition-colors duration-200 focus-within:shadow-[0_0_18px_rgba(74,108,247,0.15)] focus-within:border-[var(--color-primary)]/80 min-w-0">
         <input
           type="text"
           value={text}
@@ -108,7 +108,7 @@ function QuickInputComponent({ onCreateTask, onAddSignal, onSearch, onNavigate }
         <button
           onClick={handleSubmit}
           disabled={!parsed}
-          className={`p-2 rounded-xl transition-all cursor-pointer ${parsed ? 'bg-[var(--color-primary)] text-white hover:opacity-90 shadow-sm' : 'bg-slate-100 text-[var(--color-text-tertiary)] opacity-60'}`}
+          className={`p-2 rounded-xl transition-colors duration-150 cursor-pointer ${parsed ? 'bg-[var(--color-primary)] text-white hover:opacity-90 shadow-sm' : 'bg-slate-100 text-[var(--color-text-tertiary)] opacity-60'}`}
         >
           <Send size={13} />
         </button>
@@ -158,7 +158,7 @@ function QuickInputComponent({ onCreateTask, onAddSignal, onSearch, onNavigate }
       )}
 
       {justCreated && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 px-5 py-3 rounded-full bg-slate-900/95 backdrop-blur-md border border-slate-700/50 shadow-2xl text-[12px] font-semibold text-white animate-slide-up-fade">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 px-5 py-3 rounded-full bg-slate-900/95 border border-slate-700/50 shadow-2xl text-[12px] font-semibold text-white animate-slide-up-fade">
           <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981] animate-pulse" />
           {createdLabel}
         </div>

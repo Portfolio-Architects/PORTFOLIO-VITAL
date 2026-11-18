@@ -71,7 +71,7 @@ const KANBAN_LANES: Array<{
   {
     id: 'lane-directive',
     title: '팀장님 지시 · 긴급 현안',
-    subtitle: '구두 지시사항 및 즉시 피드백 필요 항목',
+    subtitle: '구두 지시 · 즉시 피드백',
     categories: ['directive'],
     tagMatch: '[팀장님 지시]',
     headerAccentClass: 'border-t-4 border-t-rose-500',
@@ -80,7 +80,7 @@ const KANBAN_LANES: Array<{
   {
     id: 'lane-budget',
     title: '2027 예산편성 · 수치 변동',
-    subtitle: '가내시 증감액, 세목 단가 및 일상경비 대조',
+    subtitle: '가내시 증감 · 세목 단가 · 일상경비',
     categories: ['budget'],
     tagMatch: '[2027 예산편성]',
     headerAccentClass: 'border-t-4 border-t-amber-500',
@@ -90,7 +90,7 @@ const KANBAN_LANES: Array<{
   {
     id: 'lane-audit',
     title: '행정사무감사 · 요구자료',
-    subtitle: '구의회 행감 질의답변서 및 제출 기한 관리',
+    subtitle: '행감 질의답변서 · 제출 마감',
     categories: ['audit'],
     tagMatch: '[행정감사]',
     headerAccentClass: 'border-t-4 border-t-sky-500',
@@ -100,7 +100,7 @@ const KANBAN_LANES: Array<{
   {
     id: 'lane-festival',
     title: '양재천 페스티벌 · 일반 행정',
-    subtitle: '현장 부스·식순 점검 및 부서 공용 메모',
+    subtitle: '현장 부스 · 식순 · 공용 메모',
     categories: ['festival', 'general'],
     tagMatch: '[양재천 행사]',
     headerAccentClass: 'border-t-4 border-t-emerald-500',
@@ -146,7 +146,7 @@ function WorkingMemoryPostItCard({
   return (
     <article
       data-testid={`working-memory-card-${memo.id}`}
-      className={`relative rounded-xl p-4 border transition-colors flex flex-col justify-between gap-3 ${catMeta.postItClass}`}
+      className={`vlds-cv-card relative rounded-xl p-4 border transition-colors flex flex-col justify-between gap-3 ${catMeta.postItClass}`}
     >
       <div className="space-y-2.5">
         {/* Card Meta Badges */}
@@ -161,7 +161,7 @@ function WorkingMemoryPostItCard({
               </span>
             ))}
             {memo.dateHighlight && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 font-mono tabular-nums">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-white/90 text-slate-700 border border-slate-200/80 font-mono tabular-nums">
                 <Calendar className="w-3 h-3" />
                 {memo.dateHighlight}
               </span>
@@ -170,7 +170,7 @@ function WorkingMemoryPostItCard({
 
           <div className="flex items-center gap-1">
             <span
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700"
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white/80 text-slate-500 border border-slate-200/60"
               title={
                 memo.source === 'mobile'
                   ? '스마트폰 모바일 우체통에서 전송됨'
@@ -179,7 +179,7 @@ function WorkingMemoryPostItCard({
             >
               {memo.source === 'mobile' ? (
                 <>
-                  <Smartphone className="w-2.5 h-2.5 text-slate-700 dark:text-slate-300" />
+                  <Smartphone className="w-2.5 h-2.5 text-slate-700" />
                   <span>모바일</span>
                 </>
               ) : (
@@ -194,7 +194,7 @@ function WorkingMemoryPostItCard({
 
         {/* Numeric / Budget Change Highlight Callout */}
         {memo.numericHighlight && (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-200/80 dark:bg-amber-900/60 border border-amber-400/80 dark:border-amber-700 text-amber-950 dark:text-amber-200 text-xs font-black font-mono tabular-nums">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-200/80 border border-amber-400/80 text-amber-950 text-xs font-black font-mono tabular-nums">
             <span>핵심 수치:</span>
             <span>{memo.numericHighlight}</span>
           </div>
@@ -217,7 +217,7 @@ function WorkingMemoryPostItCard({
               }}
               aria-label="메모 내용 수정"
               data-testid={`edit-memo-textarea-${memo.id}`}
-              className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg border border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/20 resize-none"
+              className="w-full px-3 py-2 text-xs font-semibold bg-white text-slate-900 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900/20 resize-none"
             />
             <div className="flex items-center justify-end gap-1.5">
               <button
@@ -242,8 +242,8 @@ function WorkingMemoryPostItCard({
           <p
             className={`text-[13px] font-bold leading-relaxed break-keep ${
               memo.status === 'reflected'
-                ? 'line-through text-slate-400 dark:text-slate-500'
-                : 'text-slate-900 dark:text-slate-100'
+                ? 'line-through text-slate-400'
+                : 'text-slate-900'
             }`}
           >
             {memo.content}
@@ -252,15 +252,15 @@ function WorkingMemoryPostItCard({
       </div>
 
       {/* Card Footer Actions */}
-      <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-slate-200/60 dark:border-slate-800/80 flex-wrap">
+      <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-slate-200/60 flex-wrap">
         <div className="flex items-center gap-1 flex-wrap">
           <button
             type="button"
             onClick={() => onTogglePin(memo.id)}
             className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer ${
               memo.pinned
-                ? 'bg-amber-200/80 text-amber-900 dark:bg-amber-900/70 dark:text-amber-200'
-                : 'text-slate-500 hover:bg-white/70 dark:hover:bg-slate-800'
+                ? 'bg-amber-200/80 text-amber-900'
+                : 'text-slate-500 hover:bg-white/70'
             }`}
             title="상단 고정 토글"
           >
@@ -273,7 +273,7 @@ function WorkingMemoryPostItCard({
               type="button"
               onClick={() => onStartEdit(memo)}
               data-testid={`edit-memo-btn-${memo.id}`}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold text-slate-500 hover:text-slate-900 hover:bg-white/70 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold text-slate-500 hover:text-slate-900 hover:bg-white/70 transition-colors cursor-pointer"
               title="메모 내용 및 수치 수정"
             >
               <Pencil className="w-3 h-3" />
@@ -284,7 +284,7 @@ function WorkingMemoryPostItCard({
           <button
             type="button"
             onClick={() => onDelete(memo.id)}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
             title="메모 삭제"
           >
             <Trash2 className="w-3 h-3" />
@@ -317,7 +317,7 @@ function WorkingMemoryPostItCard({
           <button
             type="button"
             onClick={() => onReopen(memo.id)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
             <span>미반영 복원</span>
@@ -517,7 +517,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
               </span>
               <span className="text-xs font-bold text-slate-500">건 대기 중</span>
             </div>
-            <span className="text-[11px] font-semibold text-slate-400">클릭 시 전체 보기</span>
+            <span className="text-[11px] font-semibold text-slate-400">전체 보기</span>
           </div>
         </button>
 
@@ -552,7 +552,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
               <span className="text-xs font-bold text-slate-500">건 미반영</span>
             </div>
             <span className="text-[11px] font-bold text-amber-800">
-              {onlyNumeric ? '필터 해제' : '수치 변동만 필터 →'}
+              {onlyNumeric ? '필터 해제' : '수치 필터 →'}
             </span>
           </div>
         </button>
@@ -574,9 +574,9 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
           }`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-slate-500">팀장님 지시 · 기한 명시</span>
+            <span className="text-xs font-bold text-slate-500">팀장님 지시 · 마감 명시</span>
             <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200/80 font-mono tabular-nums">
-              기한 명시 {kpiStats.datedPendingCount}건
+              마감 명시 {kpiStats.datedPendingCount}건
             </span>
           </div>
           <div className="flex items-baseline justify-between gap-2 pt-1">
@@ -587,7 +587,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
               <span className="text-xs font-bold text-slate-500">건 지시사항</span>
             </div>
             <span className="text-[11px] font-bold text-rose-700">
-              {selectedFilter === 'directive' ? '필터 해제' : '팀장님 지시만 필터 →'}
+              {selectedFilter === 'directive' ? '필터 해제' : '지시 필터 →'}
             </span>
           </div>
         </button>
@@ -615,16 +615,16 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                 onClick={() => void syncMemoInbox()}
                 disabled={isSyncingInbox}
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors cursor-pointer disabled:opacity-50"
-                title="모바일 클라우드 우체통(KV)과 즉시 동기화"
+                title="모바일 우체통 즉시 동기화"
               >
                 <RefreshCw className={`w-3 h-3 ${isSyncingInbox ? 'animate-spin text-slate-900' : ''}`} />
-                <span>모바일 우체통 동기화</span>
+                <span>우체통 동기화</span>
                 {lastSyncedAt && <span className="text-[10px] text-emerald-600 font-mono">●</span>}
               </button>
               <Link
                 href="/memo"
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors"
-                title="모바일 전용 448px 메모 우체통 열기"
+                title="모바일 우체통 열기"
               >
                 <Smartphone className="w-3 h-3" />
                 <span>/memo</span>
@@ -639,30 +639,30 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
       <section
         aria-label="작업기억 보조 보드"
         data-testid="working-memory-board"
-        className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-5"
+        className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200/80 shadow-2xs space-y-5"
       >
         {/* Top Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div className="flex items-center gap-3 flex-wrap">
-            <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800/70 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 shrink-0">
               <StickyNote className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                  작업기억 보조 보드 (Working Memory Post-it)
+                <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                  작업기억 보드
                 </h2>
-                <span className="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800 font-mono tabular-nums">
+                <span className="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300/80 font-mono tabular-nums">
                   미반영 {pendingMemos.length}건
                 </span>
                 {reflectedMemos.length > 0 && (
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 font-mono tabular-nums">
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-600 font-mono tabular-nums">
                     반영완료 {reflectedMemos.length}건
                   </span>
                 )}
               </div>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                메모보고·구두지시·예산 증감액을 1초 만에 캡처(다중 줄 붙여넣기 지원)하고 관련 업무 화면 진입 시 상단에 자동 고정합니다.
+              <p className="vlds-subtitle text-xs font-medium text-slate-500 mt-0.5">
+                지시 · 예산 변동 · 행감 메모 즉시 분류 (다중 줄 붙여넣기)
               </p>
             </div>
           </div>
@@ -673,7 +673,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
             <div
               role="tablist"
               aria-label="보드 보기 방식"
-              className="inline-flex rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700"
+              className="inline-flex rounded-lg p-0.5 bg-slate-100 border border-slate-200/70"
             >
               <button
                 type="button"
@@ -683,7 +683,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                 onClick={() => setLayoutMode('grid')}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
                   layoutMode === 'grid'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -698,7 +698,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                 onClick={() => setLayoutMode('kanban')}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
                   layoutMode === 'kanban'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -713,24 +713,24 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                 onClick={() => setLayoutMode('ledger')}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
                   layoutMode === 'ledger'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <Table2 className="w-3.5 h-3.5" />
-                <span>수치·기한 대조표</span>
+                <span>수치·마감 대조표</span>
               </button>
             </div>
 
             {/* Pending / Reflected Status Toggle */}
-            <div className="inline-flex rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700">
+            <div className="inline-flex rounded-lg p-0.5 bg-slate-100 border border-slate-200/70">
               <button
                 type="button"
                 onClick={() => setViewMode('pending')}
                 className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
                   viewMode === 'pending'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800'
+                    ? 'bg-white text-slate-900 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 미반영 ({pendingMemos.length})
@@ -740,8 +740,8 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                 onClick={() => setViewMode('reflected')}
                 className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
                   viewMode === 'reflected'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800'
+                    ? 'bg-white text-slate-900 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 반영완료 ({reflectedMemos.length})
@@ -754,7 +754,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
         <form onSubmit={handleSubmit} className="space-y-2.5">
           {/* Quick Snippet Prefix Chips */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-bold text-slate-400 mr-0.5">빠른 문구 삽입:</span>
+            <span className="text-[11px] font-bold text-slate-400 mr-0.5">빠른 삽입:</span>
             {QUICK_INSERT_SNIPPETS.map((snippet) => (
               <button
                 key={snippet.label}
@@ -780,10 +780,10 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                     void handleSubmit(e);
                   }
                 }}
-                placeholder="한 줄 메모 입력 후 Enter 또는 여러 줄 붙여넣기 (예: 9/21 가내시 메모보고: 2027 건강생활실천 본예산 6,500만 원 → 7,800만 원 증액)"
+                placeholder="메모 입력 · Enter · 다중 줄 붙여넣기 (예: 9/21 본예산 6,500만 원 → 7,800만 원)"
                 aria-label="작업기억 한 줄 메모 입력"
                 data-testid="working-memory-input"
-                className="w-full px-4 py-3 text-xs sm:text-[13px] font-semibold bg-amber-50/40 dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg border border-amber-300/80 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/15 focus:border-slate-900 resize-none"
+                className="w-full px-4 py-3 text-xs sm:text-[13px] font-semibold bg-amber-50/40 text-slate-900 placeholder:text-slate-400 rounded-lg border border-amber-300/80 focus:outline-none focus:ring-2 focus:ring-slate-900/15 focus:border-slate-900 resize-none"
               />
             </div>
             <button
@@ -801,17 +801,17 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
           {livePreview && (
             <div
               data-testid="working-memory-live-preview"
-              className="flex items-center justify-between gap-2 flex-wrap px-3.5 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 text-[11px]"
+              className="flex items-center justify-between gap-2 flex-wrap px-3.5 py-2 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px]"
             >
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1 font-bold text-slate-500 dark:text-slate-400">
+                <span className="inline-flex items-center gap-1 font-bold text-slate-500">
                   <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                   자동 분류 미리보기:
                 </span>
                 {inputLines.length > 1 && (
                   <span
                     data-testid="working-memory-preview-multiline"
-                    className="px-2 py-0.5 rounded font-extrabold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                    className="px-2 py-0.5 rounded font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200"
                   >
                     📋 다중 줄 일괄 캡처 ({inputLines.length}건)
                   </span>
@@ -819,13 +819,13 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                 {livePreview.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-2 py-0.5 rounded font-extrabold bg-slate-200/80 text-slate-900 dark:bg-slate-700 dark:text-slate-100 border border-slate-300 dark:border-slate-600"
+                    className="px-2 py-0.5 rounded font-extrabold bg-slate-200/80 text-slate-900 border border-slate-300"
                   >
                     {tag}
                   </span>
                 ))}
                 {livePreview.dateHighlight && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold bg-white text-slate-800 dark:bg-slate-700 dark:text-slate-200 border border-slate-200 font-mono tabular-nums">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold bg-white text-slate-800 border border-slate-200 font-mono tabular-nums">
                     <Calendar className="w-3 h-3" />
                     {livePreview.dateHighlight}
                   </span>
@@ -833,7 +833,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                 {livePreview.numericHighlight && (
                   <span
                     data-testid="working-memory-preview-numeric"
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-black bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-mono tabular-nums"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-black bg-amber-100 text-amber-900 border border-amber-300 font-mono tabular-nums"
                   >
                     💰 핵심 수치: {livePreview.numericHighlight}
                   </span>
@@ -848,7 +848,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                   className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer ${
                     !explicitCategory
                       ? 'bg-slate-900 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                      : 'bg-slate-100 text-slate-500'
                   }`}
                 >
                   자동
@@ -861,7 +861,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                     className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer ${
                       explicitCategory === cat.id
                         ? 'bg-slate-900 text-white'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                        : 'bg-slate-100 text-slate-500'
                     }`}
                   >
                     {cat.shortLabel}
@@ -873,9 +873,9 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
         </form>
 
         {/* Search & Multi-Dimensional Filter Toolbar (All <button>, zero <select>) */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-2 border-t border-slate-100">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 mr-1">
+            <span className="text-[11px] font-bold text-slate-400 mr-1">
               분류 필터:
             </span>
             <button
@@ -883,8 +883,8 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
               onClick={() => setSelectedFilter('all')}
               className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors cursor-pointer ${
                 selectedFilter === 'all'
-                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                  : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200/70'
+                  ? 'bg-slate-900 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
               }`}
             >
               전체 ({viewMode === 'pending' ? pendingMemos.length : reflectedMemos.length})
@@ -899,7 +899,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                   className={`px-2.5 py-1 rounded-md text-[11px] font-bold border transition-colors cursor-pointer ${
                     isSelected
                       ? cat.badgeClass
-                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200/80 dark:border-slate-800 hover:bg-slate-50'
+                      : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50'
                   }`}
                 >
                   {cat.label}
@@ -939,7 +939,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="메모 내용, 금액(7,800), 날짜 검색..."
+              placeholder="내용 · 금액(7,800) · 날짜 검색"
               aria-label="작업기억 메모 검색"
               data-testid="working-memory-search"
               className="w-full pl-8 pr-8 py-1.5 rounded-lg text-xs font-semibold bg-slate-50 border border-slate-200/80 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-400"
@@ -961,15 +961,15 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
         {displayedMemos.length === 0 ? (
           <div
             role="status"
-            className="py-12 px-4 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 space-y-2"
+            className="py-12 px-4 text-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 space-y-2"
           >
             <AlertCircle className="w-6 h-6 text-slate-400 mx-auto" />
-            <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+            <p className="text-xs font-bold text-slate-600">
               {searchQuery || selectedFilter !== 'all' || onlyNumeric || onlyPinned
-                ? '선택한 필터 또는 검색어와 일치하는 작업기억 메모가 없습니다.'
+                ? '조건 일치 메모 없음'
                 : viewMode === 'pending'
-                  ? '미반영된 작업기억 메모가 없습니다. 한 줄 메모를 입력하면 자동으로 태그와 핵심 수치를 추출합니다.'
-                  : '아직 반영 완료 처리된 메모가 없습니다.'}
+                  ? '대기 메모 없음 · 입력 시 태그·수치 자동 추출'
+                  : '반영 완료 메모 없음'}
             </p>
             {(searchQuery || selectedFilter !== 'all' || onlyNumeric || onlyPinned) && (
               <button

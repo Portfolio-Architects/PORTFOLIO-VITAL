@@ -18,7 +18,7 @@ if (typeof global.Headers === 'undefined') {
 import '@testing-library/jest-dom';
 import { renderHook, render, act, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useMergedSignals } from '@/hooks/useMergedSignals';
+import { useMergedSignals } from '@/__tests__/fixtures/useMergedSignals';
 import { SignalEntry } from '@/hooks/useSignal';
 import { Task, Project, Meeting, BudgetEntry, InventoryItem } from '@/types';
 
@@ -86,33 +86,6 @@ jest.mock('@/hooks/useSignal', () => ({
   },
 }));
 
-jest.mock('@/hooks/useScheduleAlerts', () => ({
-  useScheduleAlerts: () => [],
-}));
-
-jest.mock('@/hooks/useNotificationAlerts', () => ({
-  useNotificationAlerts: jest.fn(),
-}));
-
-jest.mock('@/hooks/useGraphCustomization', () => ({
-  useGraphCustomization: () => ({
-    customNodes: [],
-    customEdges: [],
-    deletedEdges: [],
-    overrides: {},
-  }),
-}));
-
-jest.mock('@/hooks/useSecurityLock', () => ({
-  useSecurityLock: () => ({
-    isLocked: false,
-    hasSetupPIN: true,
-    failCount: 0,
-    verifyPIN: jest.fn().mockResolvedValue(true),
-    setupPIN: jest.fn().mockResolvedValue(true),
-  }),
-}));
-
 jest.mock('@/lib/sheets-api', () => ({
   syncTombstones: jest.fn().mockResolvedValue(true),
   readSheet: jest.fn().mockResolvedValue([]),
@@ -128,8 +101,11 @@ jest.mock('next/dynamic', () => (func: any) => {
   if (str.includes('PortfolioDashboardView')) {
     return function MockDash() { return <div data-testid="dashboard-component">Dashboard View</div>; };
   }
-  if (str.includes('MindMap3D')) {
-    return function MockMM({ isActive }: { isActive?: boolean }) { return <div data-testid="mindmap-component" data-active={isActive}>MindMap View</div>; };
+  if (str.includes('ArchiveExplorerView')) {
+    return function MockArch() { return <div data-testid="archive-component">Archive View</div>; };
+  }
+  if (str.includes('WorkingMemoryPage')) {
+    return function MockMem() { return <div data-testid="memory-component">Memory View</div>; };
   }
   if (str.includes('WorkspaceView')) {
     return function MockWS() { return <div data-testid="workspace-component">Workspace View</div>; };
@@ -144,8 +120,9 @@ jest.mock('@/components/Sidebar', () => ({
   Sidebar: ({ activeModule, onModuleChange }: any) => (
     <nav data-testid="sidebar">
       <button onClick={() => onModuleChange('dashboard')}>Nav Dashboard</button>
+      <button onClick={() => onModuleChange('memory')}>Nav Memory</button>
       <button onClick={() => onModuleChange('workspace')}>Nav Workspace</button>
-      <button onClick={() => onModuleChange('mindmap')}>Nav Mindmap</button>
+      <button onClick={() => onModuleChange('archive')}>Nav Archive</button>
       <button onClick={() => onModuleChange('project')}>Nav Project</button>
       <span data-testid="active-nav">{activeModule}</span>
     </nav>
@@ -312,15 +289,20 @@ describe('Empirical Challenge: useMergedSignals & ProtectedApp Tab Switching', (
       await waitFor(() => expect(screen.getByTestId('dashboard-component')).toBeInTheDocument());
       expect(screen.getByTestId('active-nav')).toHaveTextContent('dashboard');
 
+      // Click Nav Memory
+      fireEvent.click(screen.getByText('Nav Memory'));
+      expect(screen.getByTestId('memory-component')).toBeInTheDocument();
+      expect(screen.getByTestId('active-nav')).toHaveTextContent('memory');
+
       // Click Nav Workspace
       fireEvent.click(screen.getByText('Nav Workspace'));
       expect(screen.getByTestId('workspace-component')).toBeInTheDocument();
       expect(screen.getByTestId('active-nav')).toHaveTextContent('workspace');
 
-      // Click Nav Mindmap
-      fireEvent.click(screen.getByText('Nav Mindmap'));
-      expect(screen.getByTestId('mindmap-component')).toBeInTheDocument();
-      expect(screen.getByTestId('active-nav')).toHaveTextContent('mindmap');
+      // Click Nav Archive
+      fireEvent.click(screen.getByText('Nav Archive'));
+      expect(screen.getByTestId('archive-component')).toBeInTheDocument();
+      expect(screen.getByTestId('active-nav')).toHaveTextContent('archive');
 
       // Click Nav Project
       fireEvent.click(screen.getByText('Nav Project'));
@@ -334,11 +316,12 @@ describe('Empirical Challenge: useMergedSignals & ProtectedApp Tab Switching', (
       await waitFor(() => expect(screen.getByText('Nav Dashboard')).toBeInTheDocument());
 
       const navDashboard = screen.getByText('Nav Dashboard');
+      const navMemory = screen.getByText('Nav Memory');
       const navWorkspace = screen.getByText('Nav Workspace');
-      const navMindmap = screen.getByText('Nav Mindmap');
+      const navArchive = screen.getByText('Nav Archive');
       const navProject = screen.getByText('Nav Project');
 
-      const tabs = [navDashboard, navWorkspace, navMindmap, navProject];
+      const tabs = [navDashboard, navMemory, navWorkspace, navArchive, navProject];
 
       // Perform 40 rapid tab switches
       act(() => {
@@ -352,8 +335,9 @@ describe('Empirical Challenge: useMergedSignals & ProtectedApp Tab Switching', (
       // Verify final tab state is stable
       expect(screen.getByTestId('active-nav')).toHaveTextContent('dashboard');
       expect(screen.getByTestId('dashboard-component')).toBeInTheDocument();
+      expect(screen.getByTestId('memory-component')).toBeInTheDocument();
       expect(screen.getByTestId('workspace-component')).toBeInTheDocument();
-      expect(screen.getByTestId('mindmap-component')).toBeInTheDocument();
+      expect(screen.getByTestId('archive-component')).toBeInTheDocument();
       expect(screen.getByTestId('project-component')).toBeInTheDocument();
     });
   });

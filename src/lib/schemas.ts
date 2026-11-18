@@ -321,6 +321,156 @@ export const SeedOntologyDocsSchema = z.object({
 
 export type SeedOntologyDocsDto = z.infer<typeof SeedOntologyDocsSchema>;
 
+// ============ Weekly Report Module ============
+export const WeeklyWorkItemStatusSchema = z.enum(['performance', 'plan']).catch('performance');
+
+export const WeeklyWorkItemSchema = z.object({
+  id: z.string().catch('unknown-item'),
+  projectOrder: z.number().default(1).catch(1),
+  projectName: z.string().catch(''),
+  period: z.string().catch(''),
+  target: z.string().optional().catch(undefined),
+  location: z.string().optional().catch(undefined),
+  contents: z.array(z.string()).default([]).catch([]),
+  metrics: z.string().optional().catch(undefined),
+  status: WeeklyWorkItemStatusSchema,
+});
+
+export type WeeklyWorkItemDto = z.infer<typeof WeeklyWorkItemSchema>;
+
+export const WeeklyReportSchema = z.object({
+  id: z.string().catch('unknown-weekly'),
+  reportDate: z.string().catch(''),
+  departmentName: z.string().default('보건행정과').catch('보건행정과'),
+  teamTitle: z.string().default('건강증진팀장 김지영').catch('건강증진팀장 김지영'),
+  performancePeriod: z.string().catch(''),
+  planPeriod: z.string().catch(''),
+  items: z.array(WeeklyWorkItemSchema).default([]).catch([]),
+  createdAt: z.string().catch(new Date().toISOString()),
+  updatedAt: z.string().catch(new Date().toISOString()),
+});
+
+export type WeeklyReportDto = z.infer<typeof WeeklyReportSchema>;
+
+// ============ Festival Module (Yangjae Stream Health Festival SSOT) ============
+export const FestivalMilestoneStatusSchema = z.enum(['done', 'in-progress', 'todo']);
+
+export const FestivalMilestoneItemSchema = z.object({
+  id: z.number().catch(0),
+  number: z.string().catch(''),
+  title: z.string().catch(''),
+  status: FestivalMilestoneStatusSchema.catch('todo'),
+  period: z.string().catch(''),
+  cooperationDepts: z.array(z.string()).optional().catch([]),
+  details: z.array(z.string()).default([]).catch([]),
+});
+
+export const FestivalBoothItemSchema = z.object({
+  id: z.number().catch(0),
+  category: z.string().catch(''),
+  name: z.string().catch(''),
+  scale: z.string().catch(''),
+  program: z.string().catch(''),
+  status: z.string().catch(''),
+  staffCount: z.number().optional().catch(undefined),
+  tables: z.number().optional().catch(undefined),
+  chairs: z.number().optional().catch(undefined),
+  manager: z.string().optional().catch(''),
+  phone: z.string().optional().catch(''),
+  adminPhone: z.string().optional().catch(''),
+  mobilePhone: z.string().optional().catch(''),
+  zone: z.string().optional().catch(undefined),
+  electricity: z.string().optional().catch(''),
+  electricityDetail: z.string().optional().catch(''),
+  bannerText: z.string().optional().catch(''),
+  remarks: z.string().optional().catch(''),
+});
+
+export const FestivalWeeklyReportItemSchema = z.object({
+  weekTitle: z.string().catch(''),
+  period: z.string().catch(''),
+  items: z.array(z.string()).default([]).catch([]),
+});
+
+export const FestivalScheduleItemSchema = z.object({
+  id: z.number().catch(0),
+  date: z.string().optional().catch(''),
+  phase: z.string().catch(''),
+  time: z.string().catch(''),
+  duration: z.string().optional().catch(''),
+  title: z.string().catch(''),
+  lead: z.string().optional().catch(''),
+  status: z.string().catch(''),
+  note: z.string().optional().catch(''),
+});
+
+export const FestivalDutyStaffMemberSchema = z.object({
+  name: z.string().catch(''),
+  adminPhone: z.string().optional().catch(''),
+  mobilePhone: z.string().optional().catch(''),
+  role: z.string().optional().catch(''),
+});
+
+export const FestivalDutyItemSchema = z.object({
+  id: z.union([z.number(), z.string()]).catch(0),
+  category: z.string().catch(''),
+  deptOrOrg: z.string().catch(''),
+  role: z.string().optional().catch(''),
+  manager: z.string().catch(''),
+  phone: z.string().optional().catch(''),
+  adminPhone: z.string().optional().catch(''),
+  mobilePhone: z.string().optional().catch(''),
+  tasks: z.array(z.string()).default([]).catch([]),
+  remarks: z.string().optional().catch(''),
+  staffMembers: z.array(FestivalDutyStaffMemberSchema).optional().catch(undefined),
+  headcount: z.object({
+    bogun: z.number().optional().catch(0),
+    sports: z.number().optional().catch(0),
+    agency: z.number().optional().catch(0),
+  }).optional().catch(undefined),
+});
+
+export const FestivalDataSchema = z.object({
+  meta: z.object({
+    title: z.string().catch(''),
+    shortTitle: z.string().catch(''),
+    eventDate: z.string().catch(''),
+    eventTime: z.string().catch(''),
+    location: z.string().catch(''),
+    course: z.string().catch(''),
+    targetAudience: z.string().catch(''),
+    programStructure: z.array(z.string()).optional().catch([]),
+    staffNote: z.string().optional().catch(''),
+    organizer: z.string().catch(''),
+    overallProgress: z.number().catch(0),
+    lastUpdated: z.string().catch(''),
+  }),
+  budget: z.object({
+    total: z.number().catch(0),
+    allocated: z.object({
+      agencyService: z.number().catch(0),
+      suppliesAndRental: z.number().catch(0),
+      refreshments: z.number().catch(0),
+      volunteerSupport: z.number().catch(0),
+    }),
+    agencyQuotation: z.number().catch(0),
+    agencyCompany: z.string().catch(''),
+  }),
+  weeklyReport: FestivalWeeklyReportItemSchema.optional().catch(undefined),
+  milestones: z.array(FestivalMilestoneItemSchema).default([]).catch([]),
+  booths: z.array(FestivalBoothItemSchema).default([]).catch([]),
+  schedule: z.array(FestivalScheduleItemSchema).optional().catch([]),
+  duties: z.array(FestivalDutyItemSchema).optional().catch([]),
+  departmentsCooperation: z.array(z.object({
+    dept: z.string().catch(''),
+    task: z.string().catch(''),
+    status: z.string().catch(''),
+  })).optional().catch(undefined),
+  lastUpdated: z.string().optional().catch(undefined),
+});
+
+export type FestivalDataDto = z.infer<typeof FestivalDataSchema>;
+
 export const DOMAIN_SHEET_NAMES = [
   'TASKS',
   'BUDGET_CATEGORIES',
@@ -333,6 +483,7 @@ export const DOMAIN_SHEET_NAMES = [
   'CONTACTS',
   'WORKING_MEMORY',
   'ADMIN_DOC_INDEX',
+  'WEEKLY_REPORTS',
 ] as const;
 
 export type DomainSheetName = (typeof DOMAIN_SHEET_NAMES)[number];
@@ -351,6 +502,8 @@ export const getDomainSchema = (sheetName: string) => {
     case 'CONTACTS': return ContactSchema;
     case 'WORKING_MEMORY': return WorkingMemorySchema;
     case 'ADMIN_DOC_INDEX': return AdminDocMetadataSchema;
+    case 'WEEKLY_REPORTS': return WeeklyReportSchema;
+    case 'FESTIVAL_YANGJAE_2026': return FestivalDataSchema;
     default: return z.any(); // Fallback for unstructured arrays
   }
 };
@@ -607,6 +760,146 @@ export const StrictSeedOntologyDocsSchema = z.object({
   relations: z.array(z.any()).optional(),
 });
 
+export const StrictWeeklyWorkItemStatusSchema = z.enum(['performance', 'plan']);
+
+export const StrictWeeklyWorkItemSchema = z.object({
+  id: z.string(),
+  projectOrder: z.number().default(1),
+  projectName: z.string(),
+  period: z.string(),
+  target: z.string().optional(),
+  location: z.string().optional(),
+  contents: z.array(z.string()).default([]),
+  metrics: z.string().optional(),
+  status: StrictWeeklyWorkItemStatusSchema,
+});
+
+export const StrictWeeklyReportSchema = z.object({
+  id: z.string(),
+  reportDate: z.string(),
+  departmentName: z.string().default('보건행정과'),
+  teamTitle: z.string().default('건강증진팀장 김지영'),
+  performancePeriod: z.string(),
+  planPeriod: z.string(),
+  items: z.array(StrictWeeklyWorkItemSchema),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const StrictFestivalMilestoneItemSchema = z.object({
+  id: z.number(),
+  number: z.string(),
+  title: z.string(),
+  status: FestivalMilestoneStatusSchema,
+  period: z.string(),
+  cooperationDepts: z.array(z.string()).optional(),
+  details: z.array(z.string()),
+});
+
+export const StrictFestivalBoothItemSchema = z.object({
+  id: z.number(),
+  category: z.string(),
+  name: z.string(),
+  scale: z.string(),
+  program: z.string(),
+  status: z.string(),
+  staffCount: z.number().optional(),
+  tables: z.number().optional(),
+  chairs: z.number().optional(),
+  manager: z.string().optional(),
+  phone: z.string().optional(),
+  adminPhone: z.string().optional(),
+  mobilePhone: z.string().optional(),
+  zone: z.string().optional(),
+  electricity: z.string().optional(),
+  electricityDetail: z.string().optional(),
+  bannerText: z.string().optional(),
+  remarks: z.string().optional(),
+});
+
+export const StrictFestivalWeeklyReportItemSchema = z.object({
+  weekTitle: z.string(),
+  period: z.string(),
+  items: z.array(z.string()),
+});
+
+export const StrictFestivalScheduleItemSchema = z.object({
+  id: z.number(),
+  date: z.string().optional(),
+  phase: z.string(),
+  time: z.string(),
+  duration: z.string().optional(),
+  title: z.string(),
+  lead: z.string().optional(),
+  status: z.string(),
+  note: z.string().optional(),
+});
+
+export const StrictFestivalDutyStaffMemberSchema = z.object({
+  name: z.string(),
+  adminPhone: z.string().optional(),
+  mobilePhone: z.string().optional(),
+  role: z.string().optional(),
+});
+
+export const StrictFestivalDutyItemSchema = z.object({
+  id: z.union([z.number(), z.string()]),
+  category: z.string(),
+  deptOrOrg: z.string(),
+  role: z.string().optional(),
+  manager: z.string(),
+  phone: z.string().optional(),
+  adminPhone: z.string().optional(),
+  mobilePhone: z.string().optional(),
+  tasks: z.array(z.string()),
+  remarks: z.string().optional(),
+  staffMembers: z.array(StrictFestivalDutyStaffMemberSchema).optional(),
+  headcount: z.object({
+    bogun: z.number().optional(),
+    sports: z.number().optional(),
+    agency: z.number().optional(),
+  }).optional(),
+});
+
+export const StrictFestivalDataSchema = z.object({
+  meta: z.object({
+    title: z.string(),
+    shortTitle: z.string(),
+    eventDate: z.string(),
+    eventTime: z.string(),
+    location: z.string(),
+    course: z.string(),
+    targetAudience: z.string(),
+    programStructure: z.array(z.string()).optional(),
+    staffNote: z.string().optional(),
+    organizer: z.string(),
+    overallProgress: z.number(),
+    lastUpdated: z.string(),
+  }),
+  budget: z.object({
+    total: z.number(),
+    allocated: z.object({
+      agencyService: z.number(),
+      suppliesAndRental: z.number(),
+      refreshments: z.number(),
+      volunteerSupport: z.number(),
+    }),
+    agencyQuotation: z.number(),
+    agencyCompany: z.string(),
+  }),
+  weeklyReport: StrictFestivalWeeklyReportItemSchema.optional(),
+  milestones: z.array(StrictFestivalMilestoneItemSchema),
+  booths: z.array(StrictFestivalBoothItemSchema),
+  schedule: z.array(StrictFestivalScheduleItemSchema).optional(),
+  duties: z.array(StrictFestivalDutyItemSchema).optional(),
+  departmentsCooperation: z.array(z.object({
+    dept: z.string(),
+    task: z.string(),
+    status: z.string(),
+  })).optional(),
+  lastUpdated: z.string().optional(),
+});
+
 export const getStrictDomainSchema = (sheetName: string) => {
   switch (sheetName.toUpperCase()) {
     case 'TASKS': return StrictTaskSchema;
@@ -621,6 +914,8 @@ export const getStrictDomainSchema = (sheetName: string) => {
     case 'CONTACTS': return StrictContactSchema;
     case 'WORKING_MEMORY': return StrictWorkingMemorySchema;
     case 'ADMIN_DOC_INDEX': return StrictAdminDocMetadataSchema;
+    case 'WEEKLY_REPORTS': return StrictWeeklyReportSchema;
+    case 'FESTIVAL_YANGJAE_2026': return StrictFestivalDataSchema;
     default: return z.any();
   }
 };

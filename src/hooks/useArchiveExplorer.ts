@@ -49,7 +49,7 @@ export function useArchiveExplorer(options?: UseArchiveExplorerOptions) {
           year,
           project,
           category: viewMode === 'gallery' ? 'image' : category,
-          imageCategory: viewMode === 'gallery' ? imageCategory : 'ALL',
+          imageCategory,
           limit: viewMode === 'gallery' ? '180' : '120',
         });
         if (clusterTargetId) {
@@ -90,10 +90,11 @@ export function useArchiveExplorer(options?: UseArchiveExplorerOptions) {
 
   const openArchiveTarget = useCallback(async (relPath: string, mode: 'file' | 'folder') => {
     try {
+      const safePath = relPath.replace(/%/g, '%25');
       const res = await fetch('/api/archive/open', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: relPath, mode }),
+        body: JSON.stringify({ path: safePath, mode }),
       });
       if (res.ok) {
         setActionToast(
@@ -102,9 +103,15 @@ export function useArchiveExplorer(options?: UseArchiveExplorerOptions) {
             : '연결 프로그램으로 파일을 실행했습니다.'
         );
         setTimeout(() => setActionToast(null), 2600);
+      } else {
+        const errPayload = await res.json().catch(() => null);
+        setActionToast(errPayload?.error || '파일 실행 요청에 실패했습니다.');
+        setTimeout(() => setActionToast(null), 3200);
       }
     } catch (err) {
       console.error('[useArchiveExplorer] open error:', err);
+      setActionToast('파일 실행 중 네트워크 오류가 발생했습니다.');
+      setTimeout(() => setActionToast(null), 3200);
     }
   }, []);
 

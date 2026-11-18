@@ -63,7 +63,7 @@ export function LawSearchPanel() {
   const totalCnt = searchMutation.data?.totalCnt || 0;
 
   return (
-    <div className="w-full bg-white/60 backdrop-blur-md border border-slate-200/60 rounded-[2rem] p-6 shadow-xs flex flex-col gap-6">
+    <div className="w-full bg-white/95 border border-slate-200/60 rounded-[2rem] p-6 shadow-xs flex flex-col gap-6">
       
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -89,7 +89,7 @@ export function LawSearchPanel() {
       <div className="flex bg-slate-100/80 p-1.5 rounded-2xl w-full border border-slate-200/30">
         <button
           onClick={() => { setTarget('admrul'); searchMutation.reset(); }}
-          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-colors duration-150 cursor-pointer ${
             target === 'admrul'
               ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50'
               : 'text-slate-500 hover:text-slate-800'
@@ -99,7 +99,7 @@ export function LawSearchPanel() {
         </button>
         <button
           onClick={() => { setTarget('ordin'); searchMutation.reset(); }}
-          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-colors duration-150 cursor-pointer ${
             target === 'ordin'
               ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50'
               : 'text-slate-500 hover:text-slate-800'
@@ -109,7 +109,7 @@ export function LawSearchPanel() {
         </button>
         <button
           onClick={() => { setTarget('law'); searchMutation.reset(); }}
-          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-colors duration-150 cursor-pointer ${
             target === 'law'
               ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50'
               : 'text-slate-500 hover:text-slate-800'
@@ -138,7 +138,7 @@ export function LawSearchPanel() {
           <button
             type="submit"
             disabled={isPending}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer flex items-center gap-2"
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-bold transition-colors duration-150 shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer flex items-center gap-2"
           >
             {isPending ? <RefreshCw size={14} className="animate-spin" /> : '조회하기'}
           </button>
@@ -151,7 +151,7 @@ export function LawSearchPanel() {
             <button
               key={idx}
               onClick={() => handleChipClick(chip)}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 border border-slate-200/40 rounded-xl text-[11px] font-semibold text-slate-600 transition-all cursor-pointer shadow-3xs"
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 border border-slate-200/40 rounded-xl text-[11px] font-semibold text-slate-600 transition-colors duration-150 cursor-pointer shadow-3xs"
             >
               #{chip.label}
             </button>
@@ -217,7 +217,7 @@ export function LawSearchPanel() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleViewBody(item)}
-                    className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-3xs"
+                    className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold rounded-xl transition-colors duration-150 border border-indigo-100 cursor-pointer shadow-3xs"
                   >
                     본문 보기 🔍
                   </button>
@@ -241,7 +241,7 @@ export function LawSearchPanel() {
 
       {/* Law Body Drawer / Backdrop Overlay */}
       {selectedMst && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-end bg-black/45 backdrop-blur-xs transition-opacity duration-300" onClick={handleCloseBody}>
+        <div className="fixed inset-0 z-[110] flex items-center justify-end bg-slate-900/60 transition-opacity duration-300" onClick={handleCloseBody}>
           <div
             className="w-full max-w-4xl h-full bg-white shadow-2xl flex flex-col overflow-hidden animate-slide-in pointer-events-auto"
             onClick={e => e.stopPropagation()}

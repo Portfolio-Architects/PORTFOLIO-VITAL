@@ -127,7 +127,7 @@ function AppLogModalComponent({ isOpen, onClose, appMode }: AppLogModalProps) {
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-900/60" onClick={onClose} />
       
       {/* Console Modal (White/Light Premium Theme - Wide View) */}
       <div className="relative w-full max-w-6xl bg-white border border-slate-200/80 rounded-2xl shadow-2xl flex flex-col h-[640px] overflow-hidden text-slate-800">
@@ -234,13 +234,13 @@ function AppLogModalComponent({ isOpen, onClose, appMode }: AppLogModalProps) {
           {logs.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center gap-2 text-slate-400 select-none">
               <Play size={20} className="animate-pulse" />
-              <span>로그 기록이 비어있습니다. 데몬 기동 또는 새 로그를 기다리는 중...</span>
+              <span>수집 로그 없음 · 데몬 대기 중</span>
               {clearedAt !== null && (
                 <button
                   onClick={handleRestoreLogs}
                   className="mt-2 text-[11px] text-indigo-600 hover:underline flex items-center gap-1 cursor-pointer font-sans"
                 >
-                  <History size={11} /> 이전 로그 복원하기
+                  <History size={11} /> 이전 로그 복원
                 </button>
               )}
             </div>

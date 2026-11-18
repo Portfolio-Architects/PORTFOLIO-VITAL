@@ -20,6 +20,7 @@ import {
   ArrowUpDown
 } from 'lucide-react';
 import { Contact } from '@/types';
+import { SectionHeader } from '@/components/ui';
 
 // ============ Korean Chosung & Search Utilities ============
 const CHOSUNG_LIST = [
@@ -125,7 +126,8 @@ function useContainerVirtualGrid({
   estimatedItemHeight = 220,
   gap = 12,
   overscan = 2,
-  containerRef
+  containerRef,
+  defaultContainerHeight = 480
 }: {
   totalItems: number;
   columns?: number;
@@ -133,9 +135,10 @@ function useContainerVirtualGrid({
   gap?: number;
   overscan?: number;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  defaultContainerHeight?: number;
 }) {
   const [scrollTop, setScrollTop] = useState(0);
-  const containerHeight = 480;
+  const [containerHeight, setContainerHeight] = useState(defaultContainerHeight);
 
   const totalRows = Math.ceil(totalItems / columns);
   const rowHeight = estimatedItemHeight + gap;
@@ -143,6 +146,13 @@ function useContainerVirtualGrid({
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+
+    const updateHeight = () => {
+      if (containerRef.current && containerRef.current.clientHeight > 0) {
+        setContainerHeight(containerRef.current.clientHeight);
+      }
+    };
+    updateHeight();
 
     let rafId: number | null = null;
     const handleScroll = () => {
@@ -156,8 +166,18 @@ function useContainerVirtualGrid({
     };
 
     el.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', updateHeight, { passive: true });
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(updateHeight);
+      resizeObserver.observe(el);
+    }
+
     return () => {
       el.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', updateHeight);
+      resizeObserver?.disconnect();
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [containerRef]);
@@ -431,27 +451,36 @@ const ContactCard = React.memo(({
 ContactCard.displayName = 'ContactCard';
 
 // ============ Main ContactsBox Component ============
-const ContactsBoxComponent: React.FC = () => {
+export interface ContactsBoxProps {
+  variant?: 'card' | 'sheet';
+  onClose?: () => void;
+}
+
+const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', onClose }) => {
+  const isSheet = variant === 'sheet';
   const { contacts, loading, addContact, updateContact, deleteContact } = useContacts();
 
   // 검색 및 정렬 상태
   const [localSearchTerm, setLocalSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'NAME_ASC' | 'NEWEST'>('NAME_ASC');
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // 반응형 그리드 열 수 (모바일: 1, 데스크톱: 2)
-  const [columns, setColumns] = useState(2);
+  // 반응형 그리드 열 수 (시트: 1열, 카드 모바일: 1열, 카드 데스크톱: 2열)
+  const [responsiveColumns, setResponsiveColumns] = useState(2);
   useEffect(() => {
+    if (isSheet) return;
     const updateCols = () => {
       if (typeof window !== 'undefined') {
-        setColumns(window.innerWidth >= 768 ? 2 : 1);
+        setResponsiveColumns(window.innerWidth >= 768 ? 2 : 1);
       }
     };
     updateCols();
     window.addEventListener('resize', updateCols);
     return () => window.removeEventListener('resize', updateCols);
-  }, []);
+  }, [isSheet]);
+  const columns = isSheet ? 1 : responsiveColumns;
 
   const handleClearSearch = useCallback(() => {
     setLocalSearchTerm('');
@@ -482,7 +511,10 @@ const ContactsBoxComponent: React.FC = () => {
       notes: contact.notes || '',
       error: null
     });
-  }, []);
+    if (isSheet) {
+      setIsFormOpen(true);
+    }
+  }, [isSheet]);
 
   const handleCancelEdit = useCallback(() => {
     setFormData({
@@ -492,6 +524,25 @@ const ContactsBoxComponent: React.FC = () => {
       email: '',
       notes: '',
       error: null
+    });
+    if (isSheet) {
+      setIsFormOpen(false);
+    }
+  }, [isSheet]);
+
+  const handleToggleForm = useCallback(() => {
+    setIsFormOpen(prev => {
+      if (prev) {
+        setFormData({
+          editingId: null,
+          name: '',
+          phone: '',
+          email: '',
+          notes: '',
+          error: null
+        });
+      }
+      return !prev;
     });
   }, []);
 
@@ -602,10 +653,11 @@ const ContactsBoxComponent: React.FC = () => {
   const { startIndex, endIndex, topPadding, bottomPadding } = useContainerVirtualGrid({
     totalItems: filteredContacts.length,
     columns,
-    estimatedItemHeight: 220,
+    estimatedItemHeight: isSheet ? 160 : 220,
     gap: 12,
     overscan: 2,
-    containerRef: scrollContainerRef
+    containerRef: scrollContainerRef,
+    defaultContainerHeight: isSheet ? 680 : 480
   });
 
   const visibleContacts = useMemo(() => {
@@ -616,11 +668,11 @@ const ContactsBoxComponent: React.FC = () => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setFormData(prev => ({ ...prev, error: '이름/노드명을 입력해주세요.' }));
+      setFormData(prev => ({ ...prev, error: '이름 입력 필요' }));
       return;
     }
     if (!formData.phone.trim()) {
-      setFormData(prev => ({ ...prev, error: '연락처 번호를 입력해주세요.' }));
+      setFormData(prev => ({ ...prev, error: '연락처 입력 필요' }));
       return;
     }
 
@@ -645,215 +697,321 @@ const ContactsBoxComponent: React.FC = () => {
       notes: '',
       error: null
     });
-  }, [formData, updateContact, addContact]);
+    if (isSheet) {
+      setIsFormOpen(false);
+    }
+  }, [formData, updateContact, addContact, isSheet]);
 
-  return (
-    <div className="bg-white rounded-xl p-6 sm:p-8 shadow-2xs border border-slate-200/80">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-slate-100 text-slate-700 rounded-xl border border-slate-200/80 shrink-0">
-            <BookOpen className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="text-xl font-bold text-slate-900 tracking-tight">내 연락처 및 주소록 관리</h4>
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200/80 rounded-md">
-                <Sparkles className="w-3 h-3 text-slate-500" /> 비고/메모·초성 스마트 검색
-              </span>
-            </div>
-            <p className="text-xs font-medium text-slate-500 mt-0.5">
-              실무 협업자 및 마인드맵 공약제안 노드별 연락 정보를 관리합니다. (비고/메모, 소속, 직책, 출처 통합 검색)
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-[11px] font-mono tabular-nums font-semibold px-3 py-1 bg-slate-50 border border-slate-200/80 text-slate-600 rounded-lg">
-            {localSearchTerm ? (
-              <>검색 <strong className="text-slate-900 font-bold">{filteredContacts.length}</strong>명 / 전체 {contacts.length}명</>
-            ) : (
-              <>총 <strong className="text-slate-900 font-bold">{contacts.length}</strong>명</>
-            )}
-          </span>
+  const countBadge = (
+    <span className="text-[11px] font-mono tabular-nums font-semibold px-3 py-1 bg-slate-50 border border-slate-200/80 text-slate-600 rounded-lg">
+      {localSearchTerm ? (
+        <>검색 <strong className="text-slate-900 font-bold">{filteredContacts.length}</strong>명 / 전체 {contacts.length}명</>
+      ) : (
+        <>총 <strong className="text-slate-900 font-bold">{contacts.length}</strong>명</>
+      )}
+    </span>
+  );
+
+  const sortButton = (
+    <button
+      type="button"
+      onClick={handleToggleSort}
+      className="flex items-center gap-1 text-[11px] font-bold px-3 py-1 bg-slate-100/80 hover:bg-slate-200/70 text-slate-700 border border-slate-200/80 rounded-lg transition-colors cursor-pointer"
+      title="정렬 기준 변경"
+    >
+      <ArrowUpDown className="w-3 h-3 text-slate-500" />
+      {sortOrder === 'NAME_ASC' ? '가나다순' : '최신순'}
+    </button>
+  );
+
+  const formElement = (
+    <form
+      onSubmit={handleSubmit}
+      className={
+        isSheet
+          ? 'flex flex-col gap-3 bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 shrink-0'
+          : 'lg:col-span-4 flex flex-col gap-4 bg-slate-50/70 p-6 rounded-xl border border-slate-200/80 h-fit'
+      }
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-bold text-slate-800 flex items-center gap-2">
+          {formData.editingId ? (
+            <>
+              <Pencil className="w-4 h-4 text-slate-700" /> 연락처 수정
+            </>
+          ) : (
+            <>
+              <UserPlus className="w-4 h-4 text-slate-700" /> 연락처 추가
+            </>
+          )}
+        </span>
+        {isSheet && (
           <button
-            onClick={handleToggleSort}
-            className="flex items-center gap-1 text-[11px] font-bold px-3 py-1 bg-slate-100/80 hover:bg-slate-200/70 text-slate-700 border border-slate-200/80 rounded-lg transition-colors cursor-pointer"
-            title="정렬 기준 변경"
+            type="button"
+            onClick={handleCancelEdit}
+            className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 px-2 py-1 rounded-md hover:bg-slate-200/60 transition-colors cursor-pointer"
           >
-            <ArrowUpDown className="w-3 h-3 text-slate-500" />
-            {sortOrder === 'NAME_ASC' ? '가나다순' : '최신순'}
+            닫기
           </button>
+        )}
+      </div>
+
+      {formData.error && (
+        <div className="flex items-center gap-2 text-xs font-bold bg-rose-50 text-rose-700 p-3 rounded-lg border border-rose-200/80">
+          <ShieldAlert className="w-4.5 h-4.5 shrink-0" />
+          <span>{formData.error}</span>
+        </div>
+      )}
+
+      <div className={isSheet ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'flex flex-col gap-4'}>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-bold text-slate-600">이름 · 직함</label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={handleNameChange}
+            placeholder="예: 이성섭 상임이사, 최장미"
+            className="w-full px-3.5 py-2 rounded-lg border border-slate-200/90 text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400"
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-bold text-slate-600">연락처</label>
+          <input
+            type="text"
+            value={formData.phone}
+            onChange={handlePhoneChange}
+            placeholder="예: 010-5284-3946"
+            className="w-full px-3.5 py-2 rounded-lg border border-slate-200/90 text-sm font-mono tabular-nums font-semibold text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400"
+            required
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Form Container (left side) */}
-        <form onSubmit={handleSubmit} className="lg:col-span-4 flex flex-col gap-4 bg-slate-50/70 p-6 rounded-xl border border-slate-200/80 h-fit">
-          <span className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-2">
-            {formData.editingId ? (
-              <>
-                <Pencil className="w-4 h-4 text-slate-700" /> 연락처 수정
-              </>
-            ) : (
-              <>
-                <UserPlus className="w-4 h-4 text-slate-700" /> 신규 연락처 추가
-              </>
-            )}
-          </span>
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[11px] font-bold text-slate-600">이메일 (선택)</label>
+        <input
+          type="email"
+          value={formData.email}
+          onChange={handleEmailChange}
+          placeholder="예: email@example.com"
+          className="w-full px-3.5 py-2 rounded-lg border border-slate-200/90 text-sm font-mono font-semibold text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400"
+        />
+      </div>
 
-          {formData.error && (
-            <div className="flex items-center gap-2 text-xs font-bold bg-rose-50 text-rose-700 p-3 rounded-lg border border-rose-200/80">
-              <ShieldAlert className="w-4.5 h-4.5 shrink-0" />
-              <span>{formData.error}</span>
-            </div>
-          )}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[11px] font-bold text-slate-600">소속 · 담당 메모 (선택)</label>
+        <textarea
+          rows={isSheet ? 2 : 3}
+          value={formData.notes}
+          onChange={handleNotesChange}
+          placeholder="예: 소속: 보건행정과, 비고: 예산 총괄"
+          className="w-full px-3.5 py-2 rounded-lg border border-slate-200/90 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400 resize-none leading-relaxed"
+        />
+      </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-600">이름 / 노드명</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={handleNameChange}
-              placeholder="예: 이성섭 상임이사, 최장미"
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-200/90 text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400"
-              required
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-600">연락처 (전화번호)</label>
-            <input
-              type="text"
-              value={formData.phone}
-              onChange={handlePhoneChange}
-              placeholder="예: 010-5284-3946"
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-200/90 text-sm font-mono tabular-nums font-semibold text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400"
-              required
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-600">이메일 주소 (선택)</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={handleEmailChange}
-              placeholder="예: email@example.com"
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-200/90 text-sm font-mono font-semibold text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-600">비고 / 메모 / 소속 (선택)</label>
-            <textarea
-              rows={3}
-              value={formData.notes}
-              onChange={handleNotesChange}
-              placeholder="예: 소속: 매헌기념관, 비고: 체력측정요구 뒷빽, [출처: 사업운영]"
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-200/90 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400 resize-none leading-relaxed"
-            />
-            <p className="text-[10px] text-slate-400">
-              * 소속, 직책, 출처, 비고 내용을 적어두시면 검색창에서 즉시 찾아낼 수 있습니다.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-2 mt-1">
-            <button
-              type="submit"
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors shadow-2xs cursor-pointer"
-            >
-              {formData.editingId ? '연락처 수정 완료' : '연락처 저장'}
-            </button>
-            {formData.editingId && (
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                className="w-full bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90 font-bold py-2.5 px-4 rounded-lg transition-colors cursor-pointer text-xs"
-              >
-                수정 취소
-              </button>
-            )}
-          </div>
-        </form>
-
-        {/* Contacts List (right side) */}
-        <div className="lg:col-span-8 flex flex-col min-w-0">
-          {/* Search bar */}
-          <div 
-            className="relative mb-3 cursor-text"
-            onClick={() => searchInputRef.current?.focus()}
+      <div className={isSheet ? 'flex items-center gap-2 mt-0.5' : 'flex flex-col gap-2 mt-1'}>
+        <button
+          type="submit"
+          className="flex-1 w-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-colors shadow-2xs cursor-pointer"
+        >
+          {formData.editingId ? '연락처 수정 완료' : '연락처 저장'}
+        </button>
+        {formData.editingId && (
+          <button
+            type="button"
+            onClick={handleCancelEdit}
+            className={`${isSheet ? 'px-4' : 'w-full px-4'} bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/90 font-bold py-2.5 rounded-lg transition-colors cursor-pointer text-xs`}
           >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={localSearchTerm}
-              onChange={handleSearchChange}
-              placeholder="이름, 전화번호, 비고/메모, 소속, 직책 키워드 및 초성(ㅊㄹ, ㅇㅅㅅ) 검색..."
-              className="w-full pl-11 pr-10 py-3 rounded-xl border border-slate-200/90 text-sm font-semibold text-slate-800 bg-slate-50/50 hover:bg-white focus:bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400 shadow-2xs cursor-text"
-            />
-            {localSearchTerm && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleClearSearch();
-                }}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
-                title="검색어 초기화"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+            수정 취소
+          </button>
+        )}
+      </div>
+    </form>
+  );
 
-          {/* Contacts Card Grid with Window Virtualization */}
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-slate-800 mb-3" />
-              <p className="text-xs font-bold">주소록 데이터를 불러오고 있습니다...</p>
-            </div>
-          ) : filteredContacts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 border border-dashed border-slate-200/90 rounded-xl">
-              <BookOpen className="w-10 h-10 text-slate-300 mb-3" />
-              <p className="text-sm font-bold text-slate-500">
-                {localSearchTerm 
-                  ? `"${localSearchTerm}" 관련 검색 결과가 없습니다.`
-                  : '등록된 연락처가 없습니다.'}
-              </p>
-              {localSearchTerm && (
-                <button
-                  type="button"
-                  onClick={handleClearSearch}
-                  className="mt-3 text-xs font-bold text-slate-700 hover:text-slate-900 underline cursor-pointer"
-                >
-                  검색어 초기화
-                </button>
-              )}
-            </div>
-          ) : (
-            <div 
-              ref={scrollContainerRef}
-              className="max-h-[480px] overflow-y-auto pr-1.5 scrollbar-thin"
+  const searchAndListElement = (
+    <div className={isSheet ? 'flex flex-col flex-1 min-h-0' : 'lg:col-span-8 flex flex-col min-w-0'}>
+      {/* Search bar */}
+      <div
+        className="relative mb-3 cursor-text shrink-0"
+        onClick={() => searchInputRef.current?.focus()}
+      >
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
+        <input
+          ref={searchInputRef}
+          type="text"
+          value={localSearchTerm}
+          onChange={handleSearchChange}
+          placeholder="이름 · 전화번호 · 소속 · 메모 · 초성(ㅊㄹ) 검색"
+          className="w-full pl-11 pr-10 py-3 rounded-xl border border-slate-200/90 text-sm font-semibold text-slate-800 bg-slate-50/50 hover:bg-white focus:bg-white focus:outline-none focus:border-slate-400 transition-colors placeholder:text-slate-400 shadow-2xs cursor-text"
+        />
+        {localSearchTerm && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClearSearch();
+            }}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
+            title="검색어 초기화"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Contacts Card Grid with Window Virtualization */}
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-slate-800 mb-3" />
+          <p className="text-xs font-bold">연락처 로딩 중</p>
+        </div>
+      ) : filteredContacts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 border border-dashed border-slate-200/90 rounded-xl">
+          <BookOpen className="w-10 h-10 text-slate-300 mb-3" />
+          <p className="text-sm font-bold text-slate-500">
+            {localSearchTerm
+              ? `"${localSearchTerm}" 검색 결과 없음`
+              : '등록된 연락처가 없습니다.'}
+          </p>
+          {localSearchTerm && (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="mt-3 text-xs font-bold text-slate-700 hover:text-slate-900 underline cursor-pointer"
             >
-              <div style={{ paddingTop: `${topPadding}px`, paddingBottom: `${bottomPadding}px` }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {visibleContacts.map((item) => (
-                    <ContactCard
-                      key={item.contact.id}
-                      contact={item.contact}
-                      parsedNotes={item.parsedNotes}
-                      queryTokens={queryTokens}
-                      onStartEdit={startEdit}
-                      onDelete={deleteContact}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+              검색어 초기화
+            </button>
           )}
         </div>
+      ) : (
+        <div
+          ref={scrollContainerRef}
+          className={
+            isSheet
+              ? 'flex-1 min-h-0 overflow-y-auto pr-1 custom-scrollbar'
+              : 'max-h-[480px] overflow-y-auto pr-1.5 scrollbar-thin'
+          }
+        >
+          <div style={{ paddingTop: `${topPadding}px`, paddingBottom: `${bottomPadding}px` }}>
+            <div className={isSheet ? 'grid grid-cols-1 gap-3 pb-2' : 'grid grid-cols-1 md:grid-cols-2 gap-3'}>
+              {visibleContacts.map((item) => (
+                <ContactCard
+                  key={item.contact.id}
+                  contact={item.contact}
+                  parsedNotes={item.parsedNotes}
+                  queryTokens={queryTokens}
+                  onStartEdit={startEdit}
+                  onDelete={deleteContact}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  if (isSheet) {
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        {/* Side Sheet Top Header */}
+        <div className="px-5 py-4 border-b border-slate-200/80 bg-white shrink-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2.5 bg-slate-100 text-slate-700 rounded-xl border border-slate-200/80 shrink-0">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base font-extrabold text-slate-900 tracking-tight truncate">
+                    업무 연락처
+                  </h2>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200/80 rounded-md">
+                    <Sparkles className="w-3 h-3 text-slate-500" /> 초성 · 메모 검색
+                  </span>
+                </div>
+                <p
+                  title="부서 · 유관기관 담당자 통합 조회"
+                  className="vlds-subtitle text-xs font-medium text-slate-500 mt-0.5 line-clamp-1"
+                >
+                  부서 · 유관기관 담당자 통합 조회
+                </p>
+              </div>
+            </div>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="사이드 시트 닫기"
+                className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-2 mt-3.5 pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              {countBadge}
+              {sortButton}
+            </div>
+            <button
+              type="button"
+              onClick={handleToggleForm}
+              className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
+                isFormOpen
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90'
+              }`}
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              {isFormOpen ? '입력 닫기' : '연락처 추가'}
+            </button>
+          </div>
+        </div>
+
+        {/* Side Sheet Body */}
+        <div className="flex-1 min-h-0 flex flex-col gap-4 p-5 overflow-hidden bg-white">
+          {isFormOpen && formElement}
+          {searchAndListElement}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl p-6 sm:p-8 shadow-2xs border border-slate-200/80">
+      {/* Header (VLDS SectionHeader) */}
+      <SectionHeader
+        title="업무 연락처"
+        subtitle="부서 · 유관기관 담당자 통합 조회"
+        headingLevel="h4"
+        titleClassName="text-xl font-bold text-slate-900 tracking-tight"
+        className="pb-5 mb-6"
+        icon={
+          <div className="p-3 bg-slate-100 text-slate-700 rounded-xl border border-slate-200/80 shrink-0">
+            <BookOpen className="w-6 h-6" />
+          </div>
+        }
+        badge={
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200/80 rounded-md">
+            <Sparkles className="w-3 h-3 text-slate-500" /> 초성 · 메모 검색
+          </span>
+        }
+        actions={
+          <>
+            {countBadge}
+            {sortButton}
+          </>
+        }
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {formElement}
+        {searchAndListElement}
       </div>
     </div>
   );

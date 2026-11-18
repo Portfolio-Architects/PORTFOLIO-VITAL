@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useGraphCustomization } from '@/hooks/useGraphCustomization';
+import { useGraphCustomization } from '@/__tests__/fixtures/useGraphCustomization';
 import { globalYDoc } from '@/hooks/useYjsStore';
 import * as sheetsApi from '@/lib/sheets-api';
 import { useState } from 'react';

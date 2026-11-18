@@ -2,7 +2,7 @@ import React from 'react';
 import { render, act, screen, waitFor } from '@testing-library/react';
 import { extractKeywords, useSignal } from '@/hooks/useSignal';
 import { SecurityLockScreen } from '@/components/SecurityLockScreen';
-import { MindMap3D } from '@/components/MindMap3D';
+import { Modal } from '@/components/ui/modal';
 import Home from '@/app/page';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -67,112 +67,12 @@ jest.mock('@/hooks/useProjects', () => ({
   }),
 }));
 
-jest.mock('@/hooks/useScheduleAlerts', () => ({
-  useScheduleAlerts: jest.fn().mockReturnValue([]),
-}));
-
-jest.mock('@/hooks/useNotificationAlerts', () => ({
-  useNotificationAlerts: jest.fn(),
-}));
-
-const mockVerifyPIN = jest.fn().mockResolvedValue(true);
-const mockSetupPIN = jest.fn();
-
-jest.mock('@/hooks/useSecurityLock', () => ({
-  useSecurityLock: () => ({
-    isLocked: false,
-    hasSetupPIN: true,
-    failCount: 0,
-    verifyPIN: mockVerifyPIN,
-    setupPIN: mockSetupPIN,
-  }),
-}));
-
-jest.mock('@/hooks/useGlobalSearch', () => ({
-  useGlobalSearch: () => ({
-    searchModalOpen: false,
-    searchQuery: '',
-    searchResults: [],
-    closeSearchModal: jest.fn(),
-    handleGlobalSearch: jest.fn(),
-  }),
-}));
-
-jest.mock('@/hooks/useMergedSignals', () => ({
-  useMergedSignals: () => ({
-    mergedKeywordMap: {},
-    mergedEntries: [],
-  }),
-}));
-
-const mockSetNodeOverride = jest.fn();
-jest.mock('@/hooks/useGraphCustomization', () => ({
-  useGraphCustomization: () => ({
-    customNodes: [],
-    customEdges: [],
-    deletedEdges: [],
-    overrides: {},
-    undo: jest.fn(),
-    redo: jest.fn(),
-    setNodeOverride: mockSetNodeOverride,
-    batchSetNodeOverrides: jest.fn(),
-    clearNodeOverride: jest.fn(),
-    addCustomNode: jest.fn(),
-    deleteCustomNode: jest.fn(),
-    updateCustomNodeText: jest.fn(),
-    addCustomEdge: jest.fn(),
-    deleteCustomEdge: jest.fn(),
-    removeCustomTombstone: jest.fn(),
-    renameNodeId: jest.fn(),
-    isCloudLoaded: true,
-  }),
-}));
-
-jest.mock('@/hooks/useWikiStorage', () => ({
-  useWikiStorage: () => ({
-    blocks: [],
-    isLoaded: true,
-    saveBlocks: jest.fn(),
-  }),
-}));
-
-jest.mock('@/hooks/useClassificationWords', () => ({
-  useClassificationWords: () => ({
-    data: null,
-  }),
-}));
-
-jest.mock('@/hooks/useFileRadar', () => ({
-  useFileRadar: () => ({
-    mutate: jest.fn(),
-    data: null,
-  }),
-}));
-
-// Mock subcomponents of MindMap3D to avoid loading ES modules like ProseMirror/BlockNote
+// Mock WikiEditor to avoid loading ES modules like ProseMirror/BlockNote
 jest.mock('@/components/WikiEditor', () => ({
   WikiEditor: () => <div data-testid="wiki-editor" />
 }));
 jest.mock('../src/components/WikiEditor', () => ({
   WikiEditor: () => <div data-testid="wiki-editor" />
-}));
-jest.mock('@/components/MindMapInspector', () => ({
-  MindMapInspector: () => <div data-testid="mind-map-inspector" />
-}));
-jest.mock('../src/components/MindMapInspector', () => ({
-  MindMapInspector: () => <div data-testid="mind-map-inspector" />
-}));
-jest.mock('@/components/mindmap/ui/MindMapHeader', () => ({
-  MindMapHeader: () => <div data-testid="mind-map-header" />
-}));
-jest.mock('../src/components/mindmap/ui/MindMapHeader', () => ({
-  MindMapHeader: () => <div data-testid="mind-map-header" />
-}));
-jest.mock('@/components/mindmap/ui/MindMapHUD', () => ({
-  MindMapHUD: () => <div data-testid="mind-map-hud" />
-}));
-jest.mock('../src/components/mindmap/ui/MindMapHUD', () => ({
-  MindMapHUD: () => <div data-testid="mind-map-hud" />
 }));
 
 
@@ -444,89 +344,37 @@ describe('Refactoring Correctness and Leak Verification Suite', () => {
     });
   });
 
-  // ─── MindMap3D Event Listeners and Engine Cleanup Tests ───
-  describe('MindMap3D Event Listeners and Engine Cleanup', () => {
-    it('should register all window and canvas listeners on mount and clear them on unmount without leakage', () => {
-      jest.useFakeTimers();
-      const onAddSignal = jest.fn();
-      
+  // ─── VLDS Modal & Home Window Event Listener Cleanup Tests ───
+  describe('VLDS Modal & ProtectedApp Event Listener Cleanup', () => {
+    it('should register Escape keydown listener on open and clear it on unmount without leakage', () => {
+      const onClose = jest.fn();
       const { unmount } = render(
-        <MindMap3D
-          signalKeywords={{}}
-          signalEntries={[]}
-          onAddSignal={onAddSignal}
-          isActive={true}
-        />
+        <Modal isOpen={true} onClose={onClose} title="검증 모달">
+          <div>모달 콘텐츠</div>
+        </Modal>
       );
 
-      // Advance timers to trigger the 150ms delay for engineActive
-      act(() => {
-        jest.advanceTimersByTime(150);
-      });
-
-      // Check registered listeners on window
       const windowAddCalls = addEventListenerSpy.mock.calls;
-      const wikiOpenListeners = windowAddCalls.filter(call => call[0] === 'wiki:openNode');
-      const wikiCloseListeners = windowAddCalls.filter(call => call[0] === 'wiki:closeNode');
       const keydownListeners = windowAddCalls.filter(call => call[0] === 'keydown');
-
-      expect(wikiOpenListeners.length).toBe(1);
-      expect(wikiCloseListeners.length).toBe(1);
-      // MindMap3D registers a main keydown listener on mount.
       expect(keydownListeners.length).toBeGreaterThanOrEqual(1);
 
-      // Unmount the component
       unmount();
 
-      // Check removed listeners on window
       const windowRemoveCalls = removeEventListenerSpy.mock.calls;
-      const removedWikiOpen = windowRemoveCalls.filter(call => call[0] === 'wiki:openNode');
-      const removedWikiClose = windowRemoveCalls.filter(call => call[0] === 'wiki:closeNode');
       const removedKeydown = windowRemoveCalls.filter(call => call[0] === 'keydown');
-
-      expect(removedWikiOpen.length).toBe(1);
-      expect(removedWikiClose.length).toBe(1);
       expect(removedKeydown.length).toBe(keydownListeners.length);
-
-      // Verify that engine.destroy was called
-      expect(mockDestroy).toHaveBeenCalledTimes(1);
-      jest.useRealTimers();
     });
 
-    it('should handle wheel event listener on canvas element and unregister it on unmount', async () => {
-      const onAddSignal = jest.fn();
-
-      // Create a spy on HTMLCanvasElement.prototype.addEventListener
-      const canvasAddSpy = jest.spyOn(HTMLCanvasElement.prototype, 'addEventListener');
-      const canvasRemoveSpy = jest.spyOn(HTMLCanvasElement.prototype, 'removeEventListener');
-
+    it('should not register keydown listener when Modal is closed (isOpen=false)', () => {
       const { unmount } = render(
-        <MindMap3D
-          signalKeywords={{}}
-          signalEntries={[]}
-          onAddSignal={onAddSignal}
-          isActive={true}
-        />
+        <Modal isOpen={false} onClose={jest.fn()} title="비활성 모달">
+          <div>비활성</div>
+        </Modal>
       );
 
-      // Wait for loading to finish and canvas to be mounted and wheel listener to be added
-      await waitFor(() => {
-        const loadingText = screen.queryByText('데이터 동기화 및 로딩 중...');
-        expect(loadingText).toBeNull();
-        
-        const wheelListeners = canvasAddSpy.mock.calls.filter(call => call[0] === 'wheel');
-        expect(wheelListeners.length).toBe(1);
-        expect(wheelListeners[0][2]).toEqual({ passive: false });
-      });
-
+      const keydownListeners = addEventListenerSpy.mock.calls.filter(call => call[0] === 'keydown');
+      expect(keydownListeners.length).toBe(0);
       unmount();
-
-      // Verify that the wheel listener was removed on canvas
-      const removedWheel = canvasRemoveSpy.mock.calls.filter(call => call[0] === 'wheel');
-      expect(removedWheel.length).toBe(1);
-
-      canvasAddSpy.mockRestore();
-      canvasRemoveSpy.mockRestore();
     });
   });
 

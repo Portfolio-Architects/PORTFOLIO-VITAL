@@ -33,7 +33,7 @@ const CustomSimulationTooltip = React.memo(({ active, payload, label }: any) => 
     const hasActual = itemData.actualRate !== undefined;
 
     return (
-      <div className="p-3 rounded-lg shadow-lg border border-slate-200/90 flex flex-col gap-1.5 text-[11px] min-w-[200px] bg-white/95 backdrop-blur-xs">
+      <div className="p-3 rounded-lg shadow-lg border border-slate-200/90 flex flex-col gap-1.5 text-[11px] min-w-[200px] bg-white/95">
         <div className="flex justify-between items-center border-b border-slate-100 pb-1.5 mb-0.5">
           <span className="font-bold text-slate-800 text-[11px] tracking-tight">
             {label}월 소진 시뮬레이션
@@ -246,8 +246,8 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
                 Commitment Burn-up
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              현재 실집행선에 시뮬레이터 등록 예정액(₩{totalSimulatedExpenditure.toLocaleString('ko-KR')})을 합산한 0–100% 예상 소진선
+            <p className="vlds-subtitle text-xs text-slate-400 mt-0.5">
+              실집행 + 예정액({totalSimulatedExpenditure.toLocaleString('ko-KR')}원) 합산 소진선
             </p>
           </div>
         </div>

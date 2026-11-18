@@ -20,28 +20,28 @@ export function AgentStatusBoard() {
     switch (status) {
       case 'running':
         return {
-          bg: 'bg-blue-500/10 border-blue-200/60 shadow-[0_0_18px_rgba(59,130,246,0.12)] backdrop-blur-xs',
+          bg: 'bg-blue-500/10 border-blue-200/60 shadow-[0_0_18px_rgba(59,130,246,0.12)]',
           text: 'text-blue-700',
           badge: 'bg-blue-500/15 text-blue-700 border border-blue-500/20',
           icon: <RefreshCw className="animate-spin text-blue-500" size={16} />
         };
       case 'success':
         return {
-          bg: 'bg-emerald-500/10 border-emerald-200/50 shadow-[0_0_15px_rgba(16,185,129,0.08)] backdrop-blur-xs',
+          bg: 'bg-emerald-500/10 border-emerald-200/50 shadow-[0_0_15px_rgba(16,185,129,0.08)]',
           text: 'text-emerald-700',
           badge: 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/20',
           icon: <CheckCircle2 className="text-emerald-500 animate-pulse" size={16} />
         };
       case 'failed':
         return {
-          bg: 'bg-rose-500/10 border-rose-200/50 shadow-[0_0_15px_rgba(239,68,68,0.08)] backdrop-blur-xs',
+          bg: 'bg-rose-500/10 border-rose-200/50 shadow-[0_0_15px_rgba(239,68,68,0.08)]',
           text: 'text-rose-700',
           badge: 'bg-rose-500/15 text-rose-700 border border-rose-500/20',
           icon: <AlertCircle className="text-rose-500" size={16} />
         };
       default:
         return {
-          bg: 'bg-white/40 border-slate-200/50 backdrop-blur-xs',
+          bg: 'bg-white/95 border-slate-200/50',
           text: 'text-slate-500',
           badge: 'bg-slate-100/80 text-slate-600 border border-slate-200/30',
           icon: <Radio className="text-slate-400" size={16} />
@@ -96,7 +96,7 @@ export function AgentStatusBoard() {
             return (
               <div 
                 key={agent.id} 
-                className={`flex flex-col border rounded-xl overflow-hidden transition-all duration-300 ${style.bg}`}
+                className={`flex flex-col border rounded-xl overflow-hidden transition-colors duration-300 ${style.bg}`}
               >
                 {/* Main Content */}
                 <div className="flex items-center justify-between p-3 gap-2">

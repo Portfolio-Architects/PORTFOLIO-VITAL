@@ -328,11 +328,11 @@ const BudgetCategoryCardItemComponent = ({
             <div className="flex items-center gap-2.5">
               <div className="flex-1 h-2 bg-slate-200/70 rounded-full overflow-hidden flex" title={`집행률: ${(stats.usageRate || 0).toFixed(1)}% | 미집행률: ${(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%`}>
                 <div 
-                  className={`h-full ${isVisible ? 'transition-all duration-500 ease-out' : ''} ${(stats.usageRate || 0) >= 95 ? 'bg-rose-500' : (stats.usageRate || 0) >= 80 ? 'bg-amber-500' : 'bg-slate-800'}`} 
+                  className={`h-full ${isVisible ? 'transition-[width] duration-500 ease-out' : ''} ${(stats.usageRate || 0) >= 95 ? 'bg-rose-500' : (stats.usageRate || 0) >= 80 ? 'bg-amber-500' : 'bg-slate-800'}`} 
                   style={{ width: `${Math.min(100, stats.usageRate || 0)}%` }} 
                 />
                 <div 
-                  className={`h-full bg-emerald-500/60 ${isVisible ? 'transition-all duration-500' : ''}`} 
+                  className={`h-full bg-emerald-500/60 ${isVisible ? 'transition-[width] duration-500' : ''}`} 
                   style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, stats.usageRate || 0), cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0))}%` }} 
                 />
               </div>

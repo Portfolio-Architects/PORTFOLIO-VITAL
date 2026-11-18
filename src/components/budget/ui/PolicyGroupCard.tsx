@@ -420,7 +420,7 @@ const PolicyGroupCardComponent = ({
           {/* Minimalist Thin Progress Bar */}
           <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden flex" title={`집행률: ${usageRate.toFixed(1)}% | 미집행률: ${(totalBudget > 0 ? (remaining / totalBudget * 100) : 0).toFixed(1)}%`}>
             <div 
-              className={`h-full ${isVisible ? 'transition-all duration-500 ease-out' : ''} ${
+              className={`h-full ${isVisible ? 'transition-[width] duration-500 ease-out' : ''} ${
                 usageRate >= 95 
                   ? 'bg-rose-500' 
                   : usageRate >= 80 
@@ -430,7 +430,7 @@ const PolicyGroupCardComponent = ({
               style={{ width: `${Math.min(100, usageRate)}%` }} 
             />
             <div 
-              className={`h-full bg-emerald-500/60 ${isVisible ? 'transition-all duration-500' : ''}`} 
+              className={`h-full bg-emerald-500/60 ${isVisible ? 'transition-[width] duration-500' : ''}`} 
               style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, usageRate), totalBudget > 0 ? (remaining / totalBudget * 100) : 0))}%` }} 
             />
           </div>
@@ -438,7 +438,7 @@ const PolicyGroupCardComponent = ({
       )}
       
       {(hidePolicyHeader || isOpen) && (
-        <div ref={containerRef} className={`transition-all duration-200 divide-y divide-slate-100 ${hidePolicyHeader ? 'p-4 border border-slate-200/80 rounded-xl bg-white shadow-2xs' : 'p-5 border-t border-slate-100 bg-slate-50/30 rounded-b-xl'}`}>
+        <div ref={containerRef} className={`transition-colors duration-200 divide-y divide-slate-100 ${hidePolicyHeader ? 'p-4 border border-slate-200/80 rounded-xl bg-white shadow-2xs' : 'p-5 border-t border-slate-100 bg-slate-50/30 rounded-b-xl'}`}>
           {isVirtualizationActive && topPadding > 0 && (
             <div style={{ height: `${topPadding}px` }} aria-hidden="true" />
           )}
@@ -548,13 +548,13 @@ const PolicyGroupCardComponent = ({
                     {/* Compact Progress Bar */}
                     <div className="w-16 h-2 bg-slate-200/70 rounded-full overflow-hidden inline-flex items-center shrink-0" title={`집행률: ${detailUsageRate.toFixed(1)}% | 미집행률: ${detailRemainingRate.toFixed(1)}%`}>
                       <div 
-                        className={`h-full transition-all duration-300 ${
+                        className={`h-full transition-colors duration-300 ${
                           detailUsageRate >= 95 ? 'bg-rose-500' : detailUsageRate >= 80 ? 'bg-amber-500' : 'bg-slate-800'
                         }`} 
                         style={{ width: `${Math.min(100, detailUsageRate)}%` }} 
                       />
                       <div 
-                        className="h-full bg-emerald-500/70 transition-all duration-300" 
+                        className="h-full bg-emerald-500/70 transition-colors duration-300" 
                         style={{ width: `${Math.max(0, Math.min(100 - Math.min(100, detailUsageRate), detailRemainingRate))}%` }} 
                       />
                     </div>

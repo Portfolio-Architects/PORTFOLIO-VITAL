@@ -15,50 +15,50 @@ export const WORKING_MEMORY_CATEGORIES: Record<WorkingMemoryCategory, WorkingMem
     label: '[2027 예산편성]',
     shortLabel: '2027 예산편성',
     badgeClass:
-      'bg-indigo-50 text-indigo-800 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-200 dark:border-indigo-800/80',
+      'bg-indigo-50 text-indigo-800 border-indigo-200',
     postItClass:
-      'bg-amber-50/75 dark:bg-amber-950/20 border-amber-200/90 dark:border-amber-800/60',
-    accentBarClass: 'bg-indigo-600 dark:bg-indigo-400',
+      'bg-amber-50/75 border-amber-200/90',
+    accentBarClass: 'bg-indigo-600',
   },
   directive: {
     id: 'directive',
     label: '[팀장님 지시]',
     shortLabel: '팀장님 지시',
     badgeClass:
-      'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/70 dark:text-amber-200 dark:border-amber-700/80',
+      'bg-amber-100 text-amber-900 border-amber-300',
     postItClass:
-      'bg-amber-100/65 dark:bg-amber-950/30 border-amber-300/90 dark:border-amber-700/70',
-    accentBarClass: 'bg-amber-600 dark:bg-amber-400',
+      'bg-amber-100/65 border-amber-300/90',
+    accentBarClass: 'bg-amber-600',
   },
   audit: {
     id: 'audit',
     label: '[행정감사]',
     shortLabel: '행정감사',
     badgeClass:
-      'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-200 dark:border-rose-800/80',
+      'bg-rose-50 text-rose-800 border-rose-200',
     postItClass:
-      'bg-rose-50/65 dark:bg-rose-950/20 border-rose-200/90 dark:border-rose-800/60',
-    accentBarClass: 'bg-rose-600 dark:bg-rose-400',
+      'bg-rose-50/65 border-rose-200/90',
+    accentBarClass: 'bg-rose-600',
   },
   festival: {
     id: 'festival',
     label: '[양재천 행사]',
     shortLabel: '양재천 행사',
     badgeClass:
-      'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-200 dark:border-emerald-800/80',
+      'bg-emerald-50 text-emerald-800 border-emerald-200',
     postItClass:
-      'bg-emerald-50/65 dark:bg-emerald-950/20 border-emerald-200/90 dark:border-emerald-800/60',
-    accentBarClass: 'bg-emerald-600 dark:bg-emerald-400',
+      'bg-emerald-50/65 border-emerald-200/90',
+    accentBarClass: 'bg-emerald-600',
   },
   general: {
     id: 'general',
     label: '[일반 메모]',
     shortLabel: '일반 메모',
     badgeClass:
-      'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+      'bg-slate-100 text-slate-700 border-slate-200',
     postItClass:
-      'bg-slate-50/90 dark:bg-slate-900/60 border-slate-200/90 dark:border-slate-800',
-    accentBarClass: 'bg-slate-500 dark:bg-slate-400',
+      'bg-slate-50/90 border-slate-200/90',
+    accentBarClass: 'bg-slate-500',
   },
 };
 
@@ -330,7 +330,7 @@ export function splitWorkingMemoryLines(rawText: string): string[] {
   }
 
   return rawLines
-    .map((line) => line.replace(/^(?:[-•*❍▢󰏚]|\d+[.)])\s+/, '').trim())
+    .map((line) => line.replace(/^(?:[-•*❍▢▣■󰏚]|\d+[.)])\s+/, '').trim())
     .filter((line) => line.length > 0);
 }
 

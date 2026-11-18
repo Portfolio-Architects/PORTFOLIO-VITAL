@@ -13,108 +13,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { Sidebar } from '@/components/Sidebar';
 import { syncTombstones } from '@/lib/sheets-api';
 import BudgetSimulatorSkeleton from '@/components/budget/ui/BudgetSimulatorSkeleton';
-import MindMap3DSkeleton from '@/components/skeletons/MindMap3DSkeleton';
 import YangjaeFestivalSkeleton from '@/components/skeletons/YangjaeFestivalSkeleton';
+import { PortfolioDashboardViewSkeleton } from '@/components/skeletons/PortfolioDashboardViewSkeleton';
 import { WorkingMemoryContextBanner } from '@/components/dashboard/WorkingMemoryContextBanner';
 import { PortfolioDashboardView as DirectPortfolioDashboardView } from '@/components/dashboard/PortfolioDashboardView';
 
-export function PortfolioDashboardViewSkeleton() {
-  return (
-    <div className="w-full flex flex-col gap-6 animate-pulse">
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-4">
-        <div className="xl:col-span-6 flex flex-col gap-6">
-          <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200/80 shadow-2xs h-[420px] flex flex-col justify-between">
-            <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
-              <div className="flex flex-col gap-2">
-                <div className="w-48 h-6 bg-slate-200/80 rounded-md" />
-                <div className="w-40 h-3.5 bg-slate-100 rounded" />
-              </div>
-              <div className="w-44 h-10 bg-slate-100 border border-slate-200/80 rounded-lg" />
-            </div>
-            <div className="flex-1 flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="w-full sm:w-[60%] flex justify-center items-center">
-                <div className="w-[220px] h-[220px] rounded-full border-[24px] border-slate-100 flex flex-col items-center justify-center flex-shrink-0">
-                  <div className="w-16 h-3 bg-slate-100 rounded mb-1.5" />
-                  <div className="w-24 h-5 bg-slate-200/80 rounded-md" />
-                </div>
-              </div>
-              <div className="w-full sm:w-[40%] flex flex-col gap-3.5">
-                <div className="w-full h-4 bg-slate-100 rounded" />
-                <div className="w-5/6 h-4 bg-slate-100 rounded" />
-                <div className="w-2/3 h-4 bg-slate-100 rounded" />
-                <div className="w-3/4 h-4 bg-slate-100 rounded" />
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3.5 sm:gap-4 content-start">
-            <div
-              data-testid="dashboard-skeleton-kpi-card"
-              className="bg-white border border-slate-200/80 rounded-xl px-5 py-3.5 sm:px-6 sm:py-4 shadow-2xs min-h-[78px] h-[78px] flex flex-col justify-between"
-            >
-              <div className="w-20 h-3.5 bg-slate-200/80 rounded" />
-              <div className="flex items-end justify-between gap-2">
-                <div className="w-20 h-7 bg-slate-200/80 rounded-md" />
-                <div className="w-20 h-2 bg-slate-100 rounded-full" />
-              </div>
-            </div>
-            <div
-              data-testid="dashboard-skeleton-kpi-card"
-              className="bg-white border border-slate-200/80 rounded-xl px-5 py-3.5 sm:px-6 sm:py-4 shadow-2xs min-h-[78px] h-[78px] flex flex-col justify-between"
-            >
-              <div className="w-20 h-3.5 bg-slate-200/80 rounded" />
-              <div className="flex items-end justify-between gap-2">
-                <div className="w-20 h-7 bg-slate-200/80 rounded-md" />
-                <div className="w-20 h-2 bg-slate-100 rounded-full" />
-              </div>
-            </div>
-            <div
-              data-testid="dashboard-skeleton-kpi-card"
-              className="bg-white border border-slate-200/80 rounded-xl px-5 py-3.5 sm:px-6 sm:py-4 shadow-2xs min-h-[78px] h-[78px] flex flex-col justify-between"
-            >
-              <div className="w-20 h-3.5 bg-slate-200/80 rounded" />
-              <div className="w-28 h-6 bg-slate-200/80 rounded-md" />
-            </div>
-            <div
-              data-testid="dashboard-skeleton-kpi-card"
-              className="bg-white border border-slate-200/80 rounded-xl px-5 py-3.5 sm:px-6 sm:py-4 shadow-2xs min-h-[78px] h-[78px] flex flex-col justify-between"
-            >
-              <div className="w-20 h-3.5 bg-slate-200/80 rounded" />
-              <div className="w-28 h-6 bg-slate-200/80 rounded-md" />
-            </div>
-          </div>
-        </div>
-        <div className="xl:col-span-6 flex flex-col gap-6">
-          <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200/80 shadow-2xs h-full flex flex-col justify-between">
-            <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-              <div className="flex flex-col gap-2">
-                <div className="w-44 h-6 bg-slate-200/80 rounded-md" />
-                <div className="w-56 h-3.5 bg-slate-100 rounded" />
-              </div>
-              <div className="w-36 h-9 bg-slate-100 border border-slate-200/80 rounded-lg" />
-            </div>
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-5 p-4 bg-slate-50/70 rounded-xl border border-slate-200/70">
-              <div className="h-11 bg-slate-200/60 rounded" />
-              <div className="h-11 bg-slate-200/60 rounded" />
-              <div className="h-11 bg-slate-200/60 rounded" />
-            </div>
-            <div className="flex-1 mt-5 w-full bg-slate-50/70 border border-slate-100 rounded-xl flex items-end gap-3 p-4 min-h-[325px] h-[325px]">
-              <div className="flex-grow bg-slate-200/70 rounded-t h-[50%]" />
-              <div className="flex-grow bg-slate-200/70 rounded-t h-[70%]" />
-              <div className="flex-grow bg-slate-200/70 rounded-t h-[90%]" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        data-testid="dashboard-skeleton-contacts"
-        className="mt-8 mb-8 bg-white rounded-xl p-8 shadow-2xs border border-slate-200/80 h-[250px] flex flex-col items-center justify-center gap-4"
-      >
-        <div className="w-8 h-8 rounded-full border-2 border-slate-200 border-t-slate-400" />
-        <div className="w-44 h-4 bg-slate-200/80 rounded" />
-      </div>
-    </div>
-  );
-}
+export { PortfolioDashboardViewSkeleton };
 
 function WorkspaceViewSkeleton() {
   return (
@@ -151,11 +55,6 @@ const YangjaeFestivalDashboard = dynamic(() => import('@/components/festival/Yan
   loading: () => <YangjaeFestivalSkeleton />
 });
 
-const MindMap3D = dynamic(() => import('@/components/MindMap3D').then(mod => mod.MindMap3D).catch(() => MindMap3DSkeleton), {
-  ssr: false,
-  loading: () => <MindMap3DSkeleton />
-});
-
 const ProjectManagementPage = dynamic(() => import('@/components/project/ProjectManagementPage').catch(() => ({ default: () => null })), {
   ssr: false,
   loading: () => null
@@ -182,6 +81,11 @@ const ArchiveExplorerView = dynamic(() => import('@/components/archive/ArchiveEx
 });
 
 const WorkingMemoryPage = dynamic(() => import('@/components/memory/WorkingMemoryPage').then(mod => mod.WorkingMemoryPage).catch(() => () => null), {
+  ssr: false,
+  loading: () => null
+});
+
+const ContactsSideSheet = dynamic(() => import('@/components/dashboard/ContactsSideSheet').then(mod => mod.ContactsSideSheet).catch(() => () => null), {
   ssr: false,
   loading: () => null
 });
@@ -227,11 +131,12 @@ function scheduleStaggeredPreloads(): () => void {
     import('@/components/inventory/InventoryList').catch(() => {});
   }, 5500);
 
-  // Stage 3 (+7.5s): Simulator & Modals (BudgetSimulator, AppLogModal, CommandPalette)
+  // Stage 3 (+7.5s): Simulator & Modals (BudgetSimulator, AppLogModal, CommandPalette, ContactsSideSheet)
   scheduleIdle(() => {
     import('@/components/budget/BudgetSimulator').catch(() => {});
     import('@/components/AppLogModal').catch(() => {});
     import('@/components/modals/CommandPalette').catch(() => {});
+    import('@/components/dashboard/ContactsSideSheet').catch(() => {});
   }, 7500);
 
   return () => {
@@ -252,7 +157,6 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
   const [visitedModules, setVisitedModules] = useState<Record<ModuleType, boolean>>({
     dashboard: true,
     workspace: false,
-    mindmap: false,
     project: false,
     festival: false,
     simulator: false,
@@ -263,6 +167,8 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
   const [isLogsOpen, setIsLogsOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [hasOpenedCommandPalette, setHasOpenedCommandPalette] = useState(false);
+  const [isContactsOpen, setIsContactsOpen] = useState(false);
+  const [hasOpenedContacts, setHasOpenedContacts] = useState(false);
 
   // Defer TASKS, MEETINGS, PROJECTS, INVENTORY fetching on initial Dashboard load until tab switch or Ctrl+K open (latched once triggered)
   const isDeferredDataEnabled =
@@ -270,20 +176,32 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
     visitedModules.workspace ||
     visitedModules.festival ||
     visitedModules.simulator ||
-    visitedModules.mindmap ||
     visitedModules.project ||
+    visitedModules.archive ||
+    visitedModules.memory ||
     isCommandPaletteOpen ||
     hasOpenedCommandPalette;
 
   // Domain Hooks
   const { tasks, stats: taskStats } = useTasks({ enabled: isDeferredDataEnabled });
-  const { categories: budgetCategories, entries: budgetEntries, addCategory, updateCategory, deleteCategory, replaceCategories, addEntry, updateEntry, deleteEntry, batchUpdateEntries, batchDeleteEntries, batchSettleEntries, getCategoryStats, overallStatsActual } = useBudget();
-  const { items: inventoryItems, addItem, updateItem, deleteItem, adjustStock, getItemHistory } = useInventory({ enabled: isDeferredDataEnabled });
+  const { categories: budgetCategories, entries: budgetEntries } = useBudget();
+  const { items: inventoryItems } = useInventory({ enabled: isDeferredDataEnabled });
   const { meetings } = useMeetings({ enabled: isDeferredDataEnabled });
   const { projects } = useProjects({ enabled: isDeferredDataEnabled });
-  const { contacts } = useContacts({ enabled: isCommandPaletteOpen || hasOpenedCommandPalette });
+  const { contacts } = useContacts({
+    enabled: isCommandPaletteOpen || hasOpenedCommandPalette || isContactsOpen || hasOpenedContacts
+  });
 
   const handleCloseCommandPalette = useCallback(() => setIsCommandPaletteOpen(false), []);
+  const handleToggleContacts = useCallback(() => {
+    setHasOpenedContacts(true);
+    setIsContactsOpen(prev => !prev);
+  }, []);
+  const handleCloseContacts = useCallback(() => setIsContactsOpen(false), []);
+  const handlePreloadContacts = useCallback(() => {
+    setHasOpenedContacts(true);
+    import('@/components/dashboard/ContactsSideSheet').catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -300,8 +218,6 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const actualBudgetEntries = useMemo(() => budgetEntries.filter(e => !e.isPlanned), [budgetEntries]);
-  const handleGetCategoryStats = useCallback((id: string) => getCategoryStats(id, true), [getCategoryStats]);
   const handleCloseQuickInput = useCallback(() => setIsQuickInputOpen(false), []);
 
   const aiContextData = useMemo(() => {
@@ -324,8 +240,6 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
       return { ...prev, [module]: true };
     });
   }, []);
-
-  const handleAddSignalNoop = useCallback(() => {}, []);
 
   useEffect(() => {
     syncTombstones().catch(() => {});
@@ -365,13 +279,15 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
     const distance = touchStartX.current - touchEndX.current;
     
     if (Math.abs(distance) > 60) {
-      const order: ModuleType[] = ['dashboard', 'workspace', 'festival', 'simulator', 'mindmap', 'project'];
+      const order: ModuleType[] = ['dashboard', 'memory', 'workspace', 'festival', 'archive'];
       const currentIndex = order.indexOf(activeModule);
       
-      if (distance > 0 && currentIndex < order.length - 1) {
-        handleModuleChange(order[currentIndex + 1]);
-      } else if (distance < 0 && currentIndex > 0) {
-        handleModuleChange(order[currentIndex - 1]);
+      if (currentIndex !== -1) {
+        if (distance > 0 && currentIndex < order.length - 1) {
+          handleModuleChange(order[currentIndex + 1]);
+        } else if (distance < 0 && currentIndex > 0) {
+          handleModuleChange(order[currentIndex - 1]);
+        }
       }
     }
     
@@ -393,53 +309,56 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
         appMode={appMode}
         onModeChange={onModeChange}
         onPreloadModule={preloadModule}
-        onOpenLogs={() => setIsLogsOpen(true)}
+        isContactsOpen={isContactsOpen}
+        onToggleContacts={handleToggleContacts}
+        onPreloadContacts={handlePreloadContacts}
       />
 
-      <main id="main-scroll-container" className="flex-1 pb-32 sm:pb-8 overflow-y-auto custom-scrollbar">
-        <div className="max-w-[1800px] mx-auto px-2 sm:px-3 lg:px-4 pt-4 sm:pt-6 lg:pt-8 flex flex-col gap-3">
+      <main id="main-scroll-container" className="flex-1 pb-28 sm:pb-10 overflow-y-auto custom-scrollbar">
+        <div className="max-w-[1800px] mx-auto px-2 sm:px-3 lg:px-4 flex flex-col gap-5 sm:gap-6">
           
-          {/* Global Module Header & Divider Container */}
-          <div className="flex flex-col gap-6 pt-3 sm:pt-4 lg:pt-5 shrink-0">
-            <div className="flex flex-col gap-3">
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 flex items-center gap-4">
-                <div className="w-12 h-12 bg-white rounded-xl shadow-2xs border border-slate-200/80 flex items-center justify-center overflow-hidden shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icon-192x192.png" alt={`${appMode} 로고`} className="w-full h-full object-cover" />
-                </div>
-                <span>
-                  {activeModule === 'dashboard' 
-                    ? `${appMode} 통합 대시보드` 
-                    : `${appMode} ${
-                        activeModule === 'workspace' 
-                          ? '예산관리' 
-                          : activeModule === 'festival'
-                          ? '양재천 페스티벌'
-                          : activeModule === 'simulator'
-                          ? '예산 시뮬레이터'
-                          : activeModule === 'mindmap'
-                          ? '온톨로지 마인드맵'
-                          : activeModule === 'project'
-                          ? '사업 관리'
-                          : activeModule === 'archive'
-                          ? '아카이브 탐색기'
-                          : activeModule === 'memory'
-                          ? '작업기억 보조 보드'
-                          : ''
-                      }`
-                  }
-                </span>
-              </h1>
-              <div className="flex items-center gap-3 ml-2">
-                <div className="w-1 h-5 bg-slate-900 rounded-full shrink-0" />
-                <p className="text-[13px] font-medium text-slate-500 tracking-wide">
-                  {appMode === 'HCHPS' 
-                    ? '사내 업무 편성, 지식 자산화, 그리고 실시간 관제를 위한 초개인화 인텔리전스 워크스페이스' 
-                    : '공공보건 사업 예산 편성·집행 실적, 현장 행사 및 부서 연락망 통합 관리 시스템'}
-                </p>
+          {/* VLDS Spacious 2-Tier Page Title Header (Aligned with PORTFOLIO ASSET spacing) */}
+          <div className="flex flex-col gap-3 sm:gap-3.5 pt-7 sm:pt-9 lg:pt-11 pb-6 sm:pb-7 lg:pb-8 border-b border-slate-200/75 shrink-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-slate-900 flex items-center gap-3.5">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-xl shadow-2xs border border-slate-200/85 flex items-center justify-center overflow-hidden shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/icon-192x192.png" alt={`${appMode} 로고`} className="w-full h-full object-cover" />
               </div>
-            </div>
-            <div className="h-px w-full bg-slate-200/80" />
+              <span>
+                {activeModule === 'dashboard'
+                  ? `${appMode} 통합 대시보드`
+                  : `${appMode} ${
+                      activeModule === 'workspace'
+                        ? '예산관리'
+                        : activeModule === 'festival'
+                        ? '양재천 페스티벌'
+                        : activeModule === 'simulator'
+                        ? '예산 시뮬레이터'
+                        : activeModule === 'project'
+                        ? '사업 관리'
+                        : activeModule === 'archive'
+                        ? '아카이브 탐색기'
+                        : activeModule === 'memory'
+                        ? '작업기억 보조 보드'
+                        : ''
+                    }`}
+              </span>
+            </h1>
+            <p className="vlds-subtitle text-xs sm:text-[13px] font-medium text-slate-500 leading-relaxed">
+              {activeModule === 'memory'
+                ? '지시 · 예산 변동 · 행감 메모 즉시 기록'
+                : activeModule === 'workspace'
+                  ? 'e-호조 일반지출 · 일상경비 대조 · 시뮬레이션'
+                  : activeModule === 'simulator'
+                    ? '집행 잔액 - 예정액 · 과목별 예상 잔액'
+                    : activeModule === 'festival'
+                      ? '추진과제 · 부스 현황 · 업무분장 · 행사식순'
+                      : activeModule === 'archive'
+                        ? '공문서 · 현장 사진 · 6대 도메인 · 주간업무'
+                        : activeModule === 'project'
+                          ? '단위사업 개요 · 체크리스트 · 일정 플래너'
+                          : '집행 · 불용 진단 · 월별 소진 추이 · 업무 연락처'}
+            </p>
           </div>
 
           {/* Module Content */}
@@ -447,43 +366,21 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
             {/* Dashboard */}
             {visitedModules.dashboard && (
               <div className={activeModule === 'dashboard' ? 'block' : 'hidden'}>
-                <PortfolioDashboardView tasks={tasks} budgetCategories={budgetCategories} budgetEntries={budgetEntries} onLogout={handleLogout} appMode={appMode} />
+                <PortfolioDashboardView
+                  tasks={tasks}
+                  budgetCategories={budgetCategories}
+                  budgetEntries={budgetEntries}
+                  onLogout={handleLogout}
+                  appMode={appMode}
+                  onNavigateModule={handleModuleChange}
+                />
               </div>
             )}
 
             {/* Workspace (Budget Management) */}
             {visitedModules.workspace && (
               <div className={activeModule === 'workspace' ? 'block' : 'hidden'}>
-                <WorkspaceView
-                  budgetCategories={budgetCategories}
-                  budgetEntries={actualBudgetEntries}
-                  addCategory={addCategory}
-                  updateCategory={updateCategory}
-                  deleteCategory={deleteCategory}
-                  replaceCategories={replaceCategories}
-                  addEntry={addEntry}
-                  updateEntry={updateEntry}
-                  deleteEntry={deleteEntry}
-                  batchUpdateEntries={batchUpdateEntries}
-                  batchDeleteEntries={batchDeleteEntries}
-                  batchSettleEntries={batchSettleEntries}
-                  getCategoryStats={handleGetCategoryStats}
-                  overallStats={overallStatsActual}
-                  inventoryItems={inventoryItems}
-                  addItem={addItem}
-                  updateItem={updateItem}
-                  deleteItem={deleteItem}
-                  adjustStock={adjustStock}
-                  getItemHistory={getItemHistory}
-                  addSignal={handleAddSignalNoop}
-                />
-              </div>
-            )}
-
-            {/* MindMap3D */}
-            {visitedModules.mindmap && (
-              <div className={activeModule === 'mindmap' ? 'block h-[820px] min-h-[650px] w-full' : 'hidden'}>
-                <MindMap3D isActive={activeModule === 'mindmap'} />
+                <WorkspaceView />
               </div>
             )}
 
@@ -520,7 +417,7 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
             {/* Archive Explorer */}
             {visitedModules.archive && (
               <div className={activeModule === 'archive' ? 'block' : 'hidden'}>
-                <ArchiveExplorerView />
+                <ArchiveExplorerView onNavigateModule={handleModuleChange} />
               </div>
             )}
 
@@ -551,6 +448,13 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
           isOpen={isLogsOpen}
           onClose={() => setIsLogsOpen(false)}
           appMode={appMode}
+        />
+      )}
+
+      {isContactsOpen && (
+        <ContactsSideSheet
+          isOpen={isContactsOpen}
+          onClose={handleCloseContacts}
         />
       )}
 

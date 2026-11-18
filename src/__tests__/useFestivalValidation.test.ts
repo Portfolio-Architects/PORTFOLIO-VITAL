@@ -1,4 +1,4 @@
-import { EssentialPermitStatus, BudgetValidationReport } from '@/hooks/useFestivalValidation';
+import { EssentialPermitStatus, BudgetValidationReport } from '@/__tests__/fixtures/useFestivalValidation';
 
 describe('Festival Event Tracking & Validation Engine Logic', () => {
   it('correctly categorizes essential permits status', () => {

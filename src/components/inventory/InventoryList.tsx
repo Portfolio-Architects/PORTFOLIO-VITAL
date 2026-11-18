@@ -168,7 +168,7 @@ const InventoryItemCardComponent = ({
   const statusLabel = isOut ? '품절' : isLow ? '소진임박' : '충분';
 
   return (
-    <Card className="glass-panel rounded-[2rem] border border-slate-200/60 shadow-2xs hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-1 transition-all duration-300 group">
+    <Card className="glass-panel rounded-[2rem] border border-slate-200/60 shadow-2xs hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-1 transition-transform duration-300 group">
       <CardContent className="p-5 flex flex-col h-full justify-between">
         <div>
           <div className="flex items-start justify-between mb-3">
@@ -256,7 +256,7 @@ function InventoryListComponent({ items, addItem, updateItem, deleteItem, adjust
   const containerRef = useRef<HTMLDivElement>(null);
   const cols = useColumnCount();
 
-  const inputClass = "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all font-medium";
+  const inputClass = "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-colors duration-150 font-medium";
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -387,14 +387,14 @@ function InventoryListComponent({ items, addItem, updateItem, deleteItem, adjust
             placeholder="품목명 또는 분류 검색..." 
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all font-medium cursor-text"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-colors duration-150 font-medium cursor-text"
           />
         </div>
         {uniqueCategories.length > 0 && (
           <div className="flex flex-wrap gap-1.5 items-center">
             <button 
               onClick={() => setSelectedCategory(null)} 
-              className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all cursor-pointer shadow-3xs ${
+              className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-colors duration-150 cursor-pointer shadow-3xs ${
                 !selectedCategory 
                   ? 'bg-indigo-600 text-white border-indigo-600' 
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -406,7 +406,7 @@ function InventoryListComponent({ items, addItem, updateItem, deleteItem, adjust
               <button 
                 key={cat}
                 onClick={() => setSelectedCategory(cat)} 
-                className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all cursor-pointer shadow-3xs ${
+                className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-colors duration-150 cursor-pointer shadow-3xs ${
                   selectedCategory === cat 
                     ? 'bg-indigo-600 text-white border-indigo-600' 
                     : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'

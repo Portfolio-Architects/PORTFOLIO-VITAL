@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useContext } from 'react';
+import { QueryClientContext } from '@tanstack/react-query';
 import { BudgetCategory, BudgetEntry } from '@/types';
 import { useBudgetFilters } from '@/hooks/useBudgetFilters';
+import { useBudget, CategoryStats } from '@/hooks/useBudget';
 import { Card } from '@/components/ui/card';
 import { RefreshCw, Search, FilePlus2, CircleDollarSign, Wallet, Receipt, ShieldCheck } from 'lucide-react';
 import { MultiSelectDropdown } from './ui/MultiSelectDropdown';
@@ -35,23 +37,21 @@ const DailyExpenseStatModal = dynamic(
   { ssr: false }
 );
 
-import { CategoryStats } from '@/hooks/useBudget';
-
-interface BudgetDashboardProps {
-  categories: BudgetCategory[];
-  entries: BudgetEntry[];
-  addCategory: (cat: Omit<BudgetCategory, 'id'>) => BudgetCategory;
-  updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
-  deleteCategory: (id: string) => void;
+export interface BudgetDashboardProps {
+  categories?: BudgetCategory[];
+  entries?: BudgetEntry[];
+  addCategory?: (cat: Omit<BudgetCategory, 'id'>) => BudgetCategory;
+  updateCategory?: (id: string, updates: Partial<BudgetCategory>) => void;
+  deleteCategory?: (id: string) => void;
   replaceCategories?: (cats: BudgetCategory[]) => void;
-  addEntry: (entry: Omit<BudgetEntry, 'id'>) => void;
-  updateEntry: (id: string, updates: Partial<BudgetEntry>) => void;
-  deleteEntry: (id: string) => void;
+  addEntry?: (entry: Omit<BudgetEntry, 'id'>) => void;
+  updateEntry?: (id: string, updates: Partial<BudgetEntry>) => void;
+  deleteEntry?: (id: string) => void;
   batchUpdateEntries?: (ids: string[] | Array<{ id: string; [key: string]: any }>, updates?: Partial<BudgetEntry>) => void;
   batchDeleteEntries?: (ids: string[]) => void;
   batchSettleEntries?: (ids: string[], status: 'SETTLED' | 'PENDING' | 'REJECTED') => void;
-  getCategoryStats: (id: string, excludePlanned?: boolean) => CategoryStats | null;
-  overallStats: { 
+  getCategoryStats?: (id: string, excludePlanned?: boolean) => CategoryStats | null;
+  overallStats?: { 
     totalBudget: number; totalSpent: number; totalPlanned: number; remaining: number;
     dailyExpenseIssued: number; dailyExpenseSpent: number; dailyExpenseRemaining: number;
   };
@@ -60,21 +60,102 @@ interface BudgetDashboardProps {
 
 function formatN(n: number) { return n.toLocaleString('ko-KR'); }
 
-export function BudgetDashboard(props: BudgetDashboardProps) {
-  const {
-    categories,
-    entries,
-    addCategory,
-    updateCategory,
-    deleteCategory,
-    addEntry,
-    updateEntry,
-    deleteEntry,
-    batchUpdateEntries,
-    batchDeleteEntries,
-    batchSettleEntries,
-    getCategoryStats
-  } = props;
+interface BudgetDashboardInnerProps extends BudgetDashboardProps {
+  budgetHook?: ReturnType<typeof useBudget>;
+}
+
+function BudgetDashboardInner({
+  categories: propCategories,
+  entries: propEntries,
+  addCategory: propAddCategory,
+  updateCategory: propUpdateCategory,
+  deleteCategory: propDeleteCategory,
+  addEntry: propAddEntry,
+  updateEntry: propUpdateEntry,
+  deleteEntry: propDeleteEntry,
+  batchUpdateEntries: propBatchUpdateEntries,
+  batchDeleteEntries: propBatchDeleteEntries,
+  batchSettleEntries: propBatchSettleEntries,
+  getCategoryStats: propGetCategoryStats,
+  budgetHook: hook,
+}: BudgetDashboardInnerProps) {
+  const hookCategories = hook?.categories;
+  const hookEntries = hook?.entries;
+  const categories = useMemo(() => propCategories ?? hookCategories ?? [], [propCategories, hookCategories]);
+  const entries = useMemo(() => {
+    if (propEntries) return propEntries;
+    const raw = hookEntries ?? [];
+    return raw.filter((e) => !e.isPlanned);
+  }, [propEntries, hookEntries]);
+
+  const hookAddCategory = hook?.addCategory;
+  const addCategory = useCallback(
+    (cat: Omit<BudgetCategory, 'id'>) => {
+      if (propAddCategory) return propAddCategory(cat);
+      if (hookAddCategory) return hookAddCategory(cat);
+      return { ...cat, id: 'temp' } as BudgetCategory;
+    },
+    [propAddCategory, hookAddCategory]
+  );
+
+  const hookUpdateCategory = hook?.updateCategory;
+  const updateCategory = useCallback(
+    (id: string, updates: Partial<BudgetCategory>) => {
+      if (propUpdateCategory) return propUpdateCategory(id, updates);
+      if (hookUpdateCategory) return hookUpdateCategory(id, updates);
+    },
+    [propUpdateCategory, hookUpdateCategory]
+  );
+
+  const hookDeleteCategory = hook?.deleteCategory;
+  const deleteCategory = useCallback(
+    (id: string) => {
+      if (propDeleteCategory) return propDeleteCategory(id);
+      if (hookDeleteCategory) return hookDeleteCategory(id);
+    },
+    [propDeleteCategory, hookDeleteCategory]
+  );
+
+  const hookAddEntry = hook?.addEntry;
+  const addEntry = useCallback(
+    (entry: Omit<BudgetEntry, 'id'>) => {
+      if (propAddEntry) return propAddEntry(entry);
+      if (hookAddEntry) return hookAddEntry(entry);
+    },
+    [propAddEntry, hookAddEntry]
+  );
+
+  const hookUpdateEntry = hook?.updateEntry;
+  const updateEntry = useCallback(
+    (id: string, updates: Partial<BudgetEntry>) => {
+      if (propUpdateEntry) return propUpdateEntry(id, updates);
+      if (hookUpdateEntry) return hookUpdateEntry(id, updates);
+    },
+    [propUpdateEntry, hookUpdateEntry]
+  );
+
+  const hookDeleteEntry = hook?.deleteEntry;
+  const deleteEntry = useCallback(
+    (id: string) => {
+      if (propDeleteEntry) return propDeleteEntry(id);
+      if (hookDeleteEntry) return hookDeleteEntry(id);
+    },
+    [propDeleteEntry, hookDeleteEntry]
+  );
+
+  const batchUpdateEntries = propBatchUpdateEntries ?? hook?.batchUpdateEntries;
+  const batchDeleteEntries = propBatchDeleteEntries ?? hook?.batchDeleteEntries;
+  const batchSettleEntries = propBatchSettleEntries ?? hook?.batchSettleEntries;
+
+  const hookGetCategoryStats = hook?.getCategoryStats;
+  const getCategoryStats = useCallback(
+    (id: string, excludePlanned?: boolean) => {
+      if (propGetCategoryStats) return propGetCategoryStats(id, excludePlanned);
+      if (hookGetCategoryStats) return hookGetCategoryStats(id, excludePlanned);
+      return null;
+    },
+    [propGetCategoryStats, hookGetCategoryStats]
+  );
 
   const [showCatModal, setShowCatModal] = useState(false);
   const [catModalInitialData, setCatModalInitialData] = useState<Partial<BudgetCategory> | null>(null);
@@ -253,11 +334,11 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
               <div className="mt-4 pt-3 border-t border-slate-100">
                 <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex mb-2.5" title={`집행률: ${overallExecRate.toFixed(1)}% | 실질 미집행률: ${realAvailableRemRate.toFixed(1)}%`}>
                   <div 
-                    className="bg-slate-900 h-full transition-all duration-500" 
+                    className="bg-slate-900 h-full transition-colors duration-500" 
                     style={{ width: `${Math.min(100, overallExecRate)}%` }} 
                   />
                   <div 
-                    className="bg-emerald-500/70 h-full transition-all duration-500" 
+                    className="bg-emerald-500/70 h-full transition-colors duration-500" 
                     style={{ width: `${Math.min(100 - Math.min(100, overallExecRate), realAvailableRemRate)}%` }} 
                   />
                 </div>
@@ -380,7 +461,7 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="사업명(정책/단위/세부), 통계목, 산출기초, 문서번호, 지출목적 실시간 검색..."
+              placeholder="사업명 · 통계목 · 산출기초 · 문서번호 검색"
               className="w-full pl-10 pr-9 py-2 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors cursor-text relative z-10"
             />
             {searchTerm && (
@@ -395,17 +476,16 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
           </div>
 
           <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
-            <span className="text-xs font-medium text-slate-400 hidden xl:inline mr-1">다중 필터링 & 실시간 대조 시스템</span>
             {deferredSearchTerm && (
               <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-medium shrink-0">
                 검색어: &quot;{deferredSearchTerm}&quot;
               </span>
             )}
             <button onClick={handleSaveFilters} className="text-xs sm:text-sm px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-lg font-medium border border-slate-200/90 transition-colors cursor-pointer">
-              구성 저장하기
+              필터 저장
             </button>
             <button onClick={handleResetFilters} className="text-xs sm:text-sm px-3 py-2 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 rounded-lg font-medium border border-slate-200/90 transition-colors flex items-center gap-1 cursor-pointer">
-              <RefreshCw size={12} /> 초기화 및 해제
+              <RefreshCw size={12} /> 초기화
             </button>
           </div>
         </div>
@@ -439,7 +519,7 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
         <Card><div className="px-5 py-10 text-center text-sm text-[var(--color-text-tertiary)]">예산 과목을 추가해 보세요</div></Card>
       ) : (
         <div ref={containerRef} className="space-y-4">
-          {groupedByPolicy.length === 0 && <div className="text-center text-sm text-gray-500 py-8">선택된 필터에 해당하는 예산 과목이 없습니다.</div>}
+          {groupedByPolicy.length === 0 && <div className="text-center text-sm text-gray-500 py-8">조건 일치 예산 과목 없음</div>}
           
           {isPolicyVirtualActive && topPadding > 0 && (
             <div style={{ height: `${topPadding}px` }} aria-hidden="true" />
@@ -543,3 +623,17 @@ export function BudgetDashboard(props: BudgetDashboardProps) {
     </div>
   );
 }
+
+function BudgetDashboardWithHook(props: BudgetDashboardProps) {
+  const budgetHook = useBudget();
+  return <BudgetDashboardInner {...props} budgetHook={budgetHook} />;
+}
+
+export function BudgetDashboard(props: BudgetDashboardProps = {}) {
+  const queryClient = useContext(QueryClientContext);
+  if (queryClient && (!props.categories || !props.entries)) {
+    return <BudgetDashboardWithHook {...props} />;
+  }
+  return <BudgetDashboardInner {...props} />;
+}
+

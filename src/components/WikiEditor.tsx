@@ -173,14 +173,14 @@ function WikiEditorComponent(props: WikiEditorProps) {
   }, [customSlashMenuItems]);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-950 relative">
+    <div className="flex flex-col h-full bg-white relative">
       {/* 윗부분 헤더 */}
-      <div className="shrink-0 pt-6 px-8 pb-4 border-b border-[var(--color-border-light)] dark:border-slate-800 flex justify-between items-start">
+      <div className="shrink-0 pt-6 px-8 pb-4 border-b border-[var(--color-border-light)] flex justify-between items-start">
         <div>
           <div className="text-xs font-semibold text-[var(--color-primary)] mb-1 uppercase tracking-wider">
             Wiki Document
           </div>
-          <h2 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-white">
+          <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">
             {nodeTitle === 'root-HCHPS' ? '메인 루트 위키' : nodeTitle}
           </h2>
         </div>
@@ -190,7 +190,7 @@ function WikiEditorComponent(props: WikiEditorProps) {
           {onClose && (
             <button 
               onClick={handleCloseAction}
-              className="p-2 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center rounded-full transition-colors"
+              className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center rounded-full transition-colors"
               title="닫기"
             >
               ✕

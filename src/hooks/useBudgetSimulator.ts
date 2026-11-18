@@ -211,6 +211,10 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   // If disk entries are loaded and available, prefer them; otherwise fallback to storedEntries
   const effectiveStored = diskSimEntries.length > 0 ? diskSimEntries : storedEntries;
   const entries = entriesOverride ?? effectiveStored;
+  const entriesRef = useRef<SimulationEntry[]>(entries);
+  useEffect(() => {
+    entriesRef.current = entries;
+  }, [entries]);
 
   // Single-run auto-sync between disk SSOT and localStorage cache to prevent infinite render loops
   const hasSyncedRef = useRef(false);
@@ -232,19 +236,18 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   }, [diskSimEntries, simLoading, storedEntries, saveSimulationsMut]);
 
   const setEntries = useCallback((updater: SimulationEntry[] | ((prev: SimulationEntry[]) => SimulationEntry[])) => {
-    setEntriesOverride(prev => {
-      const current = prev ?? (diskSimEntries.length > 0 ? diskSimEntries : getSimSnapshot());
-      const next = typeof updater === 'function' ? updater(current) : updater;
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem(SIMULATION_STORAGE_KEY, JSON.stringify(next));
-        } catch (err) {
-          console.warn('[useBudgetSimulator] Failed to save simulation entries:', err);
-        }
+    const current = entriesRef.current ?? (diskSimEntries.length > 0 ? diskSimEntries : getSimSnapshot());
+    const next = typeof updater === 'function' ? updater(current) : updater;
+    entriesRef.current = next;
+    setEntriesOverride(next);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(SIMULATION_STORAGE_KEY, JSON.stringify(next));
+      } catch (err) {
+        console.warn('[useBudgetSimulator] Failed to save simulation entries:', err);
       }
-      saveSimulationsMut.mutate(next);
-      return next;
-    });
+    }
+    saveSimulationsMut.mutate(next);
   }, [diskSimEntries, saveSimulationsMut]);
 
   // Combine storedEntries with any SSOT budgetEntries that are planned (isPlanned: true)
@@ -462,7 +465,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     const nextStatItem = partial.statItem !== undefined ? partial.statItem : existing?.statItem;
     const targetCategoryId = partial.categoryId || (nextDetailedProject && nextStatItem ? resolveCategoryId(nextDetailedProject, nextStatItem) : undefined) || existing?.categoryId;
 
-    if (budgetEntryId) {
+    if (budgetEntryId && budgetEntries.some(be => be.id === budgetEntryId)) {
       const budgetUpdate: Partial<BudgetEntry> = {};
       if (computedAmount !== undefined) budgetUpdate.amount = computedAmount;
       if (partial.name !== undefined) budgetUpdate.purpose = partial.name;
@@ -495,15 +498,15 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       }
       return updated;
     }));
-  }, [mergedEntries, resolveCategoryId, updateBudgetEntry, setEntries]);
+  }, [mergedEntries, budgetEntries, resolveCategoryId, updateBudgetEntry, setEntries]);
 
   const deleteEntry = useCallback((id: string) => {
     const target = mergedEntries.find(item => item.id === id);
-    if (target?.budgetEntryId) {
+    if (target?.budgetEntryId && budgetEntries.some(be => be.id === target.budgetEntryId)) {
       deleteBudgetEntry(target.budgetEntryId);
     }
     setEntries(prev => prev.filter(item => item.id !== id));
-  }, [mergedEntries, deleteBudgetEntry, setEntries]);
+  }, [mergedEntries, budgetEntries, deleteBudgetEntry, setEntries]);
 
   // Real Expenditure Lifecycle Action (정산 전환)
   const settleEntry = useCallback(async (simId: string, actualAmount?: number, actualDate?: string) => {
@@ -514,7 +517,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     const targetActionType = sim.actionType || 'general';
 
     // 1. Mark planned budget entry as settled if linked
-    if (sim.budgetEntryId) {
+    if (sim.budgetEntryId && budgetEntries.some(be => be.id === sim.budgetEntryId)) {
       await updateBudgetEntry(sim.budgetEntryId, { isSettled: true });
     }
 
@@ -537,7 +540,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       settledEntryId: actualEntry && 'id' in actualEntry ? (actualEntry.id as string) : undefined,
       settledDate: finalDate,
     });
-  }, [mergedEntries, updateBudgetEntry, addBudgetEntry, resolveCategoryId, updateEntry]);
+  }, [mergedEntries, budgetEntries, updateBudgetEntry, addBudgetEntry, resolveCategoryId, updateEntry]);
 
   const resetEntries = useCallback(() => {
     setEntries([]);

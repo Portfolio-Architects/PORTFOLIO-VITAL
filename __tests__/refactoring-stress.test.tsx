@@ -2,9 +2,9 @@ import React from 'react';
 import { render, act } from '@testing-library/react';
 import Home from '@/app/page';
 import { SecurityLockScreen } from '@/components/SecurityLockScreen';
-import { extractKeywords, SignalEntry } from '@/hooks/useSignal';
+import { extractKeywords } from '@/hooks/useSignal';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MindMap3D as ActualMindMap3D } from '@/components/MindMap3D';
+import { Modal } from '@/components/ui/modal';
 
 const createTestQueryClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } });
 const renderHome = () => render(<QueryClientProvider client={createTestQueryClient()}><Home /></QueryClientProvider>);
@@ -56,40 +56,6 @@ jest.mock('@/hooks/useProjects', () => ({
   useProjects: () => ({ projects: [] })
 }));
 
-jest.mock('@/hooks/useScheduleAlerts', () => ({
-  useScheduleAlerts: () => []
-}));
-
-jest.mock('@/hooks/useNotificationAlerts', () => ({
-  useNotificationAlerts: jest.fn()
-}));
-
-jest.mock('@/hooks/useGlobalSearch', () => ({
-  useGlobalSearch: () => ({
-    searchModalOpen: false,
-    searchQuery: '',
-    searchResults: [],
-    closeSearchModal: jest.fn(),
-    handleGlobalSearch: jest.fn()
-  })
-}));
-
-jest.mock('@/hooks/useMergedSignals', () => ({
-  useMergedSignals: () => ({
-    mergedKeywordMap: {},
-    mergedEntries: []
-  })
-}));
-
-jest.mock('@/hooks/useGraphCustomization', () => ({
-  useGraphCustomization: () => ({
-    customNodes: [],
-    customEdges: [],
-    deletedEdges: [],
-    overrides: {}
-  })
-}));
-
 jest.mock('@/lib/sheets-api', () => ({
   syncTombstones: jest.fn(() => Promise.resolve()),
   readSheet: jest.fn(() => Promise.resolve([])),
@@ -103,31 +69,10 @@ jest.mock('@/components/Sidebar', () => ({
   Sidebar: () => <div data-testid="sidebar" />
 }));
 
-// Mock SecurityLockScreen dependencies
-let mockIsLocked = false;
-let mockHasSetupPIN = true;
-let mockFailCount = 0;
-const mockVerifyPIN = jest.fn();
-const mockSetupPIN = jest.fn();
-
-jest.mock('@/hooks/useSecurityLock', () => ({
-  useSecurityLock: () => ({
-    isLocked: mockIsLocked,
-    hasSetupPIN: mockHasSetupPIN,
-    failCount: mockFailCount,
-    verifyPIN: mockVerifyPIN,
-    setupPIN: mockSetupPIN,
-  })
-}));
-
 // Mock the sub-components of ProtectedApp that are dynamically imported
 jest.mock('@/components/dashboard/PortfolioDashboardView', () => ({
   PortfolioDashboardView: () => <div data-testid="dashboard-view" />
 }));
-jest.mock('@/components/MindMap3D', () => {
-  const DummyMindMap3D = () => <div data-testid="mindmap-3d" />;
-  return { MindMap3D: DummyMindMap3D };
-});
 jest.mock('@/components/WorkspaceView', () => ({
   WorkspaceView: () => <div data-testid="workspace-view" />
 }));
@@ -188,26 +133,6 @@ jest.mock('@/lib/signal-graph', () => ({
   buildSignalGraph: jest.fn().mockReturnValue({ nodes: [], edges: [] }),
 }));
 
-jest.mock('@/hooks/useWikiStorage', () => ({
-  useWikiStorage: () => ({
-    blocks: [],
-    isLoaded: true,
-    saveBlocks: jest.fn()
-  })
-}));
-
-jest.mock('@/hooks/useClassificationWords', () => ({
-  useClassificationWords: () => ({
-    data: null
-  })
-}));
-
-jest.mock('@/hooks/useFileRadar', () => ({
-  useFileRadar: () => ({
-    mutate: jest.fn()
-  })
-}));
-
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
@@ -242,8 +167,6 @@ describe('Home Component Lifecycle and Timer Cleanup Stress Test', () => {
     jest.useFakeTimers();
     jest.spyOn(global, 'setTimeout');
     jest.spyOn(global, 'clearTimeout');
-    mockIsLocked = false;
-    mockHasSetupPIN = true;
   });
 
   afterEach(() => {
@@ -339,13 +262,10 @@ describe('SecurityLockScreen Event Listener Registration and Cleanup', () => {
   });
 });
 
-describe('MindMap3D Event Listener Registration and Cleanup (Actual Component)', () => {
+describe('VLDS Modal Event Listener Registration and Cleanup', () => {
   let activeListeners: { type: string; handler: any; options?: any }[] = [];
   const originalAddEventListener = window.addEventListener;
   const originalRemoveEventListener = window.removeEventListener;
-
-  // We unmock MindMap3D to test the actual component
-  const ActualMindMap3D = jest.requireActual('@/components/MindMap3D').MindMap3D;
 
   beforeEach(() => {
     activeListeners = [];
@@ -366,39 +286,19 @@ describe('MindMap3D Event Listener Registration and Cleanup (Actual Component)',
     window.removeEventListener = originalRemoveEventListener;
   });
 
-  test('registers keydown and wiki event listeners on mount and unregisters on unmount', () => {
-    const signalKeywords = {};
-    const signalEntries: SignalEntry[] = [];
-    
+  test('registers Escape keydown listener on open and unregisters cleanly on unmount', () => {
     const { unmount } = render(
-      <ActualMindMap3D 
-        signalKeywords={signalKeywords}
-        signalEntries={signalEntries}
-        onAddSignal={jest.fn()}
-        isActive={true}
-      />
+      <Modal isOpen={true} onClose={jest.fn()} title="테스트 모달">
+        <div>콘텐츠</div>
+      </Modal>
     );
 
-    // Verify keydown listener is registered
     const keydownListeners = activeListeners.filter(l => l.type === 'keydown');
     expect(keydownListeners.length).toBeGreaterThanOrEqual(1);
 
-    // Verify wiki event listeners are registered
-    const wikiOpenListeners = activeListeners.filter(l => l.type === 'wiki:openNode');
-    const wikiCloseListeners = activeListeners.filter(l => l.type === 'wiki:closeNode');
-    expect(wikiOpenListeners.length).toBe(1);
-    expect(wikiCloseListeners.length).toBe(1);
-
-    // Unmount
     unmount();
 
-    // Verify all registered listeners are cleaned up
     const remainingKeydown = activeListeners.filter(l => l.type === 'keydown');
-    const remainingWikiOpen = activeListeners.filter(l => l.type === 'wiki:openNode');
-    const remainingWikiClose = activeListeners.filter(l => l.type === 'wiki:closeNode');
-
     expect(remainingKeydown.length).toBe(0);
-    expect(remainingWikiOpen.length).toBe(0);
-    expect(remainingWikiClose.length).toBe(0);
   });
 });

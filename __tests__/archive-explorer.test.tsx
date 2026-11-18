@@ -158,4 +158,81 @@ describe('Master Archive Organization & Explorer Integration Suite', () => {
       expect(screen.getAllByText('KakaoTalk_20261023_104835625.jpg').length).toBeGreaterThan(0);
     });
   });
+
+  it('supports design/media categories, photo/poster/logo context filtering, and escapes literal % when opening rescued files', async () => {
+    const percentRescuedItem = {
+      id: 'arc-09999',
+      name: '20260129_기준 중위소득 80% 건보료 소득판정 기준표_1_1_1_1.png',
+      rawName: '20260129_기준 중위소득 80% 건보료 소득판정 기준표_1_1_1_1.png',
+      relPath:
+        '2026년/09_일반행정_보안_법령_기타/01_기획·품의/20260129_기준 중위소득 80% 건보료 소득판정 기준표_1_1_1_1.png',
+      year: '2026년',
+      project: '09_일반행정_보안_법령_기타',
+      subFolder: '01_기획·품의',
+      ext: '.png',
+      category: 'image' as const,
+      size: 128000,
+      date: '2026-01-29',
+      mtime: 1761200000,
+      snippet: '2026년 | 일반행정 보안 법령 기타 | 현장·수행 사진 자료',
+      keywords: ['중위소득', '건보료'],
+      imageCategory: 'photo' as const,
+    };
+
+    (global.fetch as jest.Mock).mockImplementation(async (url: string) => {
+      if (typeof url === 'string' && url.startsWith('/api/archive/open')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ ok: true }),
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          generatedAt: '2026-11-10T12:30:00.000Z',
+          totalIndexed: 7723,
+          totalMatched: 1,
+          facets: {
+            years: { '2026년': 2100 },
+            projects: { '09_일반행정_보안_법령_기타': 500 },
+            categories: { image: 3652, design: 58, media: 104 },
+          },
+          items: [percentRescuedItem],
+          cluster: null,
+        }),
+      };
+    });
+
+    render(<ArchiveExplorerView />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('20260129_기준 중위소득 80% 건보료 소득판정 기준표_1_1_1_1.png')
+      ).toBeInTheDocument();
+    });
+
+    // Verify design, media, and logo options exist in filter selects
+    expect(screen.getByRole('option', { name: '디자인 원본 (PSD/AI)' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: '영상/미디어 (MP4)' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'CI·로고·슬로건' })).toBeInTheDocument();
+
+    // Clicking "파일 열기" escapes literal % as %25 so resolveAndValidatePath succeeds
+    const openBtn = screen.getByRole('button', { name: /파일 열기/i });
+    fireEvent.click(openBtn);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/archive/open',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            path: '2026년/09_일반행정_보안_법령_기타/01_기획·품의/20260129_기준 중위소득 80%25 건보료 소득판정 기준표_1_1_1_1.png',
+            mode: 'file',
+          }),
+        })
+      );
+    });
+  });
 });

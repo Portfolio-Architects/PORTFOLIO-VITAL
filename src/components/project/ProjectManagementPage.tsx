@@ -14,14 +14,14 @@ import {
 
 function WeeklySchedulerSkeleton() {
   return (
-    <div className="w-full h-full min-h-[600px] glass-panel dark:glass-panel-dark rounded-[2rem] p-8 shadow-2xs border border-white/20 dark:border-slate-800 animate-pulse flex flex-col gap-6">
-      <div className="flex justify-between items-center pb-6 border-b border-slate-200/50 dark:border-slate-800">
-        <div className="w-48 h-6 bg-slate-200 dark:bg-slate-700 rounded-lg" />
-        <div className="w-36 h-9 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+    <div className="w-full h-full min-h-[600px] glass-panel rounded-[2rem] p-8 shadow-2xs border border-white/20 animate-pulse flex flex-col gap-6">
+      <div className="flex justify-between items-center pb-6 border-b border-slate-200/50">
+        <div className="w-48 h-6 bg-slate-200 rounded-lg" />
+        <div className="w-36 h-9 bg-slate-200 rounded-xl" />
       </div>
       <div className="grid grid-cols-7 gap-4 flex-grow">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="bg-slate-200/30 dark:bg-slate-700/20 rounded-xl" />
+          <div key={i} className="bg-slate-200/30 rounded-xl" />
         ))}
       </div>
     </div>
@@ -53,7 +53,7 @@ const ProjectListItem = React.memo(({
   return (
     <div
       onClick={() => onSelect(project.id)}
-      className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col gap-2.5 ${
+      className={`p-3.5 rounded-xl border transition-colors duration-150 cursor-pointer flex flex-col gap-2.5 ${
         isSelected 
           ? 'bg-blue-50/40 border-blue-200 shadow-xs' 
           : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50/30'
@@ -95,7 +95,7 @@ const ProjectListItem = React.memo(({
       <div className="flex items-center gap-2 mt-0.5">
         <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div 
-            className="h-full rounded-full transition-all duration-300"
+            className="h-full rounded-full transition-[width] duration-300"
             style={{ width: `${progress}%`, backgroundColor: project.color }}
           />
         </div>
@@ -184,7 +184,7 @@ const AssociatedTaskItemRow = React.memo(({
 
       <button
         onClick={() => onToggleStatus(task)}
-        className={`px-2.5 py-1.5 rounded-lg border text-[10px] font-extrabold transition-all cursor-pointer ${statusColors[task.status] || statusColors.todo}`}
+        className={`px-2.5 py-1.5 rounded-lg border text-[10px] font-extrabold transition-colors duration-150 cursor-pointer ${statusColors[task.status] || statusColors.todo}`}
       >
         {statusLabel[task.status] || '대기'}
       </button>
@@ -406,8 +406,8 @@ export default function ProjectManagementPage() {
             <FolderGit2 size={20} />
           </div>
           <div>
-            <h1 className="text-base font-extrabold text-slate-800">사업 및 일정 통합 관리 센터</h1>
-            <p className="text-[11px] font-medium text-slate-500">사업 개요 수동 관리 및 통합 일정 플래너를 전용 탭으로 전환하여 조율합니다.</p>
+            <h1 className="text-base font-extrabold text-slate-800">사업 · 일정 관리</h1>
+            <p className="vlds-subtitle text-[11px] font-medium text-slate-500">단위사업 개요 · 체크리스트 · 일정 플래너</p>
           </div>
         </div>
 
@@ -415,25 +415,25 @@ export default function ProjectManagementPage() {
         <div className="flex p-1 bg-slate-100/80 rounded-xl border border-slate-200/60 shrink-0">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer border-0 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-extrabold transition-colors duration-150 cursor-pointer border-0 ${
               activeTab === 'overview'
                 ? 'bg-white text-blue-600 shadow-xs'
                 : 'text-slate-500 hover:text-slate-700 bg-transparent'
             }`}
           >
             <FolderGit2 size={15} />
-            <span>사업/프로젝트 개요</span>
+            <span>사업 개요</span>
           </button>
           <button
             onClick={() => setActiveTab('scheduler')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer border-0 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-extrabold transition-colors duration-150 cursor-pointer border-0 ${
               activeTab === 'scheduler'
                 ? 'bg-white text-blue-600 shadow-xs'
                 : 'text-slate-500 hover:text-slate-700 bg-transparent'
             }`}
           >
             <Calendar size={15} />
-            <span>통합 일정 플래너</span>
+            <span>일정 플래너</span>
           </button>
         </div>
       </div>
@@ -448,7 +448,7 @@ export default function ProjectManagementPage() {
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FolderGit2 className="text-blue-600" size={20} />
-              <h2 className="font-extrabold text-[15px] text-slate-800">사업/프로젝트 목록</h2>
+              <h2 className="font-extrabold text-[15px] text-slate-800">사업 목록</h2>
             </div>
             <button
               onClick={() => {
@@ -467,8 +467,8 @@ export default function ProjectManagementPage() {
             {projects.length === 0 ? (
               <div className="py-12 px-4 text-center">
                 <ClipboardList className="mx-auto text-slate-300 mb-3" size={36} />
-                <p className="text-[12px] font-bold text-slate-400">등록된 사업이 없습니다.</p>
-                <p className="text-[10px] text-slate-400 mt-1">상단 + 버튼을 눌러 첫 사업을 등록하고 수동 관리를 시작하세요.</p>
+                <p className="text-[12px] font-bold text-slate-400">등록 사업 없음</p>
+                <p className="text-[10px] text-slate-400 mt-1">상단 + 버튼 클릭 · 신규 사업 등록</p>
               </div>
             ) : (
               projects.map(p => (
@@ -544,7 +544,7 @@ export default function ProjectManagementPage() {
                     </div>
                     <div className="flex items-center justify-between text-[11px] pt-0.5">
                       <span className="text-slate-400 font-bold flex items-center gap-1.5">
-                        <Clock size={12} /> 사업 추진 기한
+                        <Clock size={12} /> 추진 마감
                       </span>
                       <span className="text-blue-600 font-black">{selectedProject.timeline || '-'}</span>
                     </div>
@@ -552,7 +552,7 @@ export default function ProjectManagementPage() {
 
                   <div className="flex items-center gap-1.5 mb-3 shrink-0">
                     <CheckCircle2 size={15} className="text-slate-500" />
-                    <h3 className="font-black text-slate-700 text-[11px] uppercase tracking-wider">세부 추진 계획 (체크리스트)</h3>
+                    <h3 className="font-black text-slate-700 text-[11px] uppercase tracking-wider">추진 체크리스트</h3>
                   </div>
 
                   {/* Checklist List */}
@@ -560,7 +560,7 @@ export default function ProjectManagementPage() {
                     {selectedProject.checklistItems.length === 0 ? (
                       <div className="py-8 text-center my-auto">
                         <ClipboardList className="mx-auto text-slate-300 mb-2" size={24} />
-                        <p className="text-[11px] font-bold text-slate-400">등록된 추진 계획이 없습니다.</p>
+                        <p className="text-[11px] font-bold text-slate-400">등록 체크리스트 없음</p>
                       </div>
                     ) : (
                       selectedProject.checklistItems.map((item: ChecklistItem) => (
@@ -579,7 +579,7 @@ export default function ProjectManagementPage() {
                   <form onSubmit={handleAddChecklist} className="flex gap-2 shrink-0">
                     <input
                       type="text"
-                      placeholder="새로운 세부 항목 추가..."
+                      placeholder="체크리스트 항목 입력"
                       value={newChecklistText}
                       onChange={e => setNewChecklistText(e.target.value)}
                       className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-bold bg-white text-slate-700"
@@ -597,23 +597,23 @@ export default function ProjectManagementPage() {
                 {/* Right Panel: Performance, Future Plans & Tasks */}
                 <div className="flex-1 flex flex-col p-5 overflow-hidden bg-slate-50/10">
                   
-                  {/* 추진 실적 & 향후 계획 카드 (Performance & Future Plans) */}
+                  {/* 추진 실적 & 향후 계획 카드 */}
                   <div className="grid grid-cols-1 gap-3.5 mb-4 shrink-0">
                     <div className="bg-white border border-slate-150/60 rounded-xl p-3 shadow-2xs">
                       <h4 className="text-[11px] font-black text-slate-500 flex items-center gap-1.5 mb-1.5 uppercase">
-                        <BarChart2 size={12} className="text-emerald-500" /> 주요 추진 실적 (Achievements)
+                        <BarChart2 size={12} className="text-emerald-500" /> 주요 추진 실적
                       </h4>
                       <p className="text-[11.5px] font-bold text-slate-700 whitespace-pre-wrap leading-relaxed">
-                        {selectedProject.performance || '기재된 주요 실적이 없습니다. [정보 수정]을 통해 등록하세요.'}
+                        {selectedProject.performance || '등록 실적 없음 · [정보 수정] 입력'}
                       </p>
                     </div>
 
                     <div className="bg-white border border-slate-150/60 rounded-xl p-3 shadow-2xs">
                       <h4 className="text-[11px] font-black text-slate-500 flex items-center gap-1.5 mb-1.5 uppercase">
-                        <BookOpen size={12} className="text-blue-500" /> 향후 추진 계획 (Future Plans)
+                        <BookOpen size={12} className="text-blue-500" /> 향후 추진 계획
                       </h4>
                       <p className="text-[11.5px] font-bold text-slate-700 whitespace-pre-wrap leading-relaxed">
-                        {selectedProject.futurePlans || '기재된 향후 계획이 없습니다.'}
+                        {selectedProject.futurePlans || '등록 향후 계획 없음'}
                       </p>
                     </div>
                   </div>
@@ -621,7 +621,7 @@ export default function ProjectManagementPage() {
                   <div className="flex items-center justify-between mb-3 shrink-0 border-t border-slate-100 pt-3">
                     <div className="flex items-center gap-1.5">
                       <Calendar size={15} className="text-slate-500" />
-                      <h3 className="font-black text-slate-700 text-[11px] uppercase tracking-wider">연계 실무 업무 (Tasks)</h3>
+                      <h3 className="font-black text-slate-700 text-[11px] uppercase tracking-wider">연계 실무 업무</h3>
                     </div>
                     <button
                       onClick={() => setIsAddingTask(true)}
@@ -637,7 +637,7 @@ export default function ProjectManagementPage() {
                     {associatedTasks.length === 0 ? (
                       <div className="py-8 text-center my-auto">
                         <AlertCircle className="mx-auto text-slate-300 mb-2" size={24} />
-                        <p className="text-[11px] font-bold text-slate-400">배정된 업무가 없습니다.</p>
+                        <p className="text-[11px] font-bold text-slate-400">배정 업무 없음</p>
                       </div>
                     ) : (
                       associatedTasks.map(task => (
@@ -656,9 +656,9 @@ export default function ProjectManagementPage() {
           ) : (
             <div className="m-auto text-center p-8 max-w-sm">
               <FolderGit2 className="mx-auto text-slate-300 mb-4 animate-pulse" size={48} />
-              <h2 className="text-base font-extrabold text-slate-800">사업/프로젝트 상세 정보</h2>
+              <h2 className="text-base font-extrabold text-slate-800">단위사업 상세</h2>
               <p className="text-[12px] text-slate-400 leading-relaxed mt-2">
-                좌측 사이드바에서 개별 사업을 클릭하시면 상세 추진 현황, 실행 계획 체크리스트, 그리고 연계 실무 태스크 목록을 확인하고 직접 수동으로 제어하실 수 있습니다.
+                좌측 사업 선택 → 추진 현황 · 체크리스트 · 연계 업무 조회
               </p>
             </div>
           )}
@@ -673,12 +673,12 @@ export default function ProjectManagementPage() {
 
       {/* Add / Edit Project Dialog Modal */}
       {(isAddingProject || isEditingProject) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-[620px] overflow-hidden flex flex-col p-6 animate-scale-up animate-duration-200">
             <div className="flex items-center gap-2 mb-4 shrink-0">
               <Sparkles className="text-blue-500 animate-pulse" size={18} />
               <h3 className="font-black text-slate-800 text-[14px]">
-                {isEditingProject ? '사업/프로젝트 정보 수정' : '새로운 사업/프로젝트 등록'}
+                {isEditingProject ? '사업 정보 수정' : '신규 사업 등록'}
               </h3>
             </div>
 
@@ -701,7 +701,7 @@ export default function ProjectManagementPage() {
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">사업 상세 설명</label>
                   <textarea
-                    placeholder="사업의 주요 목적, 핵심 타임라인 또는 수동 관리 참고 사항을 적어주세요."
+                    placeholder="주요 목적 · 일정 · 관리 메모"
                     value={newProjectDesc}
                     onChange={e => setNewProjectDesc(e.target.value)}
                     className="px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-semibold text-slate-700 bg-white min-h-[60px]"
@@ -743,10 +743,10 @@ export default function ProjectManagementPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">담당 요원 (인력)</label>
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">담당 요원</label>
                   <input
                     type="text"
-                    placeholder="예: 홍길동 팀장, 이순신 대리"
+                    placeholder="예: 총괄주무관 · 전담요원"
                     value={newProjectStaff}
                     onChange={e => setNewProjectStaff(e.target.value)}
                     className="px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-bold text-slate-700 bg-white"
@@ -754,10 +754,10 @@ export default function ProjectManagementPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5 col-span-2">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">사업 추진 기한/정량 지표</label>
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">추진 마감 · 정량 지표</label>
                   <input
                     type="text"
-                    placeholder="예: 2026년 12월 31일까지 / 연간 5,000명 측정 달성"
+                    placeholder="예: 2026. 12. 31. 마감 · 연 5,000명 측정"
                     value={newProjectTimeline}
                     onChange={e => setNewProjectTimeline(e.target.value)}
                     className="px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-bold text-slate-700 bg-white"
@@ -765,9 +765,9 @@ export default function ProjectManagementPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5 col-span-2">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">주요 추진 실적 (Achievements)</label>
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">주요 추진 실적</label>
                   <textarea
-                    placeholder="현재까지 완료된 구체적 예산 지출 성과나 기획 수립 결과를 기록하세요."
+                    placeholder="완료 예산 집행 · 기획 수립 성과"
                     value={newProjectPerformance}
                     onChange={e => setNewProjectPerformance(e.target.value)}
                     className="px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-semibold text-slate-700 bg-white min-h-[60px]"
@@ -775,9 +775,9 @@ export default function ProjectManagementPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5 col-span-2">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">향후 추진 계획 (Future Plans)</label>
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">향후 추진 계획</label>
                   <textarea
-                    placeholder="차기 일정 또는 다음 단계 업무 지침을 적어주세요."
+                    placeholder="차기 일정 · 후속 추진 사항"
                     value={newProjectFuturePlans}
                     onChange={e => setNewProjectFuturePlans(e.target.value)}
                     className="px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-semibold text-slate-700 bg-white min-h-[60px]"
@@ -828,7 +828,7 @@ export default function ProjectManagementPage() {
 
       {/* Associated Task Addition Modal */}
       {isAddingTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-[420px] overflow-hidden flex flex-col p-6 animate-scale-up animate-duration-200">
             <h3 className="font-black text-slate-800 text-[14px] mb-4">프로젝트 연계 업무 배정</h3>
 

@@ -99,9 +99,8 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
             </span>
             <span className="text-xs sm:text-sm font-semibold text-slate-400 shrink-0">원</span>
           </div>
-          <div className="mt-1.5 min-h-[44px] text-[11px] text-slate-400 leading-snug">
-            <div>2026 회계연도 배정 예산</div>
-            <div>본예산 및 추경 합계</div>
+          <div className="mt-1.5 min-h-[36px] text-[11px] text-slate-400 leading-snug">
+            <div>2026 본예산 · 추경 합계</div>
           </div>
         </div>
 
@@ -130,19 +129,13 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
             </span>
             <span className="text-xs sm:text-sm font-semibold text-slate-400 shrink-0">원</span>
           </div>
-          <div className="mt-1.5 min-h-[44px] text-[11px] leading-snug">
+          <div className="mt-1.5 min-h-[36px] text-[11px] leading-snug">
             {metrics.totalDailyIssued > 0 ? (
-              <>
-                <div className="text-amber-700 font-semibold font-mono tabular-nums truncate">
-                  교부 {metrics.totalDailyIssued.toLocaleString('ko-KR')}원 포함
-                </div>
-                <div className="text-slate-400">본청 원인행위 및 지출원인</div>
-              </>
+              <div className="text-amber-700 font-semibold font-mono tabular-nums truncate">
+                교부 {metrics.totalDailyIssued.toLocaleString('ko-KR')}원 포함
+              </div>
             ) : (
-              <>
-                <div className="text-slate-500">지출결의 원인행위 완료 누적</div>
-                <div className="text-slate-400">e-호조 본청 지출 확정액</div>
-              </>
+              <div className="text-slate-400">e-호조 지출 확정 누적</div>
             )}
           </div>
         </div>
@@ -176,7 +169,7 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
             </span>
             <span className="text-xs sm:text-sm font-semibold text-slate-400 shrink-0">원</span>
           </div>
-          <div className="mt-1.5 min-h-[44px] text-[11px] leading-snug">
+          <div className="mt-1.5 min-h-[36px] text-[11px] leading-snug">
             {metrics.totalDailyRemaining > 0 ? (
               <>
                 <div className="text-amber-700 font-semibold font-mono tabular-nums truncate">
@@ -187,10 +180,7 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
                 </div>
               </>
             ) : (
-              <>
-                <div className="text-slate-500">지출 예정액 차감 전 순잔액</div>
-                <div className="text-slate-400">실질 가용 자금 기준</div>
-              </>
+              <div className="text-slate-400">예정액 차감 전 순잔액</div>
             )}
           </div>
         </div>
@@ -218,9 +208,8 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
             </span>
             <span className="text-xs sm:text-sm font-semibold text-slate-400 shrink-0">원</span>
           </div>
-          <div className="mt-1.5 min-h-[44px] text-[11px] leading-snug">
-            <div className="text-slate-600 font-semibold">확정 지출 예정 항목 합계</div>
-            <div className="text-slate-400">품의·소진 계획 등록액</div>
+          <div className="mt-1.5 min-h-[36px] text-[11px] leading-snug">
+            <div className="text-slate-400">품의 · 소진 계획 합계</div>
           </div>
         </div>
 

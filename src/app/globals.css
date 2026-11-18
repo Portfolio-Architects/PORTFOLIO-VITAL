@@ -1,63 +1,64 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.vlds-dark-disabled, .vlds-dark-disabled *));
 
 @theme {
-  --font-sans: var(--font-inter), 'Inter', -apple-system, sans-serif;
-  --font-display: var(--font-outfit), 'Outfit', sans-serif;
+  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-display: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'Cascadia Mono', 'Consolas', monospace;
+
+  /* VLDS Semantic Surface & Ink Tokens (Single High-Contrast Light Theme) */
+  --surface-canvas: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-subtle: #f1f5f9;
+  --border-subtle: rgba(226, 232, 240, 0.85);
+  --border-strong: #cbd5e1;
+  --text-ink: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
+
+  /* Brand & Status Tokens (Backward-compatible aliases preserved) */
   --color-primary: #4A6CF7;
   --color-primary-light: #7B93FA;
   --color-primary-dark: #3451D1;
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
-  --color-bg: #f8f9fb;
+  --color-bg: #f8fafc;
   --color-card: #ffffff;
-  --color-text-primary: #2d3436;
-  --color-text-secondary: #636e72;
-  --color-text-tertiary: #b2bec3;
-  --color-border: #e8ecf1;
-  --color-border-light: #f0f3f6;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #94a3b8;
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
 }
 
 :root {
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 8px 25px rgba(0,0,0,0.08);
+  color-scheme: light;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.10);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #090d16;
-    --color-card: #0f172a;
-    --color-text-primary: #f8fafc;
-    --color-text-secondary: #94a3b8;
-    --color-text-tertiary: #475569;
-    --color-border: #1e293b;
-    --color-border-light: #334155;
-    
-    /* High-contrast shadows for dark mode */
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-    --shadow-lg: 0 8px 25px rgba(0,0,0,0.5);
-  }
-}
-
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-bg);
-  color: var(--color-text-primary);
+  background-color: var(--surface-canvas);
+  color: var(--text-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6, .font-extrabold, .font-black {
-  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-family: var(--font-display);
 }
 
-button, a, .card, .nav-item, input, select, textarea, .progress-fill {
-  transition: all 120ms cubic-bezier(0.4, 0, 0.2, 1);
+/* Zero-Reflow Selective Transitions (No transition: all) */
+button, a, .nav-item {
+  transition-property: color, background-color, border-color, opacity;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Mobile Optimizations */
@@ -77,35 +78,32 @@ button, a, .card, .nav-item, input, select, textarea, .progress-fill {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #ddd;
+  background: #cbd5e1;
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #ccc;
+  background: #94a3b8;
 }
 
 /* No scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Card hover effect */
+/* Card hover effect (GPU transform + shadow only) */
 .card-hover {
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 140ms ease, border-color 140ms ease;
 }
 .card-hover:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  border-color: var(--border-strong);
 }
 
 /* Progress bar animation */
 .progress-fill {
-  transition: width 0.4s ease;
+  transition: width 240ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Sidebar link active state */
-.nav-item {
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
 .nav-item:hover {
   background-color: rgba(74, 108, 247, 0.06);
 }
@@ -114,10 +112,9 @@ button, a, .card, .nav-item, input, select, textarea, .progress-fill {
   color: var(--color-primary);
 }
 
-/* Modal backdrop */
+/* Modal backdrop (Zero GPU blur readback for Localhost 60fps) */
 .modal-backdrop {
-  background-color: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(4px);
+  background-color: rgba(15, 23, 42, 0.45);
 }
 
 /* Badge styles */
@@ -131,7 +128,7 @@ button, a, .card, .nav-item, input, select, textarea, .progress-fill {
 
 /* Calendar grid */
 .calendar-cell {
-  transition: background-color 0.15s ease;
+  transition: background-color 100ms ease;
 }
 .calendar-cell:hover {
   background-color: rgba(74, 108, 247, 0.04);
@@ -143,34 +140,51 @@ button, a, .card, .nav-item, input, select, textarea, .progress-fill {
 }
 
 /* Priority colors */
-.priority-high { color: #EF4444; background-color: rgba(239,68,68,0.08); }
-.priority-medium { color: #F59E0B; background-color: rgba(245,158,11,0.08); }
-.priority-low { color: #10B981; background-color: rgba(16,185,129,0.08); }
+.priority-high { color: #b91c1c; background-color: rgba(239, 68, 68, 0.09); }
+.priority-medium { color: #b45309; background-color: rgba(245, 158, 11, 0.10); }
+.priority-low { color: #047857; background-color: rgba(16, 185, 129, 0.10); }
 
 /* Status colors */
-.status-todo { color: #636e72; background-color: rgba(99,110,114,0.08); }
-.status-in-progress { color: #4A6CF7; background-color: rgba(74,108,247,0.08); }
-.status-done { color: #10B981; background-color: rgba(16,185,129,0.08); }
+.status-todo { color: #475569; background-color: rgba(71, 85, 105, 0.08); }
+.status-in-progress { color: #3451D1; background-color: rgba(74, 108, 247, 0.09); }
+.status-done { color: #047857; background-color: rgba(16, 185, 129, 0.10); }
 
-/* Phase 2 UX Premium Styling */
+/* VLDS Solid Surface Panels (Replaces heavy backdrop-filter blur) */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.75) !important;
-  backdrop-filter: blur(16px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(120%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid var(--border-subtle) !important;
 }
 
 .glass-panel-dark {
-  background: rgba(15, 23, 42, 0.7) !important;
-  backdrop-filter: blur(16px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(120%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* VLDS Native Offscreen Rendering Isolation Utilities */
+.vlds-cv-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 176px;
+}
+
+.vlds-cv-row {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 48px;
+}
+
+.vlds-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.vlds-subtitle {
+  word-break: keep-all;
+  letter-spacing: -0.01em;
 }
 
 @keyframes slideUpFade {
   from {
     opacity: 0;
-    transform: translate(-50%, 15px);
+    transform: translate(-50%, 12px);
   }
   to {
     opacity: 1;
@@ -179,7 +193,7 @@ button, a, .card, .nav-item, input, select, textarea, .progress-fill {
 }
 
 .animate-slide-up-fade {
-  animation: slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUpFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 mark.highlight {

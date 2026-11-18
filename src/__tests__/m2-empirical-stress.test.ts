@@ -2,7 +2,7 @@ import { buildSignalGraph } from '@/lib/signal-graph';
 import { computeCentrality } from '@/lib/ontology.service';
 import { OntologyLayout, ELLIPSE_RATIO } from '@/lib/engine/OntologyLayout';
 import { OntologyNode, OntologyEdge, OrbitalNode } from '@/lib/ontology.types';
-import { NodeOverride } from '@/hooks/useGraphCustomization';
+import { NodeOverride } from '@/lib/ontology.types';
 
 describe('Milestone 2 Empirical Stress & Correctness Verification', () => {
 

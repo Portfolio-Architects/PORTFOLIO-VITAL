@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const backupStr = require('./hchps-backup.json')['hchps-map-customization'];
+const backupStr = require('./data/archive/hchps-backup.json')['hchps-map-customization'];
 const cloudData = JSON.parse(backupStr);
 
 console.log('cloudData.id:', cloudData.id);

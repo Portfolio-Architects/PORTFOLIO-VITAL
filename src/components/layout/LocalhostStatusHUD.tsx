@@ -89,7 +89,7 @@ function LocalhostStatusHUDComponent({ onOpenLogs }: LocalhostStatusHUDProps) {
       {/* Expanded Minimalist HUD Modal */}
       {isModalOpen && (
         <div 
-          className="fixed inset-0 z-[120] bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[120] modal-backdrop flex items-center justify-center p-4"
           onClick={handleCloseModal}
         >
           <div
@@ -202,7 +202,7 @@ function LocalhostStatusHUDComponent({ onOpenLogs }: LocalhostStatusHUDProps) {
                 </div>
                 <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-slate-800 rounded-full transition-all duration-300"
+                    className="h-full bg-slate-800 rounded-full transition-[width] duration-300"
                     style={{ width: `${Math.min(100, Math.max(10, ((clientMB || 0) / 300) * 100))}%` }}
                   />
                 </div>
@@ -216,7 +216,7 @@ function LocalhostStatusHUDComponent({ onOpenLogs }: LocalhostStatusHUDProps) {
                 </div>
                 <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-emerald-600 rounded-full transition-all duration-300"
+                    className="h-full bg-emerald-600 rounded-full transition-[width] duration-300"
                     style={{ width: `${Math.min(100, Math.max(10, ((serverMB || 0) / 400) * 100))}%` }}
                   />
                 </div>

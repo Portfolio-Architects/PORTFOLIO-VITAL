@@ -52,6 +52,7 @@ jest.mock('recharts', () => {
 import { Sidebar } from '@/components/Sidebar';
 import { SplashView } from '@/components/SplashView';
 import { ContactsBox } from '@/components/dashboard/ContactsBox';
+import { ContactsSideSheet } from '@/components/dashboard/ContactsSideSheet';
 import { PortfolioDashboardView } from '@/components/dashboard/PortfolioDashboardView';
 import { PortfolioDashboardViewSkeleton } from '@/components/ProtectedApp';
 import { YangjaeFestivalSkeleton } from '@/components/skeletons/YangjaeFestivalSkeleton';
@@ -102,6 +103,38 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       expect(budgetBtn).not.toBeNull();
       fireEvent.click(budgetBtn!);
       expect(onModuleChange).toHaveBeenCalledWith('workspace');
+
+      // LocalhostStatusHUD capsule is removed from top-right nav; Business Contacts tab is present
+      expect(screen.queryByTestId('localhost-status-hud')).not.toBeInTheDocument();
+      const contactsBtn = screen.getByRole('button', { name: '업무 연락처' });
+      expect(contactsBtn).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('triggers contacts side sheet toggle and preload from top-right navigation button', () => {
+      const onToggleContacts = jest.fn();
+      const onPreloadContacts = jest.fn();
+      render(
+        <Sidebar
+          activeModule="dashboard"
+          onModuleChange={jest.fn()}
+          taskStats={{ total: 5, done: 3, overdue: 0 }}
+          appMode="VITAL"
+          onModeChange={jest.fn()}
+          isContactsOpen={true}
+          onToggleContacts={onToggleContacts}
+          onPreloadContacts={onPreloadContacts}
+        />
+      );
+
+      const contactsBtn = screen.getByRole('button', { name: '업무 연락처' });
+      expect(contactsBtn).toHaveAttribute('aria-expanded', 'true');
+      expect(contactsBtn).toHaveClass('bg-slate-900', 'text-white');
+
+      fireEvent.mouseEnter(contactsBtn);
+      expect(onPreloadContacts).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(contactsBtn);
+      expect(onToggleContacts).toHaveBeenCalledTimes(1);
     });
 
     it('renders SplashView with minimalist slate card surface and zero legacy neon gradients', () => {
@@ -150,6 +183,27 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
         })
       );
     });
+
+    it('renders ContactsSideSheet with collapsible add form and closes via close button or Escape key', () => {
+      const onClose = jest.fn();
+      render(<ContactsSideSheet isOpen={true} onClose={onClose} />);
+
+      const dialog = screen.getByRole('dialog', { name: '업무 연락처' });
+      expect(dialog).toBeInTheDocument();
+      expect(screen.getByText('김행정')).toBeInTheDocument();
+
+      // Add form is collapsed by default in sheet mode and expands on button click
+      expect(screen.queryByPlaceholderText('예: 이성섭 상임이사, 최장미')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: '연락처 추가' }));
+      expect(screen.getByPlaceholderText('예: 이성섭 상임이사, 최장미')).toBeInTheDocument();
+
+      // Close via Escape key and close button
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(onClose).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(screen.getByRole('button', { name: '사이드 시트 닫기' }));
+      expect(onClose).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('3. PortfolioDashboardView Minimalist Layout & Zero-Data Edge Cases', () => {
@@ -182,7 +236,7 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       },
     ] as any[];
 
-    it('renders minimalist 1px cards without legacy glass-panel, rounded-[2rem], or scale hover effects', () => {
+    it('renders minimalist 1px cards without legacy glass-panel, rounded-[2rem], or scale hover effects, and removes legacy tabs & sub-bar clutter', () => {
       const { container } = render(
         <PortfolioDashboardView
           budgetCategories={sampleCategories}
@@ -197,10 +251,19 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       expect(container.innerHTML).not.toContain('hover:scale-[1.01]');
       expect(container.innerHTML).not.toContain('hover:scale-[1.002]');
 
-      // Verify KPI figures are rendered intact with tabular-nums
-      expect(screen.getAllByText('100,000,000').length).toBeGreaterThanOrEqual(2);
-      expect(screen.getAllByText('65,400,000').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText('34,600,000').length).toBeGreaterThanOrEqual(2);
+      // Verify legacy tabs and removed sub-header items are completely absent
+      expect(screen.queryByTestId('donut-mode-performance')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('donut-mode-budget')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('execution-tab-overview')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('execution-tab-risk-drilldown')).not.toBeInTheDocument();
+      expect(screen.queryByText('4대 단계 요약')).not.toBeInTheDocument();
+      expect(screen.queryByText(/불용 위험 비목/)).not.toBeInTheDocument();
+      expect(screen.queryByText('총 편성 예산')).not.toBeInTheDocument();
+
+      // Verify dedicated Execution & Unallocated Risk Diagnosis figures render by default
+      expect(screen.getByText('집행·불용 위험 정밀 진단')).toBeInTheDocument();
+      expect(screen.getAllByText('65,400,000').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getAllByText('34,600,000').length).toBeGreaterThanOrEqual(3);
       expect(screen.getAllByText(/65\.4%/).length).toBeGreaterThan(0);
     });
 
@@ -228,8 +291,7 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       );
 
       // Verify Korean accounting headings and labels are present
-      expect(screen.getByText('세부사업별 예산 편성 현황')).toBeInTheDocument();
-      expect(screen.getByText('총 편성 예산')).toBeInTheDocument();
+      expect(screen.getByText('집행·불용 위험 정밀 진단')).toBeInTheDocument();
       expect(screen.getByText('예산 집행률')).toBeInTheDocument();
       expect(screen.getByText('예산 잔여율')).toBeInTheDocument();
       expect(screen.getByText('누적 집행액')).toBeInTheDocument();
@@ -255,7 +317,7 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       expect(text).not.toContain('KRW');
     });
 
-    it('aligns donut chart slices and breakdown list colors and share percentages across multiple categories', () => {
+    it('aligns 4-stage execution colors, share percentages, and dynamic detailedProject filtering', () => {
       const multiCategories = [
         {
           id: 'cat-a',
@@ -266,9 +328,6 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
           statItem: '101-04 기간제근로자등보수',
           name: '운동사 인건비',
           totalBudget: 60000000,
-          allocated: 60000000,
-          spent: 30000000,
-          remaining: 30000000,
         },
         {
           id: 'cat-b',
@@ -279,76 +338,119 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
           statItem: '201-03 행사운영비',
           name: '양재천 걷기 운영',
           totalBudget: 40000000,
-          allocated: 40000000,
-          spent: 10000000,
-          remaining: 30000000,
         },
+      ] as any[];
+
+      const multiEntries = [
+        { id: 'e-1', categoryId: 'cat-a', purpose: '급여', amount: 60000000, date: '2026-06-10', actionType: 'general' },
       ] as any[];
 
       render(
         <PortfolioDashboardView
           budgetCategories={multiCategories}
-          budgetEntries={[]}
+          budgetEntries={multiEntries}
           appMode="VITAL"
         />
       );
 
-      // Verify share percentages (60.0% and 40.0%) in breakdown list
-      expect(screen.getByText('60.0%')).toBeInTheDocument();
-      expect(screen.getByText('40.0%')).toBeInTheDocument();
+      // Overall: 60,000,000 general executed (60.0%) and 40,000,000 unallocated risk (40.0%)
+      expect(screen.getAllByText('60.0%').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('40.0%').length).toBeGreaterThanOrEqual(1);
 
-      // Verify color swatches match VITAL_THEME_COLORS
       const swatches = screen.getAllByTestId('breakdown-color-swatch');
-      expect(swatches).toHaveLength(2);
+      expect(swatches).toHaveLength(4);
       expect(swatches[0]).toHaveStyle({ backgroundColor: '#0f172a' });
       expect(swatches[1]).toHaveStyle({ backgroundColor: '#2563eb' });
+      expect(swatches[2]).toHaveStyle({ backgroundColor: '#64748b' });
+      expect(swatches[3]).toHaveStyle({ backgroundColor: '#e11d48' });
 
-      // Filter by specific detailed project and verify breakdown updates to formationItem + category name
-      const select = screen.getByRole('combobox');
+      // Filter by '강남 AI 메디헬스센터 운영' -> 100% executed, 0 unallocated risk
+      const select = screen.getByTestId('execution-project-select');
       fireEvent.change(select, { target: { value: '강남 AI 메디헬스센터 운영' } });
-      expect(screen.getByText('기간제근로자등보수')).toBeInTheDocument();
-      expect(screen.getByText('운동사 인건비')).toBeInTheDocument();
-      expect(screen.getAllByText('100.0%').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByTestId('donut-center-execution-risk')).toHaveTextContent('0');
+      expect(screen.getByText('설계 완료 100.0%')).toBeInTheDocument();
     });
 
-    it('preserves 0-won mathematical parity when categories lack detailedProject, avoids 7-slice circular color collision, and formats <0.1% positive shares cleanly', () => {
+    it('preserves 0-won mathematical parity when categories lack detailedProject and formats <0.1% positive shares cleanly', () => {
       const edgeCategories = [
-        { id: 'c1', detailedProject: '사업1', name: '항목1', totalBudget: 20000000 },
-        { id: 'c2', detailedProject: '사업2', name: '항목2', totalBudget: 20000000 },
-        { id: 'c3', detailedProject: '사업3', name: '항목3', totalBudget: 20000000 },
-        { id: 'c4', detailedProject: '사업4', name: '항목4', totalBudget: 20000000 },
-        { id: 'c5', detailedProject: '사업5', name: '항목5', totalBudget: 10000000 },
-        { id: 'c6', detailedProject: '사업6', name: '항목6', totalBudget: 9970000 },
-        // Missing detailedProject (falls back to unitProject '미분류단위사업') with tiny positive budget (0.03% -> '<0.1%')
-        { id: 'c7', detailedProject: '', unitProject: '미분류단위사업', name: '소액항목', totalBudget: 30000 },
+        { id: 'c1', detailedProject: '사업1', name: '항목1', totalBudget: 99970000 },
+        { id: 'c2', detailedProject: '', unitProject: '미분류단위사업', name: '소액항목', totalBudget: 30000 },
+      ] as any[];
+      const edgeEntries = [
+        { id: 'ee1', categoryId: 'c1', purpose: '집행', amount: 99970000, date: '2026-04-01', actionType: 'general' },
       ] as any[];
 
       render(
         <PortfolioDashboardView
           budgetCategories={edgeCategories}
-          budgetEntries={[]}
+          budgetEntries={edgeEntries}
           appMode="VITAL"
         />
       );
 
-      // Missing detailedProject category is NOT dropped; its fallback project name and <0.1% share are rendered
-      expect(screen.getAllByText('미분류단위사업').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('30,000')).toBeInTheDocument();
+      // Fallback project '미분류단위사업' appears in selector and 30,000원 risk formats share as '<0.1%'
+      expect(screen.getByRole('option', { name: '미분류단위사업' })).toBeInTheDocument();
+      expect(screen.getByTestId('donut-center-execution-risk')).toHaveTextContent('30,000');
       expect(screen.getByText('<0.1%')).toBeInTheDocument();
-
-      // 7 items -> 7th swatch (idx 6) must NOT collide with 1st swatch (idx 0, #0f172a) or 6th swatch (idx 5, #94a3b8)
-      const swatches = screen.getAllByTestId('breakdown-color-swatch');
-      expect(swatches).toHaveLength(7);
-      expect(swatches[0]).toHaveStyle({ backgroundColor: '#0f172a' });
-      expect(swatches[5]).toHaveStyle({ backgroundColor: '#94a3b8' });
-      expect(swatches[6]).toHaveStyle({ backgroundColor: '#2563eb' });
     });
 
-    it('renders 4 KPI cards and ContactsBox placeholder in PortfolioDashboardViewSkeleton and removes English clichés in ProtectedApp.tsx', () => {
+    it('renders Execution & Unallocated Risk Diagnosis Donut Panel by default with 0-won SSOT parity and clean header', () => {
+      const realCategories = JSON.parse(
+        fs.readFileSync(path.join(process.cwd(), 'data/BUDGET_CATEGORIES.json'), 'utf-8')
+      );
+      const realEntries = JSON.parse(
+        fs.readFileSync(path.join(process.cwd(), 'data/BUDGET_ENTRIES.json'), 'utf-8')
+      );
+
+      const { container } = render(
+        <PortfolioDashboardView
+          budgetCategories={realCategories}
+          budgetEntries={realEntries}
+          appMode="VITAL"
+        />
+      );
+
+      // Verify heading, design completion badge, and center unallocated risk metric (10,173,300원) on initial render
+      expect(screen.getByText('집행·불용 위험 정밀 진단')).toBeInTheDocument();
+      expect(screen.getByText('설계 완료 97.4%')).toBeInTheDocument();
+      expect(screen.getByTestId('donut-center-execution-risk')).toHaveTextContent('10,173,300');
+      expect(screen.getByText('설계 97.4% · 실집행 79.2%')).toBeInTheDocument();
+      expect(container.textContent || '').not.toContain('본청');
+
+      // Verify enlarged 252x252 donut box and z-index stacking hierarchy (center overlay z-0 beneath chart/tooltip z-20)
+      const centerOverlay = screen.getByTestId('donut-center-overlay');
+      expect(centerOverlay).toHaveClass('z-0', 'pointer-events-none');
+      expect(centerOverlay.parentElement).toHaveClass('w-[252px]', 'h-[252px]');
+
+      // Verify 4 slices summing to 387,992,000원 (266,528,800 + 40,633,500 + 70,656,400 + 10,173,300 = 387,992,000)
+      expect(266528800 + 40633500 + 70656400 + 10173300).toBe(387992000);
+      expect(screen.getByText('일반지출 집행 완료')).toBeInTheDocument();
+      expect(screen.getByText('266,528,800')).toBeInTheDocument();
+      expect(screen.getByText('일상경비 집행 완료')).toBeInTheDocument();
+      expect(screen.getByText('40,633,500')).toBeInTheDocument();
+      expect(screen.getByText('지출 예정(품의·원인행위 대기)')).toBeInTheDocument();
+      expect(screen.getByText('70,656,400')).toBeInTheDocument();
+      expect(screen.getByText('순수 미계획 불용 위험액')).toBeInTheDocument();
+
+      // Verify color swatches (#0f172a, #2563eb, #64748b, #e11d48)
+      const swatches = screen.getAllByTestId('breakdown-color-swatch');
+      expect(swatches).toHaveLength(4);
+      expect(swatches[0]).toHaveStyle({ backgroundColor: '#0f172a' });
+      expect(swatches[1]).toHaveStyle({ backgroundColor: '#2563eb' });
+      expect(swatches[2]).toHaveStyle({ backgroundColor: '#64748b' });
+      expect(swatches[3]).toHaveStyle({ backgroundColor: '#e11d48' });
+
+      // Filter by detailedProject '건강생활실천사업(건강증진)' and verify dynamic risk update (2,744,000원)
+      const projSelect = screen.getByTestId('execution-project-select');
+      fireEvent.change(projSelect, { target: { value: '건강생활실천사업(건강증진)' } });
+      expect(screen.getByTestId('donut-center-execution-risk')).toHaveTextContent('2,744,000');
+    });
+
+    it('renders 4 KPI cards in PortfolioDashboardViewSkeleton without inline ContactsBox and removes English clichés in ProtectedApp.tsx', () => {
       render(<PortfolioDashboardViewSkeleton />);
       const kpiSkeletons = screen.getAllByTestId('dashboard-skeleton-kpi-card');
       expect(kpiSkeletons).toHaveLength(4);
-      expect(screen.getByTestId('dashboard-skeleton-contacts')).toBeInTheDocument();
+      expect(screen.queryByTestId('dashboard-skeleton-contacts')).not.toBeInTheDocument();
 
       const protectedAppSrc = fs.readFileSync(
         path.join(process.cwd(), 'src/components/ProtectedApp.tsx'),

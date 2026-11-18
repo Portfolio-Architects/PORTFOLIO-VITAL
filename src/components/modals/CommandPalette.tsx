@@ -7,6 +7,7 @@ import {
   Network,
   Wallet,
   Briefcase,
+  FolderSearch,
   CheckSquare,
   Receipt,
   Package,
@@ -47,33 +48,45 @@ export interface CommandPaletteProps {
 const STATIC_NAV_ITEMS: { module: ModuleType; title: string; subtitle: string; icon: React.ReactNode }[] = [
   {
     module: 'dashboard',
-    title: '대시보드 (Dashboard)',
-    subtitle: '메인 업무 인사이트, 주간 일정 및 시그널 피드',
+    title: '대시보드',
+    subtitle: '집행 · 불용 진단 · 월별 추이 · 연락처',
     icon: <LayoutDashboard className="w-4 h-4 text-emerald-400" />
   },
   {
     module: 'memory',
-    title: '작업기억 보조 보드 (Working Memory)',
-    subtitle: '메모보고·구두지시·예산 증감액 1초 캡처 및 업무 트랙별 대조 보드',
+    title: '작업기억 보드',
+    subtitle: '지시 · 예산 변동 · 행감 메모 기록',
     icon: <StickyNote className="w-4 h-4 text-amber-400" />
   },
   {
     module: 'workspace',
-    title: '예산 & 재고 관리 (Workspace)',
-    subtitle: '품의 결재, 정산 내역 및 물품 수량 관리',
+    title: '예산관리',
+    subtitle: 'e-호조 일반지출 · 일상경비 대조 · 시뮬레이션',
     icon: <Wallet className="w-4 h-4 text-blue-400" />
   },
   {
+    module: 'project',
+    title: '사업 · 일정 관리',
+    subtitle: '단위사업 개요 · 체크리스트 · 일정 플래너',
+    icon: <Calendar className="w-4 h-4 text-teal-600" />
+  },
+  {
     module: 'festival',
-    title: '양재천 페스티벌 (Festival)',
-    subtitle: '2026 양재천 건강 페스티벌 추진 로드맵 및 부스 현황',
-    icon: <Briefcase className="w-4 h-4 text-purple-400" />
+    title: '양재천 페스티벌',
+    subtitle: '추진과제 · 부스 · 업무분장 · 식순',
+    icon: <Briefcase className="w-4 h-4 text-purple-600" />
+  },
+  {
+    module: 'archive',
+    title: '아카이브 탐색기',
+    subtitle: '공문서 · 사진 · 6대 도메인 온톨로지',
+    icon: <FolderSearch className="w-4 h-4 text-sky-600" />
   },
   {
     module: 'simulator',
-    title: '예산 시뮬레이터 (Simulator)',
-    subtitle: '실시간 예산 변동 시뮬레이션 및 재원 배분 분석',
-    icon: <Network className="w-4 h-4 text-indigo-400" />
+    title: '예산 시뮬레이터',
+    subtitle: '집행 잔액 - 예정액 · 과목별 예상 잔액',
+    icon: <Network className="w-4 h-4 text-indigo-600" />
   }
 ];
 
@@ -121,14 +134,14 @@ function CommandPaletteComponent({
     // 1. Navigation items
     for (let i = 0; i < STATIC_NAV_ITEMS.length; i++) {
       const nav = STATIC_NAV_ITEMS[i];
-      const searchTerms = `${nav.title} ${nav.subtitle} navigation module 대시보드 예산 관리 페스티벌 시뮬레이터`;
+      const searchTerms = `${nav.title} ${nav.subtitle} ${nav.module} module dashboard memory workspace project festival archive simulator working memory 대시보드 예산 관리 사업 일정 페스티벌 시뮬레이터 아카이브 작업기억`;
       items.push({
         id: `nav-${nav.module}`,
         category: 'Navigation',
         categoryLabel: '모듈 바로가기',
         title: nav.title,
         subtitle: nav.subtitle,
-        badge: 'Module',
+        badge: '모듈',
         searchTerms,
         searchTermsLower: searchTerms.toLowerCase(),
         icon: nav.icon,
@@ -139,11 +152,11 @@ function CommandPaletteComponent({
     // 2. Tasks
     for (let i = 0; i < tasks.length; i++) {
       const task = tasks[i];
-      const searchTerms = `${task.title} ${task.category || ''} ${task.description || ''} ${(task.tags || []).join(' ')} ${task.status}`;
+      const searchTerms = `${task.title} ${task.category || ''} ${task.description || ''} ${(task.tags || []).join(' ')} ${task.status} tasks`;
       items.push({
         id: `task-${task.id}`,
         category: 'Tasks',
-        categoryLabel: '업무 (Tasks)',
+        categoryLabel: '업무',
         title: task.title,
         subtitle: `${task.category}${task.dueDate ? ` · 마감: ${task.dueDate}` : ''}${task.description ? ` · ${task.description}` : ''}`,
         badge: task.status === 'done' ? '완료' : task.status === 'in-progress' ? '진행중' : '대기',
@@ -162,11 +175,11 @@ function CommandPaletteComponent({
     for (let i = 0; i < budgetEntries.length; i++) {
       const entry = budgetEntries[i];
       const catName = catMap.get(entry.categoryId) || '기타예산';
-      const searchTerms = `${entry.purpose} ${catName} ${entry.amount} ${entry.docRegNum || ''} ${entry.memo || ''}`;
+      const searchTerms = `${entry.purpose} ${catName} ${entry.amount} ${entry.docRegNum || ''} ${entry.memo || ''} budget`;
       items.push({
         id: `budget-${entry.id}`,
         category: 'Budget',
-        categoryLabel: '예산 (Budget)',
+        categoryLabel: '예산',
         title: entry.purpose,
         subtitle: `${catName} · ${entry.amount.toLocaleString()}원${entry.docRegNum ? ` · ${entry.docRegNum}` : ''}`,
         badge: entry.isPlanned ? '품의 예정' : '지출 완료',
@@ -180,13 +193,13 @@ function CommandPaletteComponent({
     // 4. Inventory Items
     for (let i = 0; i < inventoryItems.length; i++) {
       const inv = inventoryItems[i];
-      const searchTerms = `${inv.name} ${inv.category}`;
+      const searchTerms = `${inv.name} ${inv.category} inventory`;
       items.push({
         id: `inv-${inv.id}`,
         category: 'Inventory',
-        categoryLabel: '재고 (Inventory)',
+        categoryLabel: '재고',
         title: inv.name,
-        subtitle: `카테고리: ${inv.category}`,
+        subtitle: `분류: ${inv.category}`,
         badge: `${inv.currentStock} ${inv.unit}`,
         searchTerms,
         searchTermsLower: searchTerms.toLowerCase(),
@@ -198,11 +211,11 @@ function CommandPaletteComponent({
     // 5. Contacts
     for (let i = 0; i < contacts.length; i++) {
       const contact = contacts[i];
-      const searchTerms = `${contact.name} ${contact.phone} ${contact.email || ''} ${contact.notes || ''}`;
+      const searchTerms = `${contact.name} ${contact.phone} ${contact.email || ''} ${contact.notes || ''} contacts`;
       items.push({
         id: `contact-${contact.id}`,
         category: 'Contacts',
-        categoryLabel: '주소록 (Contacts)',
+        categoryLabel: '연락처',
         title: contact.name,
         subtitle: `${contact.phone}${contact.email ? ` · ${contact.email}` : ''}${contact.notes ? ` · ${contact.notes}` : ''}`,
         badge: '연락처',
@@ -216,36 +229,36 @@ function CommandPaletteComponent({
     // 6. Projects
     for (let i = 0; i < projects.length; i++) {
       const project = projects[i];
-      const searchTerms = `${project.name} ${project.description || ''} ${project.target || ''} ${project.location || ''}`;
+      const searchTerms = `${project.name} ${project.description || ''} ${project.target || ''} ${project.location || ''} projects`;
       items.push({
         id: `project-${project.id}`,
         category: 'Projects',
-        categoryLabel: '사업 (Projects)',
+        categoryLabel: '사업',
         title: project.name,
-        subtitle: project.description || project.target || '등록된 사업 과제',
+        subtitle: project.description || project.target || '단위사업',
         badge: '사업',
         searchTerms,
         searchTermsLower: searchTerms.toLowerCase(),
         icon: <Briefcase className="w-4 h-4 text-violet-400" />,
-        onSelect: () => onSelectModule('dashboard')
+        onSelect: () => onSelectModule('project')
       });
     }
 
     // 7. Meetings
     for (let i = 0; i < meetings.length; i++) {
       const meeting = meetings[i];
-      const searchTerms = `${meeting.title} ${meeting.location || ''} ${meeting.agenda || ''} ${(meeting.attendees || []).join(' ')}`;
+      const searchTerms = `${meeting.title} ${meeting.location || ''} ${meeting.agenda || ''} ${(meeting.attendees || []).join(' ')} meetings`;
       items.push({
         id: `meeting-${meeting.id}`,
         category: 'Meetings',
-        categoryLabel: '회의 & 일정 (Meetings)',
+        categoryLabel: '회의 · 일정',
         title: meeting.title,
         subtitle: `${meeting.datetime}${meeting.location ? ` · ${meeting.location}` : ''}`,
         badge: '일정',
         searchTerms,
         searchTermsLower: searchTerms.toLowerCase(),
         icon: <Calendar className="w-4 h-4 text-rose-400" />,
-        onSelect: () => onSelectModule('dashboard')
+        onSelect: () => onSelectModule('project')
       });
     }
 
@@ -288,8 +301,9 @@ function CommandPaletteComponent({
 
   // Scroll selected item into view
   useEffect(() => {
-    if (itemRefs.current[selectedIndex]) {
-      itemRefs.current[selectedIndex]?.scrollIntoView({
+    const el = itemRefs.current[selectedIndex];
+    if (el && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({
         block: 'nearest',
         behavior: 'smooth'
       });
@@ -332,19 +346,19 @@ function CommandPaletteComponent({
 
   return (
     <div
-      className="fixed inset-0 z-[200] bg-slate-950/80 backdrop-blur-xl flex items-start justify-center pt-12 sm:pt-20 px-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[200] modal-backdrop flex items-start justify-center pt-12 sm:pt-20 px-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="명령어 팔레트 (Ctrl+K)"
     >
       <div
-        className="w-full max-w-2xl bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] text-slate-100"
+        className="w-full max-w-2xl bg-white border border-slate-200/95 rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[85vh] text-slate-900"
         onClick={e => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         {/* Search Input Bar */}
-        <div className="flex items-center px-4 py-3.5 border-b border-slate-800 bg-slate-900/50">
+        <div className="flex items-center px-4 py-3.5 border-b border-slate-200/85 bg-slate-50/60">
           <Search className="w-5 h-5 text-slate-400 shrink-0 pointer-events-none" />
           <input
             ref={inputRef}
@@ -355,16 +369,16 @@ function CommandPaletteComponent({
             aria-autocomplete="list"
             value={searchQuery}
             onChange={handleSearchChange}
-            placeholder="모듈 이동, 업무, 예산, 주소록 검색... (Multi-Token Search)"
-            className="w-full bg-transparent text-slate-100 placeholder-slate-500 text-sm font-medium focus:outline-none pl-3"
+            placeholder="모듈 · 업무 · 예산 · 연락처 검색"
+            className="w-full bg-transparent text-slate-900 placeholder-slate-400 text-sm font-medium focus:outline-none pl-3"
           />
           <div className="flex items-center gap-1 shrink-0 ml-2">
-            <kbd className="px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-400 bg-slate-800 border border-slate-700 rounded-md shadow-sm">
+            <kbd className="px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-500 bg-white border border-slate-200 rounded-md shadow-2xs">
               ESC
             </kbd>
             <button
               onClick={onClose}
-              className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors ml-1"
+              className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors ml-1 cursor-pointer"
               aria-label="닫기"
             >
               <X className="w-4 h-4" />
@@ -377,11 +391,11 @@ function CommandPaletteComponent({
           ref={listRef}
           id="command-palette-results"
           role="listbox"
-          className="overflow-y-auto custom-scrollbar p-2 flex-1 divide-y divide-slate-800/40"
+          className="overflow-y-auto custom-scrollbar p-2 flex-1 divide-y divide-slate-100"
         >
           {filteredItems.length === 0 ? (
             <div className="py-12 text-center text-slate-500 text-sm font-medium">
-              검색어와 일치하는 명령어 또는 항목이 없습니다.
+              일치 항목 없음
             </div>
           ) : (
             filteredItems.map((item, index) => {
@@ -394,7 +408,7 @@ function CommandPaletteComponent({
               return (
                 <React.Fragment key={item.id}>
                   {showCategoryHeader && (
-                    <div className="px-3 pt-3 pb-1.5 text-[11px] font-bold tracking-wider uppercase text-indigo-400/90 select-none">
+                    <div className="px-3 pt-3 pb-1.5 text-[11px] font-bold tracking-wider uppercase text-indigo-600 select-none">
                       {item.categoryLabel}
                     </div>
                   )}
@@ -406,18 +420,18 @@ function CommandPaletteComponent({
                     aria-selected={isSelected}
                     onClick={() => handleActivateItem(item)}
                     onMouseEnter={() => setSelectedIndex(index)}
-                    className={`group px-3.5 py-2.5 rounded-xl flex items-center justify-between cursor-pointer transition-all duration-150 ${
+                    className={`group px-3.5 py-2.5 rounded-xl flex items-center justify-between cursor-pointer transition-colors ${
                       isSelected
-                        ? 'bg-indigo-600/30 text-white border border-indigo-500/40 shadow-lg shadow-indigo-950/40'
-                        : 'text-slate-300 hover:bg-slate-800/50 border border-transparent'
+                        ? 'bg-indigo-50/90 text-slate-900 border border-indigo-200'
+                        : 'text-slate-700 hover:bg-slate-50 border border-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0 pr-2">
                       <div
                         className={`p-2 rounded-lg shrink-0 transition-colors ${
                           isSelected
-                            ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                            : 'bg-slate-800/80 text-slate-400 border border-slate-700/50'
+                            ? 'bg-white text-indigo-600 border border-indigo-200 shadow-2xs'
+                            : 'bg-slate-100/90 text-slate-500 border border-slate-200/80'
                         }`}
                       >
                         {item.icon}
@@ -429,7 +443,7 @@ function CommandPaletteComponent({
                         {item.subtitle && (
                           <span
                             className={`text-xs truncate leading-tight mt-0.5 ${
-                              isSelected ? 'text-indigo-200/80' : 'text-slate-400'
+                              isSelected ? 'text-indigo-700/80' : 'text-slate-500'
                             }`}
                           >
                             {item.subtitle}
@@ -443,18 +457,18 @@ function CommandPaletteComponent({
                         <span
                           className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-colors ${
                             isSelected
-                              ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/40'
-                              : 'bg-slate-800 text-slate-400 border border-slate-700'
+                              ? 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                              : 'bg-slate-100 text-slate-600 border border-slate-200/80'
                           }`}
                         >
                           {item.badge}
                         </span>
                       )}
                       <ArrowRight
-                        className={`w-3.5 h-3.5 transition-transform duration-150 ${
+                        className={`w-3.5 h-3.5 transition-transform duration-100 ${
                           isSelected
-                            ? 'text-indigo-300 translate-x-0.5 opacity-100'
-                            : 'text-slate-600 opacity-0 group-hover:opacity-100'
+                            ? 'text-indigo-600 translate-x-0.5 opacity-100'
+                            : 'text-slate-400 opacity-0 group-hover:opacity-100'
                         }`}
                       />
                     </div>
@@ -466,34 +480,34 @@ function CommandPaletteComponent({
         </div>
 
         {/* Footer Shortcut Bar */}
-        <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950/60 border-t border-slate-800 text-[11px] text-slate-400">
+        <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50/90 border-t border-slate-200/85 text-[11px] text-slate-500">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 font-mono font-semibold bg-slate-800 border border-slate-700 rounded text-slate-300">
+              <kbd className="px-1.5 py-0.5 font-mono font-semibold bg-white border border-slate-200 rounded text-slate-700">
                 ↑
               </kbd>
-              <kbd className="px-1.5 py-0.5 font-mono font-semibold bg-slate-800 border border-slate-700 rounded text-slate-300">
+              <kbd className="px-1.5 py-0.5 font-mono font-semibold bg-white border border-slate-200 rounded text-slate-700">
                 ↓
               </kbd>
               <span>이동</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 font-mono font-semibold bg-slate-800 border border-slate-700 rounded text-slate-300">
+              <kbd className="px-1.5 py-0.5 font-mono font-semibold bg-white border border-slate-200 rounded text-slate-700">
                 ↵
               </kbd>
               <span>선택</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 font-mono font-semibold bg-slate-800 border border-slate-700 rounded text-slate-300">
+              <kbd className="px-1.5 py-0.5 font-mono font-semibold bg-white border border-slate-200 rounded text-slate-700">
                 ESC
               </kbd>
               <span>닫기</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-1 text-[10px] text-indigo-400/80 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            <span>PORTFOLIO Command Palette</span>
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-600 font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
+            <span>VITAL Command Palette</span>
           </div>
         </div>
       </div>

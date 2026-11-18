@@ -46,7 +46,7 @@ const ReviewNodeRowItem = React.memo(({ node, onUpdate, onDelete }: ReviewNodeRo
 
   return (
     <div 
-      className="p-4 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl shadow-3xs flex flex-col gap-3 transition-all hover:border-slate-350 dark:hover:border-slate-700"
+      className="p-4 bg-white border border-slate-200/60 rounded-2xl shadow-3xs flex flex-col gap-3 transition-colors duration-150 hover:border-slate-350"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
@@ -54,14 +54,14 @@ const ReviewNodeRowItem = React.memo(({ node, onUpdate, onDelete }: ReviewNodeRo
             type="text"
             value={node.label}
             onChange={handleLabelChange}
-            className="w-full text-sm font-bold text-slate-800 dark:text-white bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none pb-0.5"
+            className="w-full text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none pb-0.5"
           />
           <div className="text-[10px] text-slate-400 font-mono mt-1 select-none">ID: {node.id}</div>
         </div>
         <button
           type="button"
           onClick={handleDelete}
-          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl cursor-pointer transition-colors"
+          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl cursor-pointer transition-colors"
           title="노드 삭제"
         >
           <Trash2 size={15} />
@@ -75,7 +75,7 @@ const ReviewNodeRowItem = React.memo(({ node, onUpdate, onDelete }: ReviewNodeRo
           <select
             value={node.layerId ?? 3}
             onChange={handleLayerChange}
-            className="w-full text-[11px] font-semibold bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl px-2 py-1 focus:outline-none"
+            className="w-full text-[11px] font-semibold bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-2 py-1 focus:outline-none"
           >
             <option value={0}>{LAYER_LABELS[0]}</option>
             <option value={1}>{LAYER_LABELS[1]}</option>
@@ -90,7 +90,7 @@ const ReviewNodeRowItem = React.memo(({ node, onUpdate, onDelete }: ReviewNodeRo
           <select
             value={node.group}
             onChange={handleGroupChange}
-            className="w-full text-[11px] font-semibold bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl px-2 py-1 focus:outline-none"
+            className="w-full text-[11px] font-semibold bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-2 py-1 focus:outline-none"
           >
             {(Object.keys(GROUP_LABELS) as OntologyGroup[]).map(g => (
               <option key={g} value={g}>{GROUP_LABELS[g]}</option>
@@ -151,22 +151,22 @@ const ReviewEdgeRowItem = React.memo(({
 
   return (
     <div 
-      className="p-4 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl shadow-3xs flex flex-col gap-3 transition-all hover:border-slate-350 dark:hover:border-slate-700"
+      className="p-4 bg-white border border-slate-200/60 rounded-2xl shadow-3xs flex flex-col gap-3 transition-colors duration-150 hover:border-slate-350"
     >
       <div className="flex items-center justify-between gap-3">
-        <div className="flex-1 min-w-0 text-xs font-semibold text-slate-600 dark:text-slate-300 flex flex-wrap items-center gap-1.5">
-          <span className="bg-slate-100 dark:bg-slate-850 px-2 py-0.5 rounded text-slate-800 dark:text-white font-bold max-w-[150px] truncate">
+        <div className="flex-1 min-w-0 text-xs font-semibold text-slate-600 flex flex-wrap items-center gap-1.5">
+          <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-800 font-bold max-w-[150px] truncate">
             {sourceLabel}
           </span>
           <span className="text-indigo-500 font-bold mx-0.5">➔</span>
-          <span className="bg-slate-100 dark:bg-slate-850 px-2 py-0.5 rounded text-slate-800 dark:text-white font-bold max-w-[150px] truncate">
+          <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-800 font-bold max-w-[150px] truncate">
             {targetLabel}
           </span>
         </div>
         <button
           type="button"
           onClick={handleDelete}
-          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl cursor-pointer transition-colors"
+          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl cursor-pointer transition-colors"
           title="관계 삭제"
         >
           <Trash2 size={15} />
@@ -180,7 +180,7 @@ const ReviewEdgeRowItem = React.memo(({
           <select
             value={edge.type}
             onChange={handleTypeChange}
-            className="w-full text-[11px] font-semibold bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl px-2 py-1 focus:outline-none"
+            className="w-full text-[11px] font-semibold bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-2 py-1 focus:outline-none"
           >
             {(Object.keys(EDGE_TYPE_LABELS) as EdgeType[]).map(t => (
               <option key={t} value={t}>{EDGE_TYPE_LABELS[t]}</option>
@@ -411,24 +411,24 @@ function SemanticReviewModalComponent({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-4xl h-[85vh] bg-white/95 dark:bg-slate-950/95 border border-slate-200 dark:border-slate-800 rounded-[2rem] shadow-2xl flex flex-col overflow-hidden font-sans">
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in duration-200">
+      <div className="w-full max-w-4xl h-[85vh] bg-white/95 border border-slate-200 rounded-[2rem] shadow-2xl flex flex-col overflow-hidden font-sans">
         
         {/* Header */}
-        <div className="shrink-0 p-6 border-b border-slate-200/80 dark:border-slate-800/80 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/30">
+        <div className="shrink-0 p-6 border-b border-slate-200/80 flex justify-between items-center bg-slate-50/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/10">
               ✨
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-800 dark:text-white font-display">AI 시맨틱 추출 및 관계 검토</h2>
-              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">추출된 엔티티 및 관계망 구조를 최종 맵에 병합하기 전 편집/조정합니다</p>
+              <h2 className="text-lg font-bold text-slate-800 font-display">AI 시맨틱 추출 및 관계 검토</h2>
+              <p className="text-xs text-slate-400 font-medium">추출된 엔티티 및 관계망 구조를 최종 맵에 병합하기 전 편집/조정합니다</p>
             </div>
           </div>
           <button 
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full transition-colors cursor-pointer"
+            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -436,7 +436,7 @@ function SemanticReviewModalComponent({
 
         {/* Warnings Banner */}
         {integrityWarnings.length > 0 && (
-          <div className="shrink-0 px-6 py-3 bg-amber-500/10 border-b border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-start gap-2.5 max-h-24 overflow-y-auto custom-scrollbar">
+          <div className="shrink-0 px-6 py-3 bg-amber-500/10 border-b border-amber-500/20 text-amber-600 flex items-start gap-2.5 max-h-24 overflow-y-auto custom-scrollbar">
             <AlertTriangle size={16} className="shrink-0 mt-0.5" />
             <div className="text-xs font-semibold leading-relaxed flex-1">
               <span className="font-bold">[데이터 무결성 검증 경고] </span>
@@ -451,15 +451,15 @@ function SemanticReviewModalComponent({
         )}
 
         {/* Tab switchers */}
-        <div className="shrink-0 border-b border-slate-200 dark:border-slate-800 px-6 flex justify-between items-center bg-slate-50/20 dark:bg-slate-900/10">
+        <div className="shrink-0 border-b border-slate-200 px-6 flex justify-between items-center bg-slate-50/20">
           <div className="flex gap-1 pt-2">
             <button
               type="button"
               onClick={handleSetTabNodes}
-              className={`px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-all cursor-pointer ${
+              className={`px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-colors duration-150 cursor-pointer ${
                 activeTab === 'nodes'
-                  ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/20 dark:bg-indigo-950/10'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                  ? 'border-indigo-600 text-indigo-600 bg-indigo-50/20'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
               추출된 노드 검토 ({nodes.length})
@@ -467,10 +467,10 @@ function SemanticReviewModalComponent({
             <button
               type="button"
               onClick={handleSetTabEdges}
-              className={`px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-all cursor-pointer ${
+              className={`px-5 py-3 border-b-2 font-bold text-xs sm:text-sm tracking-wide transition-colors duration-150 cursor-pointer ${
                 activeTab === 'edges'
-                  ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/20 dark:bg-indigo-950/10'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                  ? 'border-indigo-600 text-indigo-600 bg-indigo-50/20'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
               추출된 관계 검토 ({edges.length})
@@ -482,12 +482,12 @@ function SemanticReviewModalComponent({
         <div className="flex-1 overflow-hidden flex flex-col md:flex-row min-h-0">
           
           {/* List panel (left 60%) */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-850">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 border-b md:border-b-0 md:border-r border-slate-200">
             {activeTab === 'nodes' ? (
               <div className="flex flex-col gap-3">
                 {nodes.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400 dark:text-slate-650 font-semibold text-xs flex flex-col items-center gap-2">
-                    <Info size={24} className="text-slate-300 dark:text-slate-700" />
+                  <div className="text-center py-12 text-slate-400 font-semibold text-xs flex flex-col items-center gap-2">
+                    <Info size={24} className="text-slate-300" />
                     추출된 노드가 없습니다. 우측 추가 폼으로 수동 생성하거나 바로 완료를 누르세요.
                   </div>
                 ) : (
@@ -504,8 +504,8 @@ function SemanticReviewModalComponent({
             ) : (
               <div className="flex flex-col gap-3">
                 {edges.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400 dark:text-slate-650 font-semibold text-xs flex flex-col items-center gap-2">
-                    <Info size={24} className="text-slate-300 dark:text-slate-700" />
+                  <div className="text-center py-12 text-slate-400 font-semibold text-xs flex flex-col items-center gap-2">
+                    <Info size={24} className="text-slate-300" />
                     추출된 관계가 없습니다. 우측 폼으로 수동 정의하거나 바로 완료를 누르세요.
                   </div>
                 ) : (
@@ -526,11 +526,11 @@ function SemanticReviewModalComponent({
           </div>
 
           {/* Creation panel (right 40%) */}
-          <div className="w-full md:w-[320px] shrink-0 p-6 bg-slate-50/40 dark:bg-slate-900/10 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
+          <div className="w-full md:w-[320px] shrink-0 p-6 bg-slate-50/40 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
             
             {activeTab === 'nodes' ? (
               <div className="flex flex-col gap-4">
-                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-800 pb-2 uppercase tracking-wide">
+                <h3 className="text-xs font-bold text-slate-700 flex items-center gap-1.5 border-b border-slate-200 pb-2 uppercase tracking-wide">
                   <Plus size={15} /> 수동 노드 추가
                 </h3>
 
@@ -542,7 +542,7 @@ function SemanticReviewModalComponent({
                       placeholder="예: 김주무관, 예산 증액안"
                       value={newNodeLabel}
                       onChange={(e) => setNewNodeLabel(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-indigo-500 focus:outline-none"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none"
                     />
                   </div>
 
@@ -551,7 +551,7 @@ function SemanticReviewModalComponent({
                     <select
                       value={newNodeLayer}
                       onChange={(e) => setNewNodeLayer(parseInt(e.target.value) as OntologyLayerId)}
-                      className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-xl focus:outline-none"
                     >
                       <option value={0}>{LAYER_LABELS[0]}</option>
                       <option value={1}>{LAYER_LABELS[1]}</option>
@@ -565,7 +565,7 @@ function SemanticReviewModalComponent({
                     <select
                       value={newNodeGroup}
                       onChange={(e) => setNewNodeGroup(e.target.value as OntologyGroup)}
-                      className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-xl focus:outline-none"
                     >
                       {(Object.keys(GROUP_LABELS) as OntologyGroup[]).map(g => (
                         <option key={g} value={g}>{GROUP_LABELS[g]}</option>
@@ -592,7 +592,7 @@ function SemanticReviewModalComponent({
                   <button
                     onClick={handleAddNode}
                     disabled={!newNodeLabel.trim()}
-                    className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-1"
+                    className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl text-xs font-bold shadow-sm transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1"
                   >
                     <Plus size={14} /> 노드 목록에 추가
                   </button>
@@ -600,7 +600,7 @@ function SemanticReviewModalComponent({
               </div>
             ) : (
               <div className="flex flex-col gap-4">
-                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-800 pb-2 uppercase tracking-wide">
+                <h3 className="text-xs font-bold text-slate-700 flex items-center gap-1.5 border-b border-slate-200 pb-2 uppercase tracking-wide">
                   <Plus size={15} /> 수동 관계(Edge) 추가
                 </h3>
 
@@ -610,7 +610,7 @@ function SemanticReviewModalComponent({
                     <select
                       value={newEdgeSource}
                       onChange={(e) => setNewEdgeSource(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-xl focus:outline-none"
                     >
                       <option value="">-- 노드 선택 --</option>
                       {nodes.map(n => (
@@ -627,7 +627,7 @@ function SemanticReviewModalComponent({
                     <select
                       value={newEdgeTarget}
                       onChange={(e) => setNewEdgeTarget(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-xl focus:outline-none"
                     >
                       <option value="">-- 노드 선택 --</option>
                       {nodes.map(n => (
@@ -644,7 +644,7 @@ function SemanticReviewModalComponent({
                     <select
                       value={newEdgeType}
                       onChange={(e) => setNewEdgeType(e.target.value as EdgeType)}
-                      className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-200 rounded-xl focus:outline-none"
                     >
                       {(Object.keys(EDGE_TYPE_LABELS) as EdgeType[]).map(t => (
                         <option key={t} value={t}>{EDGE_TYPE_LABELS[t]}</option>
@@ -671,7 +671,7 @@ function SemanticReviewModalComponent({
                   <button
                     onClick={handleAddEdge}
                     disabled={!newEdgeSource || !newEdgeTarget || newEdgeSource === newEdgeTarget}
-                    className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-1"
+                    className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl text-xs font-bold shadow-sm transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1"
                   >
                     <Plus size={14} /> 관계 목록에 추가
                   </button>
@@ -684,20 +684,20 @@ function SemanticReviewModalComponent({
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 p-6 border-t border-slate-200/80 dark:border-slate-800/80 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/30">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-            총 <span className="text-indigo-600 dark:text-indigo-400 font-bold">{nodes.length}</span>개 노드 및 <span className="text-indigo-600 dark:text-indigo-400 font-bold">{edges.length}</span>개 관계 대기 중
+        <div className="shrink-0 p-6 border-t border-slate-200/80 flex justify-between items-center bg-slate-50/50">
+          <div className="text-xs font-semibold text-slate-500">
+            총 <span className="text-indigo-600 font-bold">{nodes.length}</span>개 노드 및 <span className="text-indigo-600 font-bold">{edges.length}</span>개 관계 대기 중
           </div>
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer"
+              className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors duration-200 cursor-pointer"
             >
               취소
             </button>
             <button
               onClick={handleApprove}
-              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:opacity-90 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all duration-200 cursor-pointer flex items-center gap-1.5"
+              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:opacity-90 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-colors duration-200 cursor-pointer flex items-center gap-1.5"
             >
               <Check size={14} /> 승인 후 마인드맵에 최종 병합
             </button>

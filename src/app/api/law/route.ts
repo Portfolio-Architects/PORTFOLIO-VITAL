@@ -3,15 +3,26 @@ import { NextResponse } from 'next/server';
 const LAW_API_KEY = process.env.LAW_API_KEY || '';
 
 function extractTag(xmlBlock: string, tagName: string): string {
-  const match = xmlBlock.match(new RegExp(`<${tagName}>([^<]*)<\/${tagName}>`, 'i'));
-  return match ? match[1].trim() : '';
+  const match = xmlBlock.match(new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`, 'i'));
+  if (!match) return '';
+  let val = match[1].trim();
+  const cdataMatch = val.match(/^<!\[CDATA\[([\s\S]*?)\]\]>$/);
+  if (cdataMatch) {
+    val = cdataMatch[1].trim();
+  }
+  return val
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"');
 }
 
 function parseXmlItem(xmlBlock: string) {
   const idTags = ['법령일련번호', '행정규칙일련번호', '자치법규일련번호', 'admrulId', 'ordinSeq', '자치법규ID', 'ID'];
   const nameTags = ['법령명한글', '행정규칙명', '자치법규명', 'admrulNm', 'ordinNm', '자치법규명한글'];
-  const dateTags = ['시행일자', 'prmlDt', '공포일자', '제정개정일자'];
+  const dateTags = ['시행일자', 'prmlDt', '공포일자', '발령일자', '제정개정일자'];
   const agencyTags = ['소관부처명', '소관부처', '지자체명', '지자체기관명', '소관지자체명', 'ocmpDeptNm', 'orgNm'];
+  const linkTags = ['link', '법령상세링크', '자치법규상세링크', '행정규칙상세링크'];
   
   let id = '';
   for (const tag of idTags) {
@@ -37,7 +48,14 @@ function parseXmlItem(xmlBlock: string) {
     if (agency) break;
   }
   
-  const link = extractTag(xmlBlock, 'link');
+  let link = '';
+  for (const tag of linkTags) {
+    link = extractTag(xmlBlock, tag);
+    if (link) break;
+  }
+  if (link.startsWith('/')) {
+    link = `https://www.law.go.kr${link}`;
+  }
   
   return { id, title, date, agency, link };
 }
@@ -57,7 +75,8 @@ export async function GET(req: Request) {
 
     // 1. Body Search (본문 조회)
     if (mst) {
-      const url = `http://www.law.go.kr/DRF/lawService.do?OC=${LAW_API_KEY}&target=${target}&type=${type}&MST=${mst}`;
+      const idParam = target === 'admrul' ? `ID=${mst}` : `MST=${mst}`;
+      const url = `http://www.law.go.kr/DRF/lawService.do?OC=${LAW_API_KEY}&target=${target}&type=${type}&${idParam}`;
       
       console.log(`[Law API Route] Direct request for body: ${url}`);
       
@@ -121,13 +140,13 @@ export async function GET(req: Request) {
     const totalCntMatch = xmlText.match(/<totalCnt>([^<]*)<\/totalCnt>/i);
     const totalCnt = totalCntMatch ? parseInt(totalCntMatch[1].trim(), 10) : 0;
 
-    // Parse items (every <law>...</law> block)
+    // Parse items (every <law id="...">, <admrul id="...">, or <ordin id="..."> block)
     const items: any[] = [];
-    const lawBlockRegex = /<law>([\s\S]*?)<\/law>/g;
+    const lawBlockRegex = /<(law|admrul|ordin)(?:\s[^>]*)?>([\s\S]*?)<\/\1>/g;
     let match;
     
     while ((match = lawBlockRegex.exec(xmlText)) !== null) {
-      const itemXml = match[1];
+      const itemXml = match[2];
       const parsedItem = parseXmlItem(itemXml);
       if (parsedItem.title) {
         items.push(parsedItem);

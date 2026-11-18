@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useWikiStorage, getCanonicalWikiId } from '@/hooks/useWikiStorage';
+import { useWikiStorage, getCanonicalWikiId } from '@/__tests__/fixtures/useWikiStorage';
 import { useBudgetSimulator } from '@/hooks/useBudgetSimulator';
 import * as sheetsApi from '@/lib/sheets-api';
 

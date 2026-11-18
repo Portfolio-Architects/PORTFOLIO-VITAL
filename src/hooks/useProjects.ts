@@ -1,15 +1,181 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { useGoogleSheet, useSheetCrud } from './useGoogleSheet';
+import { useCallback, useMemo, useContext } from 'react';
+import { useQuery, useMutation, QueryClientContext } from '@tanstack/react-query';
+import { queryClient as defaultQueryClient } from '@/lib/query-client';
+import { readSheet, addRow, updateRow, deleteRow } from '@/lib/sheets-api';
 import { Project, ChecklistItem, generateId } from '@/types';
+
+const STORAGE_KEY = 'hchps-projects';
+const TOMBSTONE_STORAGE_KEY = 'hchps-global-tombstones';
+
+function readLocalTombstones(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(TOMBSTONE_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item: unknown) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object' && 'id' in item && typeof (item as { id: unknown }).id === 'string') {
+          return (item as { id: string }).id;
+        }
+        return '';
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function recordLocalTombstone(id: string): void {
+  if (typeof window === 'undefined' || !id) return;
+  try {
+    const raw = window.localStorage.getItem(TOMBSTONE_STORAGE_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    const array = Array.isArray(list) ? list : [];
+    const exists = array.some((item: unknown) =>
+      typeof item === 'string' ? item === id : Boolean(item && typeof item === 'object' && (item as { id?: string }).id === id)
+    );
+    if (!exists) {
+      array.push(id);
+      window.localStorage.setItem(TOMBSTONE_STORAGE_KEY, JSON.stringify(array));
+    }
+  } catch {
+    // Ignore storage quota errors
+  }
+}
 
 export function useProjects(options?: { enabled?: boolean }) {
   const enabled = options?.enabled ?? true;
-  const queryClient = useQueryClient();
-  const [projects, setProjects] = useGoogleSheet<Project>('PROJECTS', 'hchps-projects', [], enabled);
-  const { syncAdd, syncUpdate, syncDelete } = useSheetCrud<Project>('PROJECTS');
+  const queryClientContext = useContext(QueryClientContext);
+  const queryClient = queryClientContext || defaultQueryClient;
+
+  const { data: projects = [] } = useQuery<Project[]>({
+    queryKey: ['PROJECTS'],
+    queryFn: async () => {
+      try {
+        const rows = await readSheet<Project>('PROJECTS');
+        const deletedSet = new Set(readLocalTombstones());
+        const filtered = (Array.isArray(rows) ? rows : []).filter(p => !deletedSet.has(p.id));
+        if (filtered.length > 0) {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered)); } catch {}
+          return filtered;
+        }
+        // Fallback to localStorage if rows is empty
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) return parsed.filter((p: Project) => !deletedSet.has(p.id));
+          }
+        } catch {}
+        return filtered;
+      } catch {
+        // Offline / error fallback to localStorage
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            const deletedSet = new Set(readLocalTombstones());
+            if (Array.isArray(parsed)) return parsed.filter((p: Project) => !deletedSet.has(p.id));
+          }
+        } catch {}
+        return [];
+      }
+    },
+    initialData: () => {
+      if (typeof window === 'undefined') return [];
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const deletedSet = new Set(readLocalTombstones());
+          if (Array.isArray(parsed)) return parsed.filter((p: Project) => !deletedSet.has(p.id));
+        }
+      } catch {}
+      return [];
+    },
+    initialDataUpdatedAt: 0,
+    enabled,
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: false,
+  }, queryClient);
+
+  const addProjectMut = useMutation({
+    mutationFn: (newProject: Project) => addRow('PROJECTS', newProject),
+    onMutate: async (newProject: Project) => {
+      await queryClient.cancelQueries({ queryKey: ['PROJECTS'] });
+      const previous = queryClient.getQueryData<Project[]>(['PROJECTS']);
+      const next = [newProject, ...(previous || [])];
+      queryClient.setQueryData<Project[]>(['PROJECTS'], next);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      return { previous };
+    },
+    onError: (err, newProject, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['PROJECTS'], context.previous);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(context.previous)); } catch {}
+      }
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['PROJECTS'] });
+      }
+    }
+  }, queryClient);
+
+  const updateProjectMut = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Project> }) =>
+      updateRow('PROJECTS', id, updates),
+    onMutate: async ({ id, updates }) => {
+      await queryClient.cancelQueries({ queryKey: ['PROJECTS'] });
+      const previous = queryClient.getQueryData<Project[]>(['PROJECTS']);
+      const updatedFields = { ...updates, updatedAt: new Date().toISOString() };
+      const next = (previous || []).map(p => p.id === id ? { ...p, ...updatedFields } : p);
+      queryClient.setQueryData<Project[]>(['PROJECTS'], next);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      return { previous };
+    },
+    onError: (err, vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['PROJECTS'], context.previous);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(context.previous)); } catch {}
+      }
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['PROJECTS'] });
+      }
+    }
+  }, queryClient);
+
+  const deleteProjectMut = useMutation({
+    mutationFn: (id: string) => deleteRow('PROJECTS', id),
+    onMutate: async (id: string) => {
+      recordLocalTombstone(id);
+      await queryClient.cancelQueries({ queryKey: ['PROJECTS'] });
+      const previous = queryClient.getQueryData<Project[]>(['PROJECTS']);
+      const next = (previous || []).filter(p => p.id !== id);
+      queryClient.setQueryData<Project[]>(['PROJECTS'], next);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      return { previous };
+    },
+    onError: (err, id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['PROJECTS'], context.previous);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(context.previous)); } catch {}
+      }
+    },
+    onSettled: () => {
+      if (queryClient.getDefaultOptions().queries?.gcTime !== 0) {
+        queryClient.invalidateQueries({ queryKey: ['PROJECTS'] });
+      }
+    }
+  }, queryClient);
 
   // Pre-indexed O(1) lookup Map for projects by ID
   const projectsByIdMap = useMemo(() => {
@@ -23,121 +189,60 @@ export function useProjects(options?: { enabled?: boolean }) {
   const addProject = useCallback((project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'checklistItems'>) => {
     const now = new Date().toISOString();
     const newProject: Project = { ...project, id: generateId(), checklistItems: [], createdAt: now, updatedAt: now };
-    setProjects(prev => [newProject, ...prev]);
-    syncAdd(newProject);
+    addProjectMut.mutate(newProject);
     return newProject;
-  }, [setProjects, syncAdd]);
+  }, [addProjectMut]);
 
   const updateProject = useCallback((id: string, updates: Partial<Project>) => {
-    const updatedFields = { ...updates, updatedAt: new Date().toISOString() };
-    setProjects(prev => {
-      const next: Project[] = [];
-      for (let i = 0; i < prev.length; i++) {
-        const p = prev[i];
-        next.push(p.id === id ? { ...p, ...updatedFields } : p);
-      }
-      return next;
-    });
-    syncUpdate(id, updatedFields);
-  }, [setProjects, syncUpdate]);
+    updateProjectMut.mutate({ id, updates });
+  }, [updateProjectMut]);
 
   const deleteProject = useCallback((id: string) => {
-    setProjects(prev => {
-      const next: Project[] = [];
-      for (let i = 0; i < prev.length; i++) {
-        if (prev[i].id !== id) next.push(prev[i]);
-      }
-      return next;
-    });
-    syncDelete(id);
+    deleteProjectMut.mutate(id);
     
-    // CASCADE DELETE: Delete associated tasks
-    import('@/lib/sheets-api').then(({ readSheet, deleteRow }) => {
-      readSheet<import('@/types').Task>('TASKS').then(tasks => {
+    // CASCADE DELETE: Delete associated tasks and invalidate ['TASKS']
+    import('@/lib/sheets-api').then(({ readSheet: readTasksSheet, deleteRow: deleteTaskRow }) => {
+      readTasksSheet<import('@/types').Task>('TASKS').then(tasks => {
         const tasksToDelete: import('@/types').Task[] = [];
         for (let i = 0; i < tasks.length; i++) {
           if (tasks[i].projectId === id) tasksToDelete.push(tasks[i]);
         }
         if (tasksToDelete.length > 0) {
-          Promise.all(tasksToDelete.map(t => deleteRow('TASKS', t.id))).then(() => {
+          Promise.all(tasksToDelete.map(t => deleteTaskRow('TASKS', t.id))).then(() => {
             queryClient.invalidateQueries({ queryKey: ['TASKS'] });
           }).catch(err => console.error('Cascade delete tasks failed:', err));
         }
       }).catch(err => console.error('Failed to read TASKS for cascade delete:', err));
     });
-  }, [setProjects, syncDelete, queryClient]);
+  }, [deleteProjectMut, queryClient]);
 
   const addChecklistItem = useCallback((projectId: string, text: string) => {
     const item: ChecklistItem = { id: generateId(), text, completed: false };
-    let updatedChecklist: ChecklistItem[] = [];
-    setProjects(prev => {
-      const next: Project[] = [];
-      for (let i = 0; i < prev.length; i++) {
-        const p = prev[i];
-        if (p.id === projectId) {
-          updatedChecklist = [...p.checklistItems, item];
-          next.push({ ...p, checklistItems: updatedChecklist, updatedAt: new Date().toISOString() });
-        } else {
-          next.push(p);
-        }
-      }
-      return next;
-    });
-    if (updatedChecklist.length > 0) {
-      syncUpdate(projectId, { checklistItems: updatedChecklist as unknown as Project['checklistItems'], updatedAt: new Date().toISOString() });
+    const project = projectsByIdMap.get(projectId);
+    if (project) {
+      const updatedChecklist = [...(project.checklistItems || []), item];
+      updateProject(projectId, { checklistItems: updatedChecklist });
     }
     return item;
-  }, [setProjects, syncUpdate]);
+  }, [projectsByIdMap, updateProject]);
 
   const toggleChecklistItem = useCallback((projectId: string, itemId: string) => {
-    let updatedChecklist: ChecklistItem[] = [];
-    setProjects(prev => {
-      const next: Project[] = [];
-      for (let i = 0; i < prev.length; i++) {
-        const p = prev[i];
-        if (p.id === projectId) {
-          const list: ChecklistItem[] = [];
-          for (let j = 0; j < p.checklistItems.length; j++) {
-            const it = p.checklistItems[j];
-            list.push(it.id === itemId ? { ...it, completed: !it.completed } : it);
-          }
-          updatedChecklist = list;
-          next.push({ ...p, checklistItems: updatedChecklist, updatedAt: new Date().toISOString() });
-        } else {
-          next.push(p);
-        }
-      }
-      return next;
-    });
-    if (updatedChecklist.length > 0) {
-      syncUpdate(projectId, { checklistItems: updatedChecklist as unknown as Project['checklistItems'], updatedAt: new Date().toISOString() });
+    const project = projectsByIdMap.get(projectId);
+    if (project && project.checklistItems) {
+      const updatedChecklist = project.checklistItems.map(it =>
+        it.id === itemId ? { ...it, completed: !it.completed } : it
+      );
+      updateProject(projectId, { checklistItems: updatedChecklist });
     }
-  }, [setProjects, syncUpdate]);
+  }, [projectsByIdMap, updateProject]);
 
   const deleteChecklistItem = useCallback((projectId: string, itemId: string) => {
-    let updatedChecklist: ChecklistItem[] = [];
-    setProjects(prev => {
-      const next: Project[] = [];
-      for (let i = 0; i < prev.length; i++) {
-        const p = prev[i];
-        if (p.id === projectId) {
-          const list: ChecklistItem[] = [];
-          for (let j = 0; j < p.checklistItems.length; j++) {
-            const it = p.checklistItems[j];
-            if (it.id !== itemId) list.push(it);
-          }
-          updatedChecklist = list;
-          next.push({ ...p, checklistItems: updatedChecklist, updatedAt: new Date().toISOString() });
-        } else {
-          next.push(p);
-        }
-      }
-      return next;
-    });
-    if (updatedChecklist.length > 0) {
-      syncUpdate(projectId, { checklistItems: updatedChecklist as unknown as Project['checklistItems'], updatedAt: new Date().toISOString() });
+    const project = projectsByIdMap.get(projectId);
+    if (project && project.checklistItems) {
+      const updatedChecklist = project.checklistItems.filter(it => it.id !== itemId);
+      updateProject(projectId, { checklistItems: updatedChecklist });
     }
-  }, [setProjects, syncUpdate]);
+  }, [projectsByIdMap, updateProject]);
 
   const getProjectProgress = useCallback((projectId: string) => {
     const project = projectsByIdMap.get(projectId);
@@ -156,3 +261,4 @@ export function useProjects(options?: { enabled?: boolean }) {
 
   return { projects, addProject, updateProject, deleteProject, addChecklistItem, toggleChecklistItem, deleteChecklistItem, getProjectProgress, getProjectById };
 }
+

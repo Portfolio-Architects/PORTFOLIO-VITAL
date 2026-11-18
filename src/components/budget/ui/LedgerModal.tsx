@@ -244,7 +244,7 @@ function LedgerModalComponent({
           <div className="flex items-center gap-1.5 bg-white p-1 rounded-lg border border-slate-200 shadow-3xs">
             <button
               onClick={() => setIsSplitView(false)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-colors duration-150 cursor-pointer ${
                 !isSplitView
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'text-slate-600 hover:bg-slate-100'
@@ -255,7 +255,7 @@ function LedgerModalComponent({
             </button>
             <button
               onClick={() => setIsSplitView(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-colors duration-150 cursor-pointer ${
                 isSplitView
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'text-slate-600 hover:bg-slate-100'
@@ -354,7 +354,7 @@ function LedgerModalComponent({
                           {data.leftItems.map(e => {
                             const isSelected = selectedEntryIds.includes(e.id);
                             return (
-                              <li key={e.id} className={`flex justify-between items-center text-[13px] p-3 rounded-lg border transition-all ${isSelected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : e.isPlanned ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
+                              <li key={e.id} className={`flex justify-between items-center text-[13px] p-3 rounded-lg border transition-colors duration-150 ${isSelected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : e.isPlanned ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
                                 <div className="flex items-start gap-2.5 flex-1 min-w-0 pr-2">
                                   <button
                                     onClick={() => toggleSelectEntry(e.id)}
@@ -506,7 +506,7 @@ function LedgerModalComponent({
                     <div
                       key={e.id}
                       onClick={() => setSelectedCatId(e.categoryId)}
-                      className={`p-3 rounded-lg border transition-all cursor-pointer text-xs flex items-center justify-between ${
+                      className={`p-3 rounded-lg border transition-colors duration-150 cursor-pointer text-xs flex items-center justify-between ${
                         isTargetCat ? 'border-indigo-500 bg-indigo-50/30 shadow-xs' : 'border-slate-200 bg-white hover:bg-slate-50'
                       } ${isSelected ? 'ring-2 ring-indigo-500' : ''}`}
                     >
@@ -615,7 +615,7 @@ function LedgerModalComponent({
                       </div>
                       <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-indigo-600 rounded-full transition-all duration-300"
+                          className="h-full bg-indigo-600 rounded-full transition-[width] duration-300"
                           style={{ width: `${Math.min(100, selectedCatStats.usageRate)}%` }}
                         />
                       </div>

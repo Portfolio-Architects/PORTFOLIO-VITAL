@@ -14,58 +14,10 @@ if (typeof global.ResizeObserver === 'undefined') {
 }
 
 import React from 'react';
-import { render, act, fireEvent } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook, act } from '@testing-library/react';
 import { OntologyCanvasEngine } from '@/lib/OntologyCanvasEngine';
 import { OntologyGraph } from '@/lib/ontology.types';
-import { MindMap3D } from '@/components/MindMap3D';
-
-function renderWithQueryClient(ui: React.ReactElement) {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      {ui}
-    </QueryClientProvider>
-  );
-}
-
-jest.mock('@/hooks/useGraphCustomization', () => ({
-  useGraphCustomization: () => ({
-    overrides: {},
-    customNodes: [],
-    customEdges: [],
-    deletedEdges: [],
-    undo: jest.fn(),
-    redo: jest.fn(),
-    setNodeOverride: jest.fn(),
-    batchSetNodeOverrides: jest.fn(),
-    clearNodeOverride: jest.fn(),
-    addCustomNode: jest.fn(),
-    deleteCustomNode: jest.fn(),
-    updateCustomNodeText: jest.fn(),
-    addCustomEdge: jest.fn(),
-    deleteCustomEdge: jest.fn(),
-    removeCustomTombstone: jest.fn(),
-    renameNodeId: jest.fn(),
-    isCloudLoaded: true,
-    pendingNodes: [],
-    pendingEdges: [],
-    approveAndMerge: jest.fn(),
-    clearAll: jest.fn(),
-  }),
-}));
-
-jest.mock('@/hooks/useClassificationWords', () => ({
-  useClassificationWords: () => ({
-    data: null,
-    isLoading: false,
-    error: null,
-  }),
-}));
+import { useDocumentVisibility } from '@/hooks/useDocumentVisibility';
 
 // Mock Canvas 2D context
 function createMockCanvas() {
@@ -190,20 +142,11 @@ describe('R2 Empirical Challenge: Physics Loop & Tab Visibility', () => {
     });
   });
 
-  describe('2. Tab Visibility & document.hidden Integration', () => {
+  describe('2. Tab Visibility & document.hidden Integration (useDocumentVisibility)', () => {
     let originalHidden: boolean;
-    let requestAnimationFrameSpy: jest.SpyInstance;
-    let cancelAnimationFrameSpy: jest.SpyInstance;
 
     beforeEach(() => {
       originalHidden = document.hidden;
-      requestAnimationFrameSpy = jest.spyOn(window, 'requestAnimationFrame').mockImplementation((_cb: FrameRequestCallback) => {
-        if (typeof _cb === 'function') {
-          try { _cb(performance.now()); } catch {}
-        }
-        return 12345 as any;
-      });
-      cancelAnimationFrameSpy = jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -211,27 +154,15 @@ describe('R2 Empirical Challenge: Physics Loop & Tab Visibility', () => {
         configurable: true,
         get: () => originalHidden,
       });
-      requestAnimationFrameSpy.mockRestore();
-      cancelAnimationFrameSpy.mockRestore();
     });
 
-    test('tab switching to background (hidden=true) cancels animation frame and freezes engine', () => {
-      let unmount: () => void = () => {};
-      act(() => {
-        const res = renderWithQueryClient(
-          <MindMap3D signalKeywords={{}} signalEntries={[]} onAddSignal={jest.fn()} isActive={true} />
-        );
-        unmount = res.unmount;
+    test('tab switching to background (hidden=true) transitions visibility state to false immediately', () => {
+      Object.defineProperty(document, 'hidden', {
+        configurable: true,
+        get: () => false,
       });
-
-      const canvas = document.querySelector('canvas');
-      if (canvas) {
-        act(() => {
-          fireEvent.wheel(canvas, { deltaY: 100 });
-        });
-      }
-
-      cancelAnimationFrameSpy.mockClear();
+      const { result, unmount } = renderHook(() => useDocumentVisibility());
+      expect(result.current).toBe(true);
 
       Object.defineProperty(document, 'hidden', {
         configurable: true,
@@ -242,68 +173,29 @@ describe('R2 Empirical Challenge: Physics Loop & Tab Visibility', () => {
         document.dispatchEvent(new Event('visibilitychange'));
       });
 
-      expect(cancelAnimationFrameSpy).toHaveBeenCalled();
-
-      act(() => {
-        unmount();
-      });
+      expect(result.current).toBe(false);
+      unmount();
     });
 
-    test('resumePhysicsLoop does NOT start new frame while document.hidden is true', () => {
-      let unmount: () => void = () => {};
-      act(() => {
-        const res = renderWithQueryClient(
-          <MindMap3D signalKeywords={{}} signalEntries={[]} onAddSignal={jest.fn()} isActive={true} />
-        );
-        unmount = res.unmount;
-      });
-
+    test('mounting while document.hidden is true reports false without tearing', () => {
       Object.defineProperty(document, 'hidden', {
         configurable: true,
         get: () => true,
       });
 
-      requestAnimationFrameSpy.mockClear();
-
-      const canvas = document.querySelector('canvas');
-      if (canvas) {
-        act(() => {
-          fireEvent.wheel(canvas, { deltaY: 100 });
-        });
-      }
-
-      expect(requestAnimationFrameSpy).not.toHaveBeenCalled();
-
-      act(() => {
-        unmount();
-      });
+      const { result, unmount } = renderHook(() => useDocumentVisibility());
+      expect(result.current).toBe(false);
+      unmount();
     });
 
-    test('returning to active tab (hidden=false) resumes physics loop', () => {
-      let unmount: () => void = () => {};
-      act(() => {
-        const res = renderWithQueryClient(
-          <MindMap3D signalKeywords={{}} signalEntries={[]} onAddSignal={jest.fn()} isActive={true} />
-        );
-        unmount = res.unmount;
-      });
-
-      const canvas = document.querySelector('canvas');
-      if (canvas) {
-        act(() => {
-          fireEvent.wheel(canvas, { deltaY: 100 });
-        });
-      }
-
+    test('returning to active tab (hidden=false) restores visibility state to true', () => {
       Object.defineProperty(document, 'hidden', {
         configurable: true,
         get: () => true,
       });
-      act(() => {
-        document.dispatchEvent(new Event('visibilitychange'));
-      });
 
-      requestAnimationFrameSpy.mockClear();
+      const { result, unmount } = renderHook(() => useDocumentVisibility());
+      expect(result.current).toBe(false);
 
       Object.defineProperty(document, 'hidden', {
         configurable: true,
@@ -313,11 +205,8 @@ describe('R2 Empirical Challenge: Physics Loop & Tab Visibility', () => {
         document.dispatchEvent(new Event('visibilitychange'));
       });
 
-      expect(requestAnimationFrameSpy).toHaveBeenCalled();
-
-      act(() => {
-        unmount();
-      });
+      expect(result.current).toBe(true);
+      unmount();
     });
   });
 });

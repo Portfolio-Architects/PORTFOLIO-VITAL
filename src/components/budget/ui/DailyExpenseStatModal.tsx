@@ -71,18 +71,18 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
   }, [isOpen, categories, getCategoryStats]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="세부사업 및 통계목별 일상경비 이체내역" size="2xl">
+    <Modal isOpen={isOpen} onClose={onClose} title="세부사업 · 통계목별 일상경비 이체내역" size="2xl">
       <div className="space-y-4">
         <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-lg flex items-start gap-3">
           <Info className="text-slate-500 mt-0.5 shrink-0" size={18} />
           <div className="text-sm text-slate-600 leading-relaxed font-medium">
-            각 세부사업 하위의 통계목별로 교부된 일상경비와 실제 지출액, 가용 잔액 현황입니다.
+            세부사업 · 통계목별 교부액 · 실지출 · 가용 잔액 대조
           </div>
         </div>
 
         {statSummary.length === 0 ? (
           <div className="text-center py-10 text-slate-400 text-sm font-medium">
-            교부되거나 지출된 일상경비 내역이 없습니다.
+            일상경비 교부 · 지출 내역 없음
           </div>
         ) : (
           <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white">
@@ -118,7 +118,7 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
                           <div className="flex items-center justify-center gap-2">
                             <div className="w-16 bg-slate-100 rounded-full h-2 overflow-hidden">
                               <div
-                                className="bg-amber-500 h-full rounded-full transition-all duration-500"
+                                className="bg-amber-500 h-full rounded-full transition-[width] duration-500"
                                 style={{ width: `${Math.min(pct, 100)}%` }}
                               />
                             </div>
@@ -150,7 +150,7 @@ function DailyExpenseStatModalComponent({ isOpen, onClose, categories, getCatego
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-16 bg-slate-200 rounded-full h-2 overflow-hidden">
                           <div
-                            className="bg-slate-800 h-full rounded-full transition-all duration-500"
+                            className="bg-slate-800 h-full rounded-full transition-[width] duration-500"
                             style={{ width: `${Math.min(totals.issued > 0 ? (totals.spent / totals.issued) * 100 : 0, 100)}%` }}
                           />
                         </div>

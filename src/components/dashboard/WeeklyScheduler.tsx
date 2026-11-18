@@ -2,1398 +2,25 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { useSchedules } from '@/hooks/useSchedules';
-import { ScheduleType, Schedule } from '@/types';
-import { 
-  Calendar, ChevronLeft, ChevronRight, Clock, Plus, Shield, 
-  Users, BookOpen, FileText, Trash2, AlertCircle, X, Edit3, Grid, LayoutGrid,
-  ExternalLink, Share2, Download, Check, Copy
-} from 'lucide-react';
-import { generateGoogleCalendarUrl } from '@/lib/calendar-utils';
-import { SchedulePresetChips, SchedulePresetManageModal } from './SchedulePresetSelector';
-import { SchedulePreset } from '@/lib/schedule-presets';
-
-// ============ Time Helper Utilities ============
-const formatDateStr = (d: Date): string => {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-function timeToMinutes(timeStr: string): number {
-  if (!timeStr) return 0;
-  const [h, m] = timeStr.split(':').map(Number);
-  return (h || 0) * 60 + (m || 0);
-}
-
-function minutesToTime(mins: number): string {
-  const clamped = Math.max(0, Math.min(23 * 60 + 59, mins));
-  const h = String(Math.floor(clamped / 60)).padStart(2, '0');
-  const m = String(clamped % 60).padStart(2, '0');
-  return `${h}:${m}`;
-}
-
-// Schedule type style helper (Pre-cached static map for GC-Free O(1) lookup)
-const TYPE_CONFIG_MAP: Record<ScheduleType, { bg: string; badge: string; icon: React.ReactNode }> = {
-  security: {
-    bg: 'bg-indigo-50/70 border-indigo-100 hover:border-indigo-200 text-indigo-700 dark:bg-indigo-950/40 dark:border-indigo-900/50 dark:text-indigo-300',
-    badge: 'bg-indigo-100/80 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300',
-    icon: <Shield className="w-3.5 h-3.5" />
-  },
-  meeting: {
-    bg: 'bg-emerald-50/70 border-emerald-100 hover:border-emerald-200 text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-900/50 dark:text-emerald-300',
-    badge: 'bg-emerald-100/80 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-    icon: <Users className="w-3.5 h-3.5" />
-  },
-  education: {
-    bg: 'bg-amber-50/70 border-amber-100 hover:border-amber-200 text-amber-700 dark:bg-amber-950/40 dark:border-amber-900/50 dark:text-amber-300',
-    badge: 'bg-amber-100/85 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-    icon: <BookOpen className="w-3.5 h-3.5" />
-  },
-  other: {
-    bg: 'bg-slate-50/70 border-slate-100 hover:border-slate-200 text-slate-700 dark:bg-slate-800/50 dark:border-slate-700/50 dark:text-slate-300',
-    badge: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-350',
-    icon: <Calendar className="w-3.5 h-3.5" />
-  }
-};
-
-function getTypeConfig(schedType: ScheduleType) {
-  return TYPE_CONFIG_MAP[schedType] || TYPE_CONFIG_MAP.other;
-}
-
-const SCHEDULE_TYPE_MODAL_OPTIONS: Array<{ type: ScheduleType; label: string }> = [
-  { type: 'security', label: '보안' },
-  { type: 'meeting', label: '회의' },
-  { type: 'education', label: '교육' },
-  { type: 'other', label: '기타' }
-];
-
-const SCHEDULE_TYPE_FORM_OPTIONS: Array<{ type: ScheduleType; label: string }> = [
-  { type: 'security', label: '보안' },
-  { type: 'meeting', label: '업무 회의' },
-  { type: 'education', label: '직원 교육' },
-  { type: 'other', label: '기타 일정' }
-];
-
-// ============ Schedule Direct Creation / Edit Modal ============
-interface ScheduleModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  schedule?: Schedule | null;
-  initialDate?: string;
-  initialStartTime?: string;
-  initialEndTime?: string;
-  onSaveAdd: (data: Omit<Schedule, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  onSaveUpdate: (id: string, updates: Partial<Schedule>) => void;
-  onDeleteSchedule: (id: string) => void;
-}
-
-const ScheduleModal = React.memo(({
-  isOpen,
-  onClose,
-  schedule,
-  initialDate,
-  initialStartTime,
-  initialEndTime,
-  onSaveAdd,
-  onSaveUpdate,
-  onDeleteSchedule
-}: ScheduleModalProps) => {
-  const isEditing = Boolean(schedule);
-
-  const [title, setTitle] = useState('');
-  const [type, setType] = useState<ScheduleType>('meeting');
-  const [person, setPerson] = useState('담당자');
-  const [date, setDate] = useState('');
-  const [isRange, setIsRange] = useState(false);
-  const [endDate, setEndDate] = useState('');
-  const [startTime, setStartTime] = useState('10:00');
-  const [endTime, setEndTime] = useState('11:00');
-  const [notes, setNotes] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
-
-  const handleSelectPreset = useCallback((preset: SchedulePreset) => {
-    setTitle(preset.title);
-    setType(preset.type);
-    setPerson(preset.person);
-    if (preset.startTime) setStartTime(preset.startTime);
-    if (preset.endTime) setEndTime(preset.endTime);
-    if (preset.notes) setNotes(preset.notes);
-  }, []);
-
-  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-  }, []);
-
-  const handlePersonChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setPerson(e.target.value);
-  }, []);
-
-  const handleDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setDate(e.target.value);
-  }, []);
-
-  const handleEndDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setEndDate(e.target.value);
-  }, []);
-
-  const handleRangeToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsRange(e.target.checked);
-    if (e.target.checked) {
-      setEndDate(prev => prev || date);
-    }
-  }, [date]);
-
-  const handleStartTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setStartTime(e.target.value);
-  }, []);
-
-  const handleEndTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setEndTime(e.target.value);
-  }, []);
-
-  const handleNotesChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNotes(e.target.value);
-  }, []);
-
-  const handleOpenPresetModal = useCallback(() => {
-    setIsPresetModalOpen(true);
-  }, []);
-
-  const handleClosePresetModal = useCallback(() => {
-    setIsPresetModalOpen(false);
-  }, []);
-
-  React.useEffect(() => {
-    if (!isOpen) return;
-    if (schedule) {
-      setTitle(schedule.title);
-      setType(schedule.type);
-      setPerson(schedule.person);
-      setDate(schedule.date);
-      setIsRange(Boolean(schedule.endDate && schedule.endDate !== schedule.date));
-      setEndDate(schedule.endDate || schedule.date);
-      setStartTime(schedule.startTime);
-      setEndTime(schedule.endTime);
-      setNotes(schedule.notes || '');
-    } else {
-      const today = formatDateStr(new Date());
-      setTitle('신규 일정');
-      setType('meeting');
-      setPerson('담당자');
-      setDate(initialDate || today);
-      setIsRange(false);
-      setEndDate(initialDate || today);
-      setStartTime(initialStartTime || '10:00');
-      setEndTime(initialEndTime || '11:00');
-      setNotes('');
-    }
-    setError(null);
-  }, [isOpen, schedule, initialDate, initialStartTime, initialEndTime]);
-
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) {
-      setError('일정 제목을 입력해주세요.');
-      return;
-    }
-    if (!person.trim()) {
-      setError('담당자/참석자를 입력해주세요.');
-      return;
-    }
-    if (startTime >= endTime) {
-      setError('종료 시간은 시작 시간보다 늦어야 합니다.');
-      return;
-    }
-
-    if (isEditing && schedule) {
-      onSaveUpdate(schedule.id, {
-        title: title.trim(),
-        type,
-        person: person.trim(),
-        date,
-        endDate: isRange ? endDate : undefined,
-        startTime,
-        endTime,
-        notes: notes.trim()
-      });
-    } else {
-      onSaveAdd({
-        title: title.trim(),
-        type,
-        person: person.trim(),
-        date,
-        endDate: isRange ? endDate : undefined,
-        startTime,
-        endTime,
-        notes: notes.trim()
-      });
-    }
-    onClose();
-  }, [title, person, startTime, endTime, isEditing, schedule, onSaveUpdate, onSaveAdd, onClose, type, date, isRange, endDate, notes]);
-
-  const handleDelete = useCallback(() => {
-    if (schedule && confirm(`'${schedule.title}' 일정을 삭제하시겠습니까?`)) {
-      onDeleteSchedule(schedule.id);
-      onClose();
-    }
-  }, [schedule, onDeleteSchedule, onClose]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-[500px] overflow-hidden flex flex-col p-6">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
-          <div className="flex items-center gap-2">
-            {isEditing ? <Edit3 className="w-5 h-5 text-indigo-600" /> : <Plus className="w-5 h-5 text-indigo-600" />}
-            <h3 className="text-base font-extrabold text-slate-800 dark:text-white">
-              {isEditing ? '일정 수정 및 상세' : '새 일정 직접 등록'}
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-xl border border-rose-200 dark:border-rose-900/50 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 overflow-y-auto max-h-[70vh] pr-1 custom-scrollbar">
-          {/* 분류 선택 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-500">일정 분류</label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {SCHEDULE_TYPE_MODAL_OPTIONS.map(({ type: t, label }) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setType(t)}
-                  className={`py-2 px-1 rounded-xl border text-xs font-bold text-center transition-all cursor-pointer ${
-                    type === t
-                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
-                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 자주 쓰는 상용구 칩 바 */}
-          <SchedulePresetChips
-            currentType={type}
-            onSelectPreset={handleSelectPreset}
-            onOpenManageModal={handleOpenPresetModal}
-          />
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-500">일정 제목 *</label>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={handleTitleChange}
-              className="px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-950 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-500">담당자 / 참석자 *</label>
-            <input
-              type="text"
-              required
-              value={person}
-              onChange={handlePersonChange}
-              className="px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-950 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-slate-500">시작 날짜</label>
-              <input
-                type="date"
-                required
-                value={date}
-                onChange={handleDateChange}
-                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-950"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-slate-500">종료 날짜</label>
-              <input
-                type="date"
-                value={isRange ? endDate : date}
-                disabled={!isRange}
-                onChange={handleEndDateChange}
-                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-950 disabled:opacity-50"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="modalRangeCheck"
-              checked={isRange}
-              onChange={handleRangeToggle}
-              className="w-4 h-4 rounded text-indigo-600"
-            />
-            <label htmlFor="modalRangeCheck" className="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
-              연속 일정으로 등록 (Range)
-            </label>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-slate-500">시작 시간</label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={handleStartTimeChange}
-                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-950"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-slate-500">종료 시간</label>
-              <input
-                type="time"
-                value={endTime}
-                onChange={handleEndTimeChange}
-                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-950"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-slate-500">메모 / 특이사항</label>
-            <textarea
-              rows={3}
-              value={notes}
-              onChange={handleNotesChange}
-              placeholder="상세 내용을 적어주세요."
-              className="px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-950"
-            />
-          </div>
-
-          <div className="flex items-center justify-between mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
-            <div className="flex items-center gap-2">
-              {isEditing && schedule && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    className="px-3.5 py-2 bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 rounded-xl text-xs font-bold hover:bg-rose-100 transition-colors border-0 cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" /> 삭제
-                  </button>
-                  <a
-                    href={generateGoogleCalendarUrl(schedule)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-2 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 rounded-xl text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors border border-blue-200/60 dark:border-blue-900 flex items-center gap-1.5 no-underline"
-                    title="구글 캘린더에 이 일정 추가"
-                  >
-                    <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                    <span>구글 캘린더 등록</span>
-                    <ExternalLink className="w-3 h-3 opacity-60" />
-                  </a>
-                </>
-              )}
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-0 cursor-pointer"
-              >
-                취소
-              </button>
-              <button
-                type="submit"
-                className="px-5 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-colors border-0 cursor-pointer"
-              >
-                {isEditing ? '수정 저장' : '일정 등록'}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      {/* 자주 쓰는 상용구 관리 모달 */}
-      <SchedulePresetManageModal
-        isOpen={isPresetModalOpen}
-        onClose={handleClosePresetModal}
-        onSelectPreset={handleSelectPreset}
-        currentFormValues={{
-          title,
-          type,
-          person,
-          startTime,
-          endTime,
-          notes
-        }}
-      />
-    </div>
-  );
-});
-ScheduleModal.displayName = 'ScheduleModal';
-
-// ============ Google Calendar & iCal Sync Modal ============
-interface GoogleCalendarSyncModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onRefresh?: () => void;
-  onImportCalendar: (params: { icsUrl?: string; rawIcs?: string }) => Promise<{ success: boolean; count?: number; error?: string }>;
-}
-
-const GoogleCalendarSyncModal = React.memo(({
-  isOpen,
-  onClose,
-  onRefresh,
-  onImportCalendar
-}: GoogleCalendarSyncModalProps) => {
-  const [copied, setCopied] = useState(false);
-  const [importUrl, setImportUrl] = useState('');
-  const [importStatus, setImportStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [importMessage, setImportMessage] = useState('');
-
-  const feedUrl = useMemo(() => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001';
-    return `${origin}/api/calendar/feed.ics`;
-  }, []);
-
-  const handleImportUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setImportUrl(e.target.value);
-  }, []);
-
-  const handleCopyFeedUrl = useCallback(() => {
-    navigator.clipboard.writeText(feedUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [feedUrl]);
-
-  const handleImport = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!importUrl.trim()) return;
-
-    setImportStatus('loading');
-    setImportMessage('');
-
-    try {
-      const data = await onImportCalendar({ icsUrl: importUrl.trim() });
-      if (data.success) {
-        setImportStatus('success');
-        setImportMessage(`총 ${data.count || 0}건의 신규 일정을 성공적으로 동기화했습니다.`);
-        if (onRefresh) onRefresh();
-      } else {
-        setImportStatus('error');
-        setImportMessage(data.error || '일정 가져오기에 실패했습니다.');
-      }
-    } catch (err: any) {
-      setImportStatus('error');
-      setImportMessage(err?.message || '네트워크 오류가 발생했습니다.');
-    }
-  }, [importUrl, onImportCalendar, onRefresh]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-[560px] overflow-hidden flex flex-col p-6">
-        
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-200/50 dark:border-blue-900">
-              <Calendar className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-extrabold text-slate-800 dark:text-white">
-                구글 캘린더 (Google Calendar) 연동
-              </h3>
-              <p className="text-[11px] font-semibold text-slate-400">
-                바이탈 스케줄을 구글 캘린더에 실시간 구독하거나 외부 일정을 가져옵니다.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-6 overflow-y-auto max-h-[70vh] pr-1 custom-scrollbar">
-          
-          {/* 섹션 1: 실시간 iCal 구독 */}
-          <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/70 dark:border-slate-700/60 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <Share2 className="w-4 h-4 text-indigo-600" />
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
-                1. 구글 캘린더 실시간 구독 (추천)
-              </span>
-            </div>
-            <p className="text-[11.5px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              아래 iCal URL을 구글 캘린더에 등록하면 바이탈의 모든 일정이 웹 및 모바일 구글 캘린더에 자동으로 동기화됩니다.
-            </p>
-
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-950 p-1.5 pl-3 rounded-lg border border-slate-200 dark:border-slate-800">
-              <span className="text-xs font-mono text-slate-600 dark:text-slate-300 truncate flex-1 select-all">
-                {feedUrl}
-              </span>
-              <button
-                type="button"
-                onClick={handleCopyFeedUrl}
-                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold transition-all flex items-center gap-1 shrink-0 border-0 cursor-pointer"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? '복사됨' : 'URL 복사'}</span>
-              </button>
-            </div>
-
-            <div className="text-[10.5px] text-slate-400 dark:text-slate-500 bg-white/50 dark:bg-slate-900/50 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 space-y-1">
-              <div className="font-bold text-slate-600 dark:text-slate-300">📌 구글 캘린더 등록 방법:</div>
-              <div>1. <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 underline">Google Calendar 웹</a> 접속</div>
-              <div>2. 좌측 메뉴 <strong>다른 캘린더 (+)</strong> 클릭 &gt; <strong>&quot;URL로 추가&quot;</strong> 선택</div>
-              <div>3. 복사한 주소를 붙여넣고 <strong>&quot;캘린더 추가&quot;</strong> 클릭 완료!</div>
-            </div>
-          </div>
-
-          {/* 섹션 2: 외부 구글 캘린더 iCal 가져오기 */}
-          <form onSubmit={handleImport} className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/70 dark:border-slate-700/60 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <Download className="w-4 h-4 text-emerald-600" />
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
-                2. 외부 구글 캘린더 일정 가져오기 (Import)
-              </span>
-            </div>
-            <p className="text-[11.5px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              구글 캘린더 설정의 <strong>&quot;iCal 형식의 비공개 주소&quot;</strong>를 입력하여 바이탈 스케줄러로 일정을 가져옵니다.
-            </p>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="url"
-                required
-                placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
-                value={importUrl}
-                onChange={handleImportUrlChange}
-                className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-950 focus:outline-none focus:border-emerald-500 font-mono"
-              />
-              <button
-                type="submit"
-                disabled={importStatus === 'loading'}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-all border-0 cursor-pointer shrink-0 flex items-center gap-1.5"
-              >
-                {importStatus === 'loading' ? '가져오는 중...' : '가져오기'}
-              </button>
-            </div>
-
-            {importMessage && (
-              <div className={`p-2.5 rounded-lg text-xs font-bold flex items-center gap-2 ${
-                importStatus === 'success'
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900'
-                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900'
-              }`}>
-                {importStatus === 'success' ? <Check className="w-4 h-4 text-emerald-600" /> : <AlertCircle className="w-4 h-4 text-rose-600" />}
-                <span>{importMessage}</span>
-              </div>
-            )}
-          </form>
-
-        </div>
-
-        <div className="flex justify-end mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 rounded-xl text-xs font-bold transition-colors border-0 cursor-pointer"
-          >
-            닫기
-          </button>
-        </div>
-
-      </div>
-    </div>
-  );
-});
-GoogleCalendarSyncModal.displayName = 'GoogleCalendarSyncModal';
-
-// ============ Schedule Registration Form (Sidebar Panel) ============
-const ScheduleForm = React.memo(({ 
-  date, 
-  setDate, 
-  isRange, 
-  setIsRange, 
-  endDate, 
-  setEndDate, 
-  addSchedule 
-}: {
-  date: string;
-  setDate: (date: string) => void;
-  isRange: boolean;
-  setIsRange: (val: boolean) => void;
-  endDate: string;
-  setEndDate: (date: string) => void;
-  addSchedule: (sched: any) => void;
-}) => {
-  const [title, setTitle] = useState('보안');
-  const [type, setType] = useState<ScheduleType>('security');
-  const [person, setPerson] = useState('오창선');
-  const [startTime, setStartTime] = useState('11:00');
-  const [endTime, setEndTime] = useState('13:00');
-  const [notes, setNotes] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
-
-  const handleSelectPreset = useCallback((preset: SchedulePreset) => {
-    setTitle(preset.title);
-    setType(preset.type);
-    setPerson(preset.person);
-    if (preset.startTime) setStartTime(preset.startTime);
-    if (preset.endTime) setEndTime(preset.endTime);
-    if (preset.notes) setNotes(preset.notes);
-  }, []);
-
-  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-  }, []);
-
-  const handlePersonChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setPerson(e.target.value);
-  }, []);
-
-  const handleNotesChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNotes(e.target.value);
-  }, []);
-
-  const handleDateChange = useCallback((newVal: string) => {
-    setDate(newVal);
-    if (endDate < newVal) {
-      setEndDate(newVal);
-    }
-  }, [setDate, endDate, setEndDate]);
-
-  const handleEndDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setEndDate(e.target.value);
-  }, [setEndDate]);
-
-  const handleRangeToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsRange(e.target.checked);
-    if (e.target.checked) {
-      setEndDate(date);
-    }
-  }, [setIsRange, setEndDate, date]);
-
-  const handleStartHourChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStartTime(prev => `${e.target.value}:${prev.split(':')[1] || '30'}`);
-  }, []);
-
-  const handleStartMinChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStartTime(prev => `${prev.split(':')[0] || '11'}:${e.target.value}`);
-  }, []);
-
-  const handleEndHourChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setEndTime(prev => `${e.target.value}:${prev.split(':')[1] || '00'}`);
-  }, []);
-
-  const handleEndMinChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setEndTime(prev => `${prev.split(':')[0] || '13'}:${e.target.value}`);
-  }, []);
-
-  const handleOpenPresetModal = useCallback(() => {
-    setIsPresetModalOpen(true);
-  }, []);
-
-  const handleClosePresetModal = useCallback(() => {
-    setIsPresetModalOpen(false);
-  }, []);
-
-  const hours = useMemo(() => Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')), []);
-  const minutes = useMemo(() => ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'], []);
-
-  const applyPreset = useCallback((start: string, end: string) => {
-    setStartTime(start);
-    setEndTime(end);
-  }, []);
-
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!title.trim()) {
-      setError('일정 제목을 입력해주세요.');
-      return;
-    }
-    if (!person.trim()) {
-      setError('담당자/참석자를 입력해주세요.');
-      return;
-    }
-    if (startTime >= endTime) {
-      setError('종료 시간은 시작 시간보다 늦어야 합니다.');
-      return;
-    }
-    if (isRange && endDate && date > endDate) {
-      setError('종료 날짜는 시작 날짜보다 빠를 수 없습니다.');
-      return;
-    }
-
-    addSchedule({
-      title: title.trim(),
-      type,
-      person: person.trim(),
-      date,
-      endDate: isRange ? endDate : undefined,
-      startTime,
-      endTime,
-      notes: notes.trim()
-    });
-
-    setTitle('보안');
-    setPerson('오창선');
-    setNotes('');
-    setIsRange(false);
-    setEndDate(date);
-  }, [title, person, startTime, endTime, isRange, endDate, date, addSchedule, type, notes, setIsRange, setEndDate]);
-
-  return (
-    <form onSubmit={handleSubmit} className="xl:col-span-3 flex flex-col gap-4 bg-slate-50/20 dark:bg-slate-900/60 p-6 rounded-2xl border border-slate-200/40 dark:border-slate-800 backdrop-blur-xs max-h-[580px] overflow-y-auto">
-      <span className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-1 flex items-center gap-2">
-        <Plus className="w-4 h-4 text-indigo-500" /> 새 일정 등록
-      </span>
-
-      {error && (
-        <div className="flex items-center gap-2 text-xs font-bold bg-rose-500/10 text-rose-600 p-3 rounded-xl border border-rose-500/20">
-          <AlertCircle className="w-4.5 h-4.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-bold text-slate-500">일정 분류</label>
-        <div className="grid grid-cols-2 gap-1.5">
-          {SCHEDULE_TYPE_FORM_OPTIONS.map(({ type: t, label }) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setType(t)}
-              className={`py-1.5 px-2.5 rounded-lg border text-xs font-bold text-center transition-all cursor-pointer ${
-                type === t
-                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
-                  : 'bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 자주 쓰는 상용구 칩 바 */}
-      <SchedulePresetChips
-        currentType={type}
-        onSelectPreset={handleSelectPreset}
-        onOpenManageModal={handleOpenPresetModal}
-      />
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">일정명 (제목)</label>
-        <input
-          type="text"
-          value={title}
-          onChange={handleTitleChange}
-          placeholder="예: 4층 보안"
-          className="w-full px-4.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-950/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-655 placeholder:font-semibold"
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">담당자 / 참석자</label>
-        <input
-          type="text"
-          value={person}
-          onChange={handlePersonChange}
-          placeholder="담당 당번 혹은 회의 주최자"
-          className="w-full px-4.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-950/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-655 placeholder:font-semibold"
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">시작 날짜</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => handleDateChange(e.target.value)}
-          className="w-full px-4.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-950/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-          required
-        />
-      </div>
-
-      <div className="flex items-center gap-2 mb-1 select-none">
-        <input
-          type="checkbox"
-          id="isRangeCheck"
-          checked={isRange}
-          onChange={handleRangeToggle}
-          className="w-4 h-4 rounded text-indigo-650 border-slate-300 dark:border-slate-750 focus:ring-indigo-500 cursor-pointer"
-        />
-        <label htmlFor="isRangeCheck" className="text-xs font-bold text-slate-600 dark:text-slate-400 cursor-pointer">
-          연속 일정으로 등록
-        </label>
-      </div>
-
-      {isRange && (
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">종료 날짜</label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={handleEndDateChange}
-            min={date}
-            className="w-full px-4.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-950/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-            required
-          />
-        </div>
-      )}
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">퀵 시간 설정</label>
-        <div className="flex flex-wrap gap-1.5 mb-1">
-          <button
-            type="button"
-            onClick={() => applyPreset('11:30', '13:00')}
-            className={`px-2.5 py-1.5 text-[10px] font-bold rounded-lg border transition-all cursor-pointer ${
-              startTime === '11:30' && endTime === '13:00'
-                ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700'
-            }`}
-          >
-            보안 (11:30~13:00)
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('10:00', '11:00')}
-            className={`px-2.5 py-1.5 text-[10px] font-bold rounded-lg border transition-all cursor-pointer ${
-              startTime === '10:00' && endTime === '11:00'
-                ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700'
-            }`}
-          >
-            회의 (10:00~11:00)
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('14:00', '15:00')}
-            className={`px-2.5 py-1.5 text-[10px] font-bold rounded-lg border transition-all cursor-pointer ${
-              startTime === '14:00' && endTime === '15:00'
-                ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700'
-            }`}
-          >
-            회의 (14:00~15:00)
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('09:00', '18:00')}
-            className={`px-2.5 py-1.5 text-[10px] font-bold rounded-lg border transition-all cursor-pointer ${
-              startTime === '09:00' && endTime === '18:00'
-                ? 'bg-slate-600 border-slate-600 text-white shadow-xs'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700'
-            }`}
-          >
-            종일 (09:00~18:00)
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3.5">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">시작 시간</label>
-          <div className="flex gap-1.5">
-            <select
-              value={startTime.split(':')[0] || '11'}
-              onChange={handleStartHourChange}
-              className="w-1/2 px-3 py-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-950/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
-            >
-              {hours.map(h => <option key={h} value={h}>{h}시</option>)}
-            </select>
-            <select
-              value={startTime.split(':')[1] || '30'}
-              onChange={handleStartMinChange}
-              className="w-1/2 px-3 py-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-950/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
-            >
-              {minutes.map(m => <option key={m} value={m}>{m}분</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">종료 시간</label>
-          <div className="flex gap-1.5">
-            <select
-              value={endTime.split(':')[0] || '13'}
-              onChange={handleEndHourChange}
-              className="w-1/2 px-3 py-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-950/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
-            >
-              {hours.map(h => <option key={h} value={h}>{h}시</option>)}
-            </select>
-            <select
-              value={endTime.split(':')[1] || '00'}
-              onChange={handleEndMinChange}
-              className="w-1/2 px-3 py-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-950/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
-            >
-              {minutes.map(m => <option key={m} value={m}>{m}분</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">메모 / 특이사항</label>
-        <textarea
-          value={notes}
-          onChange={handleNotesChange}
-          placeholder="상세 위치, 안건 및 기타 중요 특이사항을 적어주세요."
-          className="w-full px-4.5 py-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-950/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-655 placeholder:font-semibold resize-none h-20"
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10 active:scale-[0.98] cursor-pointer"
-      >
-        스케줄 등록
-      </button>
-
-      {/* 자주 쓰는 상용구 관리 모달 */}
-      <SchedulePresetManageModal
-        isOpen={isPresetModalOpen}
-        onClose={handleClosePresetModal}
-        onSelectPreset={handleSelectPreset}
-        currentFormValues={{
-          title,
-          type,
-          person,
-          startTime,
-          endTime,
-          notes
-        }}
-      />
-    </form>
-  );
-});
-ScheduleForm.displayName = 'ScheduleForm';
-
-// ============ Schedule Item Component (With Drag & Drop & Direct Edit Click) ============
-const ScheduleItem = React.memo(({ 
-  schedule, 
-  config, 
-  onDelete,
-  onEdit
-}: { 
-  schedule: Schedule; 
-  config: { bg: string; badge: string; icon: React.ReactNode }; 
-  onDelete: (id: string) => void;
-  onEdit?: (schedule: Schedule) => void;
-}) => {
-  const handleDelete = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm(`'${schedule.title}' 일정을 삭제하시겠습니까?`)) {
-      onDelete(schedule.id);
-    }
-  }, [onDelete, schedule.id, schedule.title]);
-
-  const handleDragStart = useCallback((e: React.DragEvent) => {
-    const durationMins = Math.max(30, timeToMinutes(schedule.endTime) - timeToMinutes(schedule.startTime));
-    const payload = JSON.stringify({
-      id: schedule.id,
-      durationMins,
-      startTime: schedule.startTime,
-      endTime: schedule.endTime
-    });
-    e.dataTransfer.setData('application/json', payload);
-    e.dataTransfer.effectAllowed = 'move';
-  }, [schedule]);
-
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onEdit) onEdit(schedule);
-  }, [onEdit, schedule]);
-
-  return (
-    <div
-      draggable={true}
-      onDragStart={handleDragStart}
-      onClick={handleClick}
-      className={`group relative flex flex-col p-2.5 border rounded-xl transition-all duration-200 hover:shadow-sm cursor-pointer select-none ${config.bg}`}
-      title={`[클릭: 상세/수정 | 드래그: 일정 재배치]\n${schedule.title}\n담당: ${schedule.person}${schedule.notes ? `\n메모: ${schedule.notes}` : ''}`}
-    >
-      {/* Title & Type Icon */}
-      <div className="flex items-start justify-between gap-1.5">
-        <span 
-          className="text-xs font-bold text-slate-800 dark:text-slate-200 tracking-tight leading-tight line-clamp-2 pr-4 cursor-pointer"
-        >
-          {schedule.title}
-        </span>
-        <div className="shrink-0 text-slate-500 dark:text-slate-400">
-          {config.icon}
-        </div>
-      </div>
-
-      {schedule.endDate && schedule.endDate !== schedule.date && (
-        <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-700 px-1.5 py-0.5 rounded-md mt-1.5 self-start select-none">
-          기간: {schedule.date.slice(5)} ~ {schedule.endDate.slice(5)}
-        </span>
-      )}
-
-      {/* Time & Person */}
-      <div className="flex items-center justify-between gap-2 mt-2">
-        <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-0.5">
-          <Clock className="w-2.5 h-2.5 shrink-0 text-slate-450 dark:text-slate-500" />
-          {schedule.startTime} ~ {schedule.endTime}
-        </span>
-        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md truncate max-w-[65px] text-right bg-white/60 dark:bg-slate-800 dark:text-slate-300">
-          {schedule.person}
-        </span>
-      </div>
-
-      {schedule.notes && (
-        <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-0.5 mt-1 border-t border-slate-200/40 dark:border-slate-800 pt-1">
-          <FileText className="w-2.5 h-2.5 shrink-0 text-slate-450 dark:text-slate-500" />
-          <span className="truncate max-w-[120px]">
-            {schedule.notes}
-          </span>
-        </p>
-      )}
-
-      {/* Trash/Delete Action */}
-      <button
-        onClick={handleDelete}
-        className="absolute top-1 right-1 p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer border-0 bg-transparent"
-        title="삭제"
-      >
-        <Trash2 className="w-3 h-3" />
-      </button>
-    </div>
-  );
-});
-ScheduleItem.displayName = 'ScheduleItem';
-
-// ============ Memoized View Sub-Components ============
-
-const WeekDayColumn = React.memo(({
-  day,
-  dayIdx,
-  schedules,
-  dayNames,
-  isToday = false,
-  onOpenCellModal,
-  onDropCell,
-  onDeleteSchedule,
-  onEditSchedule
-}: {
-  day: Date;
-  dayIdx: number;
-  schedules: Schedule[];
-  dayNames: string[];
-  isToday?: boolean;
-  onOpenCellModal: (dayStr: string) => void;
-  onDropCell: (e: React.DragEvent, dayStr: string) => void;
-  onDeleteSchedule: (id: string) => void;
-  onEditSchedule: (sched: Schedule) => void;
-}) => {
-  const dayStr = formatDateStr(day);
-  const dayNum = day.getDate();
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    onDropCell(e, dayStr);
-  }, [onDropCell, dayStr]);
-
-  const handleHeaderClick = useCallback(() => {
-    onOpenCellModal(dayStr);
-  }, [onOpenCellModal, dayStr]);
-
-  return (
-    <div
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      className={`flex flex-col bg-white/30 dark:bg-slate-900/30 border border-slate-200/40 dark:border-slate-800/40 rounded-2xl p-3 h-full min-h-[200px] md:min-h-[480px] transition-all hover:bg-white/60 dark:hover:bg-slate-800/40 hover:shadow-2xs ${
-        isToday ? 'bg-indigo-50/10 border-indigo-300/50 shadow-xs ring-1 ring-indigo-500/5 dark:bg-indigo-950/20 dark:border-indigo-800/50 dark:ring-indigo-500/10' : ''
-      }`}
-    >
-      {/* Header */}
-      <div 
-        onClick={handleHeaderClick}
-        className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-200/40 dark:border-slate-800/50 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/50 p-1 rounded-lg transition-all select-none"
-        title={`${dayNum}일 직관적 일정 추가 (클릭)`}
-      >
-        <div className="flex items-center gap-1.5">
-          <span className={`text-[12px] font-bold ${
-            dayIdx === 5 ? 'text-blue-500' : dayIdx === 6 ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'
-          }`}>
-            {dayNames[dayIdx]}
-          </span>
-          <span className={`text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full ${
-            isToday ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-800 dark:text-slate-200'
-          }`}>
-            {dayNum}
-          </span>
-        </div>
-        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-350 bg-slate-200/40 dark:bg-slate-800 px-1.5 py-0.5 rounded-full shrink-0">
-          {schedules.length}건
-        </span>
-      </div>
-
-      {/* Column Body */}
-      <div 
-        onClick={handleHeaderClick}
-        className="flex flex-col gap-2 overflow-y-auto flex-1 max-h-[360px] md:max-h-none custom-scrollbar min-h-[140px]"
-      >
-        {schedules.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 py-8 text-slate-400 dark:text-slate-500 italic text-[11px] font-semibold cursor-pointer">
-            + 클릭하여 추가
-          </div>
-        ) : (
-          schedules.map((schedule) => (
-            <ScheduleItem
-              key={schedule.id}
-              schedule={schedule}
-              config={getTypeConfig(schedule.type)}
-              onDelete={onDeleteSchedule}
-              onEdit={onEditSchedule}
-            />
-          ))
-        )}
-      </div>
-    </div>
-  );
-});
-WeekDayColumn.displayName = 'WeekDayColumn';
-
-const MonthSchedulePill = React.memo(({
-  schedule,
-  config,
-  onEdit
-}: {
-  schedule: Schedule;
-  config: { bg: string; badge: string; icon: React.ReactNode };
-  onEdit: (sched: Schedule) => void;
-}) => {
-  const handleDragStart = useCallback((e: React.DragEvent) => {
-    const durationMins = Math.max(30, timeToMinutes(schedule.endTime) - timeToMinutes(schedule.startTime));
-    e.dataTransfer.setData('application/json', JSON.stringify({
-      id: schedule.id,
-      durationMins,
-      startTime: schedule.startTime,
-      endTime: schedule.endTime
-    }));
-  }, [schedule]);
-
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit(schedule);
-  }, [onEdit, schedule]);
-
-  return (
-    <div
-      draggable={true}
-      onDragStart={handleDragStart}
-      onClick={handleClick}
-      className={`px-1.5 py-0.5 rounded text-[10px] font-bold truncate flex items-center justify-between gap-1 shadow-2xs ${config.bg}`}
-      title={`${schedule.startTime} ${schedule.title}`}
-    >
-      <span className="truncate">{schedule.title}</span>
-      <span className="text-[8px] opacity-70 shrink-0">{schedule.startTime}</span>
-    </div>
-  );
-});
-MonthSchedulePill.displayName = 'MonthSchedulePill';
-
-const MonthCell = React.memo(({
-  day,
-  currentMonth,
-  schedules,
-  isToday = false,
-  onOpenModal,
-  onDropCell,
-  onEditSchedule
-}: {
-  day: Date;
-  currentMonth: number;
-  schedules: Schedule[];
-  isToday?: boolean;
-  onOpenModal: (dayStr: string) => void;
-  onDropCell: (e: React.DragEvent, dayStr: string) => void;
-  onEditSchedule: (sched: Schedule) => void;
-}) => {
-  const dayStr = formatDateStr(day);
-  const isCurrentMonth = day.getMonth() === currentMonth;
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    onDropCell(e, dayStr);
-  }, [onDropCell, dayStr]);
-
-  const handleClick = useCallback(() => {
-    onOpenModal(dayStr);
-  }, [onOpenModal, dayStr]);
-
-  return (
-    <div
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onClick={handleClick}
-      className={`min-h-[90px] max-h-[110px] p-1.5 rounded-xl border flex flex-col justify-start transition-all cursor-pointer ${
-        isCurrentMonth 
-          ? 'bg-white/40 dark:bg-slate-900/40 border-slate-200/50 dark:border-slate-800/50 hover:bg-white dark:hover:bg-slate-850' 
-          : 'bg-slate-100/20 dark:bg-slate-950/20 border-transparent text-slate-300 dark:text-slate-700'
-      } ${isToday ? 'ring-2 ring-indigo-500/60 bg-indigo-50/10' : ''}`}
-    >
-      <div className="flex items-center justify-between mb-1 px-1">
-        <span className={`text-[11px] font-bold ${
-          isToday 
-            ? 'w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center' 
-            : isCurrentMonth ? 'text-slate-700 dark:text-slate-200' : 'text-slate-300 dark:text-slate-600'
-        }`}>
-          {day.getDate()}
-        </span>
-        {schedules.length > 0 && (
-          <span className="text-[9px] font-bold text-slate-400">
-            {schedules.length}
-          </span>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1 overflow-y-auto max-h-[70px] custom-scrollbar">
-        {schedules.map((s) => (
-          <MonthSchedulePill
-            key={s.id}
-            schedule={s}
-            config={getTypeConfig(s.type)}
-            onEdit={onEditSchedule}
-          />
-        ))}
-      </div>
-    </div>
-  );
-});
-MonthCell.displayName = 'MonthCell';
-
-const TimetableScheduleItem = React.memo(({
-  schedule,
-  config,
-  onEdit
-}: {
-  schedule: Schedule;
-  config: { bg: string; badge: string; icon: React.ReactNode };
-  onEdit: (sched: Schedule) => void;
-}) => {
-  const handleDragStart = useCallback((e: React.DragEvent) => {
-    const durationMins = Math.max(30, timeToMinutes(schedule.endTime) - timeToMinutes(schedule.startTime));
-    e.dataTransfer.setData('application/json', JSON.stringify({
-      id: schedule.id,
-      durationMins,
-      startTime: schedule.startTime,
-      endTime: schedule.endTime
-    }));
-  }, [schedule]);
-
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit(schedule);
-  }, [onEdit, schedule]);
-
-  return (
-    <div
-      draggable={true}
-      onDragStart={handleDragStart}
-      onClick={handleClick}
-      className={`p-1.5 rounded-lg border text-[10px] font-bold flex flex-col gap-0.5 shadow-2xs ${config.bg}`}
-    >
-      <div className="flex items-center justify-between">
-        <span className="truncate">{schedule.title}</span>
-        <span className="text-[9px] opacity-75">{schedule.startTime}~{schedule.endTime}</span>
-      </div>
-      <span className="text-[8.5px] opacity-80">{schedule.person}</span>
-    </div>
-  );
-});
-TimetableScheduleItem.displayName = 'TimetableScheduleItem';
-const EMPTY_SCHEDULES: Schedule[] = [];
-
-const TimetableSlotCell = React.memo(({
-  dayStr,
-  hourStr,
-  nextHourStr,
-  schedules,
-  onOpenCellModal,
-  onDropCell,
-  onEditSchedule
-}: {
-  dayStr: string;
-  hourStr: string;
-  nextHourStr: string;
-  schedules: Schedule[];
-  onOpenCellModal: (dayStr: string, startTime?: string, endTime?: string) => void;
-  onDropCell: (e: React.DragEvent, dayStr: string, targetTime?: string) => void;
-  onEditSchedule: (sched: Schedule) => void;
-}) => {
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    onDropCell(e, dayStr, `${hourStr}:00`);
-  }, [onDropCell, dayStr, hourStr]);
-
-  const handleClick = useCallback(() => {
-    onOpenCellModal(dayStr, `${hourStr}:00`, `${nextHourStr}:00`);
-  }, [onOpenCellModal, dayStr, hourStr, nextHourStr]);
-
-  return (
-    <div
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onClick={handleClick}
-      className="p-1 border-r border-slate-100 dark:border-slate-800/40 hover:bg-indigo-50/20 dark:hover:bg-indigo-950/20 transition-colors cursor-pointer flex flex-col gap-1 min-h-[50px]"
-      title={`${dayStr} ${hourStr}:00 일정 등록 (클릭)`}
-    >
-      {schedules.map((s) => (
-        <TimetableScheduleItem
-          key={s.id}
-          schedule={s}
-          config={getTypeConfig(s.type)}
-          onEdit={onEditSchedule}
-        />
-      ))}
-    </div>
-  );
-});
-TimetableSlotCell.displayName = 'TimetableSlotCell';
-
-// ============ Main Weekly Scheduler Component ============
+import { Schedule } from '@/types';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Grid, LayoutGrid } from 'lucide-react';
+import {
+  formatDateStr,
+  timeToMinutes,
+  minutesToTime,
+  EMPTY_SCHEDULES,
+  ScheduleModal,
+  GoogleCalendarSyncModal,
+  ScheduleForm,
+  WeekDayColumn,
+  MonthCell,
+  TimetableSlotCell
+} from './scheduler';
+
+// Re-export all scheduler subcomponents, types, and helpers for 100% backward compatibility
+export * from './scheduler';
+
+// ============ Main Weekly Scheduler Component (Orchestrator) ============
 const WeeklySchedulerComponent: React.FC = () => {
   const { schedules, loading, addSchedule, updateSchedule, deleteSchedule, importCalendar } = useSchedules();
 
@@ -1622,30 +249,30 @@ const WeeklySchedulerComponent: React.FC = () => {
   const timetableHours = useMemo(() => Array.from({ length: 13 }, (_, i) => String(i + 8).padStart(2, '0')), []);
 
   return (
-    <div className="glass-panel dark:glass-panel-dark rounded-[2rem] p-6 sm:p-8 shadow-2xs border border-white/20 dark:border-slate-800/40 transition-all duration-300 hover:shadow-md">
+    <div className="glass-panel rounded-[2rem] p-6 sm:p-8 shadow-2xs border border-white/20 transition-colors duration-300 hover:shadow-md">
       
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200/50 dark:border-slate-800 pb-6 mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200/50 pb-6 mb-6">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-indigo-500/10 text-indigo-600 rounded-2xl border border-indigo-500/15">
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">통합 일정 플래너</h4>
-            <p className="text-xs font-semibold text-slate-400 mt-0.5">보안, 회의, 교육 등 주요 일정을 다각도 뷰로 통합 조율합니다.</p>
+            <h4 className="text-xl font-bold text-slate-800 tracking-tight">통합 일정 플래너</h4>
+            <p className="vlds-subtitle text-xs font-semibold text-slate-400 mt-0.5">보안 · 회의 · 교육 일정 주간 · 월간 · 타임테이블 관리</p>
           </div>
         </div>
 
         {/* Header Actions: View Mode Switcher + Navigation */}
         <div className="flex flex-wrap items-center gap-3">
           {/* View Mode Switcher */}
-          <div className="flex p-1 bg-slate-100/80 dark:bg-slate-800 rounded-xl border border-slate-200/60 dark:border-slate-700">
+          <div className="flex p-1 bg-slate-100/80 rounded-xl border border-slate-200/60">
             <button
               onClick={handleSetWeekView}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer border-0 ${
                 viewMode === 'week'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 bg-transparent'
+                  ? 'bg-white text-indigo-600 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 bg-transparent'
               }`}
             >
               <Grid className="w-3.5 h-3.5" />
@@ -1653,10 +280,10 @@ const WeeklySchedulerComponent: React.FC = () => {
             </button>
             <button
               onClick={handleSetMonthView}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer border-0 ${
                 viewMode === 'month'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 bg-transparent'
+                  ? 'bg-white text-indigo-600 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 bg-transparent'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -1664,10 +291,10 @@ const WeeklySchedulerComponent: React.FC = () => {
             </button>
             <button
               onClick={handleSetTimetableView}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer border-0 ${
                 viewMode === 'timetable'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 bg-transparent'
+                  ? 'bg-white text-indigo-600 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 bg-transparent'
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -1680,34 +307,34 @@ const WeeklySchedulerComponent: React.FC = () => {
             <button
               type="button"
               onClick={handleOpenGCalModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900 rounded-xl text-xs font-bold transition-all cursor-pointer hover:shadow-2xs active:scale-[0.97]"
-              title="구글 캘린더 실시간 연동 및 iCal 구독"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/60 rounded-xl text-xs font-bold transition-colors duration-150 cursor-pointer hover:shadow-2xs active:scale-[0.97]"
+              title="구글 캘린더 연동 · iCal 구독"
             >
-              <Calendar className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <Calendar className="w-3.5 h-3.5 text-blue-600" />
               <span>구글 캘린더 연동</span>
             </button>
 
             <button
               onClick={handleToday}
-              className="px-3.5 py-1.5 bg-slate-100/60 dark:bg-slate-800 hover:bg-slate-200/60 dark:hover:bg-slate-700 border border-slate-200/40 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-350 rounded-xl transition-all cursor-pointer hover:shadow-2xs active:scale-[0.97]"
+              className="px-3.5 py-1.5 bg-slate-100/60 hover:bg-slate-200/60 border border-slate-200/40 text-xs font-bold text-slate-600 rounded-xl transition-colors duration-150 cursor-pointer hover:shadow-2xs active:scale-[0.97]"
             >
               오늘
             </button>
-            <div className="flex items-center bg-slate-100/50 dark:bg-slate-800 border border-slate-200/30 dark:border-slate-700 rounded-xl p-1 shrink-0">
+            <div className="flex items-center bg-slate-100/50 border border-slate-200/30 rounded-xl p-1 shrink-0">
               <button
                 onClick={handlePrev}
-                className="p-1 hover:bg-white dark:hover:bg-slate-755 rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
+                className="p-1 hover:bg-white rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
               >
-                <ChevronLeft className="w-4 h-4 text-slate-600 dark:text-slate-350" />
+                <ChevronLeft className="w-4 h-4 text-slate-600" />
               </button>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 px-3 min-w-[180px] text-center">
+              <span className="text-xs font-bold text-slate-700 px-3 min-w-[180px] text-center">
                 {viewMode === 'month' ? monthText : weekRangeText}
               </span>
               <button
                 onClick={handleNext}
-                className="p-1 hover:bg-white dark:hover:bg-slate-755 rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
+                className="p-1 hover:bg-white rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
               >
-                <ChevronRight className="w-4 h-4 text-slate-600 dark:text-slate-350" />
+                <ChevronRight className="w-4 h-4 text-slate-600" />
               </button>
             </div>
           </div>
@@ -1731,7 +358,7 @@ const WeeklySchedulerComponent: React.FC = () => {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-32 text-slate-400">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3" />
-              <p className="text-xs font-bold">스케줄 정보를 불러오고 있습니다...</p>
+              <p className="text-xs font-bold">일정 로딩 중</p>
             </div>
           ) : viewMode === 'week' ? (
             /* ================= 1. WEEK VIEW ================= */
@@ -1759,7 +386,7 @@ const WeeklySchedulerComponent: React.FC = () => {
             /* ================= 2. MONTH VIEW (42-Cell Grid) ================= */
             <div className="flex flex-col gap-2 w-full">
               {/* Day Name Header Row */}
-              <div className="grid grid-cols-7 gap-1 bg-slate-100/60 dark:bg-slate-800/60 p-2 rounded-xl text-center text-xs font-bold text-slate-600 dark:text-slate-300">
+              <div className="grid grid-cols-7 gap-1 bg-slate-100/60 p-2 rounded-xl text-center text-xs font-bold text-slate-600">
                 {dayNames.map((d, i) => (
                   <div key={d} className={i === 5 ? 'text-blue-500' : i === 6 ? 'text-red-500' : ''}>
                     {d}
@@ -1789,15 +416,15 @@ const WeeklySchedulerComponent: React.FC = () => {
             </div>
           ) : (
             /* ================= 3. TIMETABLE VIEW (08:00 to 20:00 Matrix) ================= */
-            <div className="flex flex-col border border-slate-200/60 dark:border-slate-800 rounded-2xl overflow-hidden bg-white/40 dark:bg-slate-900/40">
+            <div className="flex flex-col border border-slate-200/60 rounded-2xl overflow-hidden bg-white/40">
               {/* Header Row: Days */}
-              <div className="grid grid-cols-8 border-b border-slate-200/60 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-800/60 text-center text-xs font-bold text-slate-700 dark:text-slate-200 py-2.5">
+              <div className="grid grid-cols-8 border-b border-slate-200/60 bg-slate-100/60 text-center text-xs font-bold text-slate-700 py-2.5">
                 <div className="text-slate-400">시간</div>
                 {weekDays.map((d, i) => {
                   const dayStr = formatDateStr(d);
                   const isToday = todayDateString === d.toDateString();
                   return (
-                    <div key={dayStr} className={`flex items-center justify-center gap-1 ${isToday ? 'text-indigo-600 dark:text-indigo-400 font-extrabold' : ''}`}>
+                    <div key={dayStr} className={`flex items-center justify-center gap-1 ${isToday ? 'text-indigo-600 font-extrabold' : ''}`}>
                       <span>{dayNames[i]}</span>
                       <span className="text-[11px]">({d.getDate()}일)</span>
                     </div>
@@ -1806,13 +433,13 @@ const WeeklySchedulerComponent: React.FC = () => {
               </div>
 
               {/* Hourly Slot Rows */}
-              <div className="flex flex-col overflow-y-auto max-h-[550px] custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800/50">
+              <div className="flex flex-col overflow-y-auto max-h-[550px] custom-scrollbar divide-y divide-slate-100">
                 {timetableHours.map((hourStr) => {
                   const nextHourStr = String(Number(hourStr) + 1).padStart(2, '0');
                   return (
                     <div key={hourStr} className="grid grid-cols-8 min-h-[54px] items-stretch">
                       {/* Hour Label */}
-                      <div className="p-2 border-r border-slate-200/40 dark:border-slate-800/40 text-[11px] font-bold text-slate-400 flex items-center justify-center bg-slate-50/40 dark:bg-slate-950/40">
+                      <div className="p-2 border-r border-slate-200/40 text-[11px] font-bold text-slate-400 flex items-center justify-center bg-slate-50/40">
                         {hourStr}:00
                       </div>
 
@@ -1867,3 +494,5 @@ const WeeklySchedulerComponent: React.FC = () => {
 
 export const WeeklyScheduler = React.memo(WeeklySchedulerComponent);
 WeeklyScheduler.displayName = 'WeeklyScheduler';
+
+export default WeeklyScheduler;

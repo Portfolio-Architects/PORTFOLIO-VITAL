@@ -121,15 +121,15 @@ const FALLBACK_FESTIVAL_DATA = {
     "eventTime": "08:00 ~ 14:00",
     "location": "양재천 수변문화쉼터 및 출발마당 (개포동 1279 일원)",
     "course": "수변문화쉼터 ↔ 영동4교 왕복",
-    "targetAudience": "강남구민 800명(사전접수)",
+    "targetAudience": "강남구민 800명(사전접수) → 최종 824명 참여(사전 532명, 현장 292명)",
     "programStructure": [
       "건강 걷기 체험 프로그램(구청장배 걷기대회 연계)",
       "의료 및 건강 관련 체험·홍보 부스 운영"
     ],
     "staffNote": "행사 참여 직원 대체휴무 시행 예정 (전 직원 참여)",
     "organizer": "강남구보건소 보건행정과 건강증진팀, 강남구체육회(걷기협회)",
-    "overallProgress": 85,
-    "lastUpdated": "2026-10-27"
+    "overallProgress": 100,
+    "lastUpdated": "2026-11-06"
   },
   "budget": {
     "total": 49900000,
@@ -177,14 +177,15 @@ const FALLBACK_FESTIVAL_DATA = {
         "[완료][26.9.11.]신규 걷기 코스 답사 : 2km 코스",
         "[완료][26.9.15.]강남구체육회(걷기협회) 구청장배 걷기대회 공동개최 협의 : 체육회 미팅",
         "[완료][26.9.21.] 전 부서 행사 알림 및 협조 ",
-        "[완료][26.9.22.]대행사 미팅 4 : "
+        "[완료][26.9.22.]대행사 미팅 4 : ",
+        "[완료][26.10.31.] 개최 결과 총괄 : 참여주민 총 824명(사전접수 532명, 현장접수 292명 / 목표 800명 대비 103.0% 달성), 안전사고 0건(무사고)"
       ]
     },
     {
       "id": 2,
       "number": "추진과제 2",
       "title": "행사 식순",
-      "status": "in-progress",
+      "status": "done",
       "period": "9월 1주 ~ 9월 3주",
       "cooperationDepts": [],
       "details": [
@@ -211,7 +212,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "id": 3,
       "number": "추진과제 2",
       "title": "부스 운영",
-      "status": "in-progress",
+      "status": "done",
       "period": "9월 1주 ~ 9월 2주",
       "cooperationDepts": [],
       "details": [
@@ -233,14 +234,15 @@ const FALLBACK_FESTIVAL_DATA = {
         "[완료][26.9.16.]강남구의사회 부스 운영 확정 : ",
         "[완료][26.9.21.] 자생한방병원 부스 운영 신청서 제출 : ",
         "[완료][26.9.28.]보건행정과 건강증진팀 부스 운영 확정 : ",
-        "[예정][26.10.2.] 부스 배치 세부 구획"
+        "[예정][26.10.2.] 부스 배치 세부 구획",
+        "[완료][26.10.31.] 부스 운영 실적 총괄 : 총 37동(건강체험 19개 단위 29동 + 지원부스 8동), 테이블 57개, 의자 207개, 상주인력 120명 / 19개 부스 전수 집계 완료 연인원 약 7,504명 참여"
       ]
     },
     {
       "id": 4,
       "number": "추진과제 3",
       "title": "홍보 및 행정사항",
-      "status": "in-progress",
+      "status": "done",
       "period": "9월 1주 ~ 10월 2주",
       "cooperationDepts": [
         "도시계획과",
@@ -264,14 +266,15 @@ const FALLBACK_FESTIVAL_DATA = {
         "[예정]개포 현대 2단지 아파트 입주자 대표회 미팅",
         "[예정] 자원순환과 : 쓰레기 수거 협조, 웅비환경에 따로 계약을 하는 방향으로..",
         "[예정] 업무 분장 : ",
-        "[예정]남부혈액원 주차 5대 협조 공문 발송: "
+        "[예정]남부혈액원 주차 5대 협조 공문 발송: ",
+        "[완료][26.10.31.] 당일 민원 대응(1건) : 인근 대치중학교 제37회 공인중개사 자격시험 진행 중 무대 음향 소음 민원 접수 → 즉시 볼륨 하향 및 마이크 사용 자제 조치 (차년도 10월 말 시험일정 사전 조회 반영)"
       ]
     },
     {
       "id": 5,
       "number": "추진과제 4",
       "title": "방침 및 계약",
-      "status": "in-progress",
+      "status": "done",
       "period": "9월 1주 ~ 9월 3주",
       "cooperationDepts": [],
       "details": [
@@ -284,7 +287,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "id": 6,
       "number": "추진과제 5",
       "title": "VIP 초청 관련",
-      "status": "in-progress",
+      "status": "done",
       "period": "9월 1주 ~ 10.29.(목)",
       "cooperationDepts": [
         "비서실",
@@ -294,14 +297,15 @@ const FALLBACK_FESTIVAL_DATA = {
         "[완료][26.9.3.] 구청장님 참석 비서실 협의: 참석 확정 (08:55 도착 ~ 10:35 환송)",
         "[완료][26.10.1.] 의전 담당자 지정 : 이희선 보건행정팀장(총괄) · 민지영 주무관(주차·영접) · 김하나·김하은·염지연 주무관",
         "[완료][26.10.27.] 서울남부혈액원 지상주차장 7면 협조 공문 발송 완료 (청장님 전용차량: 144두2259 카니발 검정 1번 전용면 확보, 10.28. 10:00 현장 미팅)",
-        "[진행][26.10.29. 마감] 비서실(최상문 ☎5008) 청장님 자료 6종 메모보고 회신: ①원페이퍼(진행시간 재확인 완료), ②인사말씀(양식 엄수·정책홍보실 김아름 주임 검토), ③참석자 명단(47명), ④좌석배치도, ⑤차량(144두2259)·하차·도보 동선, ⑥무대·19개 부스·청장님 전용 단축 걷기코스(밀미리교 좌측 분기 복귀) 및 사진촬영(정책홍보실 이정실·옥신해 주임) 사전 소통"
+        "[진행][26.10.29. 마감] 비서실(최상문 ☎5008) 청장님 자료 6종 메모보고 회신: ①원페이퍼(진행시간 재확인 완료), ②인사말씀(양식 엄수·정책홍보실 김아름 주임 검토), ③참석자 명단(47명), ④좌석배치도, ⑤차량(144두2259)·하차·도보 동선, ⑥무대·19개 부스·청장님 전용 단축 걷기코스(밀미리교 좌측 분기 복귀) 및 사진촬영(정책홍보실 이정실·옥신해 주임) 사전 소통",
+        "[완료][26.10.31.] 주요 내빈 27명 참석 확정 : 김현기 구청장, 서명옥 국회의원, 시의원 3명(이도희·민경희·강산욱), 구의원 9명(이재진 의장, 이인선·송영광 위원장, 이동호·박대융·김윤희·김영민·배근희·노미진), 체육회·종목단체 9명(허대무 회장, 유춘기·진석만·김대권 부회장, 이세찬 이사, 조정은 고문, 걷기 진우복 회장, 족구 박인천 회장, 선무예 허일웅 회장), 의약단체·협력병원 4명(맹우재 의사회장, 박재현 한의사회장, 김형지 약사회장, 최수연 서울대병원 강남센터 부원장)"
       ]
     },
     {
       "id": 7,
       "number": "추진과제 6",
       "title": "홍보물",
-      "status": "todo",
+      "status": "done",
       "period": "",
       "cooperationDepts": [],
       "details": [
@@ -316,11 +320,11 @@ const FALLBACK_FESTIVAL_DATA = {
       "id": 1,
       "category": "운영본부",
       "name": "보건행정과",
-      "scale": "6동",
-      "program": "운영본부(2동), 응급의료부스(1동), VIP 대기실(2동)",
-      "status": "확정",
-      "tables": 10,
-      "chairs": 20,
+      "scale": "8동",
+      "program": "체크인 부스(3동), VIP 부스(4동), 의료 부스(1동) — 총 824명 등록(사전 532·현장 292), 내빈 27명 영접, 안전사고 0건(무사고)",
+      "status": "완료",
+      "tables": 4,
+      "chairs": 59,
       "staffCount": 0,
       "manager": "오창선 (체크인 서승오)",
       "phone": "010-4907-9127",
@@ -329,7 +333,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "O",
       "electricityDetail": "케이터링(VIP)",
       "bannerText": "운영본부 / 응급의료센터 / VIP 대기실",
-      "remarks": ""
+      "remarks": "참여주민 824명(사전 532·현장 292) / 주요 내빈 27명 / 안전사고 0건(무사고)"
     },
     {
       "id": 2,
@@ -337,7 +341,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "name": "보건행정과 건강증진팀",
       "scale": "1동",
       "program": "금연 · 절주 · 영양 보건 사업 홍보 부스 및 건강생활실천 1:1 상담",
-      "status": "확정",
+      "status": "완료",
       "tables": 2,
       "chairs": 6,
       "staffCount": 6,
@@ -348,7 +352,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "일상 속 건강생활실천! 금연·절주·영양 홍보",
-      "remarks": ""
+      "remarks": "실적: 약 1,000명 참여"
     },
     {
       "id": 3,
@@ -356,7 +360,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "name": "보건행정과 서울체력장",
       "scale": "2동",
       "program": "내 신체나이 알아보기, 서울체력장 인증 체력측정 (성인: 2분제자리걷기·악력, 시니어: 의자일어서기)",
-      "status": "확정",
+      "status": "완료",
       "tables": 1,
       "chairs": 4,
       "staffCount": 3,
@@ -367,34 +371,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "서울체력장 강남센터, 체력측정",
-      "remarks": ""
+      "remarks": "실적: 120명 측정"
     },
     {
       "id": 4,
-      "category": "민간",
-      "name": "한국신체정보(주)",
-      "scale": "2동",
-      "program": "내 신체나이 알아보기, 『리얼피티 프로 플러스』 40초 바른자세·체형 정밀 분석 및 AI 맞춤 운동처방",
-      "status": "확정",
-      "tables": 1,
-      "chairs": 4,
-      "staffCount": 2,
-      "manager": "박준홍",
-      "phone": "010-9985-3732",
-      "adminPhone": "",
-      "mobilePhone": "010-9985-3732",
-      "electricity": "O",
-      "electricityDetail": "43인치 키오스크, 프린터",
-      "bannerText": "강남구민 “건강의 첫 걸음” 바른자세 검사",
-      "remarks": ""
-    },
-    {
-      "id": 5,
       "category": "보건소 부서",
       "name": "건강관리과 웰에이징센터",
       "scale": "2동",
       "program": "내 신체나이 알아보기 - 웰에이징센터 맞춤형 신체나이·근력 운동 실습 및 상담",
-      "status": "확정",
+      "status": "완료",
       "tables": 4,
       "chairs": 8,
       "staffCount": 4,
@@ -405,15 +390,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "O",
       "electricityDetail": "태블릿 PC 3대",
       "bannerText": "웰에이징센터 맞춤형 운동프로그램",
-      "remarks": ""
+      "remarks": "실적: 200명 참여"
     },
     {
-      "id": 6,
+      "id": 5,
       "category": "보건소 부서",
       "name": "질병관리과 감염병예방팀",
-      "scale": "2동",
+      "scale": "1동",
       "program": "‘강남’구가 알려주고 ‘도’움되는 ‘감’염병 예방지식(강남도감) 퀴즈 및 수인성 감염병 예방 홍보",
-      "status": "확정",
+      "status": "완료",
       "tables": 2,
       "chairs": 5,
       "staffCount": 6,
@@ -424,15 +409,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "‘강남’구가 알려주고 ‘도’움되는 ‘감’염병 예방지식(강남도감)",
-      "remarks": ""
+      "remarks": "실적: 약 1,000명 참여 (예방접종·결핵 예방 각 500명)"
     },
     {
-      "id": 7,
+      "id": 6,
       "category": "보건소 부서",
       "name": "질병관리과 감염병대응팀",
       "scale": "1동",
       "program": "손은 깨끗하게, 진드기는 멀리! 건강한 강남 ON (뷰박스 손씻기 형광 체험, 진드기 기피제 배부)",
-      "status": "확정",
+      "status": "완료",
       "tables": 2,
       "chairs": 10,
       "staffCount": 9,
@@ -443,15 +428,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "손은 깨끗하게, 감염병은 멀리! 건강한 강남 ON",
-      "remarks": ""
+      "remarks": "실적: 손씻기·매개체 대응 600명 참여"
     },
     {
-      "id": 8,
+      "id": 7,
       "category": "보건소 부서",
       "name": "질병관리과 만성질환관리팀",
       "scale": "1동",
       "program": "평생 건강의 지름길, 만성질환 관리로부터! (혈압·혈당 무료 측정 및 대사증후군 1:1 상담)",
-      "status": "확정",
+      "status": "완료",
       "tables": 2,
       "chairs": 10,
       "staffCount": 5,
@@ -462,15 +447,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "평생 건강의 지름길, 만성질환 관리로부터!",
-      "remarks": ""
+      "remarks": "실적: 500명 참여"
     },
     {
-      "id": 9,
+      "id": 8,
       "category": "보건소 부서",
       "name": "의약과 의무1팀",
       "scale": "2동",
       "program": "생명을 살리는 4분의 기적, 두근두근 CPR 심폐소생술 및 자동심장충격기(AED) 실습 체험존",
-      "status": "확정",
+      "status": "완료",
       "tables": 4,
       "chairs": 8,
       "staffCount": 3,
@@ -481,15 +466,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "두근두근 CPR 체험존",
-      "remarks": ""
+      "remarks": "실적: 139명 참여"
     },
     {
-      "id": 10,
+      "id": 9,
       "category": "보건소 부서",
       "name": "의약과 약무팀",
       "scale": "2동",
       "program": "불법 마약 근절 및 가정 내 폐의약품 안심 수거 캠페인 (마약류 모형 전시 및 OX 퀴즈, VR 체험)",
-      "status": "확정",
+      "status": "완료",
       "tables": 4,
       "chairs": 8,
       "staffCount": 10,
@@ -500,15 +485,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "O",
       "electricityDetail": "VR기기(오큘러스), 충전",
       "bannerText": "호기심이 중독으로, 마약 접근 금지! \n불법 마약 근절 캠페인",
-      "remarks": ""
+      "remarks": "실적: 약 500명 참여"
     },
     {
-      "id": 11,
+      "id": 10,
       "category": "보건소 부서",
       "name": "건강관리과 정신건강팀",
       "scale": "1동",
       "program": "마음건강 충전소 (우울·스트레스 선별검사, 마음안심버스 사업 홍보, 전문 정신건강 상담)",
-      "status": "확정",
+      "status": "완료",
       "tables": 2,
       "chairs": 10,
       "staffCount": 4,
@@ -519,15 +504,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "강남구와 함께하는 마음건강 충전소",
-      "remarks": ""
+      "remarks": "실적: 800명 참여"
     },
     {
-      "id": 12,
+      "id": 11,
       "category": "보건소 부서",
       "name": "건강관리과 치매안심센터",
       "scale": "1동",
       "program": "강남구치매안심센터 행복한 기억찾기 캠페인 (치매 선별검사 및 인지강화 프로그램)",
-      "status": "확정",
+      "status": "완료",
       "tables": 3,
       "chairs": 8,
       "staffCount": 4,
@@ -538,15 +523,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "강남구치매안심센터 행복한 기억찾기 캠페인",
-      "remarks": ""
+      "remarks": "실적: 320명 참여"
     },
     {
-      "id": 13,
+      "id": 12,
       "category": "민간",
       "name": "강남구의사회",
       "scale": "1동",
       "program": "강남구의사회 & 메드렉스병원 ‘머리부터 발끝까지 안전하게 걷자’ (관절·척추 정형외과 전문의 상담)",
-      "status": "확정",
+      "status": "완료",
       "tables": 2,
       "chairs": 4,
       "staffCount": 8,
@@ -557,15 +542,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "O",
       "electricityDetail": "노트북 1대 충전",
       "bannerText": "강남구의사회·메드렉스병원이 함께하는 \n머리부터 발끝까지 안전하게 걷자",
-      "remarks": ""
+      "remarks": "실적: 100명 참여"
     },
     {
-      "id": 14,
+      "id": 13,
       "category": "민간",
       "name": "강남구한의사회",
       "scale": "2동",
       "program": "바른자세가 건강의 시작, 한의학을 통한 체형검사 체험존 (체형 균형 및 경락 건강 상담)",
-      "status": "확정",
+      "status": "완료",
       "tables": 4,
       "chairs": 12,
       "staffCount": 6,
@@ -576,18 +561,18 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "O",
       "electricityDetail": "체형측정검사기 1대, 노트북 2대",
       "bannerText": "바른자세가 건강의 시작 한의학을 통한 체형검사 체험존",
-      "remarks": ""
+      "remarks": "실적: 120명 참여"
     },
     {
-      "id": 15,
+      "id": 14,
       "category": "민간",
       "name": "서울대학교병원 강남센터",
       "scale": "1동",
       "program": "가정의학과 전문의 1:1 맞춤형 문진 및 만성질환 예방 생활습관 의학 전문 심층 상담",
-      "status": "확정",
+      "status": "완료",
       "tables": 2,
       "chairs": 7,
-      "staffCount": 5,
+      "staffCount": 9,
       "manager": "임동은",
       "phone": "010-5663-8276",
       "adminPhone": "02-2112-5487",
@@ -595,15 +580,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "O",
       "electricityDetail": "노트북1, 혈압계3",
       "bannerText": "서울대학교병원 강남센터와 함께하는 \n맞춤형 문진 및 건강 상담",
-      "remarks": ""
+      "remarks": "실적: 180명 검진"
     },
     {
-      "id": 16,
+      "id": 15,
       "category": "민간",
       "name": "강남 차병원",
       "scale": "3동",
       "program": "중년 여성 유방 자가검진 촉지 교육, 부인과 여성질환 및 맞춤 영양 상담",
-      "status": "확정",
+      "status": "완료",
       "tables": 6,
       "chairs": 16,
       "staffCount": 14,
@@ -613,16 +598,16 @@ const FALLBACK_FESTIVAL_DATA = {
       "mobilePhone": "010-2698-0992",
       "electricity": "O",
       "electricityDetail": "미량영양소 측정기기 2대, 태블릿 2대 충전용 콘센트",
-      "bannerText": "강남차병원과 함께하는 여성건강 레벨업 2개 / 균형영양 레벨업 1개",
-      "remarks": ""
+      "bannerText": "강남차병원과 함께하는 여성건강 레벨업 2개 / 강남차병원과 함께하는 균형영양 레벨업 1개",
+      "remarks": "실적: 약 1,000명 참여"
     },
     {
-      "id": 17,
+      "id": 16,
       "category": "민간",
       "name": "자생한방병원",
       "scale": "2동",
       "program": "척추·관절 간이 침 치료, 근육 테이핑 요법 시연 및 척추 건강 1:1 한방 상담",
-      "status": "확정",
+      "status": "완료",
       "tables": 4,
       "chairs": 10,
       "staffCount": 7,
@@ -633,15 +618,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "한방척추전문병원 자생한방병원 의료지원",
-      "remarks": ""
+      "remarks": "실적: 100명 참여"
     },
     {
-      "id": 18,
+      "id": 17,
       "category": "민간",
       "name": "유디치과",
       "scale": "1동",
       "program": "이동형 대형 치과검진버스 연계 구강 검진 및 구강건강 관리법 안내, 칫솔질 실습",
-      "status": "확정",
+      "status": "완료",
       "tables": 2,
       "chairs": 4,
       "staffCount": 12,
@@ -652,15 +637,15 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "O",
       "electricityDetail": "부스 TV 설치, 버스(자가발전)",
       "bannerText": "유디치과와 함께하는 건강관리",
-      "remarks": ""
+      "remarks": "실적: 100명 구강 검진"
     },
     {
-      "id": 19,
+      "id": 18,
       "category": "민간",
       "name": "고려대학교 척추측만증연구소",
       "scale": "2동",
       "program": "거북목·척추측만증 X-Ray 무료 방사선 촬영 및 척추교정 전문의 1:1 상담",
-      "status": "확정",
+      "status": "완료",
       "tables": 4,
       "chairs": 8,
       "staffCount": 4,
@@ -671,7 +656,26 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "O",
       "electricityDetail": "X-ray 버스(220v 가능)",
       "bannerText": "고려대학교 척추측만증연구소\n척추 건강 체크존",
-      "remarks": ""
+      "remarks": "실적: 500명 상담"
+    },
+    {
+      "id": 19,
+      "category": "민간",
+      "name": "한국신체정보(주)",
+      "scale": "2동",
+      "program": "내 신체나이 알아보기, 『리얼피티 프로 플러스』 40초 바른자세·체형 정밀 분석 및 AI 맞춤 운동처방",
+      "status": "완료",
+      "tables": 1,
+      "chairs": 4,
+      "staffCount": 3,
+      "manager": "박준홍",
+      "phone": "010-9985-3732",
+      "adminPhone": "",
+      "mobilePhone": "010-9985-3732",
+      "electricity": "O",
+      "electricityDetail": "43인치 키오스크, 프린터",
+      "bannerText": "강남구민 “건강의 첫 걸음” 바른자세 검사",
+      "remarks": "실적: 125명 참여"
     },
     {
       "id": 20,
@@ -679,10 +683,10 @@ const FALLBACK_FESTIVAL_DATA = {
       "name": "케이스튜디오 (디아르스)",
       "scale": "1동",
       "program": "1:1 퍼스널 컬러 진단 및 계절별 산책·야외운동 맞춤 메이크업 재능기부 봉사",
-      "status": "확정",
+      "status": "완료",
       "tables": 2,
       "chairs": 6,
-      "staffCount": 4,
+      "staffCount": 3,
       "manager": "고명규",
       "phone": "010-9788-9471",
       "adminPhone": "",
@@ -690,7 +694,7 @@ const FALLBACK_FESTIVAL_DATA = {
       "electricity": "X",
       "electricityDetail": "",
       "bannerText": "디아르스\n퍼스널 컬러 진단 및 산책을 위한 메이크업",
-      "remarks": ""
+      "remarks": "실적: 약 100명 참여"
     }
   ],
   "schedule": [
@@ -2305,5 +2309,6 @@ const FALLBACK_FESTIVAL_DATA = {
       },
       "remarks": "대행사 1명"
     }
-  ]
+  ],
+  "lastUpdated": "2026-11-06T11:15:00.000Z"
 };

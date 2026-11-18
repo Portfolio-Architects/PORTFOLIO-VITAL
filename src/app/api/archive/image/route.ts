@@ -22,8 +22,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing path parameter' }, { status: 400 });
     }
 
+    if (relPath.includes('\0') || /%00/i.test(relPath)) {
+      return NextResponse.json({ error: 'Null bytes forbidden in path' }, { status: 400 });
+    }
+
     const fullPath = path.resolve(ARCHIVE_ROOT, relPath);
-    if (!fullPath.startsWith(ARCHIVE_ROOT + path.sep) && fullPath !== ARCHIVE_ROOT) {
+    const normalizedFull = path.normalize(fullPath).toLowerCase();
+    const normalizedRoot = path.normalize(ARCHIVE_ROOT).toLowerCase();
+    const rootWithSep = normalizedRoot.endsWith(path.sep)
+      ? normalizedRoot
+      : normalizedRoot + path.sep;
+
+    if (!normalizedFull.startsWith(rootWithSep) && normalizedFull !== normalizedRoot) {
       return NextResponse.json({ error: 'Forbidden path traversal' }, { status: 403 });
     }
 

@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { ProjectSimulationSummary, StatItemSimulationSummary, SimulationEntry, BudgetCategory, BudgetEntry } from '@/types';
+import { useVirtualList } from '@/hooks/useVirtualList';
 import {
   Search,
   Filter,
@@ -398,6 +399,40 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
     return null;
   }, [viewMode, filteredProjects, statTotals]);
 
+  // Virtualization Setup
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isTestEnv =
+    process.env.NODE_ENV === 'test' ||
+    (typeof window !== 'undefined' && window.innerHeight === 0);
+
+  // Flattened rows for 'project' view
+  const flatProjectRows = useMemo(() => {
+    if (viewMode !== 'project') return [];
+    return filteredProjects.map((p, pIdx) => ({
+      p,
+      pIdx,
+      isNegative: p.finalExpectedBalance < 0,
+      isHighExecution: p.finalExpectedBalance >= 0 && p.executionRate > 90,
+    }));
+  }, [viewMode, filteredProjects]);
+
+  const totalVirtualItems = viewMode === 'stat' ? groupedStatItems.length : flatProjectRows.length;
+
+  const virtualMetrics = useVirtualList({
+    totalItems: totalVirtualItems,
+    itemHeight: viewMode === 'stat' ? 140 : 52,
+    overscan: viewMode === 'stat' ? 1 : 4,
+    containerRef: scrollContainerRef,
+  });
+
+  const vStartIndex = isTestEnv ? 0 : virtualMetrics.startIndex;
+  const vEndIndex = isTestEnv ? totalVirtualItems : virtualMetrics.endIndex;
+  const topPadding = isTestEnv ? 0 : virtualMetrics.topPadding;
+  const bottomPadding = isTestEnv ? 0 : virtualMetrics.bottomPadding;
+
+  const visibleGroups = isTestEnv ? groupedStatItems : groupedStatItems.slice(vStartIndex, vEndIndex);
+  const visibleProjectRows = isTestEnv ? flatProjectRows : flatProjectRows.slice(vStartIndex, vEndIndex);
+
   return (
     <div className="bg-white border border-slate-200/80 rounded-xl p-5 md:p-6 shadow-2xs space-y-5 text-slate-800">
       {/* Table Header & Controls */}
@@ -407,7 +442,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
           <button
             type="button"
             onClick={() => setViewMode('stat')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${
               viewMode === 'stat'
                 ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -419,7 +454,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
           <button
             type="button"
             onClick={() => setViewMode('project')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${
               viewMode === 'project'
                 ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -431,7 +466,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
           <button
             type="button"
             onClick={() => setViewMode('entry')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer ${
               viewMode === 'entry'
                 ? 'bg-white text-slate-900 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -457,7 +492,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                       ? 'bg-slate-900 text-white border-slate-900'
                       : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80'
                   }`}
-                  title="시뮬레이션 등록 항목이 있는 통계목만 압축 표시합니다."
+                  title="등록 항목 보유 통계목 필터"
                 >
                   <span>등록 통계목만</span>
                   <span
@@ -478,7 +513,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                       ? 'bg-amber-600 text-white border-amber-600'
                       : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80'
                   }`}
-                  title="일상경비가 교부된 통계목만 압축 표시합니다."
+                  title="일상경비 교부 통계목 필터"
                 >
                   <Coins className="w-3.5 h-3.5" />
                   <span>일상경비 교부목만</span>
@@ -561,7 +596,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
           onLoadTestPreset={onLoadTestPreset}
         />
       ) : (
-        <div className="overflow-x-auto custom-scrollbar rounded-xl border border-slate-200/80 bg-white">
+        <div ref={scrollContainerRef} className="overflow-x-auto custom-scrollbar rounded-xl border border-slate-200/80 bg-white">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
               <tr className="bg-slate-50/80 text-slate-500 border-b border-slate-200/80 font-bold text-xs whitespace-nowrap">
@@ -579,9 +614,14 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-mono text-sm">
+              {topPadding > 0 && (
+                <tr style={{ height: `${topPadding}px` }} aria-hidden="true">
+                  <td colSpan={7} style={{ padding: 0, border: 0 }} />
+                </tr>
+              )}
               {/* 1. Render Stat Item Summaries Grouped by Detailed Project View */}
               {viewMode === 'stat' &&
-                groupedStatItems.map((group, groupIdx) => {
+                visibleGroups.map((group, groupIdx) => {
                   const isCollapsed = !!collapsedProjects[group.detailedProject];
 
                   return (
@@ -1091,9 +1131,7 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
 
               {/* 2. Render Project Summaries View */}
               {viewMode === 'project' &&
-                filteredProjects.map((p, pIdx) => {
-                  const isNegative = p.finalExpectedBalance < 0;
-                  const isHighExecution = !isNegative && p.executionRate > 90;
+                visibleProjectRows.map(({ p, pIdx, isNegative, isHighExecution }) => {
 
                   return (
                     <tr
@@ -1244,6 +1282,11 @@ export const SimulationResultTable: React.FC<SimulationResultTableProps> = React
                     </tr>
                   );
                 })}
+              {bottomPadding > 0 && (
+                <tr style={{ height: `${bottomPadding}px` }} aria-hidden="true">
+                  <td colSpan={7} style={{ padding: 0, border: 0 }} />
+                </tr>
+              )}
 
               {/* Empty Data Row */}
               {((viewMode === 'project' && filteredProjects.length === 0) ||

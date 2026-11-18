@@ -74,13 +74,13 @@ const SemanticResultCardItem = React.memo(({ doc, query, onOpenNode }: SemanticR
     <button 
       type="button"
       onClick={handleClick}
-      className="text-left flex flex-col gap-2 p-5 bg-white/70 backdrop-blur-xs border border-slate-200/50 rounded-2xl shadow-2xs hover:border-indigo-400 hover:shadow-md hover:scale-[1.005] hover:bg-white transition-all duration-150 cursor-pointer group"
+      className="text-left flex flex-col gap-2 p-5 bg-white/95 border border-slate-200/50 rounded-2xl shadow-2xs hover:border-indigo-400 hover:shadow-md hover:scale-[1.005] hover:bg-white transition-transform duration-150 cursor-pointer group"
     >
       <div className="flex items-center justify-between w-full">
         <span className="text-[14.5px] font-bold text-slate-800 group-hover:text-[var(--color-primary)] transition-colors">
           <FileText size={15} className="inline mr-1.5 text-indigo-500" /> {nodeId}
         </span>
-        <span className="text-[10.5px] font-bold text-indigo-700 bg-indigo-500/10 border border-indigo-500/15 px-2.5 py-1 rounded-lg group-hover:bg-indigo-500 group-hover:text-white transition-all duration-150 whitespace-nowrap shadow-2xs">
+        <span className="text-[10.5px] font-bold text-indigo-700 bg-indigo-500/10 border border-indigo-500/15 px-2.5 py-1 rounded-lg group-hover:bg-indigo-500 group-hover:text-white transition-colors duration-150 whitespace-nowrap shadow-2xs">
           지식스캔 열기 📄
         </span>
       </div>
@@ -109,13 +109,13 @@ const LocalResultCardItem = React.memo(({ result, query, onOpenNode }: LocalResu
     <button 
       type="button"
       onClick={handleClick}
-      className="text-left flex flex-col gap-2 p-5 bg-white/70 backdrop-blur-xs border border-slate-200/50 rounded-2xl shadow-2xs hover:border-orange-400 hover:shadow-md hover:scale-[1.005] hover:bg-white transition-all duration-150 cursor-pointer group"
+      className="text-left flex flex-col gap-2 p-5 bg-white/95 border border-slate-200/50 rounded-2xl shadow-2xs hover:border-orange-400 hover:shadow-md hover:scale-[1.005] hover:bg-white transition-transform duration-150 cursor-pointer group"
     >
       <div className="flex items-center justify-between w-full">
         <span className="text-[14.5px] font-bold text-slate-800 group-hover:text-orange-600 transition-colors">
           <FileText size={15} className="inline mr-1.5 text-orange-500" /> {displayTitle}
         </span>
-        <span className="text-[10.5px] font-bold text-orange-700 bg-orange-500/10 border border-orange-500/15 px-2.5 py-1 rounded-lg group-hover:bg-orange-500 group-hover:text-white transition-all duration-150 whitespace-nowrap shadow-2xs">
+        <span className="text-[10.5px] font-bold text-orange-700 bg-orange-500/10 border border-orange-500/15 px-2.5 py-1 rounded-lg group-hover:bg-orange-500 group-hover:text-white transition-colors duration-150 whitespace-nowrap shadow-2xs">
           로컬 문서 열기 📄
         </span>
       </div>
@@ -164,7 +164,7 @@ const DriveResultCardItem = React.memo(({
 
   return (
     <div 
-      className="flex flex-col p-5 bg-white/80 border border-slate-200/50 rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-150"
+      className="flex flex-col p-5 bg-white/80 border border-slate-200/50 rounded-2xl shadow-2xs hover:shadow-xs transition-colors duration-150"
     >
       <div className="flex items-center justify-between w-full">
         <div className="flex flex-col text-left">
@@ -183,7 +183,7 @@ const DriveResultCardItem = React.memo(({
           <button
             type="button"
             onClick={handleCopy}
-            className={`px-2.5 py-1 text-[10.5px] font-bold rounded-lg border transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+            className={`px-2.5 py-1 text-[10.5px] font-bold rounded-lg border transition-colors duration-150 cursor-pointer whitespace-nowrap shadow-2xs ${
               copiedPath === res.fullPath
                 ? 'bg-emerald-500 text-white border-emerald-600'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -194,7 +194,7 @@ const DriveResultCardItem = React.memo(({
           <button
             type="button"
             onClick={handleToggle}
-            className="px-2.5 py-1 text-[10.5px] font-bold bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all cursor-pointer whitespace-nowrap shadow-2xs"
+            className="px-2.5 py-1 text-[10.5px] font-bold bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-150 cursor-pointer whitespace-nowrap shadow-2xs"
           >
             {isExpanded ? '닫기 ▴' : '문맥 보기 ▾'}
           </button>
@@ -276,7 +276,7 @@ function SearchResultModalComponent({ isOpen, onClose, query, results: localResu
   const driveError = driveSearchMutation.error ? (driveSearchMutation.error as Error).message : '';
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-md transition-opacity duration-300" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 transition-opacity duration-300" onClick={onClose}>
       <div 
         className="pointer-events-auto glass-panel rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] transition-transform duration-300 scale-100"
         onClick={e => e.stopPropagation()}
@@ -297,7 +297,7 @@ function SearchResultModalComponent({ isOpen, onClose, query, results: localResu
           <button 
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors duration-150 cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -308,7 +308,7 @@ function SearchResultModalComponent({ isOpen, onClose, query, results: localResu
           <button
             type="button"
             onClick={handleSetWikiTab}
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors duration-150 cursor-pointer ${
               activeTab === 'wiki'
                 ? 'bg-indigo-500 text-white shadow-xs'
                 : 'text-slate-500 hover:bg-slate-200/50'
@@ -319,7 +319,7 @@ function SearchResultModalComponent({ isOpen, onClose, query, results: localResu
           <button
             type="button"
             onClick={handleSetFileTab}
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors duration-150 cursor-pointer ${
               activeTab === 'file'
                 ? 'bg-blue-500 text-white shadow-xs'
                 : 'text-slate-500 hover:bg-slate-200/50'

@@ -75,6 +75,12 @@ describe('VITAL 행정 공문서 표준 포매터 및 린터 테스트 (Rule M)'
       const formatted = formatAdministrativeLineBreaks(collapsed);
       expect(formatted).toBe('▢ 1. 추진 배경\n❍ 첫 번째 항목을 점검함.\n❍ 두 번째 항목을 반영함.');
     });
+
+    it('한컴 PUA 기호(󰏚)를 표준 유니코드(▣)로 치환하고 마크다운 이중 불릿(- ❍, - •, - ※)을 단일화해야 함', () => {
+      const polluted = '## 󰏚 점검 보고\n- ❍ 핵심 조치 완료함.\n  - • 세부 항목 확인됨.\n  - ※ 유의사항 준수함.';
+      const sanitized = sanitizeAdministrativeText(polluted);
+      expect(sanitized).toBe('## ▣ 점검 보고\n- 핵심 조치 완료함.\n  - 세부 항목 확인됨.\n  ※ 유의사항 준수함.');
+    });
   });
 
   describe('5. 공문서 종결 부호 보정 (ensureAdministrativeEnding)', () => {

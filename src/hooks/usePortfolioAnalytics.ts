@@ -1,6 +1,41 @@
 import { useState, useMemo } from 'react';
 import { BudgetCategory, BudgetEntry } from '@/types';
 
+export interface ExecutionRiskCategoryItem {
+  id: string;
+  detailedProject: string;
+  formationItem?: string;
+  statItem?: string;
+  name: string;
+  totalBudget: number;
+  generalExecuted: number;
+  dailyIssued: number;
+  dailyExecuted: number;
+  generalPlanned: number;
+  dailyPlanned: number;
+  lockedAmount: number;
+  generalUnplanned: number;
+  dailyUnplanned: number;
+  unplannedRisk: number;
+}
+
+export interface ExecutionDiagnosisSummary {
+  totalBudget: number;
+  generalExecuted: number;
+  dailyIssued: number;
+  dailyExecuted: number;
+  generalPlanned: number;
+  dailyPlanned: number;
+  lockedAmount: number;
+  committedPlanned: number;
+  generalUnplanned: number;
+  dailyUnplanned: number;
+  unplannedRisk: number;
+  realExecutionRate: number;
+  committedDesignRate: number;
+  riskCategories: ExecutionRiskCategoryItem[];
+}
+
 function resolveDetailedProject(category: BudgetCategory): string {
   return (
     category.detailedProject?.trim() ||
@@ -123,6 +158,141 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
       return result.sort((a, b) => a.name.localeCompare(b.name));
     }
   }, [budgetCategories, budgetEntries, selectedProject, detailedProjects]);
+
+  // 일반지출 + 부서 일상경비 통장(daily_expense) 통합 집행·불용 위험 정밀 분해 (오차 0원 수리 정합성 보장)
+  const executionDiagnosis = useMemo<ExecutionDiagnosisSummary>(() => {
+    const entriesByCatId = new Map<string, BudgetEntry[]>();
+    for (let i = 0; i < budgetEntries.length; i++) {
+      const e = budgetEntries[i];
+      let list = entriesByCatId.get(e.categoryId);
+      if (!list) {
+        list = [];
+        entriesByCatId.set(e.categoryId, list);
+      }
+      list.push(e);
+    }
+
+    let totalGeneralExecuted = 0;
+    let totalDailyIssued = 0;
+    let totalDailyExecuted = 0;
+    let totalGeneralPlanned = 0;
+    let totalDailyPlanned = 0;
+    let totalLockedAmount = 0;
+    let totalGeneralUnplanned = 0;
+    let totalDailyUnplanned = 0;
+    const riskCategories: ExecutionRiskCategoryItem[] = [];
+
+    for (let i = 0; i < filteredCategories.length; i++) {
+      const cat = filteredCategories[i];
+      const catEntries = entriesByCatId.get(cat.id) || [];
+
+      let generalSpent = 0;
+      let dailyIssued = 0;
+      let dailyExecuted = 0;
+      let generalPlanned = 0;
+      let dailyPlanned = 0;
+
+      for (let j = 0; j < catEntries.length; j++) {
+        const e = catEntries[j];
+        if (e.isPlanned) {
+          if (!e.isSettled) {
+            if (e.actionType === 'daily_expense') {
+              dailyPlanned += e.amount;
+            } else {
+              generalPlanned += e.amount;
+            }
+          }
+        } else if (e.actionType !== 'settle') {
+          if (!e.actionType || e.actionType === 'general' || e.actionType === 'correction' || e.actionType === 'transfer') {
+            if (e.actionType === 'transfer') {
+              if (e.transferDirection === 'out') generalSpent += e.amount;
+              else generalSpent -= e.amount;
+            } else {
+              generalSpent += e.amount;
+            }
+          } else if (e.actionType === 'issuance') {
+            dailyIssued += e.amount;
+          } else if (e.actionType === 'daily_expense') {
+            dailyExecuted += e.amount;
+          }
+        }
+      }
+
+      let lockedAmount = 0;
+      if (cat.subItems) {
+        for (let s = 0; s < cat.subItems.length; s++) {
+          const sub = cat.subItems[s];
+          if (sub.isLocked) {
+            lockedAmount += sub.amount;
+          } else if (sub.calculations) {
+            for (let k = 0; k < sub.calculations.length; k++) {
+              if (sub.calculations[k].isLocked) {
+                lockedAmount += sub.calculations[k].amount;
+              }
+            }
+          }
+        }
+      }
+
+      const generalUnplanned = cat.totalBudget - generalSpent - dailyIssued - generalPlanned - lockedAmount;
+      const dailyUnplanned = dailyIssued - dailyExecuted - dailyPlanned;
+      const unplannedRisk = generalUnplanned + dailyUnplanned;
+
+      totalGeneralExecuted += generalSpent;
+      totalDailyIssued += dailyIssued;
+      totalDailyExecuted += dailyExecuted;
+      totalGeneralPlanned += generalPlanned;
+      totalDailyPlanned += dailyPlanned;
+      totalLockedAmount += lockedAmount;
+      totalGeneralUnplanned += generalUnplanned;
+      totalDailyUnplanned += dailyUnplanned;
+
+      if (unplannedRisk > 0) {
+        riskCategories.push({
+          id: cat.id,
+          detailedProject: resolveDetailedProject(cat),
+          formationItem: cat.formationItem,
+          statItem: cat.statItem,
+          name: cat.name,
+          totalBudget: cat.totalBudget,
+          generalExecuted: generalSpent,
+          dailyIssued,
+          dailyExecuted,
+          generalPlanned,
+          dailyPlanned,
+          lockedAmount,
+          generalUnplanned,
+          dailyUnplanned,
+          unplannedRisk,
+        });
+      }
+    }
+
+    riskCategories.sort((a, b) => b.unplannedRisk - a.unplannedRisk || a.name.localeCompare(b.name));
+
+    const committedPlanned = totalGeneralPlanned + totalDailyPlanned + totalLockedAmount;
+    const unplannedRisk = totalGeneralUnplanned + totalDailyUnplanned;
+    const realExecutedTotal = totalGeneralExecuted + totalDailyExecuted;
+    const realExecutionRate = totalBudget > 0 ? (realExecutedTotal / totalBudget) * 100 : 0;
+    const committedDesignRate = totalBudget > 0 ? ((realExecutedTotal + committedPlanned) / totalBudget) * 100 : 0;
+
+    return {
+      totalBudget,
+      generalExecuted: totalGeneralExecuted,
+      dailyIssued: totalDailyIssued,
+      dailyExecuted: totalDailyExecuted,
+      generalPlanned: totalGeneralPlanned,
+      dailyPlanned: totalDailyPlanned,
+      lockedAmount: totalLockedAmount,
+      committedPlanned,
+      generalUnplanned: totalGeneralUnplanned,
+      dailyUnplanned: totalDailyUnplanned,
+      unplannedRisk,
+      realExecutionRate,
+      committedDesignRate,
+      riskCategories,
+    };
+  }, [filteredCategories, budgetEntries, totalBudget]);
 
 
   // Monthly Execution Trend Analysis & Target Spend-down Planner
@@ -362,6 +532,7 @@ export function usePortfolioAnalytics(budgetCategories: BudgetCategory[], budget
     executionRate,
     pieData,
     breakdownData,
+    executionDiagnosis,
     monthlyExecutionData,
     maxSpendMonth,
     avgMonthlySpend,

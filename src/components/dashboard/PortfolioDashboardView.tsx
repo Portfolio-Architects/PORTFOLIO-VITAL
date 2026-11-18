@@ -1,31 +1,9 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { PieChart, Pie, Cell, Line, ReferenceLine, XAxis, YAxis, Tooltip as RechartsTooltip, Area, CartesianGrid, ComposedChart, ResponsiveContainer } from 'recharts';
-import { Task, BudgetCategory, BudgetEntry } from '@/types';
+import { Task, BudgetCategory, BudgetEntry, ModuleType } from '@/types';
 import { usePortfolioAnalytics } from '@/hooks/usePortfolioAnalytics';
-import { ContactsBox } from './ContactsBox';
-
-
-function deferIdle(cb: () => void, timeout: number, fallbackMs: number) {
-  if (typeof window === 'undefined') return () => {};
-  const isIdle = 'requestIdleCallback' in window, w = window as any;
-  const id = isIdle ? w.requestIdleCallback(cb, { timeout }) : setTimeout(cb, fallbackMs);
-  return () => {
-    if (isIdle) {
-      w.cancelIdleCallback(id);
-    } else {
-      clearTimeout(id);
-    }
-  };
-}
-
-function useIdleMount(fallbackMs = 200) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    const cancel = deferIdle(() => setMounted(true), 400, fallbackMs);
-    return cancel;
-  }, [fallbackMs]);
-  return mounted;
-}
+import { SectionHeader } from '@/components/ui';
+import { IntegratedShowcaseSection } from './IntegratedShowcaseSection';
 
 function useDeferredChartMount() {
   const [shouldRender, setShouldRender] = useState(false);
@@ -46,6 +24,7 @@ interface DashboardProps {
   budgetEntries: BudgetEntry[];
   onLogout?: () => void;
   appMode?: 'HCHPS' | 'VITAL';
+  onNavigateModule?: (module: ModuleType) => void;
 }
 
 const MONTH_KO_MAP: Record<string, string> = {
@@ -74,15 +53,16 @@ const CustomPieTooltip = React.memo(({ active, payload }: any) => {
         : typeof data.share === 'number'
           ? `${data.share.toFixed(1)}%`
           : null;
+    const unitLabel = data.unit || '원';
     return (
-      <div className="bg-white p-3 rounded-lg shadow-md border border-slate-200/90 flex flex-col gap-1 text-xs font-semibold text-slate-900">
+      <div className="relative z-50 bg-white p-3 rounded-lg shadow-md border border-slate-200/90 flex flex-col gap-1 text-xs font-semibold text-slate-900 max-w-[260px]">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-xs shrink-0" style={{ backgroundColor: data.color }} />
-          <span className="text-slate-700 font-bold">{data.name}</span>
+          <span className="text-slate-700 font-bold truncate">{data.name}</span>
         </div>
         <div className="flex items-baseline justify-between gap-2 pt-0.5">
           <span className="font-mono tabular-nums text-slate-900 font-bold">
-            {Number(data.value).toLocaleString()}원
+            {Number(data.value).toLocaleString()}{unitLabel}
           </span>
           {formattedShare && (
             <span className="font-mono tabular-nums text-[11px] font-semibold text-slate-500">
@@ -90,6 +70,19 @@ const CustomPieTooltip = React.memo(({ active, payload }: any) => {
             </span>
           )}
         </div>
+        {typeof data.achievementRate === 'number' && (
+          <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 pt-0.5 border-t border-slate-100">
+            <span>목표 {Number(data.targetCount || 0).toLocaleString()}{unitLabel}</span>
+            <span className="font-mono tabular-nums font-bold text-slate-800">
+              달성 {data.achievementRate.toFixed(1)}%
+            </span>
+          </div>
+        )}
+        {data.secondaryMetricLabel && (
+          <p className="text-[10px] font-medium text-slate-500 leading-snug pt-0.5">
+            {data.secondaryMetricLabel}
+          </p>
+        )}
       </div>
     );
   }
@@ -156,21 +149,16 @@ const CustomComposedTooltip = React.memo(({ active, payload, label, isHchps }: a
 });
 CustomComposedTooltip.displayName = 'CustomComposedTooltip';
 
-const HCHPS_THEME_COLORS = ['#0f172a', '#059669', '#334155', '#10b981', '#64748b', '#94a3b8'];
-const VITAL_THEME_COLORS = ['#0f172a', '#2563eb', '#334155', '#3b82f6', '#64748b', '#94a3b8'];
-
-function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appMode = 'VITAL' }: DashboardProps) {
-  const renderContacts = useIdleMount();
+function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appMode = 'VITAL', onNavigateModule }: DashboardProps) {
   const renderCharts = useDeferredChartMount();
 
   const {
     selectedProject, setSelectedProject,
     detailedProjects,
-    totalBudget,
     executedBudget,
     remainingBudget,
     executionRate,
-    breakdownData,
+    executionDiagnosis,
     monthlyExecutionData,
     maxSpendMonth,
     remainingTargetAmount,
@@ -178,45 +166,93 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
   } = usePortfolioAnalytics(budgetCategories, budgetEntries);
 
   const isHchps = appMode === 'HCHPS';
-  const themeColors = isHchps ? HCHPS_THEME_COLORS : VITAL_THEME_COLORS;
 
   const handleSelectProject = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedProject(e.target.value);
   }, [setSelectedProject]);
 
-  const breakdownWithShare = useMemo(() => {
-    const len = themeColors.length;
-    return breakdownData.map((item, idx) => {
-      const rawShare = totalBudget > 0 ? (item.total / totalBudget) * 100 : 0;
+  const executionRows = useMemo(() => {
+    const formatShare = (amount: number, denom: number) => {
+      const rawShare = denom > 0 ? (amount / denom) * 100 : 0;
       const share = Number(rawShare.toFixed(1));
-      const shareLabel =
-        item.total > 0 && rawShare > 0 && rawShare < 0.1
-          ? '<0.1%'
-          : `${share.toFixed(1)}%`;
-      const isCircularWrapCollision =
-        breakdownData.length > 1 &&
-        idx === breakdownData.length - 1 &&
-        idx % len === 0;
-      const colorIdx = isCircularWrapCollision ? 1 : idx % len;
-      const color = themeColors[colorIdx] || '#cbd5e1';
-      return {
-        ...item,
-        share,
-        shareLabel,
-        color,
-      };
-    });
-  }, [breakdownData, totalBudget, themeColors]);
+      const shareLabel = amount > 0 && rawShare > 0 && rawShare < 0.1 ? '<0.1%' : `${share.toFixed(1)}%`;
+      return { share, shareLabel };
+    };
 
-  const dynamicPieData = useMemo(() => {
-    const positiveSlices = breakdownWithShare.filter((item) => item.total > 0);
-    if (positiveSlices.length > 0 && totalBudget > 0) {
-      return positiveSlices.map((item) => ({
-        name: item.formationItem ? `${item.formationItem} · ${item.name}` : item.name,
-        value: item.total,
-        share: item.share,
-        shareLabel: item.shareLabel,
-        color: item.color,
+    const denom = executionDiagnosis.totalBudget;
+    const generalShare = formatShare(executionDiagnosis.generalExecuted, denom);
+    const dailyShare = formatShare(executionDiagnosis.dailyExecuted, denom);
+    const plannedShare = formatShare(executionDiagnosis.committedPlanned, denom);
+    const riskShare = formatShare(executionDiagnosis.unplannedRisk, denom);
+
+    const plannedDetail =
+      executionDiagnosis.lockedAmount > 0
+        ? `일반 ${executionDiagnosis.generalPlanned.toLocaleString()}원 · 일상 ${executionDiagnosis.dailyPlanned.toLocaleString()}원 · 동결 ${executionDiagnosis.lockedAmount.toLocaleString()}원`
+        : `일반 ${executionDiagnosis.generalPlanned.toLocaleString()}원 · 일상 ${executionDiagnosis.dailyPlanned.toLocaleString()}원`;
+
+    const riskDetail =
+      executionDiagnosis.unplannedRisk > 0
+        ? `일반 ${executionDiagnosis.generalUnplanned.toLocaleString()}원 · 일상 ${executionDiagnosis.dailyUnplanned.toLocaleString()}원`
+        : '전 비목 설계 완료';
+
+    return [
+      {
+        id: 'exec-general',
+        name: '일반지출 집행 완료',
+        secondaryMetricLabel: 'e-호조 일반지출 확정',
+        amount: executionDiagnosis.generalExecuted,
+        share: generalShare.share,
+        shareLabel: generalShare.shareLabel,
+        color: '#0f172a',
+        isRiskAlert: false,
+      },
+      {
+        id: 'exec-daily',
+        name: '일상경비 집행 완료',
+        secondaryMetricLabel:
+          executionDiagnosis.dailyIssued > 0
+            ? `일상경비 통장 입금 ${executionDiagnosis.dailyIssued.toLocaleString()}원 중 실사용분`
+            : '일상경비 내역 없음',
+        amount: executionDiagnosis.dailyExecuted,
+        share: dailyShare.share,
+        shareLabel: dailyShare.shareLabel,
+        color: isHchps ? '#059669' : '#2563eb',
+        isRiskAlert: false,
+      },
+      {
+        id: 'exec-planned',
+        name: '지출 예정(품의·원인행위 대기)',
+        secondaryMetricLabel: plannedDetail,
+        amount: executionDiagnosis.committedPlanned,
+        share: plannedShare.share,
+        shareLabel: plannedShare.shareLabel,
+        color: '#64748b',
+        isRiskAlert: false,
+      },
+      {
+        id: 'exec-risk',
+        name: '순수 미계획 불용 위험액',
+        secondaryMetricLabel: riskDetail,
+        amount: executionDiagnosis.unplannedRisk,
+        share: riskShare.share,
+        shareLabel: riskShare.shareLabel,
+        color: '#e11d48',
+        isRiskAlert: executionDiagnosis.unplannedRisk > 0,
+      },
+    ];
+  }, [executionDiagnosis, isHchps]);
+
+  const executionPieData = useMemo(() => {
+    const positiveSlices = executionRows.filter((r) => r.amount > 0);
+    if (positiveSlices.length > 0 && executionDiagnosis.totalBudget > 0) {
+      return positiveSlices.map((r) => ({
+        name: r.name,
+        value: Math.max(0, r.amount),
+        unit: '원',
+        share: r.share,
+        shareLabel: r.shareLabel,
+        secondaryMetricLabel: r.secondaryMetricLabel,
+        color: r.color,
         isEmpty: false,
       }));
     }
@@ -224,13 +260,14 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
       {
         name: '편성 예산 없음',
         value: 1,
+        unit: '원',
         share: 0,
         shareLabel: '0.0%',
         color: '#e2e8f0',
         isEmpty: true,
       },
     ];
-  }, [breakdownWithShare, totalBudget]);
+  }, [executionRows, executionDiagnosis.totalBudget]);
 
   return (
     <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200 relative min-h-screen font-sans">
@@ -239,69 +276,100 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
         
         {/* Left Column */}
         <div className="xl:col-span-6 flex flex-col gap-6">
-          {/* 세부사업별 예산 편성 현황 */}
-          <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200/80 shadow-2xs flex flex-col h-[420px]">
-            <div className="flex justify-between items-center z-10 pb-4 mb-5 border-b border-slate-100">
-              <div>
+          {/* 집행·불용 위험 정밀 진단 단독 도넛 패널 */}
+          <div className="bg-white rounded-xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs flex flex-col min-h-[420px]">
+            {/* Top Header & Project Filter */}
+            <div className="flex flex-wrap items-center justify-between gap-2 z-10 pb-4 mb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
-                  세부사업별 예산 편성 현황
+                  집행·불용 위험 정밀 진단
                 </h2>
-                <p className="text-xs font-medium text-slate-400 mt-1">세부사업 및 통계목(비목)별 편성 예산 비중</p>
+                <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-900 text-white font-mono tabular-nums">
+                  설계 완료 {executionDiagnosis.committedDesignRate.toFixed(1)}%
+                </span>
               </div>
+
               <select
+                aria-label="집행 진단 세부사업 선택"
+                data-testid="execution-project-select"
                 value={selectedProject}
                 onChange={handleSelectProject}
-                className="bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/80 text-slate-800 text-xs sm:text-sm font-bold rounded-lg px-4 py-2.5 outline-none focus:bg-white focus:border-slate-400 transition-colors cursor-pointer min-w-[180px]"
+                className="bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/80 text-slate-800 text-xs sm:text-sm font-bold rounded-lg px-3.5 py-1.5 outline-none focus:bg-white focus:border-slate-400 transition-colors cursor-pointer max-w-[220px] truncate shrink-0"
               >
                 <option value="ALL">세부사업명 전체</option>
-                {detailedProjects.map(dp => (
-                  <option key={dp} value={dp}>{dp}</option>
+                {detailedProjects.map((dp) => (
+                  <option key={dp} value={dp}>
+                    {dp}
+                  </option>
                 ))}
               </select>
             </div>
-            
-            <div className="flex-1 w-full h-[250px] flex flex-col sm:flex-row items-stretch justify-between mb-1 gap-4">
-              <div className="w-full sm:w-[60%] h-[250px] flex-shrink-0 flex justify-center items-center">
-                <div className="w-[220px] h-[220px] relative flex-shrink-0">
-                  {renderCharts && (
-                    <PieChart width={220} height={220}>
-                      <Pie
-                        data={dynamicPieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={78}
-                        outerRadius={104}
-                        paddingAngle={dynamicPieData.length > 1 ? 1.5 : 0}
-                        minAngle={dynamicPieData.length > 1 ? 2 : 0}
-                        dataKey="value"
-                        stroke="none"
-                        cornerRadius={0}
-                        style={{ outline: 'none' }}
-                      >
-                        {dynamicPieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} style={{ outline: 'none' }} />
-                        ))}
-                      </Pie>
-                      <RechartsTooltip content={<CustomPieTooltip />} />
-                    </PieChart>
-                  )}
-                  {/* Center Text */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-xs font-semibold text-slate-400 mb-1">총 편성 예산</span>
+
+            <div className="relative z-20 flex-1 w-full min-h-[280px] flex flex-col sm:flex-row items-stretch justify-between mb-1 gap-4">
+              <div className="w-full sm:w-[47%] h-[272px] relative z-20 flex-shrink-0 flex justify-center items-center">
+                <div className="w-[252px] h-[252px] relative flex-shrink-0">
+                  {/* Center Text (z-0 + DOM 선행 배치: PieChart 및 툴팁 레이어 하단 고정) */}
+                  <div
+                    data-testid="donut-center-overlay"
+                    className="absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none px-4 text-center"
+                  >
+                    <span className="text-[11px] font-bold text-slate-400 mb-1 truncate max-w-[156px]">
+                      순수 미계획 잔액
+                    </span>
                     <div className="flex items-baseline gap-0.5">
-                      <span className="text-lg sm:text-[19px] font-black font-mono tabular-nums text-slate-900 leading-none tracking-tight">{totalBudget.toLocaleString()}</span>
+                      <span
+                        data-testid="donut-center-execution-risk"
+                        className={`text-xl sm:text-[21px] font-black font-mono tabular-nums leading-none tracking-tight ${
+                          executionDiagnosis.unplannedRisk > 0 ? 'text-rose-600' : 'text-slate-900'
+                        }`}
+                      >
+                        {executionDiagnosis.unplannedRisk.toLocaleString()}
+                      </span>
                       <span className="text-xs font-bold text-slate-400 leading-none">원</span>
                     </div>
+                    <span className="mt-1.5 px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono tabular-nums font-bold text-slate-600">
+                      설계 {executionDiagnosis.committedDesignRate.toFixed(1)}% · 실집행 {executionDiagnosis.realExecutionRate.toFixed(1)}%
+                    </span>
                   </div>
+
+                  {/* Donut SVG & Tooltip Layer (z-20: 항상 중앙 텍스트 위에 툴팁 렌더링) */}
+                  {renderCharts && (
+                    <div data-testid="donut-chart-layer" className="relative z-20 w-full h-full">
+                      <PieChart width={252} height={252}>
+                        <Pie
+                          data={executionPieData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={88}
+                          outerRadius={118}
+                          paddingAngle={executionPieData.length > 1 ? 1.5 : 0}
+                          minAngle={executionPieData.length > 1 ? 2 : 0}
+                          dataKey="value"
+                          stroke="none"
+                          cornerRadius={0}
+                          style={{ outline: 'none' }}
+                        >
+                          {executionPieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} style={{ outline: 'none' }} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip
+                          wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }}
+                          content={<CustomPieTooltip />}
+                        />
+                      </PieChart>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="w-full sm:w-[40%] flex justify-center sm:justify-start h-full items-center min-w-0">
-                <div className="w-full flex flex-col divide-y divide-slate-100 justify-start min-w-0 max-h-[250px] overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin' }}>
-                  {breakdownWithShare.map((item, idx) => (
-                    <div 
-                      key={item.id || (item.formationItem ? `${item.formationItem}-${item.name}-${idx}` : `${item.name}-${idx}`)} 
-                      className="group flex items-center justify-between gap-2.5 w-full py-2.5 px-2 hover:bg-slate-50/80 transition-colors cursor-default min-w-0"
+              <div className="w-full sm:w-[53%] relative z-10 flex justify-center sm:justify-start h-full items-center min-w-0">
+                <div className="w-full flex flex-col divide-y divide-slate-100 justify-start min-w-0 max-h-[285px] overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin' }}>
+                  {executionRows.map((item) => (
+                    <div
+                      key={item.id}
+                      data-testid={`execution-row-${item.id}`}
+                      className="group flex items-center justify-between gap-2.5 w-full py-3 px-2 hover:bg-slate-50/80 transition-colors cursor-default min-w-0"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
@@ -309,20 +377,28 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
                           className="w-3.5 h-3.5 rounded-xs shrink-0"
                           style={{ backgroundColor: item.color }}
                         />
-                        <div className="flex flex-col min-w-0" title={item.formationItem ? `${item.formationItem} - ${item.name}` : item.name}>
-                          {item.formationItem && (
-                            <span className="text-[10px] font-bold text-slate-400 truncate tracking-wide leading-none mb-1">
-                              {item.formationItem}
-                            </span>
-                          )}
-                          <span className="text-[13px] sm:text-[14px] font-bold text-slate-800 truncate leading-none">
+                        <div className="flex flex-col min-w-0" title={`${item.name} — ${item.secondaryMetricLabel}`}>
+                          <span
+                            className={`text-[13px] sm:text-[14px] font-bold truncate leading-tight ${
+                              item.isRiskAlert ? 'text-rose-700' : 'text-slate-800'
+                            }`}
+                          >
                             {item.name}
+                          </span>
+                          <span className="text-[11px] font-medium text-slate-400 truncate leading-tight mt-0.5">
+                            {item.secondaryMetricLabel}
                           </span>
                         </div>
                       </div>
                       <div className="shrink-0 text-right ml-auto flex flex-col items-end gap-0.5">
                         <div className="flex items-baseline gap-0.5">
-                          <span className="text-sm sm:text-[16px] font-bold font-mono tabular-nums text-slate-900 leading-none whitespace-nowrap">{item.total.toLocaleString()}</span>
+                          <span
+                            className={`text-sm sm:text-[16px] font-bold font-mono tabular-nums leading-none whitespace-nowrap ${
+                              item.isRiskAlert ? 'text-rose-600' : 'text-slate-900'
+                            }`}
+                          >
+                            {item.amount.toLocaleString()}
+                          </span>
                           <span className="text-[11px] font-semibold text-slate-400 leading-none">원</span>
                         </div>
                         <span className="text-[11px] font-semibold font-mono tabular-nums text-slate-400 leading-none">
@@ -331,9 +407,6 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
                       </div>
                     </div>
                   ))}
-                  {breakdownWithShare.length === 0 && (
-                    <span className="text-xs font-medium text-slate-400 text-center py-8">세부 항목이 없습니다.</span>
-                  )}
                 </div>
               </div>
             </div>
@@ -396,22 +469,19 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
         {/* Right Panel: 월별 예산 집행 추이 */}
         <div className="xl:col-span-6 flex flex-col gap-6">
           <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200/80 shadow-2xs h-full flex flex-col relative overflow-hidden">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-              <div>
-                <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
-                  월별 예산 집행 추이
-                </h2>
-                <p className="text-xs sm:text-[13px] font-medium text-slate-400 mt-1">11월 말 전액 집행 목표 대비 누적 소진율 (0~100%)</p>
-              </div>
-
-              {/* Cumulative Burn-up Status Badge */}
-              <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-50 rounded-lg border border-slate-200/80 shrink-0">
-                <span className="w-2 h-2 rounded-full bg-slate-900" />
-                <span className="text-xs font-medium text-slate-600">
-                  현재 누적 소진율: <span className="font-mono tabular-nums text-xs sm:text-sm font-bold text-slate-900">{executionRate.toFixed(1)}%</span>
-                </span>
-              </div>
-            </div>
+            <SectionHeader
+              title="월별 예산 집행 추이"
+              subtitle="11월 전액 집행 목표 대비 누적 소진율"
+              className="pb-4"
+              actions={
+                <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-50 rounded-lg border border-slate-200/80 shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-slate-900" />
+                  <span className="text-xs font-medium text-slate-600">
+                    누적 소진 <span className="font-mono tabular-nums text-xs sm:text-sm font-bold text-slate-900">{executionRate.toFixed(1)}%</span>
+                  </span>
+                </div>
+              }
+            />
 
             {/* KPIs for 11-Month Total Execution Target */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-5 p-4 bg-slate-50/70 rounded-xl border border-slate-200/70">
@@ -472,7 +542,7 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
                     <ReferenceLine y={100} stroke="#cbd5e1" strokeDasharray="3 3" strokeWidth={1} />
 
                     {/* 11월 100% 소진 마감일 세로 가이드라인 - insideTop과 offset 조정으로 텍스트 잘림 방지 */}
-                    <ReferenceLine x="Nov" stroke="#e11d48" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: "11월 예산 마감 (100%)", fill: "#e11d48", fontSize: 9, fontWeight: 700, position: 'insideTop', offset: 15 }} />
+                    <ReferenceLine x="Nov" stroke="#e11d48" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: "11월 마감 (100%)", fill: "#e11d48", fontSize: 9, fontWeight: 700, position: 'insideTop', offset: 15 }} />
                     
                     {/* 선형 100% 소진 가이드 점선 */}
                     <Line type="monotone" dataKey="targetRate" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="4 4" dot={false} activeDot={false} name="11월 소진 목표" />
@@ -487,20 +557,11 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
         </div>
       </div>
 
-      <div className="mt-8 mb-8 flex flex-col gap-8">
-        {renderContacts ? (
-          <ContactsBox />
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20 gap-4 bg-white rounded-xl p-8 shadow-2xs border border-slate-200/80 h-[250px] animate-pulse">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-slate-800" />
-            <p className="text-sm text-slate-500 font-bold">주소록 위젯을 순차 로딩하는 중...</p>
-          </div>
-        )}
-      </div>
+      {/* Integrated Showcase: Working Memory Board & Master Archive Explorer */}
+      <IntegratedShowcaseSection onNavigateModule={onNavigateModule} />
     </div>
   );
 }
 
 export const PortfolioDashboardView = React.memo(PortfolioDashboardViewComponent);
 PortfolioDashboardView.displayName = 'PortfolioDashboardView';
-
