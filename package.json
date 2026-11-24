@@ -10,6 +10,7 @@
     "build": "next build && node scripts/prepare-pages-output.js",
     "start": "next start",
     "lint": "eslint src",
+    "audit:ui": "node scripts/audit-ui-copy.js",
     "test": "jest --maxWorkers=2 --testTimeout=15000",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",

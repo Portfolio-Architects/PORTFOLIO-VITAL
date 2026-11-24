@@ -357,8 +357,8 @@ export function ArchiveExplorerView({
       {/* 3 Workflow Hub Tabs Bar (Rule S: 448px Mobile-first protected) */}
       <div
         role="tablist"
-        aria-label="아카이브 및 전사 온톨로지 통합 허브 3대 워크플로우"
-        className="w-full bg-slate-900 text-white rounded-2xl p-2 sm:p-2.5 border border-slate-800 shadow-xl overflow-x-auto max-w-full"
+        aria-label="문서 보관함 · 문서 관계도 · 주간업무"
+        className="w-full bg-slate-900 text-white rounded-2xl p-2 sm:p-2.5 border border-slate-800 shadow-sm overflow-x-auto max-w-full"
       >
         <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 min-w-full">
           {/* Tab 1: Master Archive & 6-Domain Bundle */}
@@ -366,7 +366,7 @@ export function ArchiveExplorerView({
             type="button"
             role="tab"
             aria-selected={activeTab === 'archive'}
-            aria-label="마스터 아카이브 탐색"
+            aria-label="문서 보관함"
             onClick={() => setActiveTab('archive')}
             data-testid="tab-archive"
             className={`flex-1 flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl text-left transition-colors duration-150 cursor-pointer border ${
@@ -384,13 +384,13 @@ export function ArchiveExplorerView({
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs sm:text-sm font-bold truncate">마스터 아카이브 탐색</span>
+                <span className="text-xs sm:text-sm font-bold truncate">문서 보관함</span>
                 {activeTab === 'archive' && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </div>
               <div className="text-[10px] sm:text-[11px] text-slate-300/80 truncate mt-0.5">
-                RAG 본문·사진 & 6대 도메인 묶음
+                공문서 · 사진 검색
               </div>
             </div>
           </button>
@@ -400,7 +400,7 @@ export function ArchiveExplorerView({
             type="button"
             role="tab"
             aria-selected={activeTab === 'ontology'}
-            aria-label="4단계 행정 온톨로지"
+            aria-label="문서 관계도"
             onClick={() => setActiveTab('ontology')}
             data-testid="tab-ontology"
             className={`flex-1 flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl text-left transition-colors duration-150 cursor-pointer border ${
@@ -418,13 +418,13 @@ export function ArchiveExplorerView({
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs sm:text-sm font-bold truncate">4단계 행정 온톨로지</span>
+                <span className="text-xs sm:text-sm font-bold truncate">문서 관계도</span>
                 {activeTab === 'ontology' && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </div>
               <div className="text-[10px] sm:text-[11px] text-slate-300/80 truncate mt-0.5">
-                방침서↔결과↔감사↔예산 인과추적
+                방침 · 결과 · 감사 · 예산
               </div>
             </div>
           </button>
@@ -434,7 +434,7 @@ export function ArchiveExplorerView({
             type="button"
             role="tab"
             aria-selected={activeTab === 'weekly'}
-            aria-label="수요일 주간업무"
+            aria-label="주간업무"
             onClick={() => setActiveTab('weekly')}
             data-testid="tab-weekly"
             className={`flex-1 flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl text-left transition-colors duration-150 cursor-pointer border ${
@@ -452,13 +452,13 @@ export function ArchiveExplorerView({
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs sm:text-sm font-bold truncate">수요일 주간업무</span>
+                <span className="text-xs sm:text-sm font-bold truncate">주간업무</span>
                 {activeTab === 'weekly' && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
               </div>
               <div className="text-[10px] sm:text-[11px] text-slate-300/80 truncate mt-0.5">
-                2단 대조 실적·계획 HWPX 자동 빌더
+                실적 · 계획 · HWPX
               </div>
             </div>
           </button>
@@ -480,7 +480,7 @@ export function ArchiveExplorerView({
       {activeTab === 'weekly' && (
         <div data-testid="weekly-workflow-pane" className="w-full">
           <div className="mb-2 p-3 bg-cyan-50 border border-cyan-200 rounded-xl text-xs text-cyan-950 font-semibold flex items-center justify-between">
-            <span>수요일 주간업무 · 2단 대조 실적·계획 HWPX 빌더</span>
+            <span>주간업무 · HWPX 빌더</span>
             <span className="text-[11px] text-cyan-700">매주 수요일 마감</span>
           </div>
           <WeeklyReportManager />
@@ -496,14 +496,14 @@ export function ArchiveExplorerView({
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
-                    마스터 아카이브 통합 탐색기
+                    문서 보관함
                   </h2>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200/80">
                     총 {data?.totalIndexed?.toLocaleString() || 0}건 색인됨
                   </span>
                 </div>
                 <p className="vlds-subtitle text-xs sm:text-sm text-slate-500 mt-0.5">
-                  본문(HWPX · PDF · XLSX) · 사진 맥락 통합 검색
+                  HWPX · PDF · XLSX · 사진 검색
                 </p>
               </div>
 
@@ -520,7 +520,7 @@ export function ArchiveExplorerView({
                     }`}
                   >
                     <List className="w-3.5 h-3.5" />
-                    <span>문서·통합 목록</span>
+                    <span>문서 목록</span>
                   </button>
                   <button
                     type="button"
@@ -532,7 +532,7 @@ export function ArchiveExplorerView({
                     }`}
                   >
                     <LayoutGrid className="w-3.5 h-3.5" />
-                    <span>사진·시안 갤러리</span>
+                    <span>사진 갤러리</span>
                   </button>
                 </div>
 
@@ -556,7 +556,7 @@ export function ArchiveExplorerView({
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="찾으실 키워드를 입력하세요 (예: 양재천 과업내용서, 수의계약)"
+                placeholder="키워드 검색 (예: 양재천 과업내용서, 수의계약)"
                 className="w-full pl-11 pr-10 py-3 bg-slate-50/70 focus:bg-white border border-slate-200/90 focus:border-slate-400 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-colors duration-150"
               />
               {query && (
@@ -703,7 +703,7 @@ export function ArchiveExplorerView({
                     <Search className="w-6 h-6" />
                   </div>
                   <div className="text-sm font-semibold text-slate-700">
-                    조건에 일치하는 아카이브 자료가 없습니다
+                    일치 아카이브 자료 없음
                   </div>
                   <p className="text-xs text-slate-400 max-w-sm">
                     검색어 초기화 · 연도 · 사업 필터 변경
@@ -744,7 +744,7 @@ export function ArchiveExplorerView({
                                   src={`/api/archive/image?path=${encodeURIComponent(item.relPath)}`}
                                   alt={item.name}
                                   loading="lazy"
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  className="w-full h-full object-cover"
                                   onError={(e) => {
                                     (e.currentTarget as HTMLElement).style.display = 'none';
                                     if (e.currentTarget.parentElement) {
@@ -921,7 +921,7 @@ export function ArchiveExplorerView({
                 <div className="flex items-center gap-2">
                   <Layers className="w-4 h-4 text-slate-800" />
                   <span className="text-sm font-bold text-slate-900">
-                    연계 업무 묶음 (Project Cluster)
+                    연계 자료
                   </span>
                 </div>
                 <span className="text-xs font-semibold text-slate-600 truncate max-w-[200px]">
@@ -929,7 +929,7 @@ export function ArchiveExplorerView({
                     ? activeBundle.projectName || (activeBundle as any).name || activeBundle.projectKey
                     : cluster?.anchor
                     ? formatProjectName(cluster.anchor.project)
-                    : '전사 6대 도메인 연계'}
+                    : '전체 연계'}
                 </span>
               </div>
 
@@ -939,7 +939,7 @@ export function ArchiveExplorerView({
                   <div className="p-3.5 rounded-xl bg-slate-900 text-white flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-[11px] font-semibold text-slate-300">
-                        현재 선택된 기준 자료 ({cluster.anchor.year} · {formatProjectName(cluster.anchor.project)})
+                        선택 자료 ({cluster.anchor.year} · {formatProjectName(cluster.anchor.project)})
                       </span>
                       <span className="text-[11px] text-slate-300 flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
@@ -960,7 +960,7 @@ export function ArchiveExplorerView({
                         onClick={() => openArchiveTarget(cluster.anchor.relPath, 'folder')}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-100 hover:bg-slate-700 border border-slate-700 cursor-pointer"
                       >
-                        탐색기 폴더 열기
+                        폴더 열기
                       </button>
                     </div>
                   </div>
@@ -971,10 +971,10 @@ export function ArchiveExplorerView({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                      <span>6대 도메인 라이브 연계 현황</span>
+                      <span>연계 현황</span>
                     </span>
                     <span className="text-[10px] text-slate-400">
-                      {activeBundle ? '단위사업 묶음' : '전사 9대 사업 종합'}
+                      {activeBundle ? '단위사업 묶음' : '전체 9대 사업'}
                     </span>
                   </div>
 
@@ -984,7 +984,7 @@ export function ArchiveExplorerView({
                     <div className="p-2.5 rounded-xl border border-blue-100 bg-blue-50/40 flex flex-col justify-between min-h-[92px]">
                       <div>
                         <div className="flex items-center justify-between text-[10px] text-blue-600 font-bold">
-                          <span>1. 행정 온톨로지</span>
+                          <span>1. 문서 관계도</span>
                           <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                         </div>
                         <div className="text-xs font-bold text-slate-900 mt-1 truncate">
@@ -1004,7 +1004,7 @@ export function ArchiveExplorerView({
                         onClick={() => setActiveTab('ontology')}
                         className="w-full mt-2 py-1 px-2 rounded text-[10px] font-semibold bg-blue-600/10 hover:bg-blue-600/20 text-blue-700 border border-blue-200 transition-colors cursor-pointer flex items-center justify-between truncate"
                       >
-                        <span>온톨로지 탐색기 이동</span>
+                        <span>관계도 이동</span>
                         <span>→</span>
                       </button>
                     </div>
@@ -1013,7 +1013,7 @@ export function ArchiveExplorerView({
                     <div className="p-2.5 rounded-xl border border-emerald-100 bg-emerald-50/40 flex flex-col justify-between min-h-[92px]">
                       <div>
                         <div className="flex items-center justify-between text-[10px] text-emerald-600 font-bold">
-                          <span>2. 마스터 아카이브</span>
+                          <span>2. 문서 보관함</span>
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         </div>
                         <div className="text-xs font-bold text-slate-900 mt-1 truncate">
@@ -1042,11 +1042,11 @@ export function ArchiveExplorerView({
                     <div className="p-2.5 rounded-xl border border-amber-100 bg-amber-50/40 flex flex-col justify-between min-h-[92px]">
                       <div>
                         <div className="flex items-center justify-between text-[10px] text-amber-700 font-bold">
-                          <span>3. 작업기억 메모</span>
+                          <span>3. 업무 메모</span>
                           <span
                             className={`w-1.5 h-1.5 rounded-full ${
                               (activeBundle ? (activeBundle.workingMemory?.pendingCount || 0) : enterpriseSummary.totalPendingMemos) > 0
-                                ? 'bg-amber-500 animate-pulse'
+                                ? 'bg-amber-500'
                                 : 'bg-slate-400'
                             }`}
                           />
@@ -1055,7 +1055,7 @@ export function ArchiveExplorerView({
                           미반영 메모 {activeBundle ? (activeBundle.workingMemory?.pendingCount || 0) : enterpriseSummary.totalPendingMemos}건
                         </div>
                         <div className="text-[10px] text-slate-500 truncate mt-0.5">
-                          {(activeBundle?.workingMemory as any)?.latestMemos?.[0] || activeBundle?.workingMemory?.pendingMemos?.[0]?.content || '지시사항 포스트잇 연계'}
+                          {(activeBundle?.workingMemory as any)?.latestMemos?.[0] || activeBundle?.workingMemory?.pendingMemos?.[0]?.content || '포스트잇 연계'}
                         </div>
                       </div>
                       <button
@@ -1064,7 +1064,7 @@ export function ArchiveExplorerView({
                         onClick={() => onNavigateModule?.('memory')}
                         className="w-full mt-2 py-1 px-2 rounded text-[10px] font-semibold bg-amber-600/10 hover:bg-amber-600/20 text-amber-700 border border-amber-200 transition-colors cursor-pointer flex items-center justify-between truncate"
                       >
-                        <span>작업기억 보드 이동</span>
+                        <span>포스트잇 열기</span>
                         <span>→</span>
                       </button>
                     </div>
@@ -1164,7 +1164,7 @@ export function ArchiveExplorerView({
                 {/* 3. Related Official Documents (.hwpx / .pdf) */}
                 <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
                   <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
-                    <span>연관 기안문·계획서·보고서 ({cluster?.docs.length || 0})</span>
+                    <span>연관 공문서 ({cluster?.docs.length || 0})</span>
                   </h3>
                   {!cluster?.docs || cluster.docs.length === 0 ? (
                     <p className="text-xs text-slate-400 py-1">
@@ -1212,7 +1212,7 @@ export function ArchiveExplorerView({
                 {/* 4. Related Spreadsheets & Budget (.xlsx) */}
                 <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
                   <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    연관 예산·산출내역·집행표 ({cluster?.sheets.length || 0})
+                    연관 예산표 ({cluster?.sheets.length || 0})
                   </h3>
                   {!cluster?.sheets || cluster.sheets.length === 0 ? (
                     <p className="text-xs text-slate-400 py-1">
@@ -1260,7 +1260,7 @@ export function ArchiveExplorerView({
                 {/* 5. Related Images & Postures (.jpg / .png) */}
                 <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
                   <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    연관 현장사진·시안 ({cluster?.images.length || 0})
+                    연관 사진 ({cluster?.images.length || 0})
                   </h3>
                   {!cluster?.images || cluster.images.length === 0 ? (
                     <p className="text-xs text-slate-400 py-1">
@@ -1280,7 +1280,7 @@ export function ArchiveExplorerView({
                             src={`/api/archive/image?path=${encodeURIComponent(img.relPath)}`}
                             alt={img.name}
                             loading="lazy"
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
+                            className="w-full h-full object-cover"
                             onError={(e) => {
                               (e.currentTarget as HTMLElement).style.display = 'none';
                             }}
@@ -1306,7 +1306,7 @@ export function ArchiveExplorerView({
           onClick={() => setPreviewImage(null)}
         >
           <div
-            className="bg-slate-900 text-white rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl border border-slate-700 flex flex-col"
+            className="bg-slate-900 text-white rounded-2xl max-w-4xl w-full overflow-hidden shadow-md border border-slate-700 flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">

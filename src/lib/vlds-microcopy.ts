@@ -17,11 +17,13 @@ export const VLDS_COPY_BUDGET: Record<VldsCopyRole, number> = {
   placeholder: 42,
 };
 
+export const VLDS_TITLE_MAX_WORDS = 3;
+
 export const FORBIDDEN_PROSE_ENDINGS_RE =
-  /(?:합니다|입니다|됩니다|있습니다|없습니다|했습니다|됐습니다|되었습니다|바랍니다|주십시오|십시오|하세요|주세요|보세요|하시겠습니까|중입니다)(?:[.!?…]+|\s*\([^)]*\))?$/u;
+  /(?:습니다|합니다|입니다|됩니다|있습니다|없습니다|했습니다|됐습니다|되었습니다|바랍니다|주십시오|십시오|하세요|주세요|보세요|누르세요|적어주세요|비워두세요|하시겠습니까|중입니다)(?:[.!?…]+|\s*\([^)]*\))?$/u;
 
 export const FORBIDDEN_INLINE_PROSE_RE =
-  /(?:합니다|입니다|됩니다|있습니다|없습니다|했습니다|하세요|주세요|보세요|바랍니다|주십시오)[.!?]\s+[가-힣A-Za-z0-9\[]/u;
+  /(?:습니다|합니다|입니다|됩니다|있습니다|없습니다|했습니다|하세요|주세요|보세요|바랍니다|주십시오)[.!?]\s+[가-힣A-Za-z0-9\[]/u;
 
 const NON_CONJUNCTIVE_GWA_STEMS = new Set([
   '행정',
@@ -132,6 +134,40 @@ export const FORBIDDEN_LEGACY_JARGON: ReadonlyArray<string> = [
   '다중 필터링 & 실시간 대조 시스템',
 ];
 
+/**
+ * Inflated AI/buzzword UI terms banned under VLDS Plain-Word Naming (Rule H).
+ * Maps each forbidden term to intuitive, everyday Korean UI replacements.
+ */
+export const INFLATED_UI_REPLACEMENTS: Readonly<Record<string, string>> = {
+  쇼케이스: '게시판 · 목록',
+  인텔리전스: '도우미 · 검색',
+  오케스트레이션: '연동 · 통합',
+  시너지: '연계 효과',
+  에코시스템: '연계 구조',
+  패러다임: '방식',
+  솔루션: '도구',
+  인사이트: '요약 · 분석',
+  어시스턴트: '도우미',
+  워크스페이스: '작업 공간 · 데이터',
+  '통합 허브': '보관함 · 통합 화면',
+  매트릭스: '표 · 목록',
+  익스플로러: '보관함 · 탐색기',
+};
+
+export const FORBIDDEN_INFLATED_UI_TERMS: ReadonlyArray<string> = Object.keys(
+  INFLATED_UI_REPLACEMENTS
+);
+
+const SYMBOL_ONLY_TOKEN_RE = /^[·•\-–—/→←↔&:+|()[\]{}]+$/u;
+
+export function countTitleWords(text: string): number {
+  const cleaned = text.replace(/\([^)]*\)/gu, '').trim();
+  if (!cleaned) return 0;
+  return cleaned
+    .split(/\s+/u)
+    .filter((token) => token.length > 0 && !SYMBOL_ONLY_TOKEN_RE.test(token)).length;
+}
+
 export interface VldsCopyAuditResult {
   valid: boolean;
   role: VldsCopyRole;
@@ -141,7 +177,7 @@ export interface VldsCopyAuditResult {
 }
 
 /**
- * Audits a UI string against VLDS Zero-Verbosity & Particle-Free rules.
+ * Audits a UI string against VLDS Zero-Verbosity, Particle-Free & Plain-Word Naming rules.
  * Empty strings are valid because omitting redundant subtitles/helpers is preferred.
  */
 export function auditVldsCopy(text: string | null | undefined, role: VldsCopyRole): VldsCopyAuditResult {
@@ -164,6 +200,15 @@ export function auditVldsCopy(text: string | null | undefined, role: VldsCopyRol
     violations.push(`글자 수 초과 (${normalized.length}자 > 상한 ${maxChars}자)`);
   }
 
+  if (role === 'title') {
+    const wordCount = countTitleWords(normalized);
+    if (wordCount > VLDS_TITLE_MAX_WORDS) {
+      violations.push(
+        `장황한 타이틀 어절 초과 (${wordCount}어절 > 상한 ${VLDS_TITLE_MAX_WORDS}어절 · 직관적 1~2어절 명사 권장)`
+      );
+    }
+  }
+
   if (FORBIDDEN_PROSE_ENDINGS_RE.test(normalized) || FORBIDDEN_INLINE_PROSE_RE.test(normalized)) {
     violations.push('서술형 문장 종결어미 사용 금지 (명사구·수치 종결 필수)');
   }
@@ -182,6 +227,14 @@ export function auditVldsCopy(text: string | null | undefined, role: VldsCopyRol
   for (const jargon of FORBIDDEN_LEGACY_JARGON) {
     if (normalized.includes(jargon)) {
       violations.push(`금지 레거시·수식어 포함: "${jargon}"`);
+    }
+  }
+
+  for (const term of FORBIDDEN_INFLATED_UI_TERMS) {
+    if (normalized.includes(term)) {
+      violations.push(
+        `과장·추상 UI 용어 금지: "${term}" → 권장: ${INFLATED_UI_REPLACEMENTS[term]}`
+      );
     }
   }
 

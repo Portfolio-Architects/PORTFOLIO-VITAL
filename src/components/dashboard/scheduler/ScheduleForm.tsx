@@ -333,7 +333,7 @@ export const ScheduleForm = React.memo(({
         <textarea
           value={notes}
           onChange={handleNotesChange}
-          placeholder="상세 위치, 안건 및 기타 중요 특이사항을 적어주세요."
+          placeholder="위치 · 안건 · 특이사항 입력"
           className="w-full px-4.5 py-2.5 rounded-xl border border-slate-200/60 text-sm font-semibold text-slate-700 bg-white/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors duration-150 placeholder:text-slate-300 placeholder:font-semibold resize-none h-20"
         />
       </div>

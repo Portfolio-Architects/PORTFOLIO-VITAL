@@ -1,12 +1,12 @@
 {
-  "name": "HCHPS Work Manager",
-  "short_name": "Work Mngr",
+  "name": "WORK VITAL",
+  "short_name": "WORK VITAL",
   "description": "개인용 업무관리 시스템 - 업무, 예산, 재고, 미팅, 프로젝트 통합 관리",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1A1B1E",
-  "theme_color": "#1A1B1E",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
   "icons": [
     {
       "src": "/icon-192x192.png",

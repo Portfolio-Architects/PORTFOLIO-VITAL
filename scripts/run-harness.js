@@ -220,7 +220,7 @@ function validateFestivalSSOT(schemas = syncSchemas, options = {}) {
   }
 
   if (diskData && fallbackData && errors.length === 0) {
-    const sections = ['milestones', 'booths', 'schedule', 'duties'];
+    const sections = ['milestones', 'booths', 'schedule', 'duties', 'nextYearChecklist'];
     for (const key of sections) {
       const diskLen = Array.isArray(diskData[key]) ? diskData[key].length : 0;
       const fbLen = Array.isArray(fallbackData[key]) ? fallbackData[key].length : 0;
@@ -376,6 +376,31 @@ async function main() {
       console.error('  ↳ 🚨 [FAIL] Auto-Fix failed to resolve all issues. Manual intervention required:', fixErr.message);
       failedCount++;
     }
+  }
+
+  // Step 3-B: VLDS UI Copy Design Harness (AST Static Gatekeeper)
+  console.log('\n====================================================');
+  console.log('🎨 VLDS UI Copy Design Harness: Checking JSX microcopy...');
+  console.log('====================================================');
+  try {
+    const { auditUiCopyDirectory } = require('./audit-ui-copy');
+    const uiAudit = auditUiCopyDirectory();
+    if (uiAudit.passed) {
+      console.log(
+        `  ↳ ✅ [PASS] Scanned ${uiAudit.filesScanned} TSX component files. 0 UI copy violations found (ignores: ${uiAudit.ignoredCount}).`
+      );
+    } else {
+      console.error(
+        `  ↳ ❌ [HARNESS UI-COPY ERROR] Found ${uiAudit.violationCount} UI copy violation(s):`
+      );
+      uiAudit.violations.slice(0, 20).forEach(v => {
+        console.error(`     - ${v.file}:${v.line} [${v.kind}] "${v.text}" -> ${v.reasons.join(' | ')}`);
+      });
+      failedCount += uiAudit.violationCount;
+    }
+  } catch (uiErr) {
+    console.error('  ↳ ❌ [FAIL] VLDS UI Copy Design Harness error:', uiErr.message);
+    failedCount++;
   }
 
   // Step 4: AGENTS.md 및 Engineering Report 마일스톤 자동 동기화

@@ -122,9 +122,9 @@ export default function LawSystemPage() {
     <div className="w-full flex flex-col gap-6">
       {/* Title Header */}
       <div className="flex flex-col gap-1 text-left">
-        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">법령 및 행정 표준 가이드</h1>
-        <p className="text-xs text-slate-500 font-semibold tracking-wider uppercase">
-          Administrative Law & Public Document Standard System
+        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">법령 · 공문 표준</h1>
+        <p className="text-xs text-slate-500 font-semibold">
+          법령 조회 · 행정 용어 · 공문서 규격
         </p>
       </div>
 
@@ -192,7 +192,7 @@ export default function LawSystemPage() {
             {/* Dictionary Term Cards */}
             {filteredTerms.length === 0 ? (
               <div className="p-12 text-center text-sm text-slate-400 bg-white/60 border border-slate-200/60 rounded-[2rem] shadow-3xs">
-                검색어에 부합하는 용어가 사전 내에 존재하지 않습니다.
+                일치 용어 없음
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,9 +242,9 @@ export default function LawSystemPage() {
             <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-[2rem] p-6 shadow-sm border border-indigo-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1.5">
                 <span className="text-[10px] font-extrabold bg-indigo-500/30 border border-indigo-400/40 text-indigo-200 px-3 py-1 rounded-full uppercase tracking-widest">STANDARD</span>
-                <h3 className="text-lg font-bold">공문서 작성 표준 가이드 (HWPX 규격 탑재)</h3>
+                <h3 className="text-lg font-bold">공문서 작성 표준 (HWPX)</h3>
                 <p className="text-xs text-indigo-200/80 leading-relaxed">
-                  지역보건법, 지방재정법 및 행정안전부 공문서 규격을 충족하는 공식 문서 작성 템플릿 표준입니다.
+                  지역보건법 · 지방재정법 · 행안부 공문 규격 기준
                 </p>
               </div>
               <div className="shrink-0 flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded-full border border-white/10 text-[10.5px] font-extrabold tracking-wider text-indigo-100">
@@ -259,11 +259,11 @@ export default function LawSystemPage() {
               <div className="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-3xs flex flex-col gap-4">
                 <h4 className="text-sm font-black text-slate-800 border-b border-slate-100 pb-2.5 flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                  1. 용지 여백 및 타이포그래피 표준
+                  1. 여백 · 서체
                 </h4>
                 <div className="space-y-4 text-xs font-semibold text-slate-600">
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-2.5">
-                    <p className="text-slate-800 font-extrabold text-[12.5px] mb-1">용지 레이아웃 (Layout)</p>
+                    <p className="text-slate-800 font-extrabold text-[12.5px] mb-1">용지 여백</p>
                     <div className="grid grid-cols-2 gap-2 text-slate-600">
                       <div>• 상하 여백: <span className="font-mono text-indigo-600">15mm</span> (머리말/꼬리말 포함)</div>
                       <div>• 좌우 여백: <span className="font-mono text-indigo-600">20mm</span></div>
@@ -272,7 +272,7 @@ export default function LawSystemPage() {
                   </div>
 
                   <div className="space-y-2.5">
-                    <p className="text-slate-800 font-extrabold text-[12.5px]">서체 및 글자 크기 (Typography)</p>
+                    <p className="text-slate-800 font-extrabold text-[12.5px]">서체 · 글자 크기</p>
                     <div className="space-y-2 divide-y divide-slate-100">
                       <div className="pt-2 flex justify-between items-center">
                         <span className="font-bold text-slate-800">제목 (대제목)</span>
@@ -299,10 +299,10 @@ export default function LawSystemPage() {
               <div className="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-3xs flex flex-col gap-4">
                 <h4 className="text-sm font-black text-slate-800 border-b border-slate-100 pb-2.5 flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                  2. 다단계 기호 및 인덴트 계층 구조
+                  2. 기호 · 들여쓰기
                 </h4>
                 <div className="space-y-4 text-xs font-semibold text-slate-600">
-                  <p className="text-slate-500">공문서 작성 시 항목 구분을 명확히 하기 위해 다단계 기호 계층 구조를 규정에 맞추어 계조화합니다.</p>
+                  <p className="text-slate-500">공문서 항목 구분 · 5단계 기호 계층 규격</p>
                   
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 font-mono space-y-3 text-slate-750">
                     <div className="flex items-center gap-3">
@@ -331,7 +331,7 @@ export default function LawSystemPage() {
                     <AlertCircle size={15} className="shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold text-[11.5px] text-amber-900">정렬 규칙 주의</p>
-                      <p className="text-[10.5px] text-amber-800 mt-0.5">둘째 줄 이하부터는 첫째 줄의 항목 기호가 아닌 실제 시작 단어 위치에 수직으로 일치하도록 내어쓰기(Outdent)를 적용합니다.</p>
+                      <p className="text-[10.5px] text-amber-800 mt-0.5">둘째 줄 이하 첫 단어 위치 수직 정렬 · 내어쓰기 적용</p>
                     </div>
                   </div>
                 </div>
@@ -341,14 +341,14 @@ export default function LawSystemPage() {
               <div className="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-3xs flex flex-col gap-4">
                 <h4 className="text-sm font-black text-slate-800 border-b border-slate-100 pb-2.5 flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                  3. 띄어쓰기 및 마침 가이드 ("끝." 규칙)
+                  3. 띄어쓰기 · 끝.
                 </h4>
                 <div className="space-y-4 text-xs font-semibold text-slate-600">
                   <div className="space-y-2">
                     <p className="text-slate-800 font-extrabold text-[12.5px]">공백 간격 규정</p>
                     <ul className="list-disc pl-4 space-y-1 text-slate-600">
-                      <li>기호/번호 인덱스 뒤: <span className="font-bold text-indigo-650">1공백 (1 space)</span>만 띄웁니다.</li>
-                      <li>붙임 기호 뒤: <span className="font-bold text-indigo-650">2공백 (2 spaces)</span>을 띄웁니다. (예: `붙임  1.`)</li>
+                      <li>기호/번호 뒤: <span className="font-bold text-indigo-650">1공백 (1 space)</span></li>
+                      <li>붙임 기호 뒤: <span className="font-bold text-indigo-650">2공백 (2 spaces)</span> (예: `붙임  1.`)</li>
                     </ul>
                   </div>
 
@@ -367,8 +367,9 @@ export default function LawSystemPage() {
                             {copiedText === 'end-case-1' ? '복사됨!' : '예시 복사'}
                           </button>
                         </div>
-                        <p className="text-[11px] text-slate-500 mb-1.5">본문이 끝난 마지막 글자 뒤에 2타(2칸 공백)를 띄우고 `끝.`을 적습니다.</p>
+                        <p className="text-[11px] text-slate-500 mb-1.5">본문 마지막 글자 뒤 2타 공백 + `끝.` 표기</p>
                         <div className="font-mono text-xs bg-white border border-slate-150 p-2.5 rounded-xl text-slate-700 select-all">
+                          {/* vlds-ignore-next-line */}
                           ... 협조해 주시기 바랍니다.<span className="bg-indigo-100 text-indigo-800 font-bold px-1 rounded mx-0.5">  </span>끝.
                         </div>
                       </div>
@@ -384,7 +385,7 @@ export default function LawSystemPage() {
                             {copiedText === 'end-case-2' ? '복사됨!' : '예시 복사'}
                           </button>
                         </div>
-                        <p className="text-[11px] text-slate-500 mb-1.5">붙임 목록의 가장 마지막 항목 줄 마지막 글자 뒤에 2타를 띄우고 `끝.`을 적습니다.</p>
+                        <p className="text-[11px] text-slate-500 mb-1.5">붙임 마지막 항목 뒤 2타 공백 + `끝.` 표기</p>
                         <div className="font-mono text-xs bg-white border border-slate-150 p-2.5 rounded-xl text-slate-700 space-y-1">
                           <div>붙임  1. 추진계획서 1부.</div>
                           <div>      2. 사업 예산 산출내역서 1부.<span className="bg-indigo-100 text-indigo-800 font-bold px-1 rounded mx-0.5">  </span>끝.</div>
@@ -396,7 +397,7 @@ export default function LawSystemPage() {
                         <div className="flex justify-between items-center mb-1">
                           <span className="font-bold text-slate-800 text-[11.5px]">③ 표로 끝나는 경우</span>
                         </div>
-                        <p className="text-[11px] text-slate-500 mb-1.5">표 아래 왼쪽 바깥 경계선 아래로 2칸 아래(또는 1줄 띄고 왼쪽 시작점 기준 2칸 띄어쓰기 후)에 `끝.`을 기입합니다.</p>
+                        <p className="text-[11px] text-slate-500 mb-1.5">표 하단 1줄 아래 좌측 2타 공백 + `끝.` 표기</p>
                         <div className="font-mono text-[11px] bg-white border border-slate-150 p-2.5 rounded-xl text-slate-700 leading-tight">
                           <div>┌───────────┬───────────┐</div>
                           <div>│  구  분   │  금  액   │</div>
@@ -415,18 +416,18 @@ export default function LawSystemPage() {
               <div className="bg-white border border-slate-200 rounded-[2rem] p-5 shadow-3xs flex flex-col gap-4">
                 <h4 className="text-sm font-black text-slate-800 border-b border-slate-100 pb-2.5 flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                  4. 행정 언어 순화 및 중립성 (Value Tuning)
+                  4. 행정어 순화
                 </h4>
                 <div className="space-y-4 text-xs font-semibold text-slate-600">
-                  <p className="text-slate-555">공공문서의 책임성과 대외 신뢰성을 보장하기 위해 다음과 같은 행정어 튜닝 표준을 상시 준수해야 합니다.</p>
+                  <p className="text-slate-555">공공문서 행정어 순화 4대 기준</p>
                   
                   <div className="space-y-3.5">
                     {/* Factuality */}
                     <div className="flex items-start gap-3">
                       <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg font-bold shrink-0 text-[10.5px]">사실성</div>
                       <div className="space-y-1">
-                        <p className="font-bold text-slate-800 text-[12px]">• 능동태 권장 및 피동 표현 자제</p>
-                        <p className="text-slate-500 text-[11px]">작성자의 주체적 책임을 저해하는 피동형 접사 `-시키다`를 사용하지 않고 본래의 서술적 어휘를 사용합니다. (예: `개선시키다` → `개선하다` / `교육시키다` → `교육하다` )</p>
+                        <p className="font-bold text-slate-800 text-[12px]">• 능동태 권장 · 피동 표현 배제</p>
+                        <p className="text-slate-500 text-[11px]">피동 접사 `-시키다` 배제 (`개선시키다` → `개선하다` / `교육시키다` → `교육하다`)</p>
                       </div>
                     </div>
 
@@ -434,8 +435,8 @@ export default function LawSystemPage() {
                     <div className="flex items-start gap-3">
                       <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg font-bold shrink-0 text-[10.5px]">접근성</div>
                       <div className="space-y-1">
-                        <p className="font-bold text-slate-800 text-[12px]">• 외래어 순화</p>
-                        <p className="text-slate-500 text-[11px]">일반 주민의 정보 장벽 해소를 위해 한자어, 일본식 한자 및 불필요한 서구 외래어 표기를 배제하고 공식 순화어로 대체합니다. (예: `공람` → `함께 봄` / `시말서` → `경위서` / `TF` → `전담팀` )</p>
+                        <p className="font-bold text-slate-800 text-[12px]">• 외래어 · 한자어 순화</p>
+                        <p className="text-slate-500 text-[11px]">어려운 한자어 · 외래어 순화 (`공람` → `함께 봄` / `시말서` → `경위서` / `TF` → `전담팀`)</p>
                       </div>
                     </div>
 
@@ -444,7 +445,8 @@ export default function LawSystemPage() {
                       <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg font-bold shrink-0 text-[10.5px]">비권위</div>
                       <div className="space-y-1">
                         <p className="font-bold text-slate-800 text-[12px]">• 상호존중 어휘</p>
-                        <p className="text-slate-500 text-[11px]">군사정권 시기의 고압적 지시형 어투 및 수직적 명령조를 완전 차단하고, 시민 협치 관점의 친화적 권유·안내 어조를 적용합니다. (예: `즉시 제출을 명함` → `제출해 주시기 바랍니다` )</p>
+                        {/* vlds-ignore-next-line */}
+                        <p className="text-slate-500 text-[11px]">고압적 명령조 배제 (`즉시 제출을 명함` → `제출해 주시기 바랍니다`)</p>
                       </div>
                     </div>
 
@@ -452,8 +454,8 @@ export default function LawSystemPage() {
                     <div className="flex items-start gap-3">
                       <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg font-bold shrink-0 text-[10.5px]">중립성</div>
                       <div className="space-y-1">
-                        <p className="font-bold text-slate-800 text-[12px]">• 성 평등 및 중립적 순서</p>
-                        <p className="text-slate-500 text-[11px]">성역할 고정관념을 고착화할 우려가 있는 용어를 차단하며, 인명 또는 성별 통계 나열 시 관습적 남성 우선이 아닌 여성 우선 가나다순 배치를 엄격히 실행합니다. (예: `남 20, 여 15` → `여 15, 남 20` )</p>
+                        <p className="font-bold text-slate-800 text-[12px]">• 성 평등 · 중립적 순서</p>
+                        <p className="text-slate-500 text-[11px]">성역할 편견 배제 · 가나다순 배치 (`남 20, 여 15` → `여 15, 남 20`)</p>
                       </div>
                     </div>
                   </div>

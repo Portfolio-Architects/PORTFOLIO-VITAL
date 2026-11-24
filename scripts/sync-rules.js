@@ -14,6 +14,7 @@ const SKILL_DOC_PATHS = [
   '.agents/skills/vital-festival-4way-sync/SKILL.md',
   '.agents/skills/vital-public-infographic/SKILL.md',
   '.agents/skills/vital-governance-ops/SKILL.md',
+  '.agents/skills/vital-principles-os/SKILL.md',
 ];
 
 const GUIDELINE_DOC_PATHS = [
@@ -35,6 +36,12 @@ const EPHEMERAL_EXAMPLE_PATHS = new Set([
   'scratch/draft_policy.md',
   'scratch/draft_proposal.md',
   'scratch/clean_doc.md',
+]);
+
+// Matches .gitignore exception rules under /scratch/* so CI skips untracked scratch examples
+const TRACKED_SCRATCH_PATHS = new Set([
+  'scratch/generate_new_hwpx.py',
+  'scratch/test_hwpx_anti_overlap.py',
 ]);
 
 function extractMilestoneBlocks(reportContent) {
@@ -219,7 +226,7 @@ function auditGovernanceAndSkillDocs(rootDir = ROOT_DIR, docPaths = GOVERNANCE_D
       if (byteSize > AGENTS_MAX_BYTES) {
         errors.push(`[SIZE OVERFLOW] AGENTS.md 용량(${byteSize}B)이 상한(${AGENTS_MAX_BYTES}B)을 초과했습니다.`);
       }
-      const expectedRules = 'ABCDEFGHIJKLMNOPQRS'.split('');
+      const expectedRules = 'ABCDEFGHIJKLMNOPQRST'.split('');
       for (const r of expectedRules) {
         if (!new RegExp(`^###\\s+${r}\\.\\s+`, 'm').test(content)) {
           errors.push(`[MISSING RULE] AGENTS.md 내 Rule ${r} 섹션 헤더가 누락되었습니다.`);
@@ -263,7 +270,13 @@ function auditGovernanceAndSkillDocs(rootDir = ROOT_DIR, docPaths = GOVERNANCE_D
     const missingRefs = [];
     while ((match = pathRegex.exec(content)) !== null) {
       const refRel = match[1];
-      if (refRel.includes('<') || refRel.includes('>') || refRel.includes('*') || EPHEMERAL_EXAMPLE_PATHS.has(refRel)) {
+      if (
+        refRel.includes('<') ||
+        refRel.includes('>') ||
+        refRel.includes('*') ||
+        EPHEMERAL_EXAMPLE_PATHS.has(refRel) ||
+        (refRel.startsWith('scratch/') && !TRACKED_SCRATCH_PATHS.has(refRel))
+      ) {
         continue;
       }
       if (!fs.existsSync(path.join(rootDir, refRel))) {
@@ -292,7 +305,7 @@ function auditGovernanceAndSkillDocs(rootDir = ROOT_DIR, docPaths = GOVERNANCE_D
 
 function main() {
   console.log('🔄 ==========================================');
-  console.log('🔄 AGENTS.md & Engineering Report 3-Way 동기화 및 9대 문서 감사 도구');
+  console.log('🔄 AGENTS.md & Engineering Report 3-Way 동기화 및 10대 문서 감사 도구');
   console.log('🔄 ==========================================\n');
 
   const sourcePath = fs.existsSync(REPORT_PATH) ? REPORT_PATH : MILESTONES_MIRROR_PATH;
@@ -324,8 +337,8 @@ function main() {
       process.exit(1);
     }
 
-    console.log(`  ↳ 🛡️  [AUDIT] 9대 거버넌스·스킬·지침 문서 무결성 감사 통과 (PUA 0, 이중불릿 0, RSI 위반 0, 데드링크 0)`);
-    console.log('🎉 AGENTS.md, Engineering Milestones.md 및 9대 문서 감사가 완료되었습니다!');
+    console.log(`  ↳ 🛡️  [AUDIT] 10대 거버넌스·스킬·지침 문서 무결성 감사 통과 (PUA 0, 이중불릿 0, RSI 위반 0, 데드링크 0)`);
+    console.log('🎉 AGENTS.md, Engineering Milestones.md 및 10대 문서 감사가 완료되었습니다!');
     console.log(`   -> 대상 파일: ${path.relative(process.cwd(), AGENTS_PATH)}`);
   } catch (err) {
     console.error('❌ 동기화 중 오류 발생:', err);

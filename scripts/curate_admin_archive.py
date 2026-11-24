@@ -473,12 +473,14 @@ def curate_documents() -> List[Dict[str, Any]]:
     # ----------------------------------------------------
     # Source A: Live Documents from D:\Desktop (Read-Only)
     # ----------------------------------------------------
+    desktop_records: List[Dict[str, Any]] = []
+
     if os.path.exists(DESKTOP_PATH):
         try:
-            desktop_files = [
+            desktop_files = sorted(
                 f for f in os.listdir(DESKTOP_PATH)
                 if os.path.isfile(os.path.join(DESKTOP_PATH, f))
-            ]
+            )
         except Exception:
             desktop_files = []
 
@@ -522,12 +524,9 @@ def curate_documents() -> List[Dict[str, Any]]:
             else:
                 summary = f"{f} 행정 업무 문서."
 
-            doc_idx = len(curated) + 1
-            doc_id = f"doc-adm-{doc_idx:03d}"
-
-            curated.append({
-                "id": doc_id,
-                "docId": doc_id,
+            desktop_records.append({
+                "id": "",
+                "docId": "",
                 "title": os.path.splitext(f)[0],
                 "docType": doc_type,
                 "typeLabel": TYPE_LABELS[doc_type],
@@ -546,18 +545,46 @@ def curate_documents() -> List[Dict[str, Any]]:
                 "executionRate": exec_rate,
                 "auditFindings": audit_findings,
                 "summary": summary,
-                "ontologyLinks": {
-                    "projectId": project_id,
-                    "planDocId": doc_id if doc_type == "POLICY_PLAN" else None,
-                    "resultDocId": doc_id if doc_type == "RESULT_REPORT" else None,
-                    "auditDocId": doc_id if doc_type == "ADMIN_AUDIT" else None,
-                    "budgetDocId": doc_id if doc_type == "BUDGET_PLAN" else None,
-                    "weeklyDocIds": [doc_id] if doc_type == "WEEKLY_REPORT" else [],
-                },
+                "ontologyLinks": {},
                 "createdAt": "2026-11-05T01:30:00.000Z",
                 "updatedAt": "2026-11-05T01:30:00.000Z",
             })
             seen_filenames.add(f)
+
+    # Preserve previously curated Desktop records missing from live Desktop or in headless/CI environments
+    if os.path.exists(OUTPUT_DOC_INDEX_PATH):
+        try:
+            with open(OUTPUT_DOC_INDEX_PATH, "r", encoding="utf-8") as f_prev:
+                prev_docs = json.load(f_prev)
+            if isinstance(prev_docs, list):
+                for prev in prev_docs:
+                    if prev.get("sourceLocation") != "DESKTOP":
+                        continue
+                    orig_name = prev.get("originalFileName", "")
+                    if not orig_name or orig_name in seen_filenames:
+                        continue
+                    desktop_records.append(dict(prev))
+                    seen_filenames.add(orig_name)
+        except Exception as e:
+            print(f"Warning preserving Desktop records: {e}", file=sys.stderr)
+
+    desktop_records.sort(key=lambda r: r.get("originalFileName", ""))
+    for rec in desktop_records:
+        doc_idx = len(curated) + 1
+        doc_id = f"doc-adm-{doc_idx:03d}"
+        doc_type = rec.get("docType")
+        project_id = rec.get("projectId")
+        rec["id"] = doc_id
+        rec["docId"] = doc_id
+        rec["ontologyLinks"] = {
+            "projectId": project_id,
+            "planDocId": doc_id if doc_type == "POLICY_PLAN" else None,
+            "resultDocId": doc_id if doc_type == "RESULT_REPORT" else None,
+            "auditDocId": doc_id if doc_type == "ADMIN_AUDIT" else None,
+            "budgetDocId": doc_id if doc_type == "BUDGET_PLAN" else None,
+            "weeklyDocIds": [doc_id] if doc_type == "WEEKLY_REPORT" else [],
+        }
+        curated.append(rec)
 
     # ----------------------------------------------------
     # Source B: Pre-indexed items from data/ARCHIVE_INDEX.json (In-Memory)

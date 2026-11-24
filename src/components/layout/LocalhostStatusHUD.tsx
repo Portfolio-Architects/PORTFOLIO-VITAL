@@ -294,7 +294,7 @@ function LocalhostStatusHUDComponent({ onOpenLogs }: LocalhostStatusHUDProps) {
                   className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
                 >
                   <Terminal className="w-3.5 h-3.5" />
-                  <span>구동 로그 전체 보기 (Daemon Logs)</span>
+                  <span>구동 로그 보기</span>
                 </button>
               )}
             </div>

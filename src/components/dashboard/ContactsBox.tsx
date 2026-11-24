@@ -16,8 +16,8 @@ import {
   Copy, 
   Check, 
   Building, 
-  Sparkles,
-  ArrowUpDown
+  ArrowUpDown,
+  PhoneCall
 } from 'lucide-react';
 import { Contact } from '@/types';
 import { SectionHeader } from '@/components/ui';
@@ -73,6 +73,39 @@ interface ParsedNotes {
   freeText?: string;     // 기타 일반 메모
 }
 
+type ContactSortOrder = 'RECENT_CONTACT' | 'NAME_ASC' | 'NEWEST';
+
+function parseTimestampMs(iso?: string): number {
+  if (!iso) return 0;
+  const ms = Date.parse(iso);
+  return Number.isFinite(ms) ? ms : 0;
+}
+
+function formatRecentContactDate(iso?: string): { short: string; full: string } | null {
+  const ms = parseTimestampMs(iso);
+  if (ms <= 0) return null;
+  const d = new Date(ms);
+  const now = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const isSameDay =
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate();
+  const short = isSameDay
+    ? `오늘 ${hh}:${min}`
+    : yyyy === now.getFullYear()
+    ? `${mm}.${dd}`
+    : `${String(yyyy).slice(2)}.${mm}.${dd}`;
+  return {
+    short,
+    full: `${yyyy}. ${mm}. ${dd}. ${hh}:${min}`,
+  };
+}
+
 interface IndexedContact {
   contact: Contact;
   parsedNotes: ParsedNotes;
@@ -81,6 +114,8 @@ interface IndexedContact {
   chosungStr: string;
   cleanChosungStr: string;
   createdAtTimestamp: number;
+  activityTimestamp: number;
+  lastContactedTimestamp: number;
 }
 
 function parseContactNotes(notes?: string): ParsedNotes {
@@ -272,33 +307,64 @@ const ContactCard = React.memo(({
   parsedNotes,
   queryTokens,
   onStartEdit, 
-  onDelete 
+  onDelete,
+  onRecordContact
 }: { 
   contact: Contact; 
   parsedNotes: ParsedNotes;
   queryTokens: string[];
   onStartEdit: (contact: Contact) => void; 
-  onDelete: (id: string) => void; 
+  onDelete: (id: string) => void;
+  onRecordContact: (id: string) => void;
 }) => {
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [recordedContact, setRecordedContact] = useState(false);
+
+  const phoneTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const emailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const contactTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (phoneTimerRef.current) clearTimeout(phoneTimerRef.current);
+      if (emailTimerRef.current) clearTimeout(emailTimerRef.current);
+      if (contactTimerRef.current) clearTimeout(contactTimerRef.current);
+    };
+  }, []);
+
+  const handleCallPhone = useCallback(() => {
+    onRecordContact(contact.id);
+  }, [onRecordContact, contact.id]);
 
   const handleCopyPhone = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (!contact.phone) return;
-    navigator.clipboard.writeText(contact.phone);
+    navigator.clipboard?.writeText?.(contact.phone);
     setCopiedPhone(true);
-    setTimeout(() => setCopiedPhone(false), 1500);
-  }, [contact.phone]);
+    if (phoneTimerRef.current) clearTimeout(phoneTimerRef.current);
+    phoneTimerRef.current = setTimeout(() => setCopiedPhone(false), 1500);
+    onRecordContact(contact.id);
+  }, [contact.phone, contact.id, onRecordContact]);
 
   const handleCopyEmail = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     if (!contact.email) return;
-    navigator.clipboard.writeText(contact.email);
+    navigator.clipboard?.writeText?.(contact.email);
     setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 1500);
-  }, [contact.email]);
+    if (emailTimerRef.current) clearTimeout(emailTimerRef.current);
+    emailTimerRef.current = setTimeout(() => setCopiedEmail(false), 1500);
+    onRecordContact(contact.id);
+  }, [contact.email, contact.id, onRecordContact]);
+
+  const handleMarkContacted = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onRecordContact(contact.id);
+    setRecordedContact(true);
+    if (contactTimerRef.current) clearTimeout(contactTimerRef.current);
+    contactTimerRef.current = setTimeout(() => setRecordedContact(false), 1500);
+  }, [onRecordContact, contact.id]);
 
   const handleEdit = useCallback(() => {
     onStartEdit(contact);
@@ -311,6 +377,7 @@ const ContactCard = React.memo(({
   }, [onDelete, contact.id, contact.name]);
 
   const parsed = parsedNotes;
+  const recentContactInfo = formatRecentContactDate(contact.lastContactedAt);
 
   return (
     <div className="group relative flex flex-col justify-between p-4 bg-white hover:bg-slate-50/50 border border-slate-200/80 hover:border-slate-300 rounded-xl shadow-2xs transition-colors">
@@ -326,23 +393,56 @@ const ContactCard = React.memo(({
                 <HighlightText text={parsed.source} queryTokens={queryTokens} />
               </span>
             )}
+            {recentContactInfo && (
+              <span
+                title={`최근 연락: ${recentContactInfo.full}`}
+                className="inline-flex items-center text-[10px] font-mono tabular-nums font-semibold px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-md"
+              >
+                최근 {recentContactInfo.short}
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <button
-              onClick={handleEdit}
-              className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer transition-colors"
-              title="연락처 수정"
+              type="button"
+              onClick={handleMarkContacted}
+              className={`inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold rounded-md border transition-colors cursor-pointer ${
+                recordedContact
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-slate-50/80 hover:bg-emerald-50 text-slate-500 hover:text-emerald-700 border-slate-200/80 hover:border-emerald-200'
+              }`}
+              title="최근 연락 기록"
+              aria-label={`${contact.name} 연락 기록`}
             >
-              <Pencil className="w-3.5 h-3.5" />
+              {recordedContact ? (
+                <>
+                  <Check className="w-3 h-3 text-emerald-600" />
+                  <span>기록됨</span>
+                </>
+              ) : (
+                <>
+                  <PhoneCall className="w-3 h-3" />
+                  <span>연락</span>
+                </>
+              )}
             </button>
-            <button
-              onClick={handleDelete}
-              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md cursor-pointer transition-colors"
-              title="연락처 삭제"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+              <button
+                onClick={handleEdit}
+                className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer transition-colors"
+                title="연락처 수정"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={handleDelete}
+                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md cursor-pointer transition-colors"
+                title="연락처 삭제"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -351,6 +451,7 @@ const ContactCard = React.memo(({
           <div className="flex items-center justify-between group/phone">
             <a 
               href={`tel:${contact.phone.replace(/[^0-9+]/g, '')}`}
+              onClick={handleCallPhone}
               className="flex items-center gap-1.5 text-slate-700 hover:text-slate-900 transition-colors font-mono tabular-nums font-medium"
               title="전화 걸기"
             >
@@ -458,11 +559,11 @@ export interface ContactsBoxProps {
 
 const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', onClose }) => {
   const isSheet = variant === 'sheet';
-  const { contacts, loading, addContact, updateContact, deleteContact } = useContacts();
+  const { contacts, loading, addContact, updateContact, markContacted, deleteContact } = useContacts();
 
-  // 검색 및 정렬 상태
+  // 검색 및 정렬 상태 (기본: 최근 연락순)
   const [localSearchTerm, setLocalSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState<'NAME_ASC' | 'NEWEST'>('NAME_ASC');
+  const [sortOrder, setSortOrder] = useState<ContactSortOrder>('RECENT_CONTACT');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -484,8 +585,20 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
 
   const handleClearSearch = useCallback(() => {
     setLocalSearchTerm('');
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
     searchInputRef.current?.focus();
   }, []);
+
+  const handleRecordContact = useCallback((id: string) => {
+    if (typeof markContacted === 'function') {
+      markContacted(id);
+    } else {
+      const now = new Date().toISOString();
+      updateContact(id, { lastContactedAt: now, updatedAt: now });
+    }
+  }, [markContacted, updateContact]);
 
   // 폼 등록 및 수정 상태 (단일 객체로 배치 관리)
   const [formData, setFormData] = useState({
@@ -560,10 +673,20 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalSearchTerm(e.target.value);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
   }, []);
 
   const handleToggleSort = useCallback(() => {
-    setSortOrder(prev => (prev === 'NAME_ASC' ? 'NEWEST' : 'NAME_ASC'));
+    setSortOrder((prev) => {
+      if (prev === 'RECENT_CONTACT') return 'NAME_ASC';
+      if (prev === 'NAME_ASC') return 'NEWEST';
+      return 'RECENT_CONTACT';
+    });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
   }, []);
 
   const deferredSearchTerm = useDeferredValue(localSearchTerm);
@@ -578,7 +701,9 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
       const clean = combined.replace(/[\s\-\,\.\[\]\(\)\:\/]/g, '');
       const chosung = getChosung(combined);
       const cleanChosung = getChosung(clean);
-      const ts = c.createdAt ? Date.parse(c.createdAt) || 0 : 0;
+      const createdAtTs = parseTimestampMs(c.createdAt);
+      const updatedAtTs = parseTimestampMs(c.updatedAt);
+      const lastContactedTs = parseTimestampMs(c.lastContactedAt);
 
       list[i] = {
         contact: c,
@@ -587,7 +712,9 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
         cleanStr: clean,
         chosungStr: chosung,
         cleanChosungStr: cleanChosung,
-        createdAtTimestamp: ts
+        createdAtTimestamp: createdAtTs,
+        activityTimestamp: Math.max(createdAtTs, updatedAtTs),
+        lastContactedTimestamp: lastContactedTs
       };
     }
     return list;
@@ -639,11 +766,31 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
       list.push(item);
     }
 
-    // 3. 정렬 적용
-    if (sortOrder === 'NAME_ASC') {
+    // 3. 정렬 적용 (기본: 최근 연락순 → 미연락 항목은 최근 등록/수정순 → 가나다순)
+    if (sortOrder === 'RECENT_CONTACT') {
+      list.sort((a, b) => {
+        const aHasContact = a.lastContactedTimestamp > 0;
+        const bHasContact = b.lastContactedTimestamp > 0;
+        if (aHasContact !== bHasContact) {
+          return bHasContact ? 1 : -1;
+        }
+        if (a.lastContactedTimestamp !== b.lastContactedTimestamp) {
+          return b.lastContactedTimestamp - a.lastContactedTimestamp;
+        }
+        if (b.activityTimestamp !== a.activityTimestamp) {
+          return b.activityTimestamp - a.activityTimestamp;
+        }
+        return a.contact.name.localeCompare(b.contact.name, 'ko');
+      });
+    } else if (sortOrder === 'NAME_ASC') {
       list.sort((a, b) => a.contact.name.localeCompare(b.contact.name, 'ko'));
     } else {
-      list.sort((a, b) => b.createdAtTimestamp - a.createdAtTimestamp);
+      list.sort((a, b) => {
+        if (b.createdAtTimestamp !== a.createdAtTimestamp) {
+          return b.createdAtTimestamp - a.createdAtTimestamp;
+        }
+        return a.contact.name.localeCompare(b.contact.name, 'ko');
+      });
     }
 
     return list;
@@ -717,10 +864,14 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
       type="button"
       onClick={handleToggleSort}
       className="flex items-center gap-1 text-[11px] font-bold px-3 py-1 bg-slate-100/80 hover:bg-slate-200/70 text-slate-700 border border-slate-200/80 rounded-lg transition-colors cursor-pointer"
-      title="정렬 기준 변경"
+      title="정렬 기준 변경 (최근 연락순 · 가나다순 · 최근 등록순)"
     >
       <ArrowUpDown className="w-3 h-3 text-slate-500" />
-      {sortOrder === 'NAME_ASC' ? '가나다순' : '최신순'}
+      {sortOrder === 'RECENT_CONTACT'
+        ? '최근 연락순'
+        : sortOrder === 'NAME_ASC'
+        ? '가나다순'
+        : '최근 등록순'}
     </button>
   );
 
@@ -874,7 +1025,7 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
           <p className="text-sm font-bold text-slate-500">
             {localSearchTerm
               ? `"${localSearchTerm}" 검색 결과 없음`
-              : '등록된 연락처가 없습니다.'}
+              : '등록 연락처 없음'}
           </p>
           {localSearchTerm && (
             <button
@@ -905,6 +1056,7 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
                   queryTokens={queryTokens}
                   onStartEdit={startEdit}
                   onDelete={deleteContact}
+                  onRecordContact={handleRecordContact}
                 />
               ))}
             </div>
@@ -919,27 +1071,14 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
       <div className="flex flex-col h-full min-h-0">
         {/* Side Sheet Top Header */}
         <div className="px-5 py-4 border-b border-slate-200/80 bg-white shrink-0">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="p-2.5 bg-slate-100 text-slate-700 rounded-xl border border-slate-200/80 shrink-0">
                 <BookOpen className="w-5 h-5" />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-base font-extrabold text-slate-900 tracking-tight truncate">
-                    업무 연락처
-                  </h2>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200/80 rounded-md">
-                    <Sparkles className="w-3 h-3 text-slate-500" /> 초성 · 메모 검색
-                  </span>
-                </div>
-                <p
-                  title="부서 · 유관기관 담당자 통합 조회"
-                  className="vlds-subtitle text-xs font-medium text-slate-500 mt-0.5 line-clamp-1"
-                >
-                  부서 · 유관기관 담당자 통합 조회
-                </p>
-              </div>
+              <h2 className="text-base font-extrabold text-slate-900 tracking-tight truncate min-w-0">
+                업무 연락처
+              </h2>
             </div>
             {onClose && (
               <button
@@ -987,7 +1126,6 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
       {/* Header (VLDS SectionHeader) */}
       <SectionHeader
         title="업무 연락처"
-        subtitle="부서 · 유관기관 담당자 통합 조회"
         headingLevel="h4"
         titleClassName="text-xl font-bold text-slate-900 tracking-tight"
         className="pb-5 mb-6"
@@ -995,11 +1133,6 @@ const ContactsBoxComponent: React.FC<ContactsBoxProps> = ({ variant = 'card', on
           <div className="p-3 bg-slate-100 text-slate-700 rounded-xl border border-slate-200/80 shrink-0">
             <BookOpen className="w-6 h-6" />
           </div>
-        }
-        badge={
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200/80 rounded-md">
-            <Sparkles className="w-3 h-3 text-slate-500" /> 초성 · 메모 검색
-          </span>
         }
         actions={
           <>

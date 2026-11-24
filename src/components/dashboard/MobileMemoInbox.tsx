@@ -112,7 +112,7 @@ export function MobileMemoInbox() {
             </div>
             <div className="min-w-0">
               <h1 className="text-sm font-black tracking-tight truncate">
-                VITAL 모바일 메모 우체통
+                모바일 메모함
               </h1>
               <p className="text-[11px] text-slate-300 font-medium truncate">
                 24/7 클라우드 KV ↔ 행정 PC 작업기억 보드 연동
@@ -154,7 +154,7 @@ export function MobileMemoInbox() {
             </div>
             <div className="space-y-1">
               <h2 className="text-base font-black text-slate-900">
-                모바일 우체통 PIN 해제
+                PIN 잠금 해제
               </h2>
               <p className="text-xs font-medium text-slate-500 break-keep">
                 PIN 4자리 인증 · PC 작업기억 보드 즉시 전송

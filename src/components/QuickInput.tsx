@@ -83,7 +83,7 @@ function QuickInputComponent({ onCreateTask, onAddSignal, onSearch, onNavigate }
 
   return (
     <div className="relative overflow-visible">
-      <div className="flex items-center gap-2 glass-panel rounded-2xl shadow-sm px-3.5 sm:px-4 py-2.5 transition-colors duration-200 focus-within:shadow-[0_0_18px_rgba(74,108,247,0.15)] focus-within:border-[var(--color-primary)]/80 min-w-0">
+      <div className="flex items-center gap-2 glass-panel rounded-2xl shadow-sm px-3.5 sm:px-4 py-2.5 transition-colors duration-200 focus-within:border-[var(--color-primary)]/80 min-w-0">
         <input
           type="text"
           value={text}
@@ -142,7 +142,7 @@ function QuickInputComponent({ onCreateTask, onAddSignal, onSearch, onNavigate }
             </span>
           )}
           {parsed.priority === 'high' && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] font-semibold bg-rose-500/10 text-rose-700 border border-rose-500/15 shadow-2xs animate-pulse">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] font-semibold bg-rose-500/10 text-rose-700 border border-rose-500/15 shadow-2xs">
               <AlertTriangle size={11} /> 긴급
             </span>
           )}
@@ -158,8 +158,8 @@ function QuickInputComponent({ onCreateTask, onAddSignal, onSearch, onNavigate }
       )}
 
       {justCreated && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 px-5 py-3 rounded-full bg-slate-900/95 border border-slate-700/50 shadow-2xl text-[12px] font-semibold text-white animate-slide-up-fade">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981] animate-pulse" />
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 px-5 py-3 rounded-full bg-slate-900/95 border border-slate-700/50 shadow-md text-[12px] font-semibold text-white">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
           {createdLabel}
         </div>
       )}

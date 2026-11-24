@@ -16,15 +16,23 @@ interface TopNavProps {
   isContactsOpen?: boolean;
   onToggleContacts?: () => void;
   onPreloadContacts?: () => void;
+  isStickyNotesOpen?: boolean;
+  stickyNotesCount?: number;
+  onToggleStickyNotes?: () => void;
+  onPreloadStickyNotes?: () => void;
 }
 
 const navItems: ReadonlyArray<SegmentedTabItem<ModuleType>> = [
   { id: 'dashboard', label: '대시보드', icon: LayoutDashboard },
-  { id: 'memory', label: '작업기억 보드', icon: StickyNote },
   { id: 'workspace', label: '예산관리', icon: Archive },
   { id: 'festival', label: '양재천 페스티벌', icon: Sparkles },
-  { id: 'archive', label: '아카이브 탐색기', icon: FolderSearch },
+  { id: 'archive', label: '문서 보관함', icon: FolderSearch },
 ];
+
+const desktopNavItems: ReadonlyArray<SegmentedTabItem<ModuleType>> = navItems.map(({ id, label }) => ({
+  id,
+  label,
+}));
 
 const NAV_ITEM_LABEL_MAP = new Map<ModuleType, string>(navItems.map((i) => [i.id, i.label]));
 
@@ -35,14 +43,18 @@ function SidebarComponent({
   isContactsOpen = false,
   onToggleContacts,
   onPreloadContacts,
+  isStickyNotesOpen = false,
+  stickyNotesCount = 0,
+  onToggleStickyNotes,
+  onPreloadStickyNotes,
 }: TopNavProps) {
   const activeLabel = NAV_ITEM_LABEL_MAP.get(activeModule) || '';
 
   return (
     <>
       <header className="sticky top-0 left-0 right-0 z-50 pointer-events-auto bg-white/[0.98] border-b border-slate-200/85">
-        <div className="max-w-[1800px] mx-auto px-2 sm:px-3 lg:px-4">
-          <div className="flex items-center justify-between h-14 gap-3">
+        <div className="w-full max-w-[2400px] mx-auto px-4 sm:px-8 xl:px-12 2xl:px-16">
+          <div className="flex items-center justify-between h-[56px] gap-3">
             {/* Left side: Navigation Items */}
             <div className="flex items-center gap-3">
               {/* Mobile Header Title */}
@@ -52,10 +64,10 @@ function SidebarComponent({
                 </h1>
               </div>
 
-              {/* Desktop Navigation Items (VLDS SegmentedTabs Primitive) */}
+              {/* Desktop Navigation Items (VLDS SegmentedTabs Primitive — Text-Only) */}
               <div className="hidden sm:block shrink-0">
                 <SegmentedTabs
-                  items={navItems}
+                  items={desktopNavItems}
                   activeId={activeModule}
                   onChange={onModuleChange}
                   onPreload={onPreloadModule}
@@ -64,8 +76,35 @@ function SidebarComponent({
               </div>
             </div>
 
-            {/* Right side: Business Contacts Side Sheet Tab */}
-            <div className="flex items-center gap-2 pr-1.5">
+            {/* Right side: Sticky Notes Toggle & Business Contacts Side Sheet */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                data-testid="header-sticky-notes-toggle"
+                onClick={() => onToggleStickyNotes?.()}
+                onMouseEnter={() => onPreloadStickyNotes?.()}
+                onFocus={() => onPreloadStickyNotes?.()}
+                aria-expanded={isStickyNotesOpen}
+                aria-controls="sticky-notes-sheet"
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-semibold border whitespace-nowrap transition-colors cursor-pointer ${
+                  isStickyNotesOpen
+                    ? 'bg-amber-100 text-amber-950 border-amber-300 shadow-2xs'
+                    : 'bg-amber-50/80 hover:bg-amber-100/80 text-amber-900 border-amber-200/80'
+                }`}
+                title="포스트잇 (Alt+N)"
+              >
+                <StickyNote
+                  className={`w-4 h-4 shrink-0 ${isStickyNotesOpen ? 'text-amber-700' : 'text-amber-600'}`}
+                  strokeWidth={isStickyNotesOpen ? 2.1 : 1.8}
+                />
+                <span>포스트잇</span>
+                {stickyNotesCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-md text-[11px] font-extrabold font-mono tabular-nums bg-amber-200/80 text-amber-950">
+                    {stickyNotesCount}
+                  </span>
+                )}
+              </button>
+
               <button
                 type="button"
                 onClick={() => onToggleContacts?.()}

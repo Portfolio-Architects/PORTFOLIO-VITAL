@@ -16,7 +16,7 @@ export default function Error({
 
   return (
     <div className="flex h-[80vh] w-full flex-col items-center justify-center p-6 text-center">
-      <div className="rounded-2xl bg-white/70 backdrop-blur-md p-8 shadow-sm border border-slate-200 max-w-md w-full animate-in fade-in zoom-in duration-300">
+      <div className="rounded-2xl bg-white p-8 shadow-sm border border-slate-200 max-w-md w-full">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500 mx-auto mb-6">
           <AlertOctagon size={28} />
         </div>

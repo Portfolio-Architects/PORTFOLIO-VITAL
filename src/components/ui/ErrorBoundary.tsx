@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {this.props.sectionName ? `${this.props.sectionName} 로드 실패` : '컴포넌트 로드 실패'}
           </h3>
           <p className="text-xs text-slate-500 text-center mb-4 max-w-[250px]">
-            {this.state.error?.message || '알 수 없는 오류가 발생하여 UI를 렌더링하지 못했습니다.'}
+            {this.state.error?.message || '화면 렌더링 오류 발생'}
           </p>
           <button
             onClick={this.handleReset}

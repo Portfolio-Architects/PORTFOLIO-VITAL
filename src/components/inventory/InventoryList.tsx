@@ -190,7 +190,7 @@ const InventoryItemCardComponent = ({
               </div>
             </div>
             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border ${stockColor} border-current/20 ${stockBg} text-[11px] font-bold shadow-3xs`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse shadow-sm"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
               {statusLabel}
             </div>
           </div>
@@ -422,14 +422,14 @@ function InventoryListComponent({ items, addItem, updateItem, deleteItem, adjust
       {items.length === 0 ? (
         <Card className="glass-panel rounded-[2rem] border border-white/25">
           <CardContent className="px-5 py-16 text-center text-sm text-slate-400">
-            <Package size={40} className="mx-auto mb-3 text-indigo-500/40 animate-bounce" />
-            홍보물 품목을 추가해 보세요
+            <Package size={40} className="mx-auto mb-3 text-indigo-500/40" />
+            등록 홍보물 품목 없음
           </CardContent>
         </Card>
       ) : filteredItems.length === 0 ? (
         <Card className="glass-panel rounded-[2rem] border border-white/25">
           <CardContent className="px-5 py-12 text-center text-sm text-slate-400">
-            검색 결과에 부합하는 품목이 없습니다.
+            일치 품목 없음
           </CardContent>
         </Card>
       ) : (

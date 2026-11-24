@@ -446,7 +446,7 @@ export default function WeeklyReportManager({
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-blue-600" />
-                신규 주간업무 항목 추가
+                주간업무 추가
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}

@@ -130,7 +130,7 @@ function AppLogModalComponent({ isOpen, onClose, appMode }: AppLogModalProps) {
       <div className="absolute inset-0 bg-slate-900/60" onClick={onClose} />
       
       {/* Console Modal (White/Light Premium Theme - Wide View) */}
-      <div className="relative w-full max-w-6xl bg-white border border-slate-200/80 rounded-2xl shadow-2xl flex flex-col h-[640px] overflow-hidden text-slate-800">
+      <div className="relative w-full max-w-6xl bg-white border border-slate-200/80 rounded-2xl shadow-md flex flex-col h-[640px] overflow-hidden text-slate-800">
         
         {/* Terminal Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200/60 shrink-0">
@@ -233,7 +233,7 @@ function AppLogModalComponent({ isOpen, onClose, appMode }: AppLogModalProps) {
         >
           {logs.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center gap-2 text-slate-400 select-none">
-              <Play size={20} className="animate-pulse" />
+              <Play size={20} />
               <span>수집 로그 없음 · 데몬 대기 중</span>
               {clearedAt !== null && (
                 <button
@@ -284,7 +284,7 @@ function AppLogModalComponent({ isOpen, onClose, appMode }: AppLogModalProps) {
         {/* Terminal Footer */}
         <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200/60 flex items-center justify-between text-[10px] text-slate-400 font-mono shrink-0 select-none">
           <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
             <span>0-Interactive Evolution Loop Running...</span>
           </div>
           <span>E2EE BYPASS (Plain-Text JSON Mode)</span>

@@ -26,8 +26,10 @@ export const viewport: Viewport = {
 
 export default function YangjaeFestivalPage() {
   return (
-    <div className="min-h-screen bg-slate-100/70 sm:py-8 sm:px-4 flex justify-center items-start">
-      <YangjaeFestivalClientWrapper />
+    <div className="min-h-screen bg-slate-100/70 py-3 sm:py-6 px-4 sm:px-8 xl:px-12 2xl:px-16">
+      <div className="w-full max-w-[2400px] mx-auto">
+        <YangjaeFestivalClientWrapper />
+      </div>
     </div>
   );
 }

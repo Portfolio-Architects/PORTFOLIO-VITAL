@@ -182,7 +182,7 @@ function TaskModalComponent({ isOpen, onClose, onSave, editTask, onUpdate, allTa
     setTags(prev => prev.filter(t => t !== tag));
   }, []);
 
-  const inputClass = "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-shadow";
+  const inputClass = "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors";
   const labelClass = "block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5";
 
   return (
@@ -191,7 +191,7 @@ function TaskModalComponent({ isOpen, onClose, onSave, editTask, onUpdate, allTa
 
         <div>
           <label className={labelClass}>제목 *</label>
-          <input type="text" value={title} onChange={e => setTitle(e.target.value)} className={inputClass} placeholder="업무 제목을 입력하세요" required autoFocus />
+          <input type="text" value={title} onChange={e => setTitle(e.target.value)} className={inputClass} placeholder="업무 제목 입력" required autoFocus />
         </div>
 
         <div>

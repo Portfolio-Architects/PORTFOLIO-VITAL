@@ -314,7 +314,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          인과 순회 (Trace)
+          인과 추적
         </button>
         {isBudgetPlanEntity(node) && (
           <button
@@ -356,12 +356,12 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
             {/* Quick Cross-Domain Access Bar */}
             <div className="bg-slate-800/40 p-2.5 rounded-lg border border-slate-700/50 space-y-2">
               <div className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
-                <span>전사 도메인 연계 퀵 점프</span>
+                <span>연계 바로가기</span>
                 <button
                   onClick={() => setActiveTab('cross-domain')}
                   className="text-[10px] text-teal-400 hover:underline"
                 >
-                  통합 뷰 보기 →
+                  전체 보기 →
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-1.5 text-xs">
@@ -393,7 +393,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                   className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1 truncate"
                 >
                   <span>📝</span>
-                  <span className="truncate">작업기억 보드로 이동 ({bundle?.workingMemory?.pendingCount ?? 0})</span>
+                  <span className="truncate">포스트잇 열기 ({bundle?.workingMemory?.pendingCount ?? 0})</span>
                 </button>
                 <button
                   data-testid="btn-jump-workspace"
@@ -401,7 +401,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                   className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1 truncate"
                 >
                   <span>📊</span>
-                  <span className="truncate">예산관리로 이동 ({bundle?.budget?.executionRate ?? 0}%)</span>
+                  <span className="truncate">예산관리 이동 ({bundle?.budget?.executionRate ?? 0}%)</span>
                 </button>
                 <button
                   data-testid="btn-jump-simulator"
@@ -409,7 +409,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                   className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1 truncate"
                 >
                   <span>⚡</span>
-                  <span className="truncate">예산 시뮬레이터로 이동</span>
+                  <span className="truncate">예산 시뮬레이터 이동</span>
                 </button>
                 <button
                   data-testid="btn-jump-weekly"
@@ -417,7 +417,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                   className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1 truncate"
                 >
                   <span>📅</span>
-                  <span className="truncate">수요일 주간업무 작성으로 이동</span>
+                  <span className="truncate">주간업무 이동</span>
                 </button>
                 {isYangjaeFestival && (
                   <button
@@ -426,7 +426,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                     className="p-1.5 rounded bg-teal-900/40 hover:bg-teal-800/60 text-teal-200 border border-teal-700 flex items-center gap-1 truncate col-span-2"
                   >
                     <span>✨</span>
-                    <span className="truncate">양재천 페스티벌 관제 모듈로 이동</span>
+                    <span className="truncate">양재천 페스티벌 이동</span>
                   </button>
                 )}
               </div>
@@ -445,7 +445,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                 {node.objectives && node.objectives.length > 0 && (
                   <div className="bg-slate-800/40 p-3 rounded-lg border border-slate-700/40">
                     <div className="text-xs font-semibold text-slate-300 mb-2">
-                      주요 사업목표 (Objectives)
+                      주요 사업목표
                     </div>
                     <ul className="text-xs space-y-1.5 text-slate-300 list-disc list-inside">
                       {node.objectives.map((obj, idx) => (
@@ -504,7 +504,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                 {node.achievements && node.achievements.length > 0 && (
                   <div className="bg-slate-800/40 p-3 rounded-lg border border-slate-700/40">
                     <div className="text-xs font-semibold text-slate-300 mb-2">
-                      주요 성과 요약 (Achievements)
+                      주요 성과 요약
                     </div>
                     <ul className="text-xs space-y-1.5 text-slate-300 list-disc list-inside">
                       {node.achievements.map((ach, idx) => (
@@ -546,7 +546,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                 {node.auditFindings && node.auditFindings.length > 0 && (
                   <div className="bg-slate-800/40 p-3 rounded-lg border border-slate-700/40">
                     <div className="text-xs font-semibold text-slate-300 mb-2">
-                      지적사항 전문 (Audit Findings)
+                      지적사항 전문
                     </div>
                     <ul className="text-xs space-y-1 text-slate-300 list-disc list-inside">
                       {node.auditFindings.map((f, idx) => (
@@ -559,7 +559,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                 {node.correctiveMandates && node.correctiveMandates.length > 0 && (
                   <div className="bg-amber-950/30 p-3 rounded-lg border border-amber-800/50">
                     <div className="text-xs font-semibold text-amber-300 mb-2">
-                      시정·개선 조치 요구 (Corrective Mandates)
+                      시정·개선 조치 요구
                     </div>
                     <ul className="text-xs space-y-1 text-amber-200 list-disc list-inside">
                       {node.correctiveMandates.map((m, idx) => (
@@ -620,7 +620,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                 {node.itemizedBreakdown && node.itemizedBreakdown.length > 0 && (
                   <div className="bg-slate-800/40 p-3 rounded-lg border border-slate-700/40">
                     <div className="text-xs font-semibold text-slate-300 mb-2">
-                      산출내역 목·세목 (Itemized Breakdown)
+                      산출내역 목·세목
                     </div>
                     <div className="space-y-1.5 text-xs">
                       {node.itemizedBreakdown.map((item, idx) => (
@@ -641,7 +641,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                 {node.remediatedAuditIds && node.remediatedAuditIds.length > 0 && (
                   <div className="bg-slate-800/40 p-3 rounded-lg border border-slate-700/40">
                     <div className="text-xs font-semibold text-slate-300 mb-2">
-                      반영된 감사 지적사항 (Remediated Audits)
+                      반영 감사 지적사항
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {node.remediatedAuditIds.map((aid) => (
@@ -945,14 +945,14 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                 <div className="text-xs font-bold text-teal-300 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <span>✨</span>
-                    <span>5. 2026 양재천 건강 페스티벌 현장 관제</span>
+                    <span>5. 양재천 페스티벌</span>
                   </span>
                   <span className="text-xs font-bold px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/40">
                     공정률 {bundle?.festivalAndContacts?.festivalSummary?.progress ?? 85}%
                   </span>
                 </div>
                 <p className="text-xs text-teal-200/80 leading-relaxed">
-                  448px 모바일 관제 · 추진과제 · 부스 · 분장 · 식순
+                  체크리스트 · 추진과제 · 부스 · 분장 · 식순
                 </p>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -976,7 +976,7 @@ export const AdminOntologyDrawer: React.FC<AdminOntologyDrawerProps> = ({
                   className="w-full px-3 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow"
                 >
                   <span>✨</span>
-                  <span>양재천 페스티벌 관제 이동</span>
+                  <span>양재천 페스티벌 이동</span>
                 </button>
               </div>
             ) : (

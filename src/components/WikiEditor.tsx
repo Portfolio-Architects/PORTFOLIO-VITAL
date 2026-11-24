@@ -59,9 +59,9 @@ const getCustomSlashMenuItems = (editor: any): DefaultReactSuggestionItem[] => [
       }
     },
     aliases: ["ai", "llama", "자동완성", "ai작성"],
-    group: "AI 인텔리전스",
+    group: "AI 작성",
     icon: <span className="text-indigo-500 font-bold">✨</span>,
-    subtext: "현재 문서의 문맥을 읽고 자연스럽게 내용을 이어서 작성합니다."
+    subtext: "문맥 기반 내용 이어 쓰기"
   }
 ];
 

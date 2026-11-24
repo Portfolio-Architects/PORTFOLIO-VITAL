@@ -428,11 +428,11 @@ export const AdminOntologyExplorer: React.FC<AdminOntologyExplorerProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div className="min-w-0">
             <h1 className="text-sm sm:text-base font-bold text-slate-100 flex items-center gap-2 truncate">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
-              <span>행정 문서·업무 온톨로지 양방향 탐색기</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" />
+              <span>문서 관계도</span>
             </h1>
             <p className="vlds-subtitle text-[11px] sm:text-xs text-slate-400 mt-0.5 line-clamp-1">
-              방침서 ↔ 결과보고 ↔ 행정감사 ↔ 사업설명서 인과 추적
+              방침 · 결과 · 감사 · 예산서
             </p>
           </div>
 
@@ -441,7 +441,7 @@ export const AdminOntologyExplorer: React.FC<AdminOntologyExplorerProps> = ({
             <button
               onClick={handleReindex}
               disabled={isReindexing}
-              title="아카이브 및 온톨로지 비파괴 재색인 실행"
+              title="문서 색인 갱신"
               className="flex items-center gap-1 px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors disabled:opacity-50"
             >
               <span className={`inline-block ${isReindexing ? 'animate-spin' : ''}`}>↻</span>
@@ -510,7 +510,7 @@ export const AdminOntologyExplorer: React.FC<AdminOntologyExplorerProps> = ({
           <div className="bg-slate-900/80 p-2 sm:p-2.5 rounded-lg border border-slate-800/80 flex flex-col justify-between min-h-[68px]">
             <div>
               <div className="text-[10px] text-slate-400 flex items-center justify-between">
-                <span>1. 온톨로지</span>
+                <span>1. 문서 관계도</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
               </div>
               <div className="text-xs sm:text-sm font-bold text-blue-400 mt-0.5 truncate">
@@ -526,7 +526,7 @@ export const AdminOntologyExplorer: React.FC<AdminOntologyExplorerProps> = ({
           <div className="bg-slate-900/80 p-2 sm:p-2.5 rounded-lg border border-slate-800/80 flex flex-col justify-between min-h-[68px]">
             <div>
               <div className="text-[10px] text-slate-400 flex items-center justify-between">
-                <span>2. 아카이브</span>
+                <span>2. 문서 보관함</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </div>
               <div className="text-xs sm:text-sm font-bold text-emerald-400 mt-0.5 truncate">
@@ -540,7 +540,7 @@ export const AdminOntologyExplorer: React.FC<AdminOntologyExplorerProps> = ({
                 onClick={() => onSwitchTab('archive')}
                 className="text-[10px] text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-0.5 mt-1 text-left"
               >
-                <span>아카이브 이동 →</span>
+                <span>보관함 이동 →</span>
               </button>
             ) : (
               <div className="text-[10px] text-slate-500 mt-1 truncate">공문서·사진·시트</div>
@@ -554,7 +554,7 @@ export const AdminOntologyExplorer: React.FC<AdminOntologyExplorerProps> = ({
                 <span>3. 작업기억</span>
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
-                    crossDomainMetrics.pendingMemos > 0 ? 'bg-amber-400 animate-pulse' : 'bg-slate-500'
+                    crossDomainMetrics.pendingMemos > 0 ? 'bg-amber-400' : 'bg-slate-500'
                   }`}
                 />
               </div>
@@ -811,7 +811,7 @@ export const AdminOntologyExplorer: React.FC<AdminOntologyExplorerProps> = ({
                 <div
                   key={node.id}
                   onClick={() => handleNodeClick(node)}
-                  className={`p-3 rounded-lg border bg-slate-900/60 hover:bg-slate-850 cursor-pointer transition-transform duration-150 hover:scale-[1.01] hover:border-slate-600 flex flex-col justify-between gap-2 ${
+                  className={`vlds-cv-card p-3 rounded-lg border bg-slate-900/60 hover:bg-slate-850 cursor-pointer transition-colors hover:border-slate-600 flex flex-col justify-between gap-2 ${
                     selectedNode?.id === node.id
                       ? 'border-blue-500 ring-1 ring-blue-500'
                       : 'border-slate-800'

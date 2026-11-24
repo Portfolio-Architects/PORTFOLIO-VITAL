@@ -5,18 +5,18 @@ import { QueryProviders } from "@/components/QueryProviders";
 const basePath = '';
 
 export const metadata: Metadata = {
-  title: "VITAL Work Manager",
+  title: "WORK VITAL",
   description: "개인용 업무관리 시스템 — 업무, 예산, 재고, 미팅, 프로젝트 통합 관리",
   manifest: `${basePath}/manifest.json`,
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Work Manager",
+    title: "WORK VITAL",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4A6CF7",
+  themeColor: "#0f172a",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

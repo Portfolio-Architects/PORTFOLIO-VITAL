@@ -185,21 +185,10 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
     const plannedShare = formatShare(executionDiagnosis.committedPlanned, denom);
     const riskShare = formatShare(executionDiagnosis.unplannedRisk, denom);
 
-    const plannedDetail =
-      executionDiagnosis.lockedAmount > 0
-        ? `일반 ${executionDiagnosis.generalPlanned.toLocaleString()}원 · 일상 ${executionDiagnosis.dailyPlanned.toLocaleString()}원 · 동결 ${executionDiagnosis.lockedAmount.toLocaleString()}원`
-        : `일반 ${executionDiagnosis.generalPlanned.toLocaleString()}원 · 일상 ${executionDiagnosis.dailyPlanned.toLocaleString()}원`;
-
-    const riskDetail =
-      executionDiagnosis.unplannedRisk > 0
-        ? `일반 ${executionDiagnosis.generalUnplanned.toLocaleString()}원 · 일상 ${executionDiagnosis.dailyUnplanned.toLocaleString()}원`
-        : '전 비목 설계 완료';
-
     return [
       {
         id: 'exec-general',
         name: '일반지출 집행 완료',
-        secondaryMetricLabel: 'e-호조 일반지출 확정',
         amount: executionDiagnosis.generalExecuted,
         share: generalShare.share,
         shareLabel: generalShare.shareLabel,
@@ -209,10 +198,6 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
       {
         id: 'exec-daily',
         name: '일상경비 집행 완료',
-        secondaryMetricLabel:
-          executionDiagnosis.dailyIssued > 0
-            ? `일상경비 통장 입금 ${executionDiagnosis.dailyIssued.toLocaleString()}원 중 실사용분`
-            : '일상경비 내역 없음',
         amount: executionDiagnosis.dailyExecuted,
         share: dailyShare.share,
         shareLabel: dailyShare.shareLabel,
@@ -222,7 +207,6 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
       {
         id: 'exec-planned',
         name: '지출 예정(품의·원인행위 대기)',
-        secondaryMetricLabel: plannedDetail,
         amount: executionDiagnosis.committedPlanned,
         share: plannedShare.share,
         shareLabel: plannedShare.shareLabel,
@@ -232,7 +216,6 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
       {
         id: 'exec-risk',
         name: '순수 미계획 불용 위험액',
-        secondaryMetricLabel: riskDetail,
         amount: executionDiagnosis.unplannedRisk,
         share: riskShare.share,
         shareLabel: riskShare.shareLabel,
@@ -251,7 +234,6 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
         unit: '원',
         share: r.share,
         shareLabel: r.shareLabel,
-        secondaryMetricLabel: r.secondaryMetricLabel,
         color: r.color,
         isEmpty: false,
       }));
@@ -270,19 +252,19 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
   }, [executionRows, executionDiagnosis.totalBudget]);
 
   return (
-    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200 relative min-h-screen font-sans">
-      {/* Main Panels */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-2">
+    <div className="w-full flex flex-col gap-6 relative min-h-screen font-sans">
+      {/* Main Panels (4.2:5.8 Split — Left Diagnosis+KPIs 42% / Right Trend Chart 58%) */}
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,42fr)_minmax(0,58fr)] gap-6">
         
-        {/* Left Column */}
-        <div className="xl:col-span-6 flex flex-col gap-6">
+        {/* Left Column (42%) */}
+        <div className="min-w-0 flex flex-col gap-4 sm:gap-5">
           {/* 집행·불용 위험 정밀 진단 단독 도넛 패널 */}
-          <div className="bg-white rounded-xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs flex flex-col min-h-[420px]">
+          <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200/80 shadow-2xs flex flex-col min-h-[420px]">
             {/* Top Header & Project Filter */}
             <div className="flex flex-wrap items-center justify-between gap-2 z-10 pb-4 mb-4 border-b border-slate-100">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
-                  집행·불용 위험 정밀 진단
+                  집행·불용 진단
                 </h2>
                 <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-900 text-white font-mono tabular-nums">
                   설계 완료 {executionDiagnosis.committedDesignRate.toFixed(1)}%
@@ -294,7 +276,7 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
                 data-testid="execution-project-select"
                 value={selectedProject}
                 onChange={handleSelectProject}
-                className="bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/80 text-slate-800 text-xs sm:text-sm font-bold rounded-lg px-3.5 py-1.5 outline-none focus:bg-white focus:border-slate-400 transition-colors cursor-pointer max-w-[220px] truncate shrink-0"
+                className="bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/80 text-slate-800 text-xs sm:text-sm font-bold rounded-lg px-3 py-1.5 outline-none focus:bg-white focus:border-slate-400 transition-colors cursor-pointer max-w-[200px] truncate shrink-0"
               >
                 <option value="ALL">세부사업명 전체</option>
                 {detailedProjects.map((dp) => (
@@ -305,8 +287,8 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
               </select>
             </div>
 
-            <div className="relative z-20 flex-1 w-full min-h-[280px] flex flex-col sm:flex-row items-stretch justify-between mb-1 gap-4">
-              <div className="w-full sm:w-[47%] h-[272px] relative z-20 flex-shrink-0 flex justify-center items-center">
+            <div className="relative z-20 flex-1 w-full min-h-[280px] flex flex-col sm:flex-row items-center justify-between mb-1 gap-4 sm:gap-5">
+              <div className="w-full sm:w-auto h-[264px] relative z-20 flex-shrink-0 flex justify-center items-center">
                 <div className="w-[252px] h-[252px] relative flex-shrink-0">
                   {/* Center Text (z-0 + DOM 선행 배치: PieChart 및 툴팁 레이어 하단 고정) */}
                   <div
@@ -347,6 +329,7 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
                           dataKey="value"
                           stroke="none"
                           cornerRadius={0}
+                          isAnimationActive={false}
                           style={{ outline: 'none' }}
                         >
                           {executionPieData.map((entry, index) => (
@@ -363,37 +346,32 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
                 </div>
               </div>
 
-              <div className="w-full sm:w-[53%] relative z-10 flex justify-center sm:justify-start h-full items-center min-w-0">
-                <div className="w-full flex flex-col divide-y divide-slate-100 justify-start min-w-0 max-h-[285px] overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin' }}>
+              <div className="w-full sm:flex-1 relative z-10 flex justify-center sm:justify-start h-full items-center min-w-0">
+                <div className="w-full flex flex-col divide-y divide-slate-100 justify-start min-w-0">
                   {executionRows.map((item) => (
                     <div
                       key={item.id}
                       data-testid={`execution-row-${item.id}`}
-                      className="group flex items-center justify-between gap-2.5 w-full py-3 px-2 hover:bg-slate-50/80 transition-colors cursor-default min-w-0"
+                      className="group flex items-center justify-between gap-2 w-full py-3.5 px-1.5 hover:bg-slate-50/80 transition-colors cursor-default min-w-0"
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0" title={item.name}>
                         <div
                           data-testid="breakdown-color-swatch"
-                          className="w-3.5 h-3.5 rounded-xs shrink-0"
+                          className="w-3 h-3 rounded-xs shrink-0"
                           style={{ backgroundColor: item.color }}
                         />
-                        <div className="flex flex-col min-w-0" title={`${item.name} — ${item.secondaryMetricLabel}`}>
-                          <span
-                            className={`text-[13px] sm:text-[14px] font-bold truncate leading-tight ${
-                              item.isRiskAlert ? 'text-rose-700' : 'text-slate-800'
-                            }`}
-                          >
-                            {item.name}
-                          </span>
-                          <span className="text-[11px] font-medium text-slate-400 truncate leading-tight mt-0.5">
-                            {item.secondaryMetricLabel}
-                          </span>
-                        </div>
+                        <span
+                          className={`text-[13px] sm:text-[14px] font-bold truncate leading-tight ${
+                            item.isRiskAlert ? 'text-rose-700' : 'text-slate-800'
+                          }`}
+                        >
+                          {item.name}
+                        </span>
                       </div>
                       <div className="shrink-0 text-right ml-auto flex flex-col items-end gap-0.5">
                         <div className="flex items-baseline gap-0.5">
                           <span
-                            className={`text-sm sm:text-[16px] font-bold font-mono tabular-nums leading-none whitespace-nowrap ${
+                            className={`text-sm sm:text-[15px] font-bold font-mono tabular-nums leading-none whitespace-nowrap ${
                               item.isRiskAlert ? 'text-rose-600' : 'text-slate-900'
                             }`}
                           >
@@ -412,66 +390,66 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
             </div>
           </div>
 
-          {/* KPI Mini Cards Grid */}
-          <div className="grid grid-cols-2 gap-3.5 sm:gap-4 content-start">
+          {/* KPI Mini Cards Grid (Portfolio Asset 72px Height Parity) */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 content-start">
             {/* 1. 예산 집행률 */}
-            <div className="bg-white shadow-2xs border border-slate-200/80 rounded-xl px-5 py-3.5 sm:px-6 sm:py-4 min-h-[78px] flex flex-col justify-between relative overflow-hidden">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-slate-600">예산 집행률</span>
+            <div className="bg-white shadow-2xs border border-slate-200/80 rounded-xl px-4 py-2.5 sm:px-5 sm:py-3 h-[72px] min-h-[72px] flex flex-col justify-between relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-600 leading-none">예산 집행률</span>
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-900 shrink-0" />
               </div>
               <div className="flex items-end justify-between gap-2">
-                <span className="text-2xl sm:text-3xl font-black font-mono tabular-nums text-slate-900 leading-none">{executionRate.toFixed(1)}%</span>
-                <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden shrink-0 mb-1">
+                <span className="text-xl sm:text-2xl font-black font-mono tabular-nums text-slate-900 leading-none">{executionRate.toFixed(1)}%</span>
+                <div className="w-16 sm:w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0 mb-0.5">
                   <div className="h-full bg-slate-900 rounded-full" style={{ width: `${Math.min(100, Math.max(0, executionRate))}%` }} />
                 </div>
               </div>
             </div>
 
             {/* 2. 예산 잔여율 */}
-            <div className="bg-white shadow-2xs border border-slate-200/80 rounded-xl px-5 py-3.5 sm:px-6 sm:py-4 min-h-[78px] flex flex-col justify-between relative overflow-hidden">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-slate-600">예산 잔여율</span>
+            <div className="bg-white shadow-2xs border border-slate-200/80 rounded-xl px-4 py-2.5 sm:px-5 sm:py-3 h-[72px] min-h-[72px] flex flex-col justify-between relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-600 leading-none">예산 잔여율</span>
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-300 shrink-0" />
               </div>
               <div className="flex items-end justify-between gap-2">
-                <span className="text-2xl sm:text-3xl font-black font-mono tabular-nums text-slate-700 leading-none">{(100 - executionRate).toFixed(1)}%</span>
-                <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden shrink-0 mb-1">
+                <span className="text-xl sm:text-2xl font-black font-mono tabular-nums text-slate-700 leading-none">{(100 - executionRate).toFixed(1)}%</span>
+                <div className="w-16 sm:w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0 mb-0.5">
                   <div className="h-full bg-slate-400 rounded-full" style={{ width: `${Math.min(100, Math.max(0, 100 - executionRate))}%` }} />
                 </div>
               </div>
             </div>
 
             {/* 3. 누적 집행액 */}
-            <div className="bg-white shadow-2xs border border-slate-200/80 rounded-xl px-5 py-3.5 sm:px-6 sm:py-4 min-h-[78px] flex flex-col justify-between relative overflow-hidden">
-              <span className="text-xs font-bold text-slate-600 mb-1.5">누적 집행액</span>
+            <div className="bg-white shadow-2xs border border-slate-200/80 rounded-xl px-4 py-2.5 sm:px-5 sm:py-3 h-[72px] min-h-[72px] flex flex-col justify-between relative overflow-hidden">
+              <span className="text-xs font-bold text-slate-600 leading-none">누적 집행액</span>
               <div className="flex items-baseline gap-1 min-w-0" title={`${executedBudget.toLocaleString()}원`}>
-                <span className="text-xl sm:text-2xl font-black font-mono tabular-nums text-slate-900 leading-none truncate">
+                <span className="text-lg sm:text-[20px] 2xl:text-[22px] font-black font-mono tabular-nums text-slate-900 leading-none truncate">
                   {executedBudget.toLocaleString()}
                 </span>
-                <span className="text-xs font-semibold text-slate-400 shrink-0">원</span>
+                <span className="text-xs font-semibold text-slate-400 shrink-0 leading-none">원</span>
               </div>
             </div>
 
             {/* 4. 가용 잔액 */}
-            <div className="bg-white shadow-2xs border border-slate-200/80 rounded-xl px-5 py-3.5 sm:px-6 sm:py-4 min-h-[78px] flex flex-col justify-between relative overflow-hidden">
-              <span className="text-xs font-bold text-slate-600 mb-1.5">가용 잔액</span>
+            <div className="bg-white shadow-2xs border border-slate-200/80 rounded-xl px-4 py-2.5 sm:px-5 sm:py-3 h-[72px] min-h-[72px] flex flex-col justify-between relative overflow-hidden">
+              <span className="text-xs font-bold text-slate-600 leading-none">가용 잔액</span>
               <div className="flex items-baseline gap-1 min-w-0" title={`${remainingBudget.toLocaleString()}원`}>
-                <span className="text-xl sm:text-2xl font-black font-mono tabular-nums text-slate-900 truncate block leading-none">
+                <span className="text-lg sm:text-[20px] 2xl:text-[22px] font-black font-mono tabular-nums text-slate-900 truncate block leading-none">
                   {remainingBudget.toLocaleString()}
                 </span>
-                <span className="text-xs font-semibold text-slate-400 shrink-0">원</span>
+                <span className="text-xs font-semibold text-slate-400 shrink-0 leading-none">원</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Panel: 월별 예산 집행 추이 */}
-        <div className="xl:col-span-6 flex flex-col gap-6">
+        {/* Right Panel (58%): 월별 예산 집행 추이 */}
+        <div className="min-w-0 flex flex-col gap-6">
           <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200/80 shadow-2xs h-full flex flex-col relative overflow-hidden">
             <SectionHeader
-              title="월별 예산 집행 추이"
-              subtitle="11월 전액 집행 목표 대비 누적 소진율"
+              title="월별 집행 추이"
+              subtitle="11월 전액 집행 목표"
               className="pb-4"
               actions={
                 <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-50 rounded-lg border border-slate-200/80 shrink-0">
@@ -493,7 +471,7 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
                 </div>
               </div>
               <div className="flex flex-col items-start border-l border-slate-200/80 pl-3">
-                <span className="text-xs font-bold text-slate-600 mb-1.5 truncate">월 권장 집행액 (11월 기준)</span>
+                <span className="text-xs font-bold text-slate-600 mb-1.5 truncate">월 권장 집행액</span>
                 <div className="flex items-baseline gap-0.5 sm:gap-1 flex-wrap">
                   <span className="text-[15px] sm:text-xl font-bold font-mono tabular-nums text-slate-900 leading-none tracking-tight">{Math.round(recommendedMonthlySpendForTarget).toLocaleString()}</span>
                   <span className="text-xs font-medium text-slate-400">원</span>
@@ -545,10 +523,10 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
                     <ReferenceLine x="Nov" stroke="#e11d48" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: "11월 마감 (100%)", fill: "#e11d48", fontSize: 9, fontWeight: 700, position: 'insideTop', offset: 15 }} />
                     
                     {/* 선형 100% 소진 가이드 점선 */}
-                    <Line type="monotone" dataKey="targetRate" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="4 4" dot={false} activeDot={false} name="11월 소진 목표" />
+                    <Line type="monotone" dataKey="targetRate" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="4 4" dot={false} activeDot={false} isAnimationActive={false} name="11월 소진 목표" />
                     
                     {/* 실제 누적 소진율 곡선 및 영역 */}
-                    <Area type="monotone" dataKey="cumulativeRate" stroke="#0f172a" strokeWidth={2.5} fillOpacity={1} fill="url(#colorCumulativeRate)" activeDot={{ r: 4, fill: '#0f172a', stroke: '#fff', strokeWidth: 2 }} name="누적 소진율" />
+                    <Area type="monotone" dataKey="cumulativeRate" stroke="#0f172a" strokeWidth={2.5} fillOpacity={1} fill="url(#colorCumulativeRate)" activeDot={{ r: 4, fill: '#0f172a', stroke: '#fff', strokeWidth: 2 }} isAnimationActive={false} name="누적 소진율" />
                   </ComposedChart>
                 </ResponsiveContainer>
               )}
@@ -558,7 +536,9 @@ function PortfolioDashboardViewComponent({ budgetCategories, budgetEntries, appM
       </div>
 
       {/* Integrated Showcase: Working Memory Board & Master Archive Explorer */}
-      <IntegratedShowcaseSection onNavigateModule={onNavigateModule} />
+      <div className="vlds-cv-section">
+        <IntegratedShowcaseSection onNavigateModule={onNavigateModule} />
+      </div>
     </div>
   );
 }

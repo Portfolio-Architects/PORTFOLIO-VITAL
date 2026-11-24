@@ -9,13 +9,13 @@ import { useInventory } from '@/hooks/useInventory';
 import { useMeetings } from '@/hooks/useMeetings';
 import { useProjects } from '@/hooks/useProjects';
 import { useContacts } from '@/hooks/useContacts';
+import { useWorkingMemory } from '@/hooks/useWorkingMemory';
 import { useAuth } from '@/hooks/useAuth';
 import { Sidebar } from '@/components/Sidebar';
+import { VitalLogo } from '@/components/ui/VitalLogo';
 import { syncTombstones } from '@/lib/sheets-api';
-import BudgetSimulatorSkeleton from '@/components/budget/ui/BudgetSimulatorSkeleton';
 import YangjaeFestivalSkeleton from '@/components/skeletons/YangjaeFestivalSkeleton';
 import { PortfolioDashboardViewSkeleton } from '@/components/skeletons/PortfolioDashboardViewSkeleton';
-import { WorkingMemoryContextBanner } from '@/components/dashboard/WorkingMemoryContextBanner';
 import { PortfolioDashboardView as DirectPortfolioDashboardView } from '@/components/dashboard/PortfolioDashboardView';
 
 export { PortfolioDashboardViewSkeleton };
@@ -23,13 +23,14 @@ export { PortfolioDashboardViewSkeleton };
 function WorkspaceViewSkeleton() {
   return (
     <div className="w-full flex flex-col gap-6 animate-pulse">
-      <div className="flex border-b border-slate-200/80 gap-1.5 pb-px">
-        <div className="w-36 h-11 bg-slate-200/80 rounded-t-lg" />
-        <div className="w-36 h-11 bg-slate-100 rounded-t-lg" />
-      </div>
-      <div className="flex items-center justify-between flex-wrap gap-2 mt-2">
+      <div className="flex items-center justify-between flex-wrap gap-2 mt-1">
         <div className="w-40 h-7 bg-slate-200/80 rounded-md" />
         <div className="w-28 h-9 bg-slate-100 border border-slate-200/80 rounded-lg" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-32 bg-slate-200/60 rounded-xl" />
+        ))}
       </div>
     </div>
   );
@@ -43,11 +44,6 @@ const PortfolioDashboardView = dynamic(() => import('@/components/dashboard/Port
 const WorkspaceView = dynamic(() => import('@/components/WorkspaceView').then(mod => mod.WorkspaceView).catch(() => WorkspaceViewSkeleton), {
   ssr: false,
   loading: () => <WorkspaceViewSkeleton />
-});
-
-const BudgetSimulator = dynamic(() => import('@/components/budget/BudgetSimulator').then(mod => mod.BudgetSimulator).catch(() => BudgetSimulatorSkeleton), {
-  ssr: false,
-  loading: () => <BudgetSimulatorSkeleton />
 });
 
 const YangjaeFestivalDashboard = dynamic(() => import('@/components/festival/YangjaeFestivalDashboard').catch(() => ({ default: YangjaeFestivalSkeleton })), {
@@ -80,7 +76,7 @@ const ArchiveExplorerView = dynamic(() => import('@/components/archive/ArchiveEx
   loading: () => null
 });
 
-const WorkingMemoryPage = dynamic(() => import('@/components/memory/WorkingMemoryPage').then(mod => mod.WorkingMemoryPage).catch(() => () => null), {
+const StickyNotesPanel = dynamic(() => import('@/components/memory/StickyNotesPanel').then(mod => mod.StickyNotesPanel).catch(() => () => null), {
   ssr: false,
   loading: () => null
 });
@@ -154,6 +150,8 @@ export interface ProtectedAppProps {
 
 export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
   const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
+  const [workspaceInitialTab, setWorkspaceInitialTab] = useState<'budget' | 'simulator'>('budget');
+  const [workspaceFocusSeq, setWorkspaceFocusSeq] = useState(0);
   const [visitedModules, setVisitedModules] = useState<Record<ModuleType, boolean>>({
     dashboard: true,
     workspace: false,
@@ -169,6 +167,7 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
   const [hasOpenedCommandPalette, setHasOpenedCommandPalette] = useState(false);
   const [isContactsOpen, setIsContactsOpen] = useState(false);
   const [hasOpenedContacts, setHasOpenedContacts] = useState(false);
+  const [isStickyNotesOpen, setIsStickyNotesOpen] = useState(false);
 
   // Defer TASKS, MEETINGS, PROJECTS, INVENTORY fetching on initial Dashboard load until tab switch or Ctrl+K open (latched once triggered)
   const isDeferredDataEnabled =
@@ -191,6 +190,7 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
   const { contacts } = useContacts({
     enabled: isCommandPaletteOpen || hasOpenedCommandPalette || isContactsOpen || hasOpenedContacts
   });
+  const { pendingMemos } = useWorkingMemory({ autoFetch: true });
 
   const handleCloseCommandPalette = useCallback(() => setIsCommandPaletteOpen(false), []);
   const handleToggleContacts = useCallback(() => {
@@ -203,6 +203,14 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
     import('@/components/dashboard/ContactsSideSheet').catch(() => {});
   }, []);
 
+  const handleToggleStickyNotes = useCallback(() => {
+    setIsStickyNotesOpen(prev => !prev);
+  }, []);
+  const handleCloseStickyNotes = useCallback(() => setIsStickyNotesOpen(false), []);
+  const handlePreloadStickyNotes = useCallback(() => {
+    import('@/components/memory/StickyNotesPanel').catch(() => {});
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -212,6 +220,9 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
           if (next) setHasOpenedCommandPalette(true);
           return next;
         });
+      } else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        setIsStickyNotesOpen(prev => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -258,7 +269,23 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
   const [, startTabTransition] = useTransition();
 
   const handleModuleChange = useCallback((module: ModuleType) => {
+    if (module === 'memory') {
+      setIsStickyNotesOpen(true);
+      return;
+    }
     startTabTransition(() => {
+      if (module === 'simulator') {
+        setWorkspaceInitialTab('simulator');
+        setWorkspaceFocusSeq(prev => prev + 1);
+        setActiveModule('workspace');
+        setVisitedModules(prev => prev.workspace ? prev : { ...prev, workspace: true });
+        localStorage.setItem('hchps_active_module', 'workspace');
+        return;
+      }
+      if (module === 'workspace') {
+        setWorkspaceInitialTab('budget');
+        setWorkspaceFocusSeq(prev => prev + 1);
+      }
       setActiveModule(module);
       setVisitedModules(prev => prev[module] ? prev : { ...prev, [module]: true });
       localStorage.setItem('hchps_active_module', module);
@@ -279,7 +306,7 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
     const distance = touchStartX.current - touchEndX.current;
     
     if (Math.abs(distance) > 60) {
-      const order: ModuleType[] = ['dashboard', 'memory', 'workspace', 'festival', 'archive'];
+      const order: ModuleType[] = ['dashboard', 'workspace', 'festival', 'archive'];
       const currentIndex = order.indexOf(activeModule);
       
       if (currentIndex !== -1) {
@@ -312,21 +339,27 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
         isContactsOpen={isContactsOpen}
         onToggleContacts={handleToggleContacts}
         onPreloadContacts={handlePreloadContacts}
+        isStickyNotesOpen={isStickyNotesOpen}
+        stickyNotesCount={pendingMemos.length}
+        onToggleStickyNotes={handleToggleStickyNotes}
+        onPreloadStickyNotes={handlePreloadStickyNotes}
       />
 
-      <main id="main-scroll-container" className="flex-1 pb-28 sm:pb-10 overflow-y-auto custom-scrollbar">
-        <div className="max-w-[1800px] mx-auto px-2 sm:px-3 lg:px-4 flex flex-col gap-5 sm:gap-6">
+      <main id="main-scroll-container" className="flex-1 pb-28 sm:pb-12 overflow-y-auto custom-scrollbar">
+        <div className="w-full max-w-[2400px] mx-auto px-4 sm:px-8 xl:px-12 2xl:px-16 flex flex-col gap-4 sm:gap-5">
           
-          {/* VLDS Spacious 2-Tier Page Title Header (Aligned with PORTFOLIO ASSET spacing) */}
-          <div className="flex flex-col gap-3 sm:gap-3.5 pt-7 sm:pt-9 lg:pt-11 pb-6 sm:pb-7 lg:pb-8 border-b border-slate-200/75 shrink-0">
-            <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-slate-900 flex items-center gap-3.5">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-xl shadow-2xs border border-slate-200/85 flex items-center justify-center overflow-hidden shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/icon-192x192.png" alt={`${appMode} 로고`} className="w-full h-full object-cover" />
-              </div>
-              <span>
-                {activeModule === 'dashboard'
-                  ? `${appMode} 통합 대시보드`
+          {/* VLDS Compact Page Title Header (Aligned with Portfolio Asset Rhythm) */}
+          <div className="flex flex-col gap-2 pt-5 sm:pt-7 pb-4 sm:pb-5 border-b border-slate-200/75 shrink-0">
+            <div className="flex items-center gap-3 sm:min-h-[36px] min-w-0">
+              <VitalLogo
+                className="w-6 h-6 sm:w-7 sm:h-7 text-slate-900 shrink-0"
+                title={appMode === 'VITAL' ? 'WORK VITAL 로고' : `${appMode} 로고`}
+              />
+              <h1 className="text-xl sm:text-2xl lg:text-[26px] leading-none font-extrabold tracking-[-0.02em] text-slate-900 shrink-0">
+                {appMode === 'VITAL'
+                  ? 'WORK VITAL'
+                  : activeModule === 'dashboard'
+                  ? `${appMode} 대시보드`
                   : `${appMode} ${
                       activeModule === 'workspace'
                         ? '예산관리'
@@ -337,28 +370,33 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
                         : activeModule === 'project'
                         ? '사업 관리'
                         : activeModule === 'archive'
-                        ? '아카이브 탐색기'
+                        ? '문서 보관함'
                         : activeModule === 'memory'
-                        ? '작업기억 보조 보드'
+                        ? '포스트잇'
                         : ''
                     }`}
-              </span>
-            </h1>
-            <p className="vlds-subtitle text-xs sm:text-[13px] font-medium text-slate-500 leading-relaxed">
-              {activeModule === 'memory'
-                ? '지시 · 예산 변동 · 행감 메모 즉시 기록'
-                : activeModule === 'workspace'
-                  ? 'e-호조 일반지출 · 일상경비 대조 · 시뮬레이션'
-                  : activeModule === 'simulator'
-                    ? '집행 잔액 - 예정액 · 과목별 예상 잔액'
-                    : activeModule === 'festival'
-                      ? '추진과제 · 부스 현황 · 업무분장 · 행사식순'
+              </h1>
+              {appMode === 'VITAL' && activeModule !== 'dashboard' && (
+                <>
+                  <span className="h-4 sm:h-5 w-px bg-slate-200 shrink-0" aria-hidden="true" />
+                  <span className="text-sm sm:text-base font-bold text-slate-500 tracking-tight truncate">
+                    {activeModule === 'workspace'
+                      ? '예산관리'
+                      : activeModule === 'festival'
+                      ? '양재천 페스티벌'
+                      : activeModule === 'simulator'
+                      ? '예산 시뮬레이터'
+                      : activeModule === 'project'
+                      ? '사업 관리'
                       : activeModule === 'archive'
-                        ? '공문서 · 현장 사진 · 6대 도메인 · 주간업무'
-                        : activeModule === 'project'
-                          ? '단위사업 개요 · 체크리스트 · 일정 플래너'
-                          : '집행 · 불용 진단 · 월별 소진 추이 · 업무 연락처'}
-            </p>
+                      ? '문서 보관함'
+                      : activeModule === 'memory'
+                      ? '포스트잇'
+                      : ''}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Module Content */}
@@ -377,40 +415,24 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
               </div>
             )}
 
-            {/* Workspace (Budget Management) */}
+            {/* Workspace (Unified Budget Control Board) */}
             {visitedModules.workspace && (
               <div className={activeModule === 'workspace' ? 'block' : 'hidden'}>
-                <WorkspaceView />
+                <WorkspaceView initialTab={workspaceInitialTab} focusSeq={workspaceFocusSeq} />
               </div>
             )}
 
             {/* Project Management */}
             {visitedModules.project && (
               <div className={activeModule === 'project' ? 'block' : 'hidden'}>
-                <div className="space-y-6">
-                  <ProjectManagementPage />
-                  <WorkingMemoryContextBanner contextModule="project" />
-                </div>
+                <ProjectManagementPage />
               </div>
             )}
 
             {/* 2026 Yangjae Festival Dashboard */}
             {visitedModules.festival && (
               <div className={activeModule === 'festival' ? 'block' : 'hidden'}>
-                <div className="space-y-6">
-                  <YangjaeFestivalDashboard isActive={activeModule === 'festival'} />
-                  <WorkingMemoryContextBanner contextModule="festival" />
-                </div>
-              </div>
-            )}
-
-            {/* Budget Simulator */}
-            {visitedModules.simulator && (
-              <div className={activeModule === 'simulator' ? 'block' : 'hidden'}>
-                <div className="space-y-6">
-                  <BudgetSimulator />
-                  <WorkingMemoryContextBanner contextModule="simulator" />
-                </div>
+                <YangjaeFestivalDashboard isActive={activeModule === 'festival'} />
               </div>
             )}
 
@@ -420,21 +442,14 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
                 <ArchiveExplorerView onNavigateModule={handleModuleChange} />
               </div>
             )}
-
-            {/* Working Memory Assistant Board Page */}
-            {visitedModules.memory && (
-              <div className={activeModule === 'memory' ? 'block' : 'hidden'}>
-                <WorkingMemoryPage onNavigateModule={handleModuleChange} />
-              </div>
-            )}
           </div>
 
           {/* Common Footer */}
           <div id="dashboard-footer" className="mt-8 pt-8 pb-4 border-t border-slate-200/80 shrink-0">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 text-xs font-medium text-slate-400">
-              <span className="font-mono tabular-nums">© 2026 {appMode} 공공행정 예산·업무 통합 관제</span>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-400">
+              <span className="font-mono tabular-nums">© 2026 {appMode === 'VITAL' ? 'WORK VITAL' : appMode}</span>
               <span className="flex items-center gap-3">
-                <span>예산·현장 실시간 동기화</span>
+                <span>실시간 동기화</span>
                 <span className="text-slate-300">·</span> 
                 <button onClick={handleLogout} className="text-slate-600 hover:text-slate-900 font-semibold transition-colors cursor-pointer">로그아웃</button>
               </span>
@@ -442,6 +457,13 @@ export function ProtectedApp({ appMode, onModeChange }: ProtectedAppProps) {
           </div>
         </div>
       </main>
+
+      {isStickyNotesOpen && (
+        <StickyNotesPanel
+          isOpen={isStickyNotesOpen}
+          onClose={handleCloseStickyNotes}
+        />
+      )}
 
       {isLogsOpen && (
         <AppLogModal 

@@ -73,10 +73,10 @@ export function LawSearchPanel() {
           </div>
           <div>
             <h3 className="text-[17px] font-bold text-slate-800 flex items-center gap-2">
-              법제처 국가법령 / 자치법규 실시간 연계
+              법령 · 조례 조회
             </h3>
-            <p className="text-[11px] text-slate-400 font-bold tracking-wider mt-0.5 uppercase">
-              National Law & Ordinance API Integration Hub
+            <p className="text-[11px] text-slate-400 font-semibold mt-0.5">
+              법제처 국가법령 · 자치법규 실시간 연계
             </p>
           </div>
         </div>
@@ -175,7 +175,7 @@ export function LawSearchPanel() {
           <div className="p-8 text-center flex flex-col items-center justify-center gap-3 text-rose-600 flex-1">
             <AlertCircle size={32} className="opacity-80" />
             <p className="text-xs font-bold">API 호출 장애: {errorMsg}</p>
-            <p className="text-[10.5px] text-slate-400 font-semibold mt-1">인증키 적용 여부 및 IP 등록 내역을 확인해 주세요.</p>
+            <p className="text-[10.5px] text-slate-400 font-semibold mt-1">인증키 · IP 등록 확인 필요</p>
           </div>
         )}
 
@@ -183,7 +183,7 @@ export function LawSearchPanel() {
         {!isPending && searchResults.length === 0 && !errorMsg && (
           <div className="flex flex-col items-center justify-center p-12 text-slate-400 gap-2 flex-1">
             <FileText size={40} className="opacity-20 mb-1 text-slate-400"/>
-            <p className="text-xs font-bold text-slate-500">조회된 정보가 없습니다. 검색어를 입력해 조회를 시작하세요.</p>
+            <p className="text-xs font-bold text-slate-500">조회 결과 없음 · 검색어 입력</p>
           </div>
         )}
 
@@ -191,7 +191,7 @@ export function LawSearchPanel() {
         {!isPending && searchResults.length > 0 && !errorMsg && (
           <div className="flex flex-col flex-1 divide-y divide-slate-100 max-h-[400px] overflow-y-auto custom-scrollbar">
             <div className="bg-slate-100/50 px-5 py-2.5 flex items-center justify-between text-[10px] font-bold text-slate-500 tracking-wider">
-              <span>총 {totalCnt}건의 법규가 매칭되었습니다. (상위 50건 표시)</span>
+              <span>총 {totalCnt}건 매칭 (상위 50건)</span>
               <span>정렬: 최신 시행일순</span>
             </div>
             {searchResults.map((item, idx) => (

@@ -20,21 +20,21 @@ export function AgentStatusBoard() {
     switch (status) {
       case 'running':
         return {
-          bg: 'bg-blue-500/10 border-blue-200/60 shadow-[0_0_18px_rgba(59,130,246,0.12)]',
+          bg: 'bg-blue-500/10 border-blue-200/60',
           text: 'text-blue-700',
           badge: 'bg-blue-500/15 text-blue-700 border border-blue-500/20',
           icon: <RefreshCw className="animate-spin text-blue-500" size={16} />
         };
       case 'success':
         return {
-          bg: 'bg-emerald-500/10 border-emerald-200/50 shadow-[0_0_15px_rgba(16,185,129,0.08)]',
+          bg: 'bg-emerald-500/10 border-emerald-200/50',
           text: 'text-emerald-700',
           badge: 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/20',
-          icon: <CheckCircle2 className="text-emerald-500 animate-pulse" size={16} />
+          icon: <CheckCircle2 className="text-emerald-500" size={16} />
         };
       case 'failed':
         return {
-          bg: 'bg-rose-500/10 border-rose-200/50 shadow-[0_0_15px_rgba(239,68,68,0.08)]',
+          bg: 'bg-rose-500/10 border-rose-200/50',
           text: 'text-rose-700',
           badge: 'bg-rose-500/15 text-rose-700 border border-rose-500/20',
           icon: <AlertCircle className="text-rose-500" size={16} />
@@ -54,7 +54,7 @@ export function AgentStatusBoard() {
   };
 
   return (
-    <div className="flex flex-col glass-panel border border-white/30 rounded-2xl p-4 shadow-xl max-w-sm w-full animate-in fade-in slide-in-from-right-5 duration-300">
+    <div className="flex flex-col glass-panel border border-white/30 rounded-2xl p-4 shadow-md max-w-sm w-full">
       {/* Header */}
       <div className="flex justify-between items-center mb-3.5 pb-2.5 border-b border-slate-200/50">
         <div className="flex items-center gap-1.5">
@@ -64,10 +64,7 @@ export function AgentStatusBoard() {
         <div className="flex items-center gap-2">
           {/* Live indicator sync with partykit */}
           <div className="flex items-center gap-1.5">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
+            <span className="inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             <span className="text-[10px] font-semibold text-emerald-600">Sync Active</span>
           </div>
           {statuses.length > 0 && (
@@ -84,7 +81,7 @@ export function AgentStatusBoard() {
       {/* Empty State */}
       {sortedStatuses.length === 0 ? (
         <div className="py-6 text-center text-xs text-slate-400 font-semibold flex flex-col items-center gap-2">
-          <Bot size={28} className="text-slate-300 animate-bounce" />
+          <Bot size={28} className="text-slate-300" />
           <span>No agents active. Start a task to monitor.</span>
         </div>
       ) : (

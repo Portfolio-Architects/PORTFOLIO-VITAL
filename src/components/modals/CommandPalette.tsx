@@ -49,37 +49,37 @@ const STATIC_NAV_ITEMS: { module: ModuleType; title: string; subtitle: string; i
   {
     module: 'dashboard',
     title: '대시보드',
-    subtitle: '집행 · 불용 진단 · 월별 추이 · 연락처',
+    subtitle: '집행 현황 · 월별 추이',
     icon: <LayoutDashboard className="w-4 h-4 text-emerald-400" />
   },
   {
     module: 'memory',
-    title: '작업기억 보드',
-    subtitle: '지시 · 예산 변동 · 행감 메모 기록',
-    icon: <StickyNote className="w-4 h-4 text-amber-400" />
+    title: '포스트잇',
+    subtitle: '빠른 업무 메모',
+    icon: <StickyNote className="w-4 h-4 text-amber-500" />
   },
   {
     module: 'workspace',
     title: '예산관리',
-    subtitle: 'e-호조 일반지출 · 일상경비 대조 · 시뮬레이션',
+    subtitle: '실집행 · 일상경비 · 예정',
     icon: <Wallet className="w-4 h-4 text-blue-400" />
   },
   {
     module: 'project',
     title: '사업 · 일정 관리',
-    subtitle: '단위사업 개요 · 체크리스트 · 일정 플래너',
+    subtitle: '사업 개요 · 체크리스트 · 일정',
     icon: <Calendar className="w-4 h-4 text-teal-600" />
   },
   {
     module: 'festival',
     title: '양재천 페스티벌',
-    subtitle: '추진과제 · 부스 · 업무분장 · 식순',
+    subtitle: '체크리스트 · 부스 · 분장 · 식순',
     icon: <Briefcase className="w-4 h-4 text-purple-600" />
   },
   {
     module: 'archive',
-    title: '아카이브 탐색기',
-    subtitle: '공문서 · 사진 · 6대 도메인 온톨로지',
+    title: '문서 보관함',
+    subtitle: '공문서 · 사진 · 주간업무',
     icon: <FolderSearch className="w-4 h-4 text-sky-600" />
   },
   {

@@ -19,7 +19,7 @@ export default function GlobalError({
     <html>
       <body>
         <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-50 p-6 text-center">
-          <div className="rounded-2xl bg-white p-8 shadow-xl border border-slate-200 max-w-md w-full animate-in fade-in zoom-in duration-300">
+          <div className="rounded-2xl bg-white p-8 shadow-sm border border-slate-200 max-w-md w-full">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mx-auto mb-6 text-red-500">
               <AlertTriangle size={32} />
             </div>

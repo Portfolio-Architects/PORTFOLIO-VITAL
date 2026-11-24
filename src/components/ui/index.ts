@@ -20,3 +20,6 @@ export { NumericText } from './numeric-text';
 export type { NumericTextProps } from './numeric-text';
 
 export { ErrorBoundary } from './ErrorBoundary';
+
+export { VitalLogo } from './VitalLogo';
+export type { VitalLogoProps } from './VitalLogo';

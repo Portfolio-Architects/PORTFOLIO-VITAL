@@ -172,7 +172,7 @@ const AssociatedTaskItemRow = React.memo(({
   };
 
   return (
-    <div className="p-3 bg-white border border-slate-150 rounded-xl flex items-center justify-between gap-3 shadow-2xs hover:shadow-xs transition-shadow">
+    <div className="vlds-cv-row p-3 bg-white border border-slate-150 rounded-xl flex items-center justify-between gap-3 shadow-2xs hover:border-slate-300 transition-colors">
       <div className="flex flex-col gap-1 min-w-0">
         <h4 className="font-extrabold text-[12px] text-slate-800 truncate">{task.title}</h4>
         <div className="flex items-center gap-1.5 mt-0.5">
@@ -441,7 +441,7 @@ export default function ProjectManagementPage() {
       {/* Main Tab Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
         {activeTab === 'overview' ? (
-          <div className="flex flex-col md:flex-row w-full max-w-[1700px] mx-auto gap-6 h-full">
+          <div className="flex flex-col md:flex-row w-full max-w-[2400px] mx-auto gap-6 h-full">
         
         {/* Left Column: Project List Sidebar */}
         <div className="w-full md:w-[360px] shrink-0 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex flex-col h-full overflow-hidden">
@@ -655,7 +655,7 @@ export default function ProjectManagementPage() {
             </div>
           ) : (
             <div className="m-auto text-center p-8 max-w-sm">
-              <FolderGit2 className="mx-auto text-slate-300 mb-4 animate-pulse" size={48} />
+              <FolderGit2 className="mx-auto text-slate-300 mb-4" size={48} />
               <h2 className="text-base font-extrabold text-slate-800">단위사업 상세</h2>
               <p className="text-[12px] text-slate-400 leading-relaxed mt-2">
                 좌측 사업 선택 → 추진 현황 · 체크리스트 · 연계 업무 조회
@@ -676,7 +676,7 @@ export default function ProjectManagementPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-[620px] overflow-hidden flex flex-col p-6 animate-scale-up animate-duration-200">
             <div className="flex items-center gap-2 mb-4 shrink-0">
-              <Sparkles className="text-blue-500 animate-pulse" size={18} />
+              <Sparkles className="text-blue-500" size={18} />
               <h3 className="font-black text-slate-800 text-[14px]">
                 {isEditingProject ? '사업 정보 수정' : '신규 사업 등록'}
               </h3>
@@ -830,11 +830,11 @@ export default function ProjectManagementPage() {
       {isAddingTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-[420px] overflow-hidden flex flex-col p-6 animate-scale-up animate-duration-200">
-            <h3 className="font-black text-slate-800 text-[14px] mb-4">프로젝트 연계 업무 배정</h3>
+            <h3 className="font-black text-slate-800 text-[14px] mb-4">연계 업무 배정</h3>
 
             <form onSubmit={handleCreateAssociatedTask} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">업무명 (Task Title)</label>
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">업무명</label>
                 <input
                   type="text"
                   required
@@ -846,7 +846,7 @@ export default function ProjectManagementPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">업무 중요도 (Priority)</label>
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wide">중요도</label>
                 <select
                   value={newTaskPriority}
                   onChange={e => setNewTaskPriority(e.target.value as any)}
