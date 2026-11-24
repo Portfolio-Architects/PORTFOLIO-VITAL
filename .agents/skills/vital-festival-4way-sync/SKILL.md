@@ -54,10 +54,11 @@ description: >-
 ```
 - 마스터 엑셀 수집(`sync_festival_excel.py`) $\to$ 로컬 JSON·TS 폴백(`sync-festival-fallbacks.py`) 및 `YangjaeFestivalDashboard` 9개 하위 모듈 반영 $\to$ 정적 HTML 빌드(`prepare-pages-output.js`) $\to$ KV 업로드(`sync-festival-to-cloud.js`)를 동시 동기화함.
 
-### ▢ Phase 2. 모바일 448px(`max-w-md`) 무결점 인체공학 표준
-- **뷰포트 및 4대 탭 위계 영구 고정:** `max-w-md mx-auto` · `overflow-x-hidden`을 고정하고 상단 탭 순서를 `1. 추진과제` $\to$ `2. 부스현황` $\to$ `3. 업무분장` $\to$ `4. 행사식순`으로 불변 유지함.
+### ▢ Phase 2. VLDS 와이드뷰 플레이북 및 정적 모바일 호환 표준
+- **와이드뷰 5대 탭 위계 (VITAL 앱 · `/festival/yangjae`):** `max-w-[1800px]` 와이드 컨테이너, 4열 KPI 요약 스트립 및 5탭(`1. 히스토리·체크리스트` $\to$ `2. 추진과제` $\to$ `3. 부스현황` $\to$ `4. 업무분장` $\to$ `5. 행사식순`) 구성을 유지하며, 2026 추진 히스토리·핵심 교훈·32개 차년도 체크리스트(`ChecklistPlaybookTab`)와 다단 반응형 그리드를 적용함.
+- **정적 모바일 레플리카 (`scripts/pages-template.html`):** 외부 현장 공유용 정적 HTML(`out/festival/yangjae/index.html`)은 `max-w-md` 모바일 1열 가독성과 `overflow-x-hidden` 가로 클리핑 0건을 유지함.
 - **6대 퀵 필터:** `1. 운영`, `2. 코스`, `3. 부스`, `4. VIP의전`, `5. 직원식사`, `6. 쓰레기처리`.
-- **일자별 배지·카드 레이아웃:** 사전준비(`10.17~10.24`: `bg-indigo-50 text-indigo-700`), 행사전날(`10.30`: `bg-amber-50 text-amber-700`), 행사당일(`10.31`: `bg-sky-50 text-sky-700`) 및 헤더 2행 분리(`flex flex-wrap gap-y-2`)·전폭 카드 스택을 적용함.
+- **일자별 배지·카드 레이아웃:** 사전준비(`10.17~10.24`: `bg-indigo-50 text-indigo-700`), 행사전날(`10.30`: `bg-amber-50 text-amber-700`), 행사당일(`10.31`: `bg-sky-50 text-sky-700`) 및 헤더 2행 분리(`flex flex-wrap gap-y-2`)를 적용함.
 
 ### ▢ Phase 3. 공공 의전 및 국민의례 규정 (대통령훈령 제438호)
 - **약식절차 1 공식 적용:** ① 국기에 대한 경례(무전주 애국가 반주 1절, 맹세문 없음) $\to$ ② 순국선열·호국영령 묵념(10~15초) $\to$ ③ 착석 전환 안내 순으로 진행함.

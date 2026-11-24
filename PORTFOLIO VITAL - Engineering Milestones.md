@@ -3,6 +3,189 @@
 ## 8. 최근 엔지니어링 마일스톤 (요약)
 
 
+### [Milestone 316: 대시보드 상단 메인 그리드 4.2:5.8 비율 전환 및 집행·불용 진단 레전드 서브텍스트 제거] Refactored `PortfolioDashboardView.tsx` and `PortfolioDashboardViewSkeleton.tsx` main two-column grid from 50:50 (`xl:grid-cols-12`) to an exact 4.2:5.8 split (`xl:grid-cols-[minmax(0,42fr)_minmax(0,58fr)]`: 42% left diagnosis + KPIs / 58% right monthly trend chart); eliminated all verbose sub-text lines (`e-호조 일반지출 확정`, `일상경비 통장 입금 ...`, `일반 ... · 일상 ...`) from the 4 execution diagnosis legend rows and optimized donut-to-legend horizontal allocation (`shrink-0` 252px donut + `flex-1 min-w-0` legend) for crisp zero-truncation fit. (2026-11-24)
+* **개요 및 추진 목적**:
+  - 우측 ｢월별 집행 추이｣ 시계열 차트의 가독성을 확장하고 좌측 ｢집행·불용 진단｣ 레전드의 불필요한 보조 설명을 걷어내어 VLDS 초간결 원칙을 강화함:
+    1. **상단 대시보드 4.2:5.8 그리드 전환 (`PortfolioDashboardView.tsx`, `PortfolioDashboardViewSkeleton.tsx`)**:
+       - 상단 메인 패널과 스켈레톤을 `xl:grid-cols-[minmax(0,42fr)_minmax(0,58fr)]`(좌측 42% 진단·KPI / 우측 58% 월별 추이 차트)로 전환하고, 좌측 도넛(`w-[252px] shrink-0`)·레전드(`flex-1 min-w-0`) 폭 배분을 최적화함.
+    2. **레전드 서브텍스트 전량 제거 (`PortfolioDashboardView.tsx`)**:
+       - `e-호조 일반지출 확정`·`일상경비 통장 입금 ...`·`일반 ... · 일상 ...` 등 4개 항목 하단 서브텍스트와 미사용 `secondaryMetricLabel` 연산을 제거하고 항목명·금액·비율만 단정하게 표기함.
+
+
+
+### [Milestone 315: 디자인 기인 렌더링 부하 전수 제거 및 성능 우선(Performance-First) 사양 전환] Audited and eliminated all design-induced rendering, GPU compositor, and main-thread JS bottlenecks across `src/app/` and `src/components/`: removed remaining `backdrop-blur` (2→0), `blur-3xl` background orbs (3→0), `transition-all` (3→0), `transition-shadow` (5→0), full-tree `animate-in` mount transitions (26→0), `hover:scale-*` GPU layer promotions (5→0), and always-on infinite idle `animate-pulse`/`animate-ping`/`animate-bounce` indicators on permanent UI chrome across 9 components; disabled Recharts JS rAF morph animations (`isAnimationActive={false}` on all 6 `<Pie>`/`<Area>`/`<Line>` series in `PortfolioDashboardView.tsx` and `SimulationBurnUpChart.tsx`); removed layout-reflow `.progress-fill` width transition and repaint `.card-hover` box-shadow transition in `globals.css` while adding `.vlds-cv-section` and `@media (prefers-reduced-motion: reduce)`; expanded native `content-visibility: auto` (`.vlds-cv-card`/`.vlds-cv-row`/`.vlds-cv-section`) coverage from 6 to 20 hotspots across budget, festival, search, ontology, and dashboard views; downgraded heavy `shadow-xl`/`shadow-2xl`/neon glow shadows to crisp VLDS 1px border + `shadow-sm`/`shadow-md`. (2026-11-23)
+* **개요 및 추진 목적**:
+  - 장식성 블러·상시 유휴 애니메이션·차트 JS 보간·대형 그림자 등 디자인 기인 프레임 드롭 요인을 전수 감사하여 로컬호스트 60fps·유휴 CPU 0% 성능 우선 사양으로 일괄 전환함:
+    1. **GPU 블러·`transition-all`·상시 유휴 애니메이션 완전 제거 (`login/page.tsx`, `error.tsx`, `global-error.tsx`, `globals.css`, 9개 컴포넌트)**:
+       - `backdrop-blur`(2→0)·`blur-3xl`(3→0)·`transition-all`(3→0)·`transition-shadow`(5→0)·`hover:scale-*`(5→0)·`animate-in`(26→0) 및 비로딩 영구 요소의 `animate-pulse`/`animate-ping`/`animate-bounce`를 전량 제거하고, `globals.css`의 `.progress-fill` width 리플로우·`.card-hover` box-shadow 리페인트를 제거함.
+    2. **Recharts 0ms 즉시 렌더링 및 오프스크린 렌더링 격리 3.3배 확장 (`PortfolioDashboardView.tsx`, `SimulationBurnUpChart.tsx`, 예산·축제 6개 뷰)**:
+       - 대시보드·시뮬레이터 6개 Recharts 시리즈 전원 `isAnimationActive={false}`를 적용하고, `.vlds-cv-card`/`.vlds-cv-row`/`.vlds-cv-section`(`content-visibility: auto`) 적용 지점을 6건→20건으로 확장함.
+
+
+
+### [Milestone 314: WORK VITAL 리브랜딩 및 모노크롬 V-프리즘 기하학 SVG 로고·파비콘 일괄 교체] Rebranded VITAL UI title, browser metadata, login, and splash screens to minimalist `WORK VITAL` paired with a custom monochrome geometric V-Prism SVG mark (`src/components/ui/VitalLogo.tsx`): removed the heavy white bordered logo container in `ProtectedApp.tsx` to align directly beside `WORK VITAL` (with clean vertical hairline `|` + active tab label on non-dashboard views matching `PORTFOLIO ASSET`), updated `SplashView.tsx`, `src/app/login/page.tsx`, `src/app/layout.tsx`, and `public/manifest.json` (`themeColor: #0f172a`), and generated 4× supersampled monochrome V-Prism PNG icons (`src/app/icon.png`, `src/app/apple-icon.png`, `public/icon-192x192.png`, `public/icon-512x512.png`) with full Jest, TypeScript, and VLDS AST harness verification. (2026-11-23)
+* **개요 및 추진 목적**:
+  - 기존 컬러 사각 박스 아이콘 및 복합 명칭(`VITAL 대시보드` · `VITAL Work Manager` · `VITAL Work & Wealth`)을 `PORTFOLIO ASSET`과 쌍을 이루는 심플한 업무 특화 브랜드(`WORK VITAL`) 및 모노크롬 기하학 마크로 일괄 개편함:
+    1. **모노크롬 V-프리즘 기하학 SVG 로고 및 4종 아이콘 생성 (`VitalLogo.tsx`, `src/app/icon.png`, `apple-icon.png`, `public/icon-192x192.png`, `512x512.png`)**:
+       - `#0f172a` 단일 슬레이트 계열의 좌·우 V 프리즘 암과 상단 다이아몬드 크라운을 결합한 `VitalLogo` 컴포넌트를 구축하고, 4배 슈퍼샘플링 PNG 파비콘·PWA 아이콘 4종을 일괄 교체함.
+    2. **전 화면 타이틀·스플래시·로그인·메타데이터 통일 (`ProtectedApp.tsx`, `SplashView.tsx`, `src/app/login/page.tsx`, `src/app/layout.tsx`, `public/manifest.json`)**:
+       - 페이지 상단 외곽 박스 제거 후 `[V-Prism] WORK VITAL`(하위 탭 `| 탭명` 구분) 구조로 통일하고 브라우저 탭 `title`, 푸터, 스플래시, 로그인 및 4개 Jest 스위트를 동기화함.
+
+
+
+### [Milestone 313: PORTFOLIO ASSET 기준 전체 페이지 너비(2400px) 및 헤더행 수직·수평 간격 통일] Aligned VITAL global page container width and header row vertical/horizontal rhythm identically with `portfolio-asset.app`: upgraded `Sidebar.tsx`, `ProtectedApp.tsx`, `src/app/festival/yangjae/page.tsx`, and `ProjectManagementPage.tsx` from `max-w-[1800px] px-2 sm:px-3 lg:px-4` to `w-full max-w-[2400px] mx-auto px-4 sm:px-8 xl:px-12 2xl:px-16` (removing right-side `pr-1.5` inset and footer `px-4` drift for 0px edge alignment); tightened `ProtectedApp.tsx` title header spacing (`pt-5 sm:pt-7 pb-4 sm:pb-5`, `w-8 h-8 sm:w-9 sm:h-9` logo, `text-xl sm:text-2xl lg:text-[28px]`, `sm:min-h-[36px]`, main stack `gap-4 sm:gap-5`) and removed redundant top margins (`mt-2`/`mt-4`) from `PortfolioDashboardView.tsx` and `PortfolioDashboardViewSkeleton.tsx`, matching Portfolio Asset's `56px` navbar + `28px` title top offset + `20px` content gap; synced `docs/VLDS_DESIGN_SYSTEM.md` and `AGENTS.md`. (2026-11-23)
+* **개요 및 추진 목적**:
+  - 동일 브라우저 내 인접 탭(`portfolio-asset.app` ↔ `localhost:3001`) 전환 시 발생하던 좌우 폭 점프 및 상단 타이틀 행 과다 공백을 제거하여 두 플랫폼의 공간 리듬을 1px 단위로 통일함:
+    1. **전체 페이지 컨테이너 폭·좌우 여백 통일 (`Sidebar.tsx`, `ProtectedApp.tsx`, `src/app/festival/yangjae/page.tsx`, `ProjectManagementPage.tsx`)**:
+       - 상단 네비게이션 바와 본문 메인 컨테이너를 `w-full max-w-[2400px] mx-auto px-4 sm:px-8 xl:px-12 2xl:px-16`으로 통일하고, 헤더 우측 `pr-1.5` 및 푸터 내부 `px-4` 오프셋을 제거해 전 뷰포트(1920px `px-16`, 2560px `2400px`)에서 헤더·본문·푸터 좌우 경계를 일치시킴.
+    2. **헤더행 수직 간격 · 타이틀 스케일 및 2×2 KPI 카드 높이 정렬 (`ProtectedApp.tsx`, `PortfolioDashboardView.tsx`, `PortfolioDashboardViewSkeleton.tsx`)**:
+       - 네비게이션 바(`h-[56px]`) 하단부터 타이틀 상단 간격을 `44px`에서 Asset 기준 `28px`(`pt-5 sm:pt-7`)로, 타이틀 하단 구분선 여백을 `32px`에서 `20px`(`pb-4 sm:pb-5`)로, 구분선부터 첫 카드 간격을 `32px`에서 `20px`(`gap-4 sm:gap-5`, `mt-2`/`mt-4` 제거)로 정밀 조정함.
+       - 대시보드 하단 2×2 KPI 카드 4종(`예산 집행률` · `예산 잔여율` · `누적 집행액` · `가용 잔액`)과 스켈레톤의 높이를 기존 `82.5~84.4px`(총 `186px`)에서 Asset 실측(`71.25px`) 기준 `h-[72px] min-h-[72px]`(`px-4 py-2.5 sm:px-5 sm:py-3`, 행간 `gap-2.5 sm:gap-3`, 총 `156px`)으로 통일함.
+
+
+
+### [Milestone 312: VLDS 디자인 컨텍스트 기반 전 화면 UI 직관화 및 AST 하네스 사각지대 보강] Aligned live UI titles, navigation tabs, subtitles, empty states, and dynamic expressions across all 5 major VITAL domains with Rule H / VLDS Principle 5 (Plain-Word Naming & Zero-Filler): unified `아카이브 탐색기` / `마스터 아카이브 탐색` → `문서 보관함`, `4단계 행정 온톨로지` / `행정 문서·업무 온톨로지 양방향 탐색기` → `문서 관계도`, `VITAL 통합 대시보드` → `VITAL 대시보드`, `예산 통합 관제` → `예산 현황`, and `작업기억 보조 보드` → `포스트잇` (`Sidebar.tsx`, `ProtectedApp.tsx`, `CommandPalette.tsx`, `IntegratedShowcaseSection.tsx`, `BudgetDashboard.tsx`, `ArchiveExplorerView.tsx`, `AdminOntologyExplorer.tsx`, `AdminOntologyDrawer.tsx`); removed redundant page-level subtitles and English gloss badges (`Architecture Ready`, `Commitment Burn-up`, `(Project Cluster)`, `(Objectives)`, `(Achievements)`, `(Task Title)`); upgraded `scripts/audit-ui-copy.js` to catch `JsxExpression` ternary prose literals, mixed-child `<h1>~<h4>` headings, and global `(English)` glosses (0 violations across 90 TSX files) and synced all 12 affected Jest suites. (2026-11-20)
+* **개요 및 추진 목적**:
+  - Milestone 310 디자인 하네스 도입 이후에도 실제 화면에 잔존하던 중복 상단 부제·전문용어 탭 명칭·영문 병기 배지·동적 삼항식 서술문을 일괄 정리하고, AST 하네스의 3대 사각지대를 보강함:
+    1. **전 화면 1~2어절 직관 단어 통일 및 자명한 부제·영문 장식 제거 (`Sidebar.tsx`, `ProtectedApp.tsx`, `CommandPalette.tsx`, `SplashView.tsx`, `PortfolioDashboardView.tsx`, `IntegratedShowcaseSection.tsx`, `BudgetDashboard.tsx`, `SimulationBurnUpChart.tsx`, `ArchiveExplorerView.tsx`, `AdminOntologyExplorer.tsx`, `AdminOntologyDrawer.tsx`, `YangjaeFestivalDashboard.tsx` 등)**:
+       - 상단 탭·페이지 `<h1>`·커맨드 팔레트·행정 게시판 탭을 `대시보드` · `예산관리` · `양재천 페스티벌` · `문서 보관함` · `문서 관계도` · `포스트잇`으로 통일하고, 페이지 상단 중복 부제·`예산 통합 관제`·`Architecture Ready`·`Commitment Burn-up`·`(Project Cluster)` 등 영문 병기를 제거함.
+    2. **AST 하네스 사각지대 보강 및 12개 Jest 스위트 전수 검증 (`scripts/audit-ui-copy.js`, 12개 `__tests__/*.test.tsx`)**:
+       - `audit-ui-copy.js`에 `JsxExpression` 삼항식 리터럴·혼합 자식 `<h1>~<h4>`·전역 중복 영문 병기(`(English)`) 감사를 추가해 추가 검출 23건을 전량 정화(90개 TSX 파일 0건)하고 `tsc`·`run-harness.js`·12개 Jest 스위트 전수 통과를 검증함.
+
+
+
+### [Milestone 311: 양재천 페스티벌 페이지 VLDS 와이드뷰 개편 및 2026 추진 히스토리·차년도 체크리스트 플레이북 구축] Refactored `YangjaeFestivalDashboard.tsx`, `YangjaeFestivalSkeleton.tsx`, `YangjaeFestivalClientWrapper.tsx`, `src/app/festival/yangjae/page.tsx`, and all 4 existing sub-tabs (`MilestonesTab`, `BoothsTab`, `DutiesTab`, `ScheduleTab`) from narrow `448px` cards to a full VLDS responsive wide-view (`max-w-[1800px]` / `1600px`) with a 4-column KPI summary strip (`824명` participants, `19개소 37동 · 7,504명` booth visits, `57,302천원` executed budget, `무사고 0건` + checklist progress); extended `FestivalDataSchema` / `StrictFestivalDataSchema` (`src/lib/schemas.ts`), `useYangjaeFestival.ts`, `data/FESTIVAL_YANGJAE_2026.json`, and `run-harness.js` (`nextYearChecklist` parity) with verified 2026 execution history (`historySummary2026`: result report `보건행정과-14093`, 6 lessons learned, 8 key documents) and 32 structured 5-phase next-year checklist items (`ChecklistPlaybookTab.tsx`) supporting persistent checkbox toggles, phase/domain/lesson/search filters, inline CRUD, reset, and CSV export. (2026-11-20)
+* **개요 및 추진 목적**:
+  - 2026. 10. 31. 본행사 개최 및 결과보고(`보건행정과-14093`) 완료 이후, 기존 `448px` 모바일 관제 카드를 타 VITAL 페이지와 동일한 VLDS 와이드뷰로 개편하고 차년도(2027) 추진 시 그대로 참고·체크할 수 있는 실무 체크리스트 플레이북으로 고도화함:
+    1. **SSOT 스키마 및 2026 실측 히스토리·32개 체크리스트 구축 (`schemas.ts`, `useYangjaeFestival.ts`, `FESTIVAL_YANGJAE_2026.json`, `run-harness.js`)**:
+       - `historySummary2026`(824명 참여, 19개소 37동·연인원 7,504명, 행사운영비 49,302천원·낙찰차액 498천원·사무관리비 8,000천원, 핵심 교훈 6건, 주요 공문 8건)과 D-90~D+14 5단계 32개 체크리스트(`nextYearChecklist`)를 등록하고 4-Way 폴백·하네스 패리티 검증을 연동함.
+    2. **VLDS 와이드뷰 및 `ChecklistPlaybookTab` 신설 (`YangjaeFestivalDashboard.tsx`, `ChecklistPlaybookTab.tsx`, 4개 기존 탭)**:
+       - 4열 KPI 요약 스트립과 5탭 세그먼트 바(`1. 히스토리·체크리스트` → `2. 추진과제` → `3. 부스현황` → `4. 업무분장` → `5. 행사식순`)를 구축하고 좌측 8/12열 5단계 체크리스트 + 우측 4/12열 핵심 교훈·행사 개요·주요 공문 패널을 배치했으며, 기존 4개 탭도 데스크톱 다단 와이드 그리드로 전환함.
+
+
+
+### [Milestone 310: VLDS 직관적 일상어 · 불필요 문장 차단 UI 디자인 하네스(`audit-ui-copy.js`) 구축 및 전 컴포넌트 0건 정화] Upgraded VLDS microcopy enforcement (`AGENTS.md` Rule H, `docs/VLDS_DESIGN_SYSTEM.md` Principle 5, `src/lib/vlds-microcopy.ts`) with Plain-Word Naming (`FORBIDDEN_INFLATED_UI_TERMS` banning AI buzzwords like `쇼케이스`/`인텔리전스`/`워크스페이스`/`어시스턴트`/`통합 허브`), `VLDS_TITLE_MAX_WORDS = 3` (`countTitleWords`), and expanded prose-ending checks; built a TypeScript AST static UI Copy Design Harness (`scripts/audit-ui-copy.js`, `npm run audit:ui`) integrated as Step 3-B in `scripts/run-harness.js` and documented in `.agents/skills/vital-governance-ops/SKILL.md`; cleaned all 91 pre-existing UI copy violations across 24 TSX components (e.g., `통합 행정 지식 쇼케이스` → `행정 게시판`, `마스터 아카이브 통합 탐색기` → `문서 보관함`, `행정 인텔리전스 어시스턴트` → `업무 도우미`) and expanded `__tests__/vlds-concise-microcopy.test.tsx` to enforce 0 violations across all 89 `src/components/**/*.tsx` files. (2026-11-20)
+* **개요 및 추진 목적**:
+  - 기존 `vlds-microcopy.ts`가 `통합 행정 지식 쇼케이스` 같은 4어절 이상 과장 외래어 타이틀을 통과시키고 `run-harness.js`에 JSX 전수 정적 감사가 없어 불필요한 설명 문장이 UI에 유입되는 구조적 공백을 해소함:
+    1. **규칙 · SSOT · 검증 엔진 고도화 (`AGENTS.md` Rule H, `docs/VLDS_DESIGN_SYSTEM.md`, `src/lib/vlds-microcopy.ts`)**:
+       - `VLDS_DESIGN_SYSTEM.md`에 제5원칙(직관적 일상어 · 자명한 문장 생략) 및 치환 사전을 신설하고 `FORBIDDEN_INFLATED_UI_TERMS`·`INFLATED_UI_REPLACEMENTS`·`countTitleWords`(3어절 상한)·확장 서술어 패턴을 `auditVldsCopy()`에 탑재함.
+    2. **AST UI 디자인 하네스 구축 및 24개 컴포넌트 전수 정화 (`scripts/audit-ui-copy.js`, `scripts/run-harness.js`, `src/components/`)**:
+       - TypeScript Compiler API로 `src/components/**/*.tsx` 89개 파일의 `SectionHeader`, `<h1>`~`<h4>`, `placeholder`/`aria-label`/`title`, `JsxText`를 전수 검사하는 `audit-ui-copy.js`를 신설하고 `run-harness.js` Step 3-B 및 `npm run audit:ui`에 편입함.
+       - 실측된 과장 타이틀(`통합 행정 지식 쇼케이스` → `행정 게시판` 등) 및 서술형 안내 문구 총 91건을 일괄 교정하고 `audit-ui-copy.js`·`sync-rules.js`·`run-harness.js`·`tsc`·Jest 회귀 스위트 전수 통과(0 errors)를 검증함.
+
+
+
+### [Milestone 309: 예산 시뮬레이터 · 통합 관제 낙찰차액(`bid_saving`) 집행유보 항목 신설 및 잔액·집행률 분리 연산] Added `bid_saving` (낙찰차액 · 집행유보 · 불용 확정) to `BudgetActionType` (`src/types/index.ts`, `src/lib/schemas.ts`, `src/lib/server/budget-validator.ts`), isolated reserve accounting in `useBudget.ts` and `useBudgetSimulator.ts` (deducts from `finalExpectedBalance` and available balance while strictly excluding from `simulatedExpenditure`, `projectedExecRate`, `executionRate`, and `settleEntry`), added 3-way segmented selector in `SimulationInputForm.tsx` (`일반 지출` · `일상경비 지출` · `낙찰차액`), and wired violet `낙찰차액` / `집행유보` indicators across `BudgetDashboard.tsx`, `SimulationSummaryCards.tsx`, `SimulationBurnUpChart.tsx`, `SimulationResultTable.tsx`, `SimulationEntryList.tsx`, `PolicyGroupCard.tsx`, `BudgetCategoryCardItem.tsx`, and `StatItemDetailModal.tsx` with full Jest & Zod harness verification. (2026-11-19)
+* **개요 및 추진 목적**:
+  - ｢지방자치단체 세출예산 집행기준｣상 입찰로 발생한 낙찰차액(집행유보·불용 확정분)을 일반 지출 예정액과 혼합할 때 발생하는 예상 집행률 왜곡을 차단하기 위해 전용 경비 구분을 신설함:
+    1. **스키마·수리 연산 격리 (`types/index.ts`, `schemas.ts`, `budget-validator.ts`, `useBudget.ts`, `useBudgetSimulator.ts`)**:
+       - `BudgetActionType`·`BudgetActionTypeSchema`에 `bid_saving`을 추가하고 `StatItemSimulationSummary`·`ProjectSimulationSummary`에 `simulatedBidSaving`을 신설함.
+       - `finalExpectedBalance = currentRemaining - simulatedGeneralExpenditure - simulatedBidSaving - shortfall`로 가용 잔액에서는 차감하되 `simulatedExpenditure`·예상 집행률·소진 차트에서는 제외하고 `settleEntry` 실지출 정산 전환을 차단함.
+    2. **통합 관제·시뮬레이션 UI 일괄 연동 및 검증 (`SimulationInputForm.tsx`, `BudgetDashboard.tsx` 등 8개 뷰)**:
+       - 지출 예정 등록 모달(`지출 재원 · 경비 구분`)을 3단 카드(`일반 지출` · `일상경비 지출` · `낙찰차액`)로 확장하고, KPI 카드·진행바(`유보 %`)·과목 카드·통계목 테이블·목록·상세 모달에 `낙찰차액(집행유보)` 배지를 반영함.
+       - `npx tsc --noEmit`, `node scripts/run-harness.js --quick` 및 6개 Jest 스위트(95개 테스트) 전수 통과를 확인함.
+
+
+
+### [Milestone 308: 작업기억 보드 초경량화 · 모니터 옆 포스트잇(StickyNotesPanel) 전환 및 노란 메모 배너 일괄 정리] Replaced the complex 1,295-LOC `작업기억 보드` navigation tab and inline `WorkingMemoryContextBanner` overlays with an analog monitor-side post-it rail (`StickyNoteCard.tsx`, `StickyNotesPanel.tsx`) accessible across all modules (`Sidebar.tsx`, `ProtectedApp.tsx`, `CommandPalette.tsx`) while preserving 100% of `WORKING_MEMORY.json` (7 records), `/memo` mobile relay, and 12-sheet Zod harness compatibility: added optional `StickyNoteColor` (`yellow`/`pink`/`mint`/`sky`) across `src/types/index.ts`, `src/lib/schemas.ts`, `src/lib/working-memory-parser.ts`, and `src/hooks/useWorkingMemory.ts` (`changeMemoColor`); implemented 20~50 char Enter-to-attach input, 4-color sticky notes, 3-line clamp + click-to-expand for legacy long memos, double-click inline editing, 1-click tear-off/restore drawer, desktop docked side rail + responsive slide-over drawer (`Alt+N`), and `__tests__/sticky-notes-panel.test.tsx`. (2026-11-19)
+* **개요 및 추진 목적**:
+  - 기존 1,295줄 복합 화면(`WorkingMemoryPage.tsx`) 및 모듈 하단 `WorkingMemoryContextBanner`의 시인성 저하와 탭 왕복 불편을 해소해, 어느 화면에서나 20~50자 짧은 메모를 모니터 옆에 포스트잇처럼 붙여두고 즉시 확인·떼어낼 수 있도록 전면 경량화함:
+    1. **모니터 옆 포스트잇 레일 & 슬라이드 오버 (`StickyNoteCard.tsx`, `StickyNotesPanel.tsx`, `ProtectedApp.tsx`, `Sidebar.tsx`)**:
+       - 상단 네비게이션에서 `작업기억 보드` 탭과 각 모듈 하단 `WorkingMemoryContextBanner`를 제거하고, 헤더 우측 `업무 연락처` 옆에 `포스트잇 (N)` 토글 버튼(`Alt+N`) 및 데스크톱 `xl` 이상 우측 고정 레일(`docked`) / 좁은 화면 슬라이드 오버(`drawer`)를 구축함.
+       - 4색 파스텔 팔레트(노랑·분홍·민트·하늘), 20~50자 카운터 + `Enter` 즉시 부착, 기존 장문 메모 3줄 요약·클릭 펼침, 더블클릭 인라인 수정, 1클릭 떼어내기(`reflected`) 및 하단 접이식 복구함을 구현함.
+    2. **데이터 무손실 확장 및 검증 (`schemas.ts`, `useWorkingMemory.ts`, `sticky-notes-panel.test.tsx`)**:
+       - `WORKING_MEMORY.json` 기존 7건·모바일 `/memo` 우체통·12대 시트 Zod 하네스(`StrictWorkingMemorySchema`) 하위호환을 유지한 채 `color?: StickyNoteColor` 선택 필드를 추가하고, `tsc`·`eslint`·신규 Jest 스위트·`run-harness.js`·`sync-rules.js` 통과를 검증함.
+
+
+
+### [Milestone 307: 예산 대조보드 · 예산 시뮬레이터 단일 통합 관제 보드(Option A) 일원화 및 지출 내역 무손실 가드 구축] Consolidated the dualized budget dashboard and simulator UIs into a single unified budget control board (`BudgetDashboard.tsx`, `WorkspaceView.tsx`, `ProtectedApp.tsx`, `CommandPalette.tsx`) while preserving 100% backward compatibility with `BUDGET_CATEGORIES.json` (15), `BUDGET_ENTRIES.json` (90), `BUDGET_SIMULATIONS.json` (13), and the 12-sheet Zod harness (`Risk of Ruin = 0`): unified 4 dual-pipeline KPI cards (actual + planned general/daily balances with zero double-deduction), integrated collapsible risk chips & lazy-loaded `SimulationBurnUpChart`/`SimulationResultTable` (`과목별 대조` | `예정 · 소진 표`), added inline planned-entry management and settlement transitions inside `PolicyGroupCard.tsx` and `BudgetCategoryCardItem.tsx`, extracted reusable `SimulationInputModal.tsx` (with confirm-guarded secondary reset/preset tools) and `SimulationSettleModal.tsx` (with double-submit lock), updated legacy dual-tab tests and added `__tests__/budget-unified-integration.test.tsx`. (2026-11-19)
+* **개요 및 추진 목적**:
+  - `BUDGET_ENTRIES.json`(`isPlanned: true` 13건)과 `BUDGET_SIMULATIONS.json`(13건)이 동일 라이프사이클임에도 UI·라우팅이 이원화되어 발생하던 탭 왕복·예정 누락·중복 마운트 문제를 Option A(단일 통합 UI + 12대 시트 SSOT 무파괴 보존)로 해소함:
+    1. **라우팅 · 진입점 단일화 (`WorkspaceView.tsx`, `ProtectedApp.tsx`, `CommandPalette.tsx`)**:
+       - `WorkspaceView` 상단 이중 탭(`예산 대조보드` / `예산 시뮬레이터`) 및 `ProtectedApp` 독립 `simulator` 모듈 중복 렌더링 블록을 제거하고, `simulator` 진입 요청을 단일 `workspace` 통합 보드의 `예정 · 소진 표` + 소진 차트 펼침 상태로 라우팅함.
+    2. **통합 관제 보드 · 듀얼 파이프라인 KPI · 인라인 예정 정산 (`BudgetDashboard.tsx`, `PolicyGroupCard.tsx`, `BudgetCategoryCardItem.tsx`, `SimulationInputModal.tsx`, `SimulationSettleModal.tsx`)**:
+       - 4대 KPI 카드에 e-호조 실집행·본청 실잔여·일상경비 잔액과 예정 지출(일반·일상경비 부족분 포함) 반영 최종 예상 잔액을 이중 차감 없이 오차 0원으로 병기함.
+       - 과목 카드(`PolicyGroupCard`, `BudgetCategoryCardItem`) 내부에 미정산 예정 건수·금액 배지 및 인라인 `지출 예정 (시뮬레이션)` 섹션(수정·삭제·`[실지출 전환]`)을 통합하고, `SimulationInputModal`(파괴적 프리셋·초기화 `window.confirm` 가드 격리) 및 `SimulationSettleModal`(중복 제출 잠금)을 공용 컴포넌트화함.
+    3. **지출 내역 무손실 검증 및 회귀 테스트 (`Rule B, E, H, R`)**:
+       - `data/BUDGET_CATEGORIES.json`·`BUDGET_ENTRIES.json`·`BUDGET_SIMULATIONS.json` SHA-256 해시 불변, `npx tsc --noEmit`, `node scripts/run-harness.js`, `node scripts/test-challenger-m1-empirical-sync.js`, `node scripts/sync-rules.js` 및 전체 Jest 스위트(`__tests__/budget-unified-integration.test.tsx` 신설 포함) 통과를 검증함.
+
+
+
+### [Milestone 306: 레이 달리오 ｢원칙｣ VITAL 통합(Rule T · vital-principles-os 스킬 · 작업기억 이슈로그 스키마/구조화 UI 및 10대 문서 감사 확장)] Integrated Ray Dalio's Principles as an AIA Labs-style decision & diagnostic auxiliary engine (excluding PriOS surveillance/rating tools): added `Rule T` to `AGENTS.md`, created `.agents/skills/vital-principles-os/SKILL.md`, upgraded `scripts/sync-rules.js` & `vital-governance-ops` to a 10-document (`Rule A~T`) governance audit, extended `WorkingMemoryCategory` with `'issue_log'` and optional structured `issueMeta` (`severity`, `responsibleParty`, `proximateCause`, `rootCause`, `machineFix`, `doubleDoRequired`) across `src/types/index.ts`, `src/lib/schemas.ts` (Runtime + Strict parity), `src/lib/working-memory-parser.ts` (`extractIssueMeta`), `src/hooks/useWorkingMemory.ts`, `/api/memo`, Cloudflare Edge `functions/api/memo.ts`, `WorkingMemoryPage.tsx` (structured root-cause card + 5th Kanban lane `lane-issue-log`), and `IntegratedShowcaseSection.tsx`, verified via `sync-rules.js`, `privacy_guard.py`, `run-harness.js`, `tsc --noEmit`, and Jest suites. (2026-11-19)
+* **개요 및 추진 목적**:
+  - 레이 달리오 ｢원칙｣ 중 공공 행정 및 VITAL 업무시스템에 부합하는 5단계 진단·근접(동사) vs. 근본(형용사) 원인 분석·확률 의사결정($EV$, `Risk of Ruin = 0`)·신뢰도 가중 삼각측량·책임당사자(`RP`)·이중 실행(`Double-do`)·`Issue Log`·`Living Manual` 환류 체계를 에이전트 OS(Layer 1)와 VITAL 웹앱(Layer 2 옵션 B)에 동시 통합하고, 감시·낙인형(`Dot Collector`·`Pain Button`·`Baseball Cards`·`PriOS` 자동 결재) 안티패턴을 명시 차단함:
+    1. **에이전트 OS 및 10대 거버넌스 자동 감사 확장 (`AGENTS.md`, `.agents/skills/vital-principles-os/SKILL.md`, `vital-governance-ops/SKILL.md`, `scripts/sync-rules.js`)**:
+       - `AGENTS.md`에 상시 불변식 `Rule T`와 스킬 라우팅 행을 추가(`23,800B` 상한 대비 여유 유지)하고, 5단계 분리·$EV$/`Risk of Ruin=0`·3등급 신뢰도·`Double-do`·`Issue Log` 런북을 담은 6번째 온디맨드 스킬 `vital-principles-os`를 신설함.
+       - `scripts/sync-rules.js`의 `SKILL_DOC_PATHS`·`expectedRules`(`A~T`) 및 `__tests__/harness-schema-parity.test.ts` 단언을 10대 문서 감사 규격으로 동기화해 PUA·이중불릿·RSI 평어체·데드링크 0건을 강제함.
+    2. **작업기억 보드 `issue_log` 스키마·파서·구조화 카드 및 엣지 레플리카 확장 (`src/types/index.ts`, `src/lib/schemas.ts`, `src/lib/working-memory-parser.ts`, `src/components/memory/WorkingMemoryPage.tsx`, `functions/api/memo.ts`)**:
+       - `WorkingMemoryCategorySchema`에 `'issue_log'`를 추가하고 선택적 `WorkingMemoryIssueMetaSchema` / `StrictWorkingMemoryIssueMetaSchema`(`severity`, `responsibleParty`, `proximateCause`, `rootCause`, `machineFix`, `doubleDoRequired`)를 Runtime·Strict 100% 동등성 규격으로 구현해 기존 SSOT 레코드 하위 호환성과 12대 시트 Zod 하네스를 유지함.
+       - `extractIssueMeta()`로 `[이슈로그] RP: | 근접: | 근본: | 개선: | 위험:` 1줄 입력을 자동 추출하고, `WorkingMemoryPage.tsx`(구조화 원인진단 카드·실시간 미리보기·5열 칸반 `lane-issue-log`·대조표 배지)·`IntegratedShowcaseSection.tsx`·`/api/memo`·`functions/api/memo.ts`에 일관 반영함.
+    3. **다중 회귀·정합성 검증 (`Rule B, E, H, P, Q, T`)**:
+       - `node scripts/sync-rules.js`(10대 문서 감사 0건), `python scripts/privacy_guard.py --scan`, `npx tsc --noEmit`, `node scripts/run-harness.js`, Jest(`harness-schema-parity`, `working-memory`, `vlds-concise-microcopy`, `challenger-m3-2-negative-records`, `challenger-m4-style-regression`) 전 스위트 통과를 검증함.
+
+
+
+### [Milestone 305: 제339회 구의회 2027년 예산(안) 심사 소장님 구두 발표용 예상질문 HWPX('(발표답변용)') 비파괴 분리 빌드] Preserved both original `(전체수합) 보건소 예산 예상질문_소장님용(양식).hwpx` and detailed `(전체수합) 2027년 보건소 예산 예상질문_소장님용(메디헬스반영).hwpx` untouched via SHA-256 verification, refactored `scratch/build_budget_qa_hwpx.py` with payload parameters, and built `D:\Desktop\(전체수합) 2027년 보건소 예산 예상질문_소장님용(발표답변용).hwpx` (`277,735B`) via `scratch/build_budget_qa_oral_hwpx.py` compressing Q1/Q2 `☞` oral answer boxes (`1,441자→350자`, `1,165자→377자`, 4 points × 2 lines each) while preserving `0`-KRW-error backup tables in `♠ 참고자료` and `0` overlap defects, synced `ADMIN_DOC_INDEX.json` (`doc-adm-426`) and `WORKING_MEMORY.json`. (2026-11-18)
+* **개요 및 추진 목적**:
+  - 기존 상세 근거판의 장문(`1,441자`·`1,165자`)이 보건소장님의 의회 현장 즉석 구술에 부적합한 문제를 해소하기 위해 원본 양식 전 부서 평균 구술 분량(`181~381자`)에 맞춘 구두 발표 최적화 사본을 비파괴 분리 구축함:
+    1. **원본·상세판 2종 무결성 보존 및 공통 빌더 파라미터화 (`scratch/build_budget_qa_hwpx.py`, `scratch/build_budget_qa_oral_hwpx.py`)**:
+       - 기존 `(양식).hwpx`(`305,473B`) 및 `(메디헬스반영).hwpx`(`310,521B`)의 SHA-256 해시를 불변 검증하고, 공통 HWPX 클로닝·치유 함수(`build_budget_qa_hwpx`)에 질문·답변 인자를 분리해 중복 코드 없이 신규 `(발표답변용).hwpx`(`277,735B`)를 생성함.
+    2. **소장님 구술 최적화 문안 재설계 (`scratch/draft_oral_qa_briefing.md`, `P[075]`/`P[079]`)**:
+       - Q1(`강남 AI 메디헬스센터`) `☞` 박스를 4대 핵심 키워드·8줄(`350자`, 박스 높이 `17,362` HWPUnits)·Q2(`건강생활실천사업`) `☞` 박스를 4대 핵심 키워드·8줄(`377자`, 박스 높이 `17,362`)로 재편해 40초 내외 두괄식 구술과 뒷장 `♠ 참고자료` 정밀 도표 대조의 이원화 체계를 확립함.
+    3. **5대 겹침 차단·온톨로지 환류·회귀 검증 (`Rule E, G, K, O, Q`)**:
+       - `verify_hwpx_no_overlap()` 결함 `0`건(`88`셀 치유, `BinData/image1~7.png` 유지), PIPA 스캔 `0`건, `ADMIN_DOC_INDEX.json`(`doc-adm-426`)·`WORKING_MEMORY.json` 환류, `sync-rules.js`, Zod 하네스·TypeScript·Jest 스위트를 통과함.
+
+
+
+### [Milestone 304: 2027 서울체력장 강남센터 운영 계획 기반 '찾아가는 AI형(22백만·무상 2년)' 및 '출장형 8종(10백만·무상 1년)' 물품구매 과업지시서 2종 HWPX 비파괴 빌드] Built two non-destructive HWPX task instructions (`D:\Desktop\과업지시서_찾아가는 AI 서울체력장 측정 장비 구매.hwpx`, `D:\Desktop\과업지시서_서울체력장 출장형 측정 장비 구매.hwpx`) via `scratch/build_task_instructions_hwpx.py` from `2027 서울체력장 강남센터 운영 계획 (2)_작성중.hwpx`, procurement excel, and real-time DRF checks (`지방계약법 시행령` Art. 25(1)5(na) & Art. 30(1)2; `강남구 계약심사 업무처리 규칙` Art. 4), eliminating template XML overlap defects (`0` defects), scrubbing unfair contract clauses against the 2026-11-06 manual, passing `privacy_guard.py --scan` (`0` hits), and syncing `SCHEDULES.json`, `WORKING_MEMORY.json`, and `ADMIN_DOC_INDEX.json` (`doc-adm-424`, `doc-adm-425`). (2026-11-18)
+* **개요 및 추진 목적**:
+  - 바탕화면 최신 계획([2027 서울체력장 강남센터 운영 계획 (2)_작성중.hwpx](file:///D:/Desktop/2027%20%EC%84%9C%EC%9A%B8%EC%B2%B4%EB%A0%A5%EC%9E%A5%20%EA%B0%95%EB%82%A8%EC%84%BC%ED%84%B0%20%EC%9A%B4%EC%98%81%20%EA%B3%84%ED%9A%8D%20(2)_%EC%9E%91%EC%84%B1%EC%A4%91.hwpx))·분리 발주계획 엑셀(`22,000천원` / `10,000천원`)·견적·사양서 및 국가법령정보 DRF(`MST=286149`, `MST=1922719`)를 교차 검증해 물품구매 과업지시서 2종을 비파괴 산출함:
+    1. **과업 1 (찾아가는 AI형 · `22,000,000원` · 세곡보건지소 2층 · 무상보증 2년 · `2026. 12. 18. 한`)**:
+       - 추정가격 `20,000,000원`(부가세 `2,000,000원`) 기반 `세부품명번호 60109399-01` 동등 이상 범용 성능 규격(43인치 터치스크린, 3D 모션센서, 6코어·12스레드 프로세서, AI 측정 SW·웹 관리자·손목닥터9988 연계 호환, 700×700mm 듀얼 포스플레이트 2개, 3,000×4,000mm 안전매트 시공)과 SLA(2시간 원격·24시간 현장 대응)를 반영함.
+    2. **과업 2 (출장형 8종 · `10,000,000원` · 강남구보건소 3층 · 무상보증 1년 · `2026. 12. 18. 한`)**:
+       - 추정가격 `9,090,909원`(부가세 `909,091원`) 기반 운영계획 8종(절대악력·팔굽혀펴기·스텝박스·윗몸앞으로굽히기·균형검사기(SPPB)·4M 보행속도·반응시간·체성분분석기) 동등 이상 이동형 규격과 휴대 보관·영점 교정·데이터 호환 요건을 반영함.
+    3. **XML 5대 겹침 치유, 부당특약 정비 및 온톨로지 환류 (`scratch/build_task_instructions_hwpx.py`, `Rule E, G, K, O, Q, R`)**:
+       - 아카이브 양식(`20260831_4. 과업지시서...hwpx`) 내 `SQUEEZE`·병합 셀 `vertpos` 중복·`paraPr 23` 결함을 치유하고 개방형 우측 `borderFill`(`17~19`)을 추가해 두 산출물 모두 `verify_hwpx_no_overlap()` `0`건·PIPA `0`건을 통과했으며, `2026. 11. 6.` 수의계약 매뉴얼 `[서식 2]` 기준으로 상호 협의·귀책 책임 조항을 정비한 뒤 `SCHEDULES.json`·`WORKING_MEMORY.json`·`ADMIN_DOC_INDEX.json`(`doc-adm-424`~`425`)을 환류함.
+
+
+
+### [Milestone 303: 제339회 구의회 2027년 예산(안) 예상질문 HWPX '건강생활실천사업(건강증진)' 2번 문항 확장 및 메디-런·행사경비 재구조화 팩트 컴파일] Expanded the consolidated 2027 Council budget Q&A HWPX (`D:\Desktop\(전체수합) 2027년 보건소 예산 예상질문_소장님용(메디헬스반영).hwpx`) via `scratch/build_budget_qa_hwpx.py` by populating Q2 (`건강생활실천사업(건강증진)`, `148,279천원`, `+26,899천원 / +22.2%`) alongside Q1 (`강남 AI 메디헬스센터 운영`) and Q3~Q4 placeholders, reconciling line items from official HWPX/PDF/XLSX budget sources (`0` KRW error), verifying `0` overlap defects (`280,061B`), and syncing `SCHEDULES.json`, `WORKING_MEMORY.json`, and `ADMIN_DOC_INDEX.json` (`doc-adm-004`). (2026-11-18)
+* **개요 및 추진 목적**:
+  - 제339회 강남구의회 경제도시위원회(`2026. 12. 1.`) 예산안 심사에 대비해 `보건행정과` 2번 예상질문으로 **｢건강생활실천사업(건강증진)｣ 예산 증감 사유·메디-런 확대·행사성 경비 정비 내역**을 추가 컴파일함:
+    1. **1차 실무 문서·법령 DRF 교차 검증 (`Rule F, R`)**:
+       - `('26.10.26.자).hwpx`, `과장님용 최종.hwpx`, `보건행정과.pdf`, `20260914_본예산 편성 총괄표...xlsx`, `2026_메디런_프로그램_운영_계획.hwpx` 및 DRF `국민건강증진법`(`MST=285763` 제15조·제16조의2·제16조의3·제19조)을 교차 검증해 `148,279천원` = 기금 `15,868`(`+2,772`) + 시비 `19,042`(`+3,327`) + 구비 `113,369`(`+20,800`) 및 편성목 합계 오차 `0원`을 확인함.
+       - 외형 증가(`+26,899천원`) 중 `27,000천원`(`307-01`)은 `건강증진지원실 운영`(`56,492천원`) 통폐합에 따른 바른자세개선 검진·시약비 이관이며, 무대(`△7,000`)·예술공연(`△3,200`)·이벤트(`△764`)·다과비(`△3,000`) 등 전시성 경비 `△13,964천원` 삭감 및 구비 일반운영비 순감액(`87,669→84,469천원`, `△3,200천원`)과 `메디-런` 확대(`12,600→26,463천원`) 구조를 정리함.
+    2. **비파괴 HWPX 다중 문항 조판 및 온톨로지 환류 (`scratch/build_budget_qa_hwpx.py`, `Rule E, G, K, O, Q`)**:
+       - Q2 답변 박스(`49,362` HWPUnits)·참고자료(`51,602` HWPUnits, 재원별 증감표+세부사업 구조조정표 2종)·Q3~Q4 슬롯(`46,240` HWPUnits)을 A4 유효높이(`71,434`) 이내 1페이지 단위로 안착(`Verified 0 overlap defects`, `88`셀 치유)하고 `ADMIN_DOC_INDEX.json`(`doc-adm-004`)·`SCHEDULES.json`·`WORKING_MEMORY.json`·`sync-rules.js`·Zod 하네스·PIPA 스캔을 완료함.
+
+
+
+### [Milestone 302: 업무 연락처 '최근 연락순' 기본 정렬·연락 이력(`lastContactedAt`) 추적 및 3단 정렬 토글 구현] Added optional `lastContactedAt` persistence across `Contact` (`src/types/index.ts`), `ContactSchema` & `StrictContactSchema` (`src/lib/schemas.ts`), and `markContacted` in `useContacts.ts`, switched `ContactsBox.tsx` default sort order to `최근 연락순` (`RECENT_CONTACT` → `NAME_ASC` → `NEWEST`) with automatic contact logging on `tel:` call, phone/email copy, and 1-click `연락` action plus inline recent-contact badge, and verified with `contacts-recent-sort.test.tsx`, `npx tsc --noEmit`, ESLint, `run-harness.js`, and `sync-rules.js`. (2026-11-18)
+* **개요 및 추진 목적**:
+  - 기존 `가나다순`(`NAME_ASC`) 기본 정렬을 실무 빈도 중심의 **최근 연락순(`RECENT_CONTACT`)** 기본 정렬로 전환하고, 통화·복사·수동 체크 기반의 최근 연락 시각 영속화 파이프라인을 구축함:
+    1. **연락 이력 스키마 및 낙관적 영속화 (`src/types/index.ts`, `src/lib/schemas.ts`, `src/hooks/useContacts.ts`)**:
+       - `Contact`, `ContactSchema`, `StrictContactSchema`에 선택적 ISO 타임스탬프 필드 `lastContactedAt`을 추가하여 기존 180건 SSOT 레코드 호환성 및 Zod 하네스 무결성을 유지함.
+       - `useContacts`에 `markContacted(id)`를 신설하고 `updateContact`가 디스크 동기화 페이로드에 `updatedAt`을 일관 반영하도록 보강함.
+    2. **기본 정렬 전환·1클릭 연락 기록 UI 및 VLDS 준거 (`src/components/dashboard/ContactsBox.tsx`)**:
+       - 기본 정렬을 `RECENT_CONTACT`(`최근 연락순` → `가나다순` → `최근 등록순`)로 전환하고, `lastContactedAt` 보유 항목을 최상단 내림차순 우선 배치한 뒤 미기록 항목은 최근 활동(`Math.max(updatedAt, createdAt)`) 내림차순·한글 가나다순으로 정렬함.
+       - 카드 헤더의 1클릭 `연락` 기록 버튼, `tel:` 전화 걸기, 전화번호·이메일 복사 시 `lastContactedAt`을 자동 갱신하고 `최근 오늘 HH:mm` / `최근 MM.DD` 배지를 표시함.
+    3. **단위·스키마·거버넌스 회귀 검증 (`__tests__/contacts-recent-sort.test.tsx`, `run-harness.js`, `sync-rules.js`)**:
+       - 신규 단위 테스트(`contacts-recent-sort.test.tsx`) 및 기존 UI·스키마·VLDS 스위트, TypeScript, ESLint, Zod 하네스, 9대 문서 감사를 통과함.
+
+
+
+### [Milestone 301: 제339회 구의회 2027년 예산(안) 심사 대비 '강남 AI 메디헬스센터' 전산보안 예상질문 HWPX 비파괴 빌드 및 온톨로지 환류] Built a non-destructive 2027 Council budget Q&A HWPX copy (`D:\Desktop\(전체수합) 2027년 보건소 예산 예상질문_소장님용(메디헬스반영).hwpx`) preserving the cover, summary tables, and 5 other departments while replacing stale 2026 `보건행정과` items with `강남 AI 메디헬스센터 운영(신규)` IT security & budget Q&A (`189,256천원`: 시비 `64,673천원` / 구비 `124,583천원`), verified `0` overlap defects via `scratch/build_budget_qa_hwpx.py`, and synced `SCHEDULES.json`, `WORKING_MEMORY.json`, and `ADMIN_DOC_INDEX.json`. (2026-11-18)
+* **개요 및 추진 목적**:
+  - 제339회 강남구의회 제2차 정례회 경제도시위원회(`2026. 11. 25.~12. 1.`) 2027년도 예산안 심사 대비, 의회 전문위원의 핵심 질의 대상인 **｢강남 AI 메디헬스센터 운영(신규)｣ 전산시스템 보안 및 예산 타당성** 소장님용 예상질문·답변·참고자료를 실증 자료 기반으로 컴파일함:
+    1. **1차 실무 문서·법령 RAG 교차 검증 (`Rule F, R`)**:
+       - 바탕화면 양식([`(전체수합) 보건소 예산 예상질문_소장님용(양식).hwpx`](file:///D:/Desktop/(%EC%A0%84%EC%B2%B4%EC%88%98%ED%95%A9)%20%EB%B3%B4%EA%B1%B4%EC%86%8C%20%EC%98%88%EC%82%B0%20%EC%98%88%EC%83%81%EC%A7%88%EB%AC%B8_%EC%86%8C%EC%9E%A5%EB%8B%98%EC%9A%A9(%EC%96%91%EC%8B%9D).hwpx))과 사업설명서 HWPX(`189,256천원` = 인건비 `102,643` + 사업비 `86,613`, 시비 `64,673` + 구비 `124,583`, 전산연계 `59,907천원`), `스마트정보과-12151`(`2026. 10. 1.`) 정보화 예산타당성 원안 승인, IT 사전검토 실무협의체·지능정보화위원회 기술자문 의견, `스마트정보과-10477` 7대 안전조치(`SFR-001~005`, `SER-001~002`), 국정원 `국가·공공기관 AI 보안 가이드북(25.12.10)` 및 DRF 현행 법령(`개인정보 보호법` 제23조·제29조·제33조·시행령 제35조, `전자정부법` 제56조·제67조, `디지털의료제품법` 등)을 대조함.
+    2. **비파괴 양식 치유·HWPX 인플레이스 빌드 (`scratch/build_budget_qa_hwpx.py`, `Rule G, O, Q`)**:
+       - `scratch/generate_new_hwpx.py`의 5대 겹침 차단·ZIP Bit-2 복원 엔진을 재사용해 표지(`P[000]~P[072]`)·이미지(`BinData/image1~7.png`) 및 타 5개 부서(`위생과~세곡보건지소`) 구분면 정중앙 정렬을 100% 보존하고, `보건행정과`에 메디헬스 보안·예산 1문항(2개 중첩 도표 포함)과 타 팀 취합용 `2~4` 슬롯을 배치해 `verify_hwpx_no_overlap()` `0`건 결함 및 `privacy_guard.py --scan` `0`건 노출을 통과함.
+    3. **온톨로지 역방향 환류 및 거버넌스 검증 (`Rule E, K`)**:
+       - `data/SCHEDULES.json`·`SCHEDULE.md`(`11. 26.` 총괄 제안설명, `12. 1.` 보건소 예산안 심사), `data/WORKING_MEMORY.json`(발주 전 사전협의·보안성 검토·영향평가 후속 과업), `data/ADMIN_DOC_INDEX.json`(`doc-adm-423`)을 환류하고 3-Way 동기화 및 Zod 하네스를 통과함.
+
+
+
 ### [Milestone 300: 거버넌스·스킬·지침·리포트 마크다운 전면 경량화 및 실측 아키텍처 정합성 최적화] Optimized all 9 governance, skill, and guideline markdown SSOTs (`145,943B` → `93,305B`, `-36.1%` total via progressive disclosure deduplication), modernized `README.md` (port `3001`, Cloudflare KV, CLI), and updated `PORTFOLIO VITAL - Engineering Report.md` Sections 1–7 to live 2026-11-16 metrics (`196` prod `src/` TS/TSX, `63,069` LOC, `16` API routes, `28` hooks, `6` Edge modules, `68` Jest suites) while purging obsolete `D:\Desktop\공공문서 폴더\2026년`, `src/middleware.ts`, and deleted `MindMap3D`/orphan API references. (2026-11-16)
 * **개요 및 추진 목적**:
   - 중복 규격·구버전 경로·과대 용량으로 인한 컨텍스트 효율 저하를 해소하고, 프로젝트 루트 및 9대 거버넌스 문서의 실측 정합성을 100% 복원함:

@@ -8,9 +8,9 @@
 
 ## ▣ 2. 초간결·무조사 마이크로카피 헌장 (Zero-Verbosity & Particle-Free UX Writing)
 
-### ▢ 1. 4대 핵심 작성 원칙
+### ▢ 1. 5대 핵심 작성 원칙
 1. **서술문 전면 금지 (Noun-Phrase & Metric First)**:
-   - UI 헤더·부제·보조문·빈 상태(Empty State)·알림 문구에서 구어체·존대·명령형 어미(`~하-` · `~입니-` · `~됩니-` · `~있습-` · `~없습-` · `~보세-` · `~주세-` · `~바랍-` · `~중입-`) 등 문장형 서술어 및 복수 문장 나열을 금지함.
+   - UI 헤더·부제·보조문·빈 상태(Empty State)·알림 문구에서 구어체·존대·명령형 어미(`~습니-` · `~하-` · `~입니-` · `~됩니-` · `~있습-` · `~없습-` · `~보세-` · `~주세-` · `~바랍-` · `~중입-`) 등 문장형 서술어 및 복수 문장 나열을 금지함.
    - 기능을 줄글로 해설하지 않고 **핵심 명사구 + 정량 수치**로 직결 표기함.
 2. **불필요 조사 제거 및 한글 음운(받침) 기반 정밀 판별 (Particle-Free Telegraphic Syntax)**:
    - 목적격(`을/를`), 주격·보격(`이/가 + 서술어`), 보조사(`은/는 + 서술어`), 부사격(`에서/으로/로 이동`), 접속조사(`와/과/및`), 관료적 조사구(`에 대한`, `에 따른`, `에 의거`, `을 위해`, `을 통해`) 사용을 원칙적으로 배제함.
@@ -21,12 +21,24 @@
    - 행 내부는 **`핵심 항목명` + `1줄 정량 지표`** 최대 2단으로 제한하며 부가 맥락은 `title` 툴팁 또는 드릴다운 뷰로 분리함.
 4. **영문 중복 병기 및 추상 수식어 배제**:
    - 한글 제목·탭·카테고리 뒤 중복 영문 병기(`(Working Memory Post-it)`, `(Achievements)`, `(Future Plans)`, `(Tasks)`, `(Upstream)`, `Commitment Balance Engine`) 및 추상 수식어(`초개인화 행정 인텔리전스`, `사이버네틱스 환류`)를 금지함.
+5. **직관적 일상어 · 자명한 문장 생략 (Plain-Word Naming & Zero-Filler)**:
+   - 섹션·카드·모달 타이틀은 기능을 0.3초 내 식별하는 **1~2어절 실무 명사**(`행정 게시판`, `문서 보관함`, `업무 도우미`, `예산 관리`, `모바일 메모함`)로 구성하며 **최대 3어절**을 초과하는 장황한 복합 타이틀을 금지함.
+   - AI 과장 수식어·추상 외래어(`쇼케이스`, `인텔리전스`, `오케스트레이션`, `시너지`, `에코시스템`, `패러다임`, `솔루션`, `인사이트`, `어시스턴트`, `워크스페이스`, `통합 허브`, `매트릭스`, `익스플로러`)를 UI 표출 문자열에서 차단함.
+   - 제목만으로 기능이 자명한 경우 `subtitle`·안내 `<p>` 문장을 생략(`undefined`)하며, 빈 상태(Empty State)는 단문 명사구(`등록 메모 없음`, `일치 문서 없음`)로 표기함.
+
+| 금지 과장 · 장황 표현 | 직관 표준 표현 |
+|:---|:---|
+| `통합 행정 지식 쇼케이스` | `행정 게시판` |
+| `마스터 아카이브 통합 탐색기` | `문서 보관함` |
+| `행정 인텔리전스 어시스턴트` | `업무 도우미` |
+| `로컬 SSOT · 워크스페이스 연결 중` | `로컬 데이터 연결 중` |
+| `등록된 항목이 없습니-. 상단에서 추가하세-.` | `등록 항목 없음` |
 
 ### ▢ 2. 요소별 글자 수 상한 (Character Budget)
 
 | UI 요소 역할 (`VldsCopyRole`) | 글자 수 상한 | 작성 규격 | 금지 안티패턴 예시 | 표준 변환 예시 |
 |:---|---:|:---|:---|:---|
-| **섹션·카드 제목 (`title`)** | **18자** | 핵심 도메인 명사구 단독 표기 | `주요 추진 실적 (Achievements)` | `주요 추진 실적` |
+| **섹션·카드 제목 (`title`)** | **18자 · 3어절** | 1~2어절 직관 명사구 단독 표기 | `통합 행정 지식 쇼케이스` / `주요 추진 실적 (Achievements)` | `행정 게시판` / `주요 추진 실적` |
 | **보조 부제 (`subtitle`)** | **36자** | `·` 구분 무조사 키워드 (자명 시 생략) | `현재 집행 잔액을 기준으로 미집행 확정 지출 예정액을 차감하여...` | `집행 잔액 - 예정액 · 과목별 예상 잔액` |
 | **버튼·탭·배지 (`cta`)** | **12자** | 직관 동작·상태 명사 | `초기화 및 해제` / `작업기억 보드로 이동` | `초기화` / `작업기억 보드 이동` |
 | **행 보조·빈 상태 (`helper`)** | **32자** | 정량 수치·상태 단문 | `세부사업과 통계목을 먼저 선택하세요.` | `세부사업 · 통계목 선선택` |
@@ -37,13 +49,15 @@
 ## ▣ 3. 레이아웃·타이포그래피 및 런타임 검증
 
 ### ▢ 1. 상단 타이틀 및 컨테이너 여백 불변식
-- **컨테이너 폭·좌우 여백**: `max-w-[1800px] mx-auto px-2 sm:px-3 lg:px-4` 규격을 유지함.
-- **페이지 상단 2단 타이틀 패딩**: `pt-7 sm:pt-9 lg:pt-11 pb-6 sm:pb-7 lg:pb-8` 상하 여백과 모듈별 무조사 핵심 요약 1줄을 유지함.
+- **컨테이너 폭·좌우 여백 (PORTFOLIO ASSET 통일 규격)**: `w-full max-w-[2400px] mx-auto px-4 sm:px-8 xl:px-12 2xl:px-16` 규격을 상단 네비게이션 바(`Sidebar.tsx`)와 본문 컨테이너(`ProtectedApp.tsx`)에 동일 적용함.
+- **페이지 상단 헤더행 간격**: 상단 네비게이션 바 `h-[56px]`, 타이틀 블록 `pt-5 sm:pt-7 pb-4 sm:pb-5`(`w-8 h-8 sm:w-9 sm:h-9` 아이콘 · `gap-3` · `sm:min-h-[36px]`), 본문 래퍼 `gap-4 sm:gap-5`로 정렬함.
+- **대시보드 2×2 KPI 카드 높이**: PORTFOLIO ASSET 실측(`71.25px`) 기준 단일 카드 `h-[72px] min-h-[72px] px-4 py-2.5 sm:px-5 sm:py-3`, 행간 `gap-2.5 sm:gap-3`(총 `156px`) 및 스켈레톤 동일 치수로 고정함.
 - **회계 수치 정렬**: 모든 예산·집행률·건수 표기는 고정폭 숫자(`font-mono tabular-nums` 또는 `NumericText` 프리미티브)를 적용함.
 - **단일 줄 서브타이틀 (`.vlds-subtitle`)**: `SectionHeader`의 부제는 `vlds-subtitle line-clamp-1`(`word-break: keep-all`)과 `title={subtitle}` 네이티브 툴팁 폴백을 동시 적용하여 좁은 뷰포트(448px)에서도 줄바꿈 붕괴 없이 전문 확인을 보장함.
 
 ### ▢ 2. 코드 게이트키퍼 연동
-- **정적·단위 검증 모듈**: [`vlds-microcopy.ts`](../src/lib/vlds-microcopy.ts) (`auditVldsCopy`, `joinTelegraphic`, `VLDS_COPY_BUDGET`)
+- **정적·단위 검증 모듈**: [`vlds-microcopy.ts`](../src/lib/vlds-microcopy.ts) (`auditVldsCopy`, `countTitleWords`, `FORBIDDEN_INFLATED_UI_TERMS`, `joinTelegraphic`, `VLDS_COPY_BUDGET`)
+- **AST UI 디자인 하네스**: [`audit-ui-copy.js`](../scripts/audit-ui-copy.js) (`npm run audit:ui` · `scripts/run-harness.js` Step 3-B 자동 편입 · 법령/공문 인용 예문에 한해 `vlds-ignore-next-line` 명시 예외)
 - **UI 프리미티브**: [`src/components/ui/`](../src/components/ui/index.ts) (`Card`, `SectionHeader`, `KpiStatCard`, `Badge`, `SegmentedTabs`, `Button`, `NumericText`, `Modal`)
 - **자동화 회귀 테스트**: [`vlds-concise-microcopy.test.tsx`](../__tests__/vlds-concise-microcopy.test.tsx)
 

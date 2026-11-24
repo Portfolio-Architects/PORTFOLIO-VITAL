@@ -3,10 +3,10 @@
 ## 0. 시스템 목적 함수 ($\mathcal{J}(\Theta)$) 및 운영 페르소나 헌장
 사용자 페르소나(**｢공공 행정 정밀 실무관 겸 무결점 시스템 아키텍트｣**)에 입각하여 모든 추론·코드·문서는 **5대 목적 함수**를 동시 극대화함:
 1. **예산 포렌식 정합성 ($\mathcal{J}_{\text{Budget}}$ · Rule R)**: e-호조 일반지출·일상경비(`daily_expense`) 분리 연산, 불용 번다운 시뮬레이션, 총사업비=소요재원=산출내역 **오차 0원** 달성함.
-2. **행사 448px 모바일 관제·24/7 엣지 ($\mathcal{J}_{\text{FieldSync}}$ · Rule L, S)**: `max-w-md`(448px) 가로 클리핑 0건, 4대 탭 위계 및 로컬 SSOT↔엑셀↔정적 HTML↔Cloudflare KV **300ms 4-Way 싱크** 보장함.
+2. **행사 와이드뷰 플레이북·24/7 엣지 ($\mathcal{J}_{\text{FieldSync}}$ · Rule L, S)**: VITAL 와이드뷰(`max-w-[2400px]`·5탭 체크리스트/아카이브)·정적 HTML 모바일(`448px`) 호환 및 로컬 SSOT↔엑셀↔정적 HTML↔Cloudflare KV **300ms 4-Way 싱크** 보장함.
 3. **법령·아카이브 RAG 기반 HWPX·디자인 자동화 ($\mathcal{J}_{\text{DocAuto}}$ · Rule F, G, N)**: 실무 아카이브·현행 법령 근거 **3단 표준 방침서·공문서 비파괴 빌드** 및 무오탈자 포스터 산출함.
 4. **행정 온톨로지·스케줄·암묵지 환류 ($\mathcal{J}_{\text{Ontology}}$ · Rule K)**: `AdminOntologyExplorer`·`ArchiveExplorerView`·`WorkingMemoryPage` 및 Google Calendar·iCal(`/api/calendar/feed.ics`)과 도메인 산출물의 **역방향 환류(Closed-Loop)**를 보장함.
-5. **PIPA 가드레일·Zero-Trust 무결성 ($\mathcal{J}_{\text{Security}}$ · Rule A, B, O, Q)**: `privacy_guard.py`(G2B 오탐 방어), `src/proxy.ts`·`/api/auth`, 원자적 쓰기·20버전 백업·툼스톤, 12대 시트+축제 SSOT Zod 하네스(`run-harness.js`), 9대 문서 자동 감사(`sync-rules.js`) 및 68개 Jest 스위트 통과를 강제함.
+5. **PIPA 가드레일·Zero-Trust 무결성 ($\mathcal{J}_{\text{Security}}$ · Rule A, B, O, Q)**: `privacy_guard.py`(G2B 오탐 방어), `src/proxy.ts`·`/api/auth`, 원자적 쓰기·20버전 백업·툼스톤, 12대 시트+축제 SSOT Zod 하네스(`run-harness.js`), 10대 문서 자동 감사(`sync-rules.js`) 및 68개 Jest 스위트 통과를 강제함.
 
 ## 1. 시스템 온톨로지 (M-V-C & Hybrid Edge) 및 핵심 검증 CLI
 수정된 FSD + M-V-C 아키텍처 준거 (프로덕션 `src/` **196개 TS/TSX, 63,069 LOC**):
@@ -14,9 +14,9 @@
 - **뷰 (UI & VLDS)**: `src/components/` 및 `src/components/ui/` 프리미티브(`Card`, `SectionHeader`, `Badge`, `Modal`, `SegmentedTabs`, `Button`, `NumericText`) 기반 단일 라이트·무조사 마이크로카피 UI(React 19.2.7, Tailwind v4).
 - **컨트롤러 (Hooks)**: 모든 페칭·시뮬레이션·뮤테이션은 `src/hooks/` **28개 커스텀 훅(6,581 LOC)**(`useTasks`, `useBudget`, `useBudgetSimulator`, `useYangjaeFestival`, `useInventory` 등)으로 격리하며 컴포넌트 내 직접 `fetch` 호출을 금지함.
 - **실시간 CRDT & 24/7 클라우드 레플리카**: PartyKit+Yjs CRDT 및 `functions/`(**6개 Edge 모듈, 3,103 LOC**)+Cloudflare KV(`HCHPS_DATA`) 24/7 무중단 레플리카를 운영함.
-- **핵심 검증 CLI**: 개발 서버 `npm run dev`(포트 `3001`) · 타입 `npx tsc --noEmit` · 하네스 `node scripts/run-harness.js` · 규칙 동기화 `node scripts/sync-rules.js` · 개인정보 `python scripts/privacy_guard.py --scan <경로>`.
+- **핵심 검증 CLI**: 개발 서버 `npm run dev`(포트 `3001`) · 타입 `npx tsc --noEmit` · 하네스 `node scripts/run-harness.js` · UI 카피 감사 `node scripts/audit-ui-copy.js` · 규칙 동기화 `node scripts/sync-rules.js` · 개인정보 `python scripts/privacy_guard.py --scan <경로>`.
 
-## 2. AI 에이전트 행동 수칙 (Always-On Invariants: Rule A ~ S)
+## 2. AI 에이전트 행동 수칙 (Always-On Invariants: Rule A ~ T)
 
 ### A. 데이터 불변성 및 좀비 데이터 차단
 - 로컬 고속 I/O를 위해 E2EE를 바이패스하고 평문 JSON을 원자적(`fs.rename`)으로 입출력하며, 삭제 항목 부활 방지를 위해 전역 툼스톤(`hchps-global-tombstones`)을 유지함.
@@ -32,7 +32,7 @@
 - **내장 브라우저 자동 실행 영구 금지**: 사용자 명시 지시가 없는 한 `browser` 서브에이전트(`invoke_subagent`) 및 쉘 브라우저(`start`, `open`)를 절대 실행하지 않음.
 
 ### E. 패치 실시간 기록 및 3-Way 규칙·스킬·지침 자동 감사 동기화
-- 주요 변경 시 `PORTFOLIO VITAL - Engineering Report.md` 제8장에 기록 후 `node scripts/sync-rules.js`를 실행해 `Engineering Milestones.md`·`AGENTS.md` 3-Way 동기화, **24KB(`23,800B`) 이하** 용량, 9대 문서(`AGENTS.md` + 5대 `SKILL.md` + 3대 `docs/*.md`)의 PUA·이중불릿·RSI·데드링크 자동 감사를 통과함.
+- 주요 변경 시 `PORTFOLIO VITAL - Engineering Report.md` 제8장에 기록 후 `node scripts/sync-rules.js`를 실행해 `Engineering Milestones.md`·`AGENTS.md` 3-Way 동기화, **24KB(`23,800B`) 이하** 용량, 10대 문서(`AGENTS.md` + 6대 `SKILL.md` + 3대 `docs/*.md`)의 PUA·이중불릿·RSI·데드링크 자동 감사를 통과함.
 
 ### F. 실무 아카이브 및 법령 RAG 최우선 참조
 - 기획서·방침서·보고서 작성 시 가상 수치를 배제하고 ① 표준 예시(`방침서 예시.hwpx` · `D:\Desktop`·`D:\Desktop\_Organized_Archive`·`F:\_Organized_Archive` 자동 탐색)·바탕화면(`D:\Desktop`), ② 전사 아카이브(`F:\_Organized_Archive`, 2015~2026년) 및 색인(`data/ADMIN_DOC_INDEX.json`·`data/ARCHIVE_INDEX.json`), ③ `/api/law`·법제처 DRF(`OC`=`LAW_API_KEY` 50자, `law`/`ordin` `MST`·`admrul` `ID` 분기, 조·항·호·목 명시)를 최우선 대조함.
@@ -44,7 +44,7 @@
 
 ### H. 로컬호스트 디자인 시스템(VLDS) · 무조사 마이크로카피 및 청크 격리
 - 대용량 뷰 `dynamic(..., { ssr: false })`·실치수 Skeleton·유휴 프리로딩(3.5s/5.5s/7.5s)을 적용하며 외부 웹폰트·다크모드·전역 `transition: all`·`backdrop-blur`를 배제함.
-- **초간결 무조사 마이크로카피** ([docs/VLDS_DESIGN_SYSTEM.md](docs/VLDS_DESIGN_SYSTEM.md), `vlds-microcopy.ts`): UI 내 서술형 존대·불필요 조사·영문 중복 병기·3단 적층을 금지하고 명사구·수치·기호(` · `, ` → `, ` - `)만 표기함.
+- **초간결 무조사 마이크로카피 · 직관적 일상어 디자인 하네스** ([docs/VLDS_DESIGN_SYSTEM.md](docs/VLDS_DESIGN_SYSTEM.md), `src/lib/vlds-microcopy.ts`, `scripts/audit-ui-copy.js`): UI 내 서술형 문장·불필요 조사·자명한 보조 설명·영문 중복 병기·3단 적층·과장 외래어(`쇼케이스`/`인텔리전스`/`워크스페이스`/`오케스트레이션`/`통합 허브`/`어시스턴트`) 및 4어절 이상 장황한 타이틀을 금지하고 1~2어절 직관 단어(`통합 행정 지식 쇼케이스` → `행정 게시판`)·수치·기호(` · `, ` → `, ` - `)만 표기하며 `run-harness.js` AST 게이트로 검증함.
 
 ### I. 백그라운드 탭 일시중지 및 Zero-Stall 규격
 - `document.hidden` 시 DB 폴링, 3D 물리 틱(`isPaused`), React Query 리패치를 중단해 Long Task stall 0ms를 보장하고 복귀 시 delta를 `Math.min(now - lastFrameTime, 100)`으로 클램핑함.
@@ -84,15 +84,22 @@
 ### S. 하이브리드 클라우드 레플리카(Cloudflare Pages & KV) 4-Way 동기화 및 축제 하네스 검증
 - 행사 데이터 변경 시 ① `data/FESTIVAL_YANGJAE_2026.json`(`sync_festival_excel.py`) ↔ ② `YangjaeFestivalDashboard`·`useYangjaeFestival`(`yangjaeFestivalFallback.ts`) ↔ ③ `scripts/pages-template.html`(`prepare-pages-output.js`) ↔ ④ `functions/api/festival/yangjae.ts`·KV(`sync-festival-to-cloud.js`/`watch:cloud`) 4계층을 동기화하고 `node scripts/run-harness.js`(`validateFestivalSSOT`)로 검증함(상세: `.agents/skills/vital-festival-4way-sync/SKILL.md`).
 
+### T. 달리오 원칙 기반 5단계 진단 · 확률 의사결정 및 시스템 진화 규격
+- **5단계 분리·근본원인 진단**: `목표 → 문제 → 진단 → 설계 → 실행` 단계를 분리하고 `문제 → 설계` 직행을 차단하며, 일회성 행위(동사·근접원인)에서 지속적 구조·속성(형용사·근본원인) 및 사건(`Case`)·기계(`Machine`) 이중 차원까지 추적함.
+- **확률 의사결정($EV$) 및 파산위험(`Risk of Ruin`) 0 통제**: 중대 정책·예산·계약·아키텍처 판단 시 선 학습→후 결정, 기댓값($EV = P_{\text{성공}}\cdot\text{보상} - P_{\text{실패}}\cdot\text{비용}$) 비교, 비가역 파국·위법·예산결함·PIPA 유출 확률 `0` 강제 및 80/20 핵심 동인 우선 처리를 적용함.
+- **신뢰도 가중·`RP` 명시·이중 실행(`Double-do`)**: 익명(`우리/그들`)을 금지해 책임당사자(`RP`)를 명시하고, 법령·실적(3회+)·인과 논리 기반 신뢰도 가중치로 대안을 평가하며, 결재 예산표·법정 기한·운영 DB 이관 등 핵심 업무는 단순 재검토(`Double-check`) 대신 독립 경로 이중 실행(`Double-do`)으로 교차 검증함.
+- **보조 엔진 경계(`PriOS` 배제)**: 원칙은 상시 감시·평점화(`Dot Collector`·`Pain Button`)를 배제하고 `Issue Log`(`data/WORKING_MEMORY.json` `issue_log`)·살아있는 매뉴얼(`Living Manual`) 진화에 한정 적용함(상세: `.agents/skills/vital-principles-os/SKILL.md`).
+
 ## 3. 온디맨드 스킬 라우팅 매트릭스 및 출력 전 자가 점검 게이트
 - **도메인별 온디맨드 스킬셋 (`Progressive Disclosure` — 착수 시 해당 `SKILL.md`·지침 필독)**:
   | 스킬 / 영구 지침 | 경로 | 활성화 트리거 · 핸드오프 | 연계 규칙 |
   |:---|:---|:---|:---|
   | **vital-budget-audit** | `.agents/skills/vital-budget-audit/SKILL.md` | 예산 3중 총액, 101-04·405-01·일상경비 감사 (`vital-hwpx-docgen`·온톨로지 환류) | Rule R (B, F, K, Q) |
   | **vital-hwpx-docgen** | `.agents/skills/vital-hwpx-docgen/SKILL.md` | 방침서(`방침서 예시.hwpx` 3단)·인플레이스 치유·화보 `BinData`·공문/주간 HWPX | Rule F, G, M (K, N, O, Q, R) |
-  | **vital-festival-4way-sync** | `.agents/skills/vital-festival-4way-sync/SKILL.md` | 양재천 448px 모바일 UI·의전·4-Way 싱크·축제 하네스 | Rule L, S (I, J, K, R) |
+  | **vital-festival-4way-sync** | `.agents/skills/vital-festival-4way-sync/SKILL.md` | 양재천 와이드뷰 체크리스트·모바일 정적 UI·의전·4-Way 싱크·축제 하네스 | Rule L, S (I, J, K, R) |
   | **vital-public-infographic** | `.agents/skills/vital-public-infographic/SKILL.md` | 16:9·2:3 포스터·코스도·QR·다중 품목 격자 화보 합성 | Rule N (F, G, M) |
-  | **vital-governance-ops** | `.agents/skills/vital-governance-ops/SKILL.md` | 마일스톤 3-Way·9대 문서 감사·PIPA(G2B 가드)·온톨로지 환류·Zod 하네스 허브 | Rule A~E, H~K, O~Q |
+  | **vital-governance-ops** | `.agents/skills/vital-governance-ops/SKILL.md` | 마일스톤 3-Way·10대 문서 감사·PIPA(G2B 가드)·온톨로지 환류·Zod 하네스 허브 | Rule A~E, H~K, O~Q |
+  | **vital-principles-os** | `.agents/skills/vital-principles-os/SKILL.md` | 5단계 진단·근본원인·EV/파산위험0·신뢰도 가중·Double-do·Issue Log 환류 | Rule T (B, E, F, K, Q, R) |
   | **HWP_GENERATION_GUIDELINES** | `docs/HWP_GENERATION_GUIDELINES.md` | HWPX 여백·서체·5대 겹침 차단·인플레이스 치유·화보 매핑·채팅 출력 SSOT | Rule G, M |
   | **VLDS_DESIGN_SYSTEM** | `docs/VLDS_DESIGN_SYSTEM.md` | 단일 라이트 UI 토큰 및 초간결·무조사 마이크로카피(`vlds-microcopy.ts`) SSOT | Rule H |
   | **PERSONAL_INFO_PROTECTION_GUIDE** | `docs/PERSONAL_INFO_PROTECTION_GUIDE.md` | PIPA 마스킹·G2B 하이픈 오탐 방어·`privacy_guard.py` 사전 스캔 SSOT | Rule Q |
@@ -101,10 +108,10 @@
 - **응답 직전 4대 자가 점검 게이트**: ① 깨짐 PUA(`U+F03DA`)·이중 불릿·구어체·사과 0건, ② `## ▣`·`### ▢` 2단계 이하 위계 및 3+ 항목 표 적용, ③ 1문장=1줄·URL/`file:///` 클릭 링크 완비, ④ 개조식 종결(`-함/-됨/-임`) 및 말미 `  끝.` 확인함.
 
 ## 4. 최신 동기화된 마일스톤 (Synced Milestones Log)
-- **최신 동기화 일자:** 2026-11-17
+- **최신 동기화 일자:** 2026-11-24
 - **동기화된 마일스톤:**
-  - [Milestone 300: 거버넌스·스킬·지침·리포트 마크다운 전면 경량화 및 실측 아키텍처 정합성 최적화] (2026-11-16)
-  - [Milestone 299: 국가법령정보 Open API(`OC` 50자 절단) 키 정합화 및 `law`·`ordin`·`admrul` CDATA/본문 XML 파서 전면 복구] (2026-11-16)
-  - [Milestone 298: 실존 아카이브 기준 문서 참조 경로 정비 및 미존재 당해연도 바탕화면 하위 폴더 참조 제거] (2026-11-16)
-  - [Milestone 297: 우상단 내비게이션 업무 연락처 탭 등록 · 사이드 시트 전환 및 헤더 상태 캡슐 제거] (2026-11-16)
-  - 그 외 과거 누적 마일스톤 총 323건 통합 보존 (2026-07-16 ~ 2026-11-13 상세 내역은 Engineering Report.md 및 Engineering Milestones.md 참조)
+  - [Milestone 316: 대시보드 상단 메인 그리드 4.2:5.8 비율 전환 및 집행·불용 진단 레전드 서브텍스트 제거] (2026-11-24)
+  - [Milestone 315: 디자인 기인 렌더링 부하 전수 제거 및 성능 우선(Performance-First) 사양 전환] (2026-11-23)
+  - [Milestone 314: WORK VITAL 리브랜딩 및 모노크롬 V-프리즘 기하학 SVG 로고·파비콘 일괄 교체] (2026-11-23)
+  - [Milestone 313: PORTFOLIO ASSET 기준 전체 페이지 너비(2400px) 및 헤더행 수직·수평 간격 통일] (2026-11-23)
+  - 그 외 과거 누적 마일스톤 총 339건 통합 보존 (2026-07-16 ~ 2026-11-20 상세 내역은 Engineering Report.md 및 Engineering Milestones.md 참조)
