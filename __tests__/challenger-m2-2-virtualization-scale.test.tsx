@@ -235,7 +235,7 @@ describe('Empirical Challenger M2.2: SimulationResultTable & ArchiveExplorerView
         />
       );
 
-      expect(screen.getByText('검색 조건에 일치하는 결과가 없습니다.')).toBeInTheDocument();
+      expect(screen.getByText('검색 결과 없음')).toBeInTheDocument();
       // No crash, table structure preserved
       expect(container.querySelector('table')).toBeInTheDocument();
     });
@@ -316,11 +316,11 @@ describe('Empirical Challenger M2.2: SimulationResultTable & ArchiveExplorerView
       const { container } = render(<ArchiveExplorerView />);
 
       await waitFor(() => {
-        expect(screen.getByText('마스터 아카이브 통합 탐색기')).toBeInTheDocument();
+        expect(screen.getAllByText('문서 보관함').length).toBeGreaterThan(0);
       });
 
       // Switch to Gallery mode
-      const galleryBtn = screen.getByText('사진·시안 갤러리').closest('button');
+      const galleryBtn = screen.getByText('사진 갤러리').closest('button');
       expect(galleryBtn).not.toBeNull();
       fireEvent.click(galleryBtn!);
 

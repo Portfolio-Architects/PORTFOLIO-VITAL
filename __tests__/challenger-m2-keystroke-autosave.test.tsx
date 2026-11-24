@@ -691,6 +691,10 @@ describe('Challenger 2 Empirical Verification: Keystroke Latency & Auto-Save Pro
     it('integrates DetailEditRow in edit mode: types text, auto-flushes on blur/save, and commits to SSOT', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
+      // Switch from default Tab 1 ("1. 히스토리·체크리스트") to Tab 2 ("2. 추진과제")
+      const milestonesTabBtn = await screen.findByRole('button', { name: /2\.\s*추진과제/i });
+      fireEvent.click(milestonesTabBtn);
+
       // Expand all tasks
       const toggleAllBtn = await screen.findByRole('button', { name: /전체 펼치기/i });
       fireEvent.click(toggleAllBtn);

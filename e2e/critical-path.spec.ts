@@ -58,7 +58,7 @@ test.describe('HCHPS UI Critical Path', () => {
     await expect(page).toHaveURL(/.*\/login/);
 
     // Login page should have the title visible
-    await expect(page.getByText('VITAL Work Manager')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'WORK VITAL' })).toBeVisible();
     await expect(page.getByPlaceholder('Enter your ID')).toBeVisible();
   });
 });

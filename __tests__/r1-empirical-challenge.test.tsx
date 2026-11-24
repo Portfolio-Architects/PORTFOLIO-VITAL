@@ -104,7 +104,7 @@ jest.mock('next/dynamic', () => (func: any) => {
   if (str.includes('ArchiveExplorerView')) {
     return function MockArch() { return <div data-testid="archive-component">Archive View</div>; };
   }
-  if (str.includes('WorkingMemoryPage')) {
+  if (str.includes('WorkingMemoryPage') || str.includes('StickyNotesPanel')) {
     return function MockMem() { return <div data-testid="memory-component">Memory View</div>; };
   }
   if (str.includes('WorkspaceView')) {
@@ -289,10 +289,10 @@ describe('Empirical Challenge: useMergedSignals & ProtectedApp Tab Switching', (
       await waitFor(() => expect(screen.getByTestId('dashboard-component')).toBeInTheDocument());
       expect(screen.getByTestId('active-nav')).toHaveTextContent('dashboard');
 
-      // Click Nav Memory
+      // Click Nav Memory (opens monitor-side StickyNotesPanel drawer while preserving active dashboard tab)
       fireEvent.click(screen.getByText('Nav Memory'));
       expect(screen.getByTestId('memory-component')).toBeInTheDocument();
-      expect(screen.getByTestId('active-nav')).toHaveTextContent('memory');
+      expect(screen.getByTestId('active-nav')).toHaveTextContent('dashboard');
 
       // Click Nav Workspace
       fireEvent.click(screen.getByText('Nav Workspace'));

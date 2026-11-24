@@ -404,6 +404,52 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
         fs.readFileSync(path.join(process.cwd(), 'data/BUDGET_ENTRIES.json'), 'utf-8')
       );
 
+      // Independently compute expected SSOT execution diagnosis from live JSON (Double-do 0-won parity check)
+      const computeDiagnosis = (cats: any[], entries: any[]) => {
+        const totalBudget = cats.reduce((acc, c) => acc + c.totalBudget, 0);
+        let generalExecuted = 0;
+        let dailyExecuted = 0;
+        let committedPlanned = 0;
+        let unplannedRisk = 0;
+        for (const cat of cats) {
+          const catEntries = entries.filter((e) => e.categoryId === cat.id);
+          let gs = 0, di = 0, de = 0, gp = 0, dp = 0, locked = 0;
+          for (const e of catEntries) {
+            if (e.isPlanned) {
+              if (!e.isSettled) {
+                if (e.actionType === 'daily_expense') dp += e.amount;
+                else gp += e.amount;
+              }
+            } else if (e.actionType !== 'settle') {
+              if (!e.actionType || e.actionType === 'general' || e.actionType === 'correction' || e.actionType === 'transfer') {
+                if (e.actionType === 'transfer') gs += e.transferDirection === 'out' ? e.amount : -e.amount;
+                else gs += e.amount;
+              } else if (e.actionType === 'issuance') {
+                di += e.amount;
+              } else if (e.actionType === 'daily_expense') {
+                de += e.amount;
+              }
+            }
+          }
+          for (const sub of cat.subItems || []) {
+            if (sub.isLocked) locked += sub.amount;
+            else for (const calc of sub.calculations || []) if (calc.isLocked) locked += calc.amount;
+          }
+          generalExecuted += gs;
+          dailyExecuted += de;
+          committedPlanned += gp + dp + locked;
+          unplannedRisk += (cat.totalBudget - gs - di - gp - locked) + (di - de - dp);
+        }
+        const designRate = totalBudget > 0 ? ((generalExecuted + dailyExecuted + committedPlanned) / totalBudget) * 100 : 0;
+        const realRate = totalBudget > 0 ? ((generalExecuted + dailyExecuted) / totalBudget) * 100 : 0;
+        return { totalBudget, generalExecuted, dailyExecuted, committedPlanned, unplannedRisk, designRate, realRate };
+      };
+
+      const expectedAll = computeDiagnosis(realCategories, realEntries);
+      expect(
+        expectedAll.generalExecuted + expectedAll.dailyExecuted + expectedAll.committedPlanned + expectedAll.unplannedRisk
+      ).toBe(expectedAll.totalBudget);
+
       const { container } = render(
         <PortfolioDashboardView
           budgetCategories={realCategories}
@@ -412,11 +458,13 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
         />
       );
 
-      // Verify heading, design completion badge, and center unallocated risk metric (10,173,300원) on initial render
+      // Verify heading, design completion badge, and center unallocated risk metric match live SSOT with 0-won error
       expect(screen.getByText('집행·불용 진단')).toBeInTheDocument();
-      expect(screen.getByText('설계 완료 97.4%')).toBeInTheDocument();
-      expect(screen.getByTestId('donut-center-execution-risk')).toHaveTextContent('10,173,300');
-      expect(screen.getByText('설계 97.4% · 실집행 79.2%')).toBeInTheDocument();
+      expect(screen.getByText(`설계 완료 ${expectedAll.designRate.toFixed(1)}%`)).toBeInTheDocument();
+      expect(screen.getByTestId('donut-center-execution-risk')).toHaveTextContent(expectedAll.unplannedRisk.toLocaleString());
+      expect(
+        screen.getByText(`설계 ${expectedAll.designRate.toFixed(1)}% · 실집행 ${expectedAll.realRate.toFixed(1)}%`)
+      ).toBeInTheDocument();
       expect(container.textContent || '').not.toContain('본청');
 
       // Verify enlarged 252x252 donut box and z-index stacking hierarchy (center overlay z-0 beneath chart/tooltip z-20)
@@ -424,14 +472,13 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       expect(centerOverlay).toHaveClass('z-0', 'pointer-events-none');
       expect(centerOverlay.parentElement).toHaveClass('w-[252px]', 'h-[252px]');
 
-      // Verify 4 slices summing to 387,992,000원 (266,528,800 + 40,633,500 + 70,656,400 + 10,173,300 = 387,992,000)
-      expect(266528800 + 40633500 + 70656400 + 10173300).toBe(387992000);
+      // Verify all 4 execution rows and exact amounts
       expect(screen.getByText('일반지출 집행 완료')).toBeInTheDocument();
-      expect(screen.getByText('266,528,800')).toBeInTheDocument();
+      expect(screen.getByText(expectedAll.generalExecuted.toLocaleString())).toBeInTheDocument();
       expect(screen.getByText('일상경비 집행 완료')).toBeInTheDocument();
-      expect(screen.getByText('40,633,500')).toBeInTheDocument();
+      expect(screen.getByText(expectedAll.dailyExecuted.toLocaleString())).toBeInTheDocument();
       expect(screen.getByText('지출 예정(품의·원인행위 대기)')).toBeInTheDocument();
-      expect(screen.getByText('70,656,400')).toBeInTheDocument();
+      expect(screen.getByText(expectedAll.committedPlanned.toLocaleString())).toBeInTheDocument();
       expect(screen.getByText('순수 미계획 불용 위험액')).toBeInTheDocument();
 
       // Verify color swatches (#0f172a, #2563eb, #64748b, #e11d48)
@@ -442,10 +489,17 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       expect(swatches[2]).toHaveStyle({ backgroundColor: '#64748b' });
       expect(swatches[3]).toHaveStyle({ backgroundColor: '#e11d48' });
 
-      // Filter by detailedProject '건강생활실천사업(건강증진)' and verify dynamic risk update (2,744,000원)
+      // Filter by detailedProject '건강생활실천사업(건강증진)' and verify dynamic risk recalculation
+      const targetProject = '건강생활실천사업(건강증진)';
+      const expectedFiltered = computeDiagnosis(
+        realCategories.filter((c: any) => (c.detailedProject || c.unitProject || '미분류 세부사업') === targetProject),
+        realEntries
+      );
       const projSelect = screen.getByTestId('execution-project-select');
-      fireEvent.change(projSelect, { target: { value: '건강생활실천사업(건강증진)' } });
-      expect(screen.getByTestId('donut-center-execution-risk')).toHaveTextContent('2,744,000');
+      fireEvent.change(projSelect, { target: { value: targetProject } });
+      expect(screen.getByTestId('donut-center-execution-risk')).toHaveTextContent(
+        expectedFiltered.unplannedRisk.toLocaleString()
+      );
     });
 
     it('renders 4 KPI cards in PortfolioDashboardViewSkeleton without inline ContactsBox and removes English clichés in ProtectedApp.tsx', () => {

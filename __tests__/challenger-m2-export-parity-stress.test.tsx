@@ -301,18 +301,21 @@ describe('Challenger M2: 20-Symbol Export Parity & Invariant Stress-Testing', ()
         </QueryClientProvider>
       );
 
-      // Locate 4 tab buttons
-      const tab1Btn = screen.getByRole('button', { name: /1\.\s*추진과제/i });
-      const tab2Btn = screen.getByRole('button', { name: /2\.\s*부스현황/i });
-      const tab3Btn = screen.getByRole('button', { name: /3\.\s*업무분장/i });
-      const tab4Btn = screen.getByRole('button', { name: /4\.\s*행사식순/i });
+      // Locate 5 tab buttons (Milestone 311 VLDS wide-view 5-tab architecture)
+      const tabChecklistBtn = screen.getByRole('button', { name: /1\.\s*히스토리·체크리스트/i });
+      const tab1Btn = screen.getByRole('button', { name: /2\.\s*추진과제/i });
+      const tab2Btn = screen.getByRole('button', { name: /3\.\s*부스현황/i });
+      const tab3Btn = screen.getByRole('button', { name: /4\.\s*업무분장/i });
+      const tab4Btn = screen.getByRole('button', { name: /5\.\s*행사식순/i });
 
+      expect(tabChecklistBtn).toBeInTheDocument();
       expect(tab1Btn).toBeInTheDocument();
       expect(tab2Btn).toBeInTheDocument();
       expect(tab3Btn).toBeInTheDocument();
       expect(tab4Btn).toBeInTheDocument();
 
-      // 1. Enter edit mode on Tab 1 (Milestones)
+      // 1. Switch to Milestones tab and enter edit mode
+      fireEvent.click(tab1Btn);
       const editButtons = screen.getAllByTitle('과제 수정');
       expect(editButtons.length).toBeGreaterThan(0);
       fireEvent.click(editButtons[0]);
@@ -323,10 +326,10 @@ describe('Challenger M2: 20-Symbol Export Parity & Invariant Stress-Testing', ()
       fireEvent.change(titleInput, { target: { value: stressDraftText } });
       expect(titleInput).toHaveValue(stressDraftText);
 
-      // 2. Cycle through Tab 2 -> Tab 3 -> Tab 4 -> Tab 1
+      // 2. Cycle through Booths -> Duties -> Schedule -> Checklist -> Milestones
       fireEvent.click(tab2Btn);
       expect(screen.getByText(/부스 배치 계획/i)).toBeInTheDocument();
-      // Verify draft in Tab 1 is STILL preserved in DOM (hidden)
+      // Verify draft in Milestones tab is STILL preserved in DOM (hidden)
       expect(screen.getByPlaceholderText('추진과제 제목')).toHaveValue(stressDraftText);
 
       fireEvent.click(tab3Btn);
@@ -337,15 +340,20 @@ describe('Challenger M2: 20-Symbol Export Parity & Invariant Stress-Testing', ()
       expect(screen.getByRole('heading', { name: /행사 식순/i })).toBeInTheDocument();
       expect(screen.getByPlaceholderText('추진과제 제목')).toHaveValue(stressDraftText);
 
-      // Return to Tab 1
+      fireEvent.click(tabChecklistBtn);
+      expect(screen.getByPlaceholderText('추진과제 제목')).toHaveValue(stressDraftText);
+
+      // Return to Milestones tab
       fireEvent.click(tab1Btn);
       expect(screen.getByPlaceholderText('추진과제 제목')).toBeVisible();
       expect(screen.getByPlaceholderText('추진과제 제목')).toHaveValue(stressDraftText);
     });
 
-    it('renders YangjaeFestivalSkeleton with 448px max-w-md constraint and 1px borders', () => {
+    it('renders YangjaeFestivalSkeleton with VLDS wide-view layout and 1px borders', () => {
       const { container } = render(<YangjaeFestivalSkeleton />);
-      expect(container.querySelector('.max-w-md')).toBeInTheDocument();
+      expect(container.querySelector('.w-full')).toBeInTheDocument();
+      expect(container.innerHTML).toContain('lg:grid-cols-4');
+      expect(container.innerHTML).toContain('sm:grid-cols-5');
       expect(container.innerHTML).toContain('animate-pulse');
       expect(container.innerHTML).not.toContain('border-2');
     });

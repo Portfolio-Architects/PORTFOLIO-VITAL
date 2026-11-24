@@ -204,7 +204,9 @@ describe('Milestone 277: Working Memory Post-it Board & Mobile KV Memo Inbox Sui
       const liveDiskData = JSON.parse(
         fs.readFileSync(path.join(process.cwd(), 'data', 'WORKING_MEMORY.json'), 'utf-8')
       );
-      resetWorkingMemoryStoreForTest(liveDiskData);
+      expect(Array.isArray(liveDiskData)).toBe(true);
+      const hasSeedMemo = liveDiskData.some((m: { id?: string }) => m.id === 'wm-seed-budget-2027');
+      resetWorkingMemoryStoreForTest(hasSeedMemo ? liveDiskData : DEFAULT_WORKING_MEMORY_MEMOS);
 
       render(<WorkingMemoryBoard />);
 

@@ -207,11 +207,12 @@ describe('Milestone M2 Empirical Challenger: Dormant Tab & Zombie Polling Defens
         </QueryClientProvider>
       );
 
-      // Step A: Initially on milestones tab (Tab labels: "1. 추진과제", "2. 부스현황")
-      const milestonesTabBtn = screen.getByRole('button', { name: /1\.\s*추진과제/i });
-      const boothsTabBtn = screen.getByRole('button', { name: /2\.\s*부스현황/i });
+      // Step A: Switch from default Tab 1 ("1. 히스토리·체크리스트") to Tab 2 ("2. 추진과제")
+      const milestonesTabBtn = screen.getByRole('button', { name: /2\.\s*추진과제/i });
+      const boothsTabBtn = screen.getByRole('button', { name: /3\.\s*부스현황/i });
       expect(milestonesTabBtn).toBeInTheDocument();
       expect(boothsTabBtn).toBeInTheDocument();
+      fireEvent.click(milestonesTabBtn);
 
       // Expand all task accordions
       const toggleAllBtn = screen.getByRole('button', { name: /전체 펼치기/i });
