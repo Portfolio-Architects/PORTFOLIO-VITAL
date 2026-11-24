@@ -46,12 +46,12 @@
   },
   {
     "id": "contact-seed-5-mqeq4iu2y3mkrkb78",
-    "name": "관악구",
+    "name": "관악구 권미혜 주임님",
     "phone": "028797122",
     "email": "",
     "notes": "노드 ID: custom-1779952260703",
     "createdAt": "2026-06-15T04:39:18.362Z",
-    "updatedAt": "2026-06-15T04:39:18.362Z"
+    "updatedAt": "2026-11-23T07:21:40.594Z"
   },
   {
     "id": "contact-seed-6-mqeq4iu2auo0mvdso",
@@ -720,15 +720,6 @@
     "updatedAt": "2026-06-15T04:49:56.279Z"
   },
   {
-    "id": "contact-seed-82-b4x2ct7",
-    "name": "강남장애인가족지원센터(담당)",
-    "phone": "02-3412-8551",
-    "email": "",
-    "notes": "소속: 강남장애인가족지원센터, [출처: 기부관련]",
-    "createdAt": "2026-06-15T04:49:56.279Z",
-    "updatedAt": "2026-06-15T04:49:56.279Z"
-  },
-  {
     "id": "contact-seed-83-6hr4d47",
     "name": "서정락 소장님",
     "phone": "010-8761-3719",
@@ -1158,7 +1149,8 @@
     "email": "scoliosis1@daum.net",
     "notes": "고려대학교 척추측만증 연구소",
     "createdAt": "2026-07-22T01:21:09.941Z",
-    "updatedAt": "2026-07-22T01:21:09.941Z"
+    "updatedAt": "2026-11-18T06:45:33.077Z",
+    "lastContactedAt": "2026-11-18T06:45:33.077Z"
   },
   {
     "id": "mrwtrpa6mfr51pyov",
@@ -1197,7 +1189,7 @@
     "updatedAt": "2026-08-14T08:40:16.355Z"
   },
   {
-    "name": "구금모 주무관",
+    "name": "서울시 구금모 주무관",
     "phone": "0221337557",
     "email": "gugeummo@seoul.go.kr",
     "notes": "직영 체력측정센터. AI 체력측정, 서울형 체력인증 운영기준 및 매뉴얼",
@@ -1265,15 +1257,6 @@
     "email": "",
     "notes": "노드 ID: custom-1775785898357",
     "id": "contact-seed-3-msxymqbiwt6vum0f8",
-    "createdAt": "2026-08-18T01:04:26.814Z",
-    "updatedAt": "2026-08-18T01:04:26.814Z"
-  },
-  {
-    "name": "공간 디자인 및 리플릿",
-    "phone": "027565174, 01032007895",
-    "email": "",
-    "notes": "노드 ID: custom-1776086744704",
-    "id": "contact-seed-4-msxymqbi2y9rk83wp",
     "createdAt": "2026-08-18T01:04:26.814Z",
     "updatedAt": "2026-08-18T01:04:26.814Z"
   },
@@ -1374,7 +1357,8 @@
     "notes": "한국신체정보",
     "id": "mtchwiiv8g8nskvww",
     "createdAt": "2026-08-28T05:12:42.439Z",
-    "updatedAt": "2026-08-28T05:12:42.439Z"
+    "updatedAt": "2026-11-23T00:29:30.895Z",
+    "lastContactedAt": "2026-11-23T00:29:30.895Z"
   },
   {
     "name": "유디치과",
@@ -1438,15 +1422,6 @@
     "id": "mtml-nam-sang-hee-7025",
     "createdAt": "2026-09-04T07:20:00.000Z",
     "updatedAt": "2026-09-04T07:20:00.000Z"
-  },
-  {
-    "name": "과장님",
-    "phone": "02-3423-7010",
-    "email": "",
-    "notes": "강남구보건소 보건행정과장",
-    "id": "mtml-chief-section-7010",
-    "createdAt": "2026-09-07T08:15:00.000Z",
-    "updatedAt": "2026-09-07T08:15:00.000Z"
   },
   {
     "name": "이무상 지도사",
@@ -1636,5 +1611,24 @@
     "id": "mwk8qm4bnv4b6a16r",
     "createdAt": "2026-11-17T05:17:27.035Z",
     "updatedAt": "2026-11-17T05:17:27.035Z"
+  },
+  {
+    "name": "고명규 대표님",
+    "phone": "010-9788-9471",
+    "email": "kmg9471@gmail.com",
+    "notes": "케이스튜디오 디아르스",
+    "id": "mwsj93b4agkuyygaw",
+    "createdAt": "2026-11-23T00:33:54.688Z",
+    "updatedAt": "2026-11-23T00:33:54.688Z"
+  },
+  {
+    "name": "김훈",
+    "phone": "010-6385-8964",
+    "email": "",
+    "notes": "인바디",
+    "id": "mwt1orudoc9vi3fho",
+    "createdAt": "2026-11-23T09:09:59.412Z",
+    "updatedAt": "2026-11-23T09:10:02.645Z",
+    "lastContactedAt": "2026-11-23T09:10:02.645Z"
   }
 ]
