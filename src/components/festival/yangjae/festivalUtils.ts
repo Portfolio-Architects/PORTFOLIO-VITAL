@@ -1,6 +1,6 @@
 import React from 'react';
 import type { YangjaeReportTab, ParsedDetail, BoothScaleParsed } from './types';
-export { DUTY_CATEGORIES, SCHEDULE_PHASES } from './types';
+export { DUTY_CATEGORIES, SCHEDULE_PHASES, CHECKLIST_PHASES, CHECKLIST_DOMAINS } from './types';
 
 // Universal Robust Clipboard Copy (Works on all mobile/desktop browsers, webviews, and sandboxes)
 export async function copyToClipboardSafe(text: string): Promise<boolean> {
@@ -206,10 +206,11 @@ export function maskPersonName(raw: string | undefined | null): string {
 }
 
 export const YANGJAE_REPORT_TABS: { id: YangjaeReportTab; label: string }[] = [
-  { id: 'milestones', label: '1. 추진과제' },
-  { id: 'booths', label: '2. 부스현황' },
-  { id: 'duties', label: '3. 업무분장' },
-  { id: 'schedule', label: '4. 행사식순' },
+  { id: 'playbook', label: '1. 히스토리·체크리스트' },
+  { id: 'milestones', label: '2. 추진과제' },
+  { id: 'booths', label: '3. 부스현황' },
+  { id: 'duties', label: '4. 업무분장' },
+  { id: 'schedule', label: '5. 행사식순' },
 ];
 
 export function parseBoothScale(scale: string): BoothScaleParsed {

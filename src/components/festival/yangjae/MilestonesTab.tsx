@@ -322,6 +322,7 @@ export const MilestonesTab: React.FC<MilestonesTabProps> = React.memo(({
         )}
       </div>
 
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
       {(milestones || []).map((item) => {
         if (!item) return null;
         const isEditingThis = editingMilestoneId === item.id && editMilestoneData !== null;
@@ -615,6 +616,7 @@ export const MilestonesTab: React.FC<MilestonesTabProps> = React.memo(({
           </div>
         );
       })}
+      </div>
     </>
   );
 });

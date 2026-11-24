@@ -25,12 +25,15 @@ import {
   ArrowRight,
   AlertCircle,
   TrendingUp,
+  ShieldAlert,
 } from 'lucide-react';
 import { ModuleType, WorkingMemoryCategory, WorkingMemoryMemo } from '@/types';
 import { useWorkingMemory } from '@/hooks/useWorkingMemory';
 import {
   WORKING_MEMORY_CATEGORIES,
   WORKING_MEMORY_CATEGORY_LIST,
+  WORKING_MEMORY_ISSUE_SEVERITY_META,
+  extractIssueMeta,
   parseWorkingMemoryInput,
   splitWorkingMemoryLines,
 } from '@/lib/working-memory-parser';
@@ -46,6 +49,11 @@ const QUICK_INSERT_SNIPPETS: Array<{ label: string; text: string; category?: Wor
   { label: '+ 2027 예산 가내시', text: '가내시 메모보고: 2027 본예산 ', category: 'budget' },
   { label: '+ 행정감사 자료', text: '행정감사 요구자료: ', category: 'audit' },
   { label: '+ 양재천 행사', text: '양재천 페스티벌: ', category: 'festival' },
+  {
+    label: '+ 이슈로그 (근접→근본)',
+    text: '[이슈로그] RP: | 근접: | 근본: | 개선: | 위험:상',
+    category: 'issue_log',
+  },
   { label: '+ 수치변동 (→)', text: ' → ' },
 ];
 
@@ -107,6 +115,15 @@ const KANBAN_LANES: Array<{
     badgeClass: 'bg-emerald-50 text-emerald-900 border-emerald-200',
     targetModule: { module: 'festival', label: '페스티벌 열기' },
   },
+  {
+    id: 'lane-issue-log',
+    title: '이슈로그 · 근본원인',
+    subtitle: '근접(동사) → 근본(형용사) → 기계개선',
+    categories: ['issue_log'],
+    tagMatch: '[이슈로그]',
+    headerAccentClass: 'border-t-4 border-t-violet-500',
+    badgeClass: 'bg-violet-50 text-violet-900 border-violet-200',
+  },
 ];
 
 interface PostItCardProps {
@@ -142,6 +159,11 @@ function WorkingMemoryPostItCard({
     WORKING_MEMORY_CATEGORIES[memo.category] || WORKING_MEMORY_CATEGORIES.general;
   const isEditing = editingId === memo.id;
   const targetNav = CATEGORY_TARGET_MODULE[memo.category];
+  const resolvedIssueMeta =
+    memo.issueMeta || (memo.category === 'issue_log' ? extractIssueMeta(memo.content) : undefined);
+  const severityMeta = resolvedIssueMeta?.severity
+    ? WORKING_MEMORY_ISSUE_SEVERITY_META[resolvedIssueMeta.severity]
+    : undefined;
 
   return (
     <article
@@ -197,6 +219,64 @@ function WorkingMemoryPostItCard({
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-200/80 border border-amber-400/80 text-amber-950 text-xs font-black font-mono tabular-nums">
             <span>핵심 수치:</span>
             <span>{memo.numericHighlight}</span>
+          </div>
+        )}
+
+        {/* Dalio Principles Structured Issue Log Block */}
+        {resolvedIssueMeta && !isEditing && (
+          <div
+            data-testid={`issue-log-structured-${memo.id}`}
+            className="rounded-lg bg-white/95 border border-violet-200/90 p-2.5 space-y-1.5"
+          >
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="inline-flex items-center gap-1 text-[10px] font-black text-violet-800">
+                <ShieldAlert className="w-3 h-3" />
+                원인진단
+              </span>
+              {severityMeta && (
+                <span
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold border ${severityMeta.badgeClass}`}
+                >
+                  위험 {severityMeta.label}
+                </span>
+              )}
+              {resolvedIssueMeta.responsibleParty && (
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 text-slate-800 border border-slate-200">
+                  RP {resolvedIssueMeta.responsibleParty}
+                </span>
+              )}
+              {resolvedIssueMeta.doubleDoRequired && (
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                  이중실행
+                </span>
+              )}
+            </div>
+            <div className="space-y-1 text-[11px]">
+              {resolvedIssueMeta.proximateCause && (
+                <div className="flex items-baseline gap-1.5">
+                  <span className="shrink-0 font-extrabold text-slate-500">근접(동사)</span>
+                  <span className="font-semibold text-slate-800 break-keep">
+                    {resolvedIssueMeta.proximateCause}
+                  </span>
+                </div>
+              )}
+              {resolvedIssueMeta.rootCause && (
+                <div className="flex items-baseline gap-1.5">
+                  <span className="shrink-0 font-extrabold text-violet-700">근본(형용사)</span>
+                  <span className="font-bold text-slate-900 break-keep">
+                    {resolvedIssueMeta.rootCause}
+                  </span>
+                </div>
+              )}
+              {resolvedIssueMeta.machineFix && (
+                <div className="flex items-baseline gap-1.5">
+                  <span className="shrink-0 font-extrabold text-emerald-700">기계개선</span>
+                  <span className="font-bold text-emerald-900 break-keep">
+                    {resolvedIssueMeta.machineFix}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -372,6 +452,9 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
     const directivePendingCount = pendingMemos.filter(
       (m) => m.category === 'directive' || (m.tags && m.tags.includes('[팀장님 지시]'))
     ).length;
+    const issueLogPendingCount = pendingMemos.filter(
+      (m) => m.category === 'issue_log' || (m.tags && m.tags.includes('[이슈로그]'))
+    ).length;
     const datedPendingCount = pendingMemos.filter((m) => Boolean(m.dateHighlight)).length;
     const mobileCount = memos.filter((m) => m.source === 'mobile').length;
     const totalCount = memos.length;
@@ -382,6 +465,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
       pinnedPendingCount,
       numericPendingCount,
       directivePendingCount,
+      issueLogPendingCount,
       datedPendingCount,
       mobileCount,
       totalCount,
@@ -414,6 +498,10 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
           ...(m.tags || []),
           m.numericHighlight || '',
           m.dateHighlight || '',
+          m.issueMeta?.responsibleParty || '',
+          m.issueMeta?.proximateCause || '',
+          m.issueMeta?.rootCause || '',
+          m.issueMeta?.machineFix || '',
         ]
           .join(' ')
           .toLowerCase();
@@ -484,7 +572,7 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
   return (
     <div
       data-testid="working-memory-page"
-      className="w-full flex flex-col gap-5 animate-in fade-in duration-200 font-sans"
+      className="w-full flex flex-col gap-5 font-sans"
     >
       {/* 1. Cognitive Offloading KPI Summary Strip */}
       <section
@@ -655,6 +743,11 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                 <span className="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300/80 font-mono tabular-nums">
                   미반영 {pendingMemos.length}건
                 </span>
+                {kpiStats.issueLogPendingCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-violet-50 text-violet-800 border border-violet-200 font-mono tabular-nums">
+                    이슈로그 {kpiStats.issueLogPendingCount}건
+                  </span>
+                )}
                 {reflectedMemos.length > 0 && (
                   <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-600 font-mono tabular-nums">
                     반영완료 {reflectedMemos.length}건
@@ -838,6 +931,22 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                     💰 핵심 수치: {livePreview.numericHighlight}
                   </span>
                 )}
+                {livePreview.issueMeta && (
+                  <span
+                    data-testid="working-memory-preview-issue"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-black bg-violet-100 text-violet-900 border border-violet-300"
+                  >
+                    <ShieldAlert className="w-3 h-3" />
+                    <span>
+                      이슈로그
+                      {livePreview.issueMeta.responsibleParty
+                        ? ` · RP ${livePreview.issueMeta.responsibleParty}`
+                        : ''}
+                      {livePreview.issueMeta.rootCause ? ' · 근본원인' : ''}
+                      {livePreview.issueMeta.machineFix ? ' · 기계개선' : ''}
+                    </span>
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center gap-1 flex-wrap">
@@ -1003,10 +1112,10 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
             ))}
           </div>
         ) : layoutMode === 'kanban' ? (
-          /* Mode B: 4-Column Concurrent Workstream Kanban Lanes */
+          /* Mode B: 5-Column Concurrent Workstream Kanban Lanes (incl. Issue Log) */
           <div
             data-testid="working-memory-kanban-view"
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start"
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 items-start"
           >
             {KANBAN_LANES.map((lane) => {
               const laneMemos = displayedMemos.filter((m) =>
@@ -1127,7 +1236,26 @@ export function WorkingMemoryPage({ onNavigateModule }: WorkingMemoryPageProps =
                         )}
                       </td>
                       <td className="py-3 px-3.5 align-top font-semibold text-slate-900 leading-snug max-w-xl">
-                        {memo.content}
+                        <div>{memo.content}</div>
+                        {memo.issueMeta && (
+                          <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                            {memo.issueMeta.responsibleParty && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                RP {memo.issueMeta.responsibleParty}
+                              </span>
+                            )}
+                            {memo.issueMeta.rootCause && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-violet-50 text-violet-800 border border-violet-200">
+                                근본 {memo.issueMeta.rootCause}
+                              </span>
+                            )}
+                            {memo.issueMeta.machineFix && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                개선 {memo.issueMeta.machineFix}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="py-3 px-3.5 whitespace-nowrap align-top text-[11px] font-semibold text-slate-500">
                         {memo.source === 'mobile' ? '모바일' : 'PC'}

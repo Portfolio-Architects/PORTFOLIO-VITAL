@@ -4,12 +4,10 @@ import React, { useState, useMemo, useSyncExternalStore, useCallback, useEffect 
 import {
   Check,
   Share2,
-  Edit3,
-  Save,
-  X,
-  Plus,
-  Trash2,
-  Loader2,
+  Users,
+  Tent,
+  Wallet,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   useYangjaeFestival,
@@ -21,6 +19,10 @@ import {
   ScheduleItem,
   DutyItem,
   DutyStaffMember,
+  FestivalChecklistItem,
+  ChecklistPhaseId,
+  ChecklistDomain,
+  ChecklistPriority,
 } from '@/hooks/useYangjaeFestival';
 
 import {
@@ -50,6 +52,7 @@ import {
   YANGJAE_REPORT_TABS,
 } from './yangjae/festivalUtils';
 
+import { ChecklistPlaybookTab } from './yangjae/ChecklistPlaybookTab';
 import { MilestonesTab } from './yangjae/MilestonesTab';
 import { BoothsTab } from './yangjae/BoothsTab';
 import { DutiesTab } from './yangjae/DutiesTab';
@@ -96,9 +99,13 @@ const getServerIsLocalAdmin = () => false;
 
 export interface YangjaeFestivalDashboardProps {
   isActive?: boolean;
+  initialTab?: YangjaeReportTab;
 }
 
-function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalDashboardProps = {}) {
+function YangjaeFestivalDashboardComponent({
+  isActive = true,
+  initialTab = 'playbook',
+}: YangjaeFestivalDashboardProps = {}) {
   const { data = YANGJAE_FALLBACK_DATA } = useYangjaeFestival(isActive);
   const saveMutation = useSaveYangjaeFestival();
 
@@ -125,7 +132,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   const [editDutiesData, setEditDutiesData] = useState<DutyItem[]>(() => (data?.duties || YANGJAE_FALLBACK_DATA.duties || []) as DutyItem[]);
 
   const [saveToast, setSaveToast] = useState<boolean>(false);
-  const [toastMessage, setToastMessage] = useState<string>('수정 사항이 저장되었습니다!');
+  const [toastMessage, setToastMessage] = useState<string>('저장 완료');
   const [showPrivateMobile, setShowPrivateMobile] = useState<boolean>(false);
   const [showPinModal, setShowPinModal] = useState<boolean>(false);
   const [pinInput, setPinInput] = useState<string>('');
@@ -198,12 +205,13 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   const [selectedTargetMilestoneId, setSelectedTargetMilestoneId] = useState<number | null>(null);
   const [isTransferring, setIsTransferring] = useState<boolean>(false);
 
-  const [selectedTab, setSelectedTab] = useState<YangjaeReportTab>('milestones');
+  const [selectedTab, setSelectedTab] = useState<YangjaeReportTab>(initialTab);
   const [visitedFestivalTabs, setVisitedFestivalTabs] = useState<Record<YangjaeReportTab, boolean>>({
-    milestones: true,
-    booths: false,
-    duties: false,
-    schedule: false,
+    playbook: initialTab === 'playbook',
+    milestones: initialTab === 'milestones',
+    booths: initialTab === 'booths',
+    duties: initialTab === 'duties',
+    schedule: initialTab === 'schedule',
   });
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
   const [scheduleSearchQuery, setScheduleSearchQuery] = useState<string>('');
@@ -529,7 +537,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   const handleAddMilestone = async () => {
     const maxId = (data.milestones || []).reduce((max, m) => Math.max(max, Number(m?.id) || 0), 0);
     const nextId = (Number.isFinite(maxId) ? maxId : 0) + 1;
-    const initialDetailStr = '세부 추진 계획을 입력하세요.';
+    const initialDetailStr = '세부 계획 입력';
     const newTask: MilestoneItem = {
       id: nextId,
       number: `추진과제 ${nextId}`,
@@ -610,7 +618,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       const targetMilestone = currentMilestones.find((m) => m.id === selectedTargetMilestoneId);
 
       if (!sourceMilestone || !targetMilestone) {
-        alert('대상 추진과제를 찾을 수 없습니다.');
+        alert('대상 추진과제 없음');
         setIsTransferring(false);
         return;
       }
@@ -901,7 +909,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       title: '신규 행사 식순',
       lead: '보건행정과',
       status: '예정',
-      note: '식순 세부 내용을 입력하세요.',
+      note: '식순 내용 입력',
     };
     if (scheduleSearchQuery) {
       setScheduleSearchQuery('');
@@ -1131,7 +1139,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       phone: '',
       adminPhone: '',
       mobilePhone: '',
-      tasks: ['과업 세부 내용을 입력하세요.'],
+      tasks: ['과업 내용 입력'],
       staffMembers: [{ name: '', role: '', adminPhone: '', mobilePhone: '' }],
     };
     setEditDutiesData([...list, newDuty]);
@@ -1192,7 +1200,7 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
       const res = await fetch('/api/festival/yangjae/sync-excel', { method: 'POST' });
       const json = await res.json();
       if (json.success) {
-        setToastMessage('바탕화면 단일 마스터 엑셀 동기화 완료!');
+        setToastMessage('엑셀 동기화 완료');
         setSaveToast(true);
         setTimeout(() => setSaveToast(false), 3500);
       } else {
@@ -1238,6 +1246,134 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
     URL.revokeObjectURL(url);
   }, [data?.duties]);
 
+  const activeChecklist = useMemo<FestivalChecklistItem[]>(
+    () => (Array.isArray(data?.nextYearChecklist) ? data.nextYearChecklist : YANGJAE_FALLBACK_DATA.nextYearChecklist || []),
+    [data?.nextYearChecklist]
+  );
+
+  const historySummary = useMemo(
+    () => data?.historySummary2026 || YANGJAE_FALLBACK_DATA.historySummary2026,
+    [data?.historySummary2026]
+  );
+
+  const checklistProgress = useMemo(() => {
+    const total = activeChecklist.length;
+    const done = activeChecklist.filter((i) => i.checked).length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    return { total, done, pct };
+  }, [activeChecklist]);
+
+  const persistChecklist = useCallback(
+    async (nextList: FestivalChecklistItem[], message: string) => {
+      try {
+        const payload: FestivalData = {
+          ...(data || YANGJAE_FALLBACK_DATA),
+          nextYearChecklist: nextList,
+        };
+        await saveMutation.mutateAsync(payload);
+        setToastMessage(message);
+        setSaveToast(true);
+        setTimeout(() => setSaveToast(false), 2600);
+      } catch {
+        alert('체크리스트 저장 실패');
+      }
+    },
+    [data, saveMutation]
+  );
+
+  const handleToggleChecklistItem = useCallback(
+    (id: string) => {
+      const next = activeChecklist.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      );
+      void persistChecklist(next, '체크 상태 저장 완료');
+    },
+    [activeChecklist, persistChecklist]
+  );
+
+  const handleAddChecklistItem = useCallback(
+    (draft: {
+      phase: ChecklistPhaseId;
+      timingLabel: string;
+      domain: ChecklistDomain;
+      title: string;
+      priority: ChecklistPriority;
+      actualDate2026: string;
+      history2026: string;
+      cooperationDepts: string[];
+      docRef?: string;
+      lessonWarning?: string;
+      memo?: string;
+    }) => {
+      const newItem: FestivalChecklistItem = {
+        id: `chk-${Date.now().toString(36)}`,
+        checked: false,
+        ...draft,
+      };
+      void persistChecklist([...activeChecklist, newItem], '신규 체크 항목 추가 완료');
+    },
+    [activeChecklist, persistChecklist]
+  );
+
+  const handleUpdateChecklistItem = useCallback(
+    (id: string, updates: Partial<FestivalChecklistItem>) => {
+      const next = activeChecklist.map((item) =>
+        item.id === id ? { ...item, ...updates } : item
+      );
+      void persistChecklist(next, '체크 항목 수정 완료');
+    },
+    [activeChecklist, persistChecklist]
+  );
+
+  const handleDeleteChecklistItem = useCallback(
+    (id: string) => {
+      const next = activeChecklist.filter((item) => item.id !== id);
+      void persistChecklist(next, '체크 항목 삭제 완료');
+    },
+    [activeChecklist, persistChecklist]
+  );
+
+  const handleResetChecklistChecks = useCallback(() => {
+    const next = activeChecklist.map((item) => ({ ...item, checked: false }));
+    void persistChecklist(next, '체크리스트 전체 초기화 완료');
+  }, [activeChecklist, persistChecklist]);
+
+  const handleExportChecklistCsv = useCallback(() => {
+    const header = ['완료여부', '단계', '시점', '영역', '중요도', '체크항목', '2026이행일', '2026추진이력', '협조부서', '관련공문', '차년도주의사항', '메모'];
+    const esc = (v: string | undefined) => `"${String(v || '').replace(/"/g, '""')}"`;
+    const rows = activeChecklist.map((i) => [
+      i.checked ? '완료' : '미완료',
+      i.phase,
+      i.timingLabel,
+      i.domain,
+      i.priority === 'must' ? '필수' : i.priority === 'high' ? '중요' : '일반',
+      i.title,
+      i.actualDate2026,
+      i.history2026,
+      (i.cooperationDepts || []).join(' / '),
+      i.docRef || '',
+      i.lessonWarning || '',
+      i.memo || '',
+    ].map(esc).join(','));
+    const csvContent = '\uFEFF' + [header.map(esc).join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `양재천페스티벌_차년도_체크리스트_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [activeChecklist]);
+
+  const handleChangeOverviewField = useCallback(
+    (updater: (prev: FestivalData['meta']) => FestivalData['meta']) => {
+      setEditOverviewData((prev) => updater(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta));
+    },
+    [data?.meta]
+  );
+
   const handleCopySummary = useCallback(async () => {
     const targetUrl = typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')
       ? `${window.location.origin}/festival/yangjae`
@@ -1274,15 +1410,15 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
   }, [PUBLIC_SHARE_URL, data?.meta?.title]);
 
   return (
-    <div className="w-full flex justify-center selection:bg-slate-800 selection:text-white pb-16 relative">
+    <div className="w-full selection:bg-slate-800 selection:text-white pb-12 relative">
       
       {/* Floating Copy Success Toast Modal */}
       {copied && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 border border-slate-800">
           <Check className="w-4 h-4 text-emerald-400 stroke-[2.5] shrink-0" />
           <div>
-            <div className="font-bold text-xs sm:text-sm">페스티벌 대시보드 링크가 복사되었습니다!</div>
-            <div className="text-[11px] text-slate-300">원하는 곳(카카오톡·문자 등)에 바로 붙여넣기(Ctrl+V) 하세요.</div>
+            <div className="font-bold text-xs sm:text-sm">페스티벌 링크 복사 완료</div>
+            <div className="text-[11px] text-slate-300">카카오톡 · 문자 붙여넣기(Ctrl+V)</div>
           </div>
         </div>
       )}
@@ -1293,36 +1429,45 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
           <Check className="w-4 h-4 text-emerald-400 stroke-[2.5] shrink-0" />
           <div>
             <div className="font-bold text-xs sm:text-sm">{toastMessage}</div>
-            <div className="text-[11px] text-slate-300">로컬 DB에 성공적으로 반영되었습니다.</div>
+            <div className="text-[11px] text-slate-300">로컬 DB 반영 완료</div>
           </div>
         </div>
       )}
 
-      <div 
-        className={`yangjae-dashboard-container w-full sm:max-w-md bg-white sm:rounded-xl sm:border sm:border-slate-200/80 sm:shadow-2xs overflow-hidden flex flex-col min-h-screen text-slate-900 font-sans transition-all duration-200 ${
+      <div
+        className={`yangjae-dashboard-container w-full bg-white sm:rounded-xl sm:border sm:border-slate-200/80 sm:shadow-2xs overflow-hidden flex flex-col text-slate-900 font-sans ${
           isLargeFont ? 'is-large-font text-[16px]' : ''
         }`}
       >
         <style>{LARGE_FONT_STYLES}</style>
-        
-        {/* Top Sticky Header */}
-        <div className="sticky top-0 z-30 bg-slate-900 text-white px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800">
-          <div className="min-w-0 flex-1">
-            <div className={`${isLargeFont ? 'text-lg' : 'text-sm'} font-bold tracking-tight truncate`}>2026 양재천 건강 페스티벌</div>
+
+        {/* Top Sticky Header Bar */}
+        <div className="sticky top-0 z-30 bg-slate-900 text-white px-3 sm:px-4 lg:px-5 py-2.5 sm:py-3 flex items-center justify-between gap-2 border-b border-slate-800">
+          <div className="min-w-0 flex-1 flex items-center gap-2.5">
+            <div className={`${isLargeFont ? 'text-lg' : 'text-sm sm:text-base'} font-bold tracking-tight truncate`}>
+              2026 양재천 건강 페스티벌
+            </div>
+            <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono tabular-nums font-semibold bg-slate-800 text-emerald-300 border border-slate-700 shrink-0">
+              2026 실적 · 2027 체크리스트
+            </span>
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="hidden sm:inline-flex items-center px-2 py-1 rounded-md text-[11px] font-mono tabular-nums font-bold bg-slate-800/90 text-slate-200 border border-slate-700 whitespace-nowrap">
+              체크 {checklistProgress.done}/{checklistProgress.total} ({checklistProgress.pct}%)
+            </span>
+
             {/* Large Font Toggle Button */}
             <button
               type="button"
               onClick={() => setIsLargeFont(!isLargeFont)}
               className={`px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap ${
-                isLargeFont 
-                  ? 'bg-white text-slate-900 border-white shadow-2xs' 
+                isLargeFont
+                  ? 'bg-white text-slate-900 border-white shadow-2xs'
                   : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
               }`}
-              title="글자 크기 확대/보통 전환"
+              title="글자 크기 전환"
             >
               <span className="font-bold text-[12px] sm:text-[13px]">{isLargeFont ? '가-' : '가+'}</span>
               <span>{isLargeFont ? '보통' : '큰글씨'}</span>
@@ -1341,259 +1486,111 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 p-3.5 space-y-4 bg-slate-50/60">
-          
-          {/* Section 1: Official Event Overview */}
-          <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs">
-            <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 gap-2">
-              <div className="flex items-center gap-2">
-                <span className={`inline-block ${isLargeFont ? 'w-4 h-4 border-2' : 'w-3.5 h-3.5 border-[1.5px]'} border-slate-900 rounded-[2px] shrink-0`} />
-                <span className={`${isLargeFont ? 'text-lg' : 'text-sm sm:text-base'} font-bold text-slate-900 tracking-tight`}>
-                  행사 개요
+        {/* Main Wide-View Content Area */}
+        <div className="flex-1 p-3.5 sm:p-5 lg:p-6 space-y-5 bg-slate-50/60">
+          {/* Section 1: 4-Column VLDS KPI Summary Strip */}
+          <div
+            data-testid="festival-wide-kpi-grid"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"
+          >
+            {/* KPI 1: Participation */}
+            <div className="bg-white border border-slate-200/85 rounded-xl p-4 shadow-2xs flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">2026 참여 실적</span>
+                <Users className="w-4 h-4 text-slate-400" />
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-slate-900 font-mono tabular-nums tracking-tight">
+                  {(historySummary?.participantsTotal ?? 824).toLocaleString('ko-KR')}
+                  <span className="text-xs font-semibold text-slate-400 ml-0.5">명</span>
+                </span>
+                <span className="text-[11px] font-mono tabular-nums font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                  +{historySummary?.yoyGrowthPct ?? 17.7}%
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                {editingOverview ? (
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={handleSaveOverview}
-                      disabled={saveMutation.isPending}
-                      className="px-2 py-0.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-md flex items-center gap-1 cursor-pointer"
-                      title="행사 개요 저장"
-                    >
-                      {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                      <span>저장</span>
-                    </button>
-                    <button
-                      onClick={handleCancelEditOverview}
-                      className="px-2 py-0.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 rounded-md flex items-center gap-0.5 cursor-pointer"
-                      title="취소"
-                    >
-                      <X className="w-3 h-3" />
-                      <span>취소</span>
-                    </button>
-                  </div>
-                ) : isLocalAdmin ? (
-                  <button
-                    type="button"
-                    onClick={handleStartEditOverview}
-                    className="p-1 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer transition-colors"
-                    title="행사 개요 수정"
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                  </button>
-                ) : null}
-                <span className={`font-mono tabular-nums font-bold ${isLargeFont ? 'text-sm px-2.5 py-0.5' : 'text-xs px-2 py-0.5'} bg-slate-900 text-white rounded-md border border-slate-800 shadow-2xs tracking-wide shrink-0`}>
-                  D-{daysLeft}
-                </span>
+              <div className="text-[11px] font-mono tabular-nums text-slate-500 pt-2 border-t border-slate-100">
+                사전 {historySummary?.preRegistered ?? 532} · 현장 {historySummary?.onSite ?? 292} · VIP {historySummary?.vipCount ?? 27}명
               </div>
             </div>
 
-            {/* Key-Value Details Grid */}
-            <div className="space-y-2">
-              {/* 행사명 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 행사명</span>
-                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
-                {editingOverview ? (
-                  <input
-                    type="text"
-                    value={editOverviewData?.title || ''}
-                    onChange={(e) => setEditOverviewData(prev => ({
-                      ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                      title: e.target.value
-                    }))}
-                    className="w-full px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-bold text-slate-900"
+            {/* KPI 2: Booths & Visits */}
+            <div className="bg-white border border-slate-200/85 rounded-xl p-4 shadow-2xs flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">체험 부스 · 연인원</span>
+                <Tent className="w-4 h-4 text-slate-400" />
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-slate-900 font-mono tabular-nums tracking-tight">
+                  {(historySummary?.boothsSummary.cumulativeVisitors ?? 7504).toLocaleString('ko-KR')}
+                  <span className="text-xs font-semibold text-slate-400 ml-0.5">명</span>
+                </span>
+                <span className="text-[11px] font-mono tabular-nums font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                  {historySummary?.boothsSummary.entities ?? 19}개소 {historySummary?.boothsSummary.totalDongs ?? 37}동
+                </span>
+              </div>
+              <div className="text-[11px] font-mono tabular-nums text-slate-500 pt-2 border-t border-slate-100">
+                검진버스 {historySummary?.boothsSummary.buses ?? 2}대 · 운영인력 {historySummary?.boothsSummary.staffCount ?? 225}명
+              </div>
+            </div>
+
+            {/* KPI 3: Budget Execution */}
+            <div className="bg-white border border-slate-200/85 rounded-xl p-4 shadow-2xs flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">예산 실집행</span>
+                <Wallet className="w-4 h-4 text-slate-400" />
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-slate-900 font-mono tabular-nums tracking-tight">
+                  {Math.round((historySummary?.budgetExecution.totalExecuted ?? 57302000) / 1000).toLocaleString('ko-KR')}
+                  <span className="text-xs font-semibold text-slate-400 ml-0.5">천원</span>
+                </span>
+                <span className="text-[11px] font-mono tabular-nums font-bold px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 border border-violet-200/80">
+                  낙찰차액 {Math.round((historySummary?.budgetExecution.bidSaving ?? 498000) / 1000)}천원
+                </span>
+              </div>
+              <div className="text-[11px] font-mono tabular-nums text-slate-500 pt-2 border-t border-slate-100 truncate" title={historySummary?.budgetExecution.sponsorship}>
+                운영비 49,302 · 사무관리 8,000천원
+              </div>
+            </div>
+
+            {/* KPI 4: Safety & Next-Year Checklist Progress */}
+            <div className="bg-white border border-slate-200/85 rounded-xl p-4 shadow-2xs flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">안전 · 차년도 체크</span>
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-2xl font-black text-slate-900 font-mono tabular-nums tracking-tight">
+                  {checklistProgress.done}
+                  <span className="text-sm font-bold text-slate-400">/{checklistProgress.total}</span>
+                </span>
+                <span className="text-[11px] font-mono tabular-nums font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                  무사고 {historySummary?.safetySummary.accidents ?? 0}건
+                </span>
+              </div>
+              <div className="pt-2 border-t border-slate-100 space-y-1">
+                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-slate-900 rounded-full"
+                    style={{ width: `${checklistProgress.pct}%` }}
                   />
-                ) : (
-                  <span className="font-bold text-slate-900 leading-snug break-keep min-w-0">{data?.meta?.title || '제8회 강남구청장배 걷기 대회 연계 2026 양재천 걷자! 건강 페스티벌'}</span>
-                )}
-              </div>
-
-              {/* 일시 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 일&nbsp;&nbsp;&nbsp;&nbsp;시</span>
-                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
-                {editingOverview ? (
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      value={editOverviewData?.eventDate || ''}
-                      onChange={(e) => setEditOverviewData(prev => ({
-                        ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                        eventDate: e.target.value
-                      }))}
-                      className="w-1/2 px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
-                      placeholder="2026-10-31(토)"
-                    />
-                    <input
-                      type="text"
-                      value={editOverviewData?.eventTime || ''}
-                      onChange={(e) => setEditOverviewData(prev => ({
-                        ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                        eventTime: e.target.value
-                      }))}
-                      className="w-1/2 px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
-                      placeholder="09:00 ~ 14:00"
-                    />
-                  </div>
-                ) : (
-                  <span className="font-mono tabular-nums font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.eventDate || ''} ({data?.meta?.eventTime || ''})</span>
-                )}
-              </div>
-
-              {/* 장소 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 장&nbsp;&nbsp;&nbsp;&nbsp;소</span>
-                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
-                {editingOverview ? (
-                  <input
-                    type="text"
-                    value={editOverviewData?.location || ''}
-                    onChange={(e) => setEditOverviewData(prev => ({
-                      ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                      location: e.target.value
-                    }))}
-                    className="w-full px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
-                  />
-                ) : (
-                  <span className="font-semibold text-slate-800 leading-snug break-keep min-w-0">{data?.meta?.location || ''}</span>
-                )}
-              </div>
-
-              {/* 코스 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 코&nbsp;&nbsp;&nbsp;&nbsp;스</span>
-                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
-                {editingOverview ? (
-                  <input
-                    type="text"
-                    value={editOverviewData?.course || ''}
-                    onChange={(e) => setEditOverviewData(prev => ({
-                      ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                      course: e.target.value
-                    }))}
-                    className="w-full px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
-                  />
-                ) : (
-                  <span className="font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.course || ''}</span>
-                )}
-              </div>
-
-              {/* 참여 대상 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 참&nbsp;&nbsp;&nbsp;&nbsp;여</span>
-                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
-                {editingOverview ? (
-                  <input
-                    type="text"
-                    value={editOverviewData?.targetAudience || ''}
-                    onChange={(e) => setEditOverviewData(prev => ({
-                      ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                      targetAudience: e.target.value
-                    }))}
-                    className="w-full px-2 py-1 border border-slate-300 rounded-md bg-slate-50/70 font-semibold text-slate-900"
-                  />
-                ) : (
-                  <span className="font-semibold text-slate-800 break-keep min-w-0">{data?.meta?.targetAudience || ''}</span>
-                )}
-              </div>
-
-              {/* 프로그램 구성 */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline`}>
-                <span className="font-semibold text-slate-500 tracking-wide whitespace-nowrap shrink-0">• 구&nbsp;&nbsp;&nbsp;&nbsp;성</span>
-                <span className="font-medium text-slate-300 text-center shrink-0">:</span>
-                <div className="space-y-1 min-w-0">
-                  {(editingOverview ? (editOverviewData?.programStructure || []) : (data?.meta?.programStructure || [])).map((item: string, pIdx: number) => (
-                    <div key={`prog-${pIdx}-${item.slice(0, 15)}`} className="flex items-start">
-                      {editingOverview ? (
-                        <div className="flex items-center gap-1 flex-1">
-                          <input
-                            type="text"
-                            value={item}
-                            onChange={(e) => {
-                              const nextProg = [...(editOverviewData?.programStructure || [])];
-                              nextProg[pIdx] = e.target.value;
-                              setEditOverviewData(prev => ({
-                                ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                                programStructure: nextProg
-                              }));
-                            }}
-                            className="w-full px-2 py-0.5 border border-slate-300 rounded-md bg-white text-xs font-semibold text-slate-800"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const nextProg = (editOverviewData?.programStructure || []).filter((_: string, idx: number) => idx !== pIdx);
-                              setEditOverviewData(prev => ({
-                                ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                                programStructure: nextProg
-                              }));
-                            }}
-                            className="p-0.5 text-red-500 hover:bg-red-50 rounded cursor-pointer shrink-0"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <span className={`font-semibold text-slate-800 leading-snug break-keep ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
-                          {item}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                  {editingOverview && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const nextProg = [...(editOverviewData?.programStructure || [])];
-                        nextProg.push('신규 체험·홍보 프로그램');
-                        setEditOverviewData(prev => ({
-                          ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                          programStructure: nextProg
-                        }));
-                      }}
-                      className="mt-1 px-2 py-0.5 text-[11px] font-semibold bg-slate-100 text-slate-800 rounded-md border border-slate-200/80 hover:bg-slate-200 flex items-center gap-1 cursor-pointer w-fit"
-                    >
-                      <Plus className="w-3 h-3" />
-                      <span>구성 항목 추가</span>
-                    </button>
-                  )}
                 </div>
-              </div>
-
-              {/* 비고 (직원 복무) */}
-              <div className={`grid ${isLargeFont ? 'grid-cols-[minmax(76px,max-content)_12px_1fr] text-sm gap-1.5' : 'grid-cols-[minmax(62px,max-content)_10px_1fr] text-xs gap-1'} items-baseline pt-0.5`}>
-                <span className="font-extrabold text-blue-600 tracking-wide whitespace-nowrap shrink-0">• 비&nbsp;&nbsp;&nbsp;&nbsp;고</span>
-                <span className="font-bold text-blue-400 text-center shrink-0">:</span>
-                {editingOverview ? (
-                  <input
-                    type="text"
-                    value={editOverviewData?.staffNote ?? data?.meta?.staffNote ?? '행사 참여 직원 대체휴무 시행 예정'}
-                    onChange={(e) => setEditOverviewData(prev => ({
-                      ...(prev || data?.meta || YANGJAE_FALLBACK_DATA.meta),
-                      staffNote: e.target.value
-                    }))}
-                    className="w-full px-2 py-1 border border-blue-400 rounded-md bg-blue-50/50 font-bold text-blue-900"
-                    placeholder="행사 참여 직원 대체휴무 시행 예정"
-                  />
-                ) : (
-                  <span className="font-bold text-blue-600 leading-snug break-keep">
-                    {data?.meta?.staffNote || '행사 참여 직원 대체휴무 시행 예정'}
-                  </span>
-                )}
+                <div className="flex justify-between text-[11px] font-mono tabular-nums text-slate-500">
+                  <span>진행률 {checklistProgress.pct}%</span>
+                  <span>민원 {historySummary?.safetySummary.complaints ?? 1}건 교훈</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Section 2: Tab Navigation (Minimalist Segmented Control - 4 Cols) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80">
+          {/* Section 2: Tab Navigation (VLDS Minimalist Segmented Control - 5 Cols) */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80">
             {YANGJAE_REPORT_TABS.map((tab) => (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => handleSelectTab(tab.id)}
-                className={`${isLargeFont ? 'py-3 text-base font-black' : 'py-2.5 text-xs font-extrabold'} rounded-lg transition-all cursor-pointer text-center border ${
+                className={`${isLargeFont ? 'py-3 text-base font-black' : 'py-2.5 text-xs sm:text-[13px] font-extrabold'} rounded-lg transition-colors cursor-pointer text-center border ${
                   selectedTab === tab.id
                     ? 'bg-white text-slate-900 shadow-2xs border-slate-200/80 font-extrabold'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 border-transparent font-bold'
@@ -1603,6 +1600,33 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
               </button>
             ))}
           </div>
+
+          {/* TAB 1: 2026 추진 히스토리 · 차년도 체크리스트 */}
+          {visitedFestivalTabs.playbook && (
+            <div className={selectedTab === 'playbook' ? 'block' : 'hidden'}>
+              <ChecklistPlaybookTab
+                checklist={activeChecklist}
+                historySummary={historySummary}
+                meta={data?.meta || YANGJAE_FALLBACK_DATA.meta}
+                editingOverview={editingOverview}
+                editOverviewData={editOverviewData}
+                daysLeft={daysLeft}
+                isLocalAdmin={isLocalAdmin}
+                isLargeFont={isLargeFont}
+                isPendingSave={saveMutation.isPending}
+                onToggleItem={handleToggleChecklistItem}
+                onAddItem={handleAddChecklistItem}
+                onUpdateItem={handleUpdateChecklistItem}
+                onDeleteItem={handleDeleteChecklistItem}
+                onResetChecks={handleResetChecklistChecks}
+                onExportChecklistCsv={handleExportChecklistCsv}
+                onStartEditOverview={handleStartEditOverview}
+                onCancelEditOverview={handleCancelEditOverview}
+                onSaveOverview={handleSaveOverview}
+                onChangeOverviewField={handleChangeOverviewField}
+              />
+            </div>
+          )}
 
           {/* TAB 1: 추진과제별 현황 */}
           {visitedFestivalTabs.milestones && (
@@ -1835,40 +1859,42 @@ function YangjaeFestivalDashboardComponent({ isActive = true }: YangjaeFestivalD
 
 export function YangjaeFestivalSkeleton() {
   return (
-    <div className="w-full flex justify-center pb-16">
-      <div className="w-full max-w-md bg-white sm:rounded-xl sm:border sm:border-slate-200/80 sm:shadow-2xs overflow-hidden flex flex-col min-h-screen animate-pulse">
+    <div className="w-full pb-12 animate-pulse">
+      <div className="w-full bg-white sm:rounded-xl sm:border sm:border-slate-200/80 sm:shadow-2xs overflow-hidden flex flex-col">
         {/* Top Header Skeleton */}
-        <div className="bg-slate-900 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800">
-          <div className="min-w-0 flex-1">
-            <div className="h-5 w-44 bg-slate-700 rounded" />
-          </div>
-          <div className="flex items-center gap-1 sm:gap-1.5">
-            <div className="h-7 w-14 sm:w-16 bg-slate-800 rounded-lg" />
-            <div className="h-7 w-12 sm:w-14 bg-slate-800 rounded-lg" />
+        <div className="bg-slate-900 px-4 py-3 flex items-center justify-between gap-2 border-b border-slate-800">
+          <div className="h-5 w-52 bg-slate-700 rounded" />
+          <div className="flex items-center gap-1.5">
+            <div className="h-7 w-24 bg-slate-800 rounded-md" />
+            <div className="h-7 w-16 bg-slate-800 rounded-md" />
+            <div className="h-7 w-14 bg-slate-800 rounded-md" />
           </div>
         </div>
-        {/* Content Skeleton */}
-        <div className="flex-1 p-4 space-y-4 bg-slate-50/40">
-          <div className="bg-white border border-slate-200/80 rounded-xl p-4 space-y-3 shadow-2xs">
-            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-              <div className="h-5 w-32 bg-slate-200 rounded" />
-              <div className="h-6 w-14 bg-slate-200 rounded-md" />
-            </div>
-            <div className="space-y-2">
-              <div className="h-4 bg-slate-100 rounded w-full" />
-              <div className="h-4 bg-slate-100 rounded w-5/6" />
-              <div className="h-4 bg-slate-100 rounded w-4/6" />
-            </div>
+        {/* Wide-View Content Skeleton */}
+        <div className="flex-1 p-4 sm:p-5 lg:p-6 space-y-5 bg-slate-50/40">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className="h-28 bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs" />
+            <div className="h-28 bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs" />
+            <div className="h-28 bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs" />
+            <div className="h-28 bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs" />
           </div>
-          <div className="grid grid-cols-4 gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80">
-            <div className="h-8 bg-white rounded-lg shadow-2xs" />
-            <div className="h-8 bg-slate-200/50 rounded-lg" />
-            <div className="h-8 bg-slate-200/50 rounded-lg" />
-            <div className="h-8 bg-slate-200/50 rounded-lg" />
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80">
+            <div className="h-9 bg-white rounded-lg shadow-2xs" />
+            <div className="h-9 bg-slate-200/50 rounded-lg" />
+            <div className="h-9 bg-slate-200/50 rounded-lg" />
+            <div className="h-9 bg-slate-200/50 rounded-lg" />
+            <div className="h-9 bg-slate-200/50 rounded-lg" />
           </div>
-          <div className="space-y-3">
-            <div className="h-28 bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs" />
-            <div className="h-28 bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs" />
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+            <div className="xl:col-span-8 space-y-3">
+              <div className="h-24 bg-white border border-slate-200/80 rounded-xl shadow-2xs" />
+              <div className="h-44 bg-white border border-slate-200/80 rounded-xl shadow-2xs" />
+              <div className="h-44 bg-white border border-slate-200/80 rounded-xl shadow-2xs" />
+            </div>
+            <div className="xl:col-span-4 space-y-3">
+              <div className="h-56 bg-white border border-slate-200/80 rounded-xl shadow-2xs" />
+              <div className="h-48 bg-white border border-slate-200/80 rounded-xl shadow-2xs" />
+            </div>
           </div>
         </div>
       </div>

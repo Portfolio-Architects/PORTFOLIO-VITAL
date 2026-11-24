@@ -26,6 +26,7 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
     let totalSpent = 0;
     let totalRemaining = 0;
     let simulatedExpenditure = 0;
+    let totalBidSaving = 0;
     let finalExpectedBalance = 0;
     let deficitCount = 0;
     let requiredBalance = 0;
@@ -41,6 +42,7 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
       totalSpent += p.currentSpent;
       totalRemaining += p.currentRemaining;
       simulatedExpenditure += p.simulatedExpenditure;
+      totalBidSaving += (p.simulatedBidSaving || 0);
       finalExpectedBalance += p.finalExpectedBalance;
       totalDailyIssued += (p.dailyExpenseIssued || 0);
       totalDailySpent += (p.dailyExpenseSpent || 0);
@@ -56,7 +58,8 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
 
     const currentExecutionRate = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
     const currentRemainingRate = totalBudget > 0 ? (totalRemaining / totalBudget) * 100 : 0;
-    const projectedGeneralSpent = totalBudget - finalExpectedBalance;
+    // 낙찰차액(totalBidSaving)은 불용 확정 유보액이므로 예상 최종 집행률에서 제외
+    const projectedGeneralSpent = totalBudget - finalExpectedBalance - totalBidSaving;
     const projectedExecutionRate =
       totalBudget > 0 ? (projectedGeneralSpent / totalBudget) * 100 : 0;
     const projectedRemainingRate =
@@ -69,6 +72,7 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
       currentExecutionRate,
       currentRemainingRate,
       simulatedExpenditure,
+      totalBidSaving,
       finalExpectedBalance,
       projectedExecutionRate,
       projectedRemainingRate,
@@ -210,6 +214,11 @@ export const SimulationSummaryCards: React.FC<SimulationSummaryCardsProps> = Rea
           </div>
           <div className="mt-1.5 min-h-[36px] text-[11px] leading-snug">
             <div className="text-slate-400">품의 · 소진 계획 합계</div>
+            {metrics.totalBidSaving > 0 && (
+              <div className="text-violet-700 font-semibold font-mono tabular-nums truncate">
+                낙찰차액 유보 {metrics.totalBidSaving.toLocaleString('ko-KR')}원 (별도)
+              </div>
+            )}
           </div>
         </div>
 

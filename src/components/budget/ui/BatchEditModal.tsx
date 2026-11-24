@@ -57,8 +57,7 @@ function BatchEditModalComponent({ isOpen, onClose, title, categories, onApply }
     <Modal isOpen={isOpen} onClose={onClose} title={`[${title}] 일괄 수정`} size="md">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="bg-slate-50 border border-slate-200/80 text-slate-600 p-3.5 rounded-lg text-sm leading-relaxed">
-          해당 그룹에 속한 <b className="text-slate-900 font-bold">{categories.length}개</b>의 모든 하위 과목 예산/재원 구분을 일괄 변경합니다.<br/>
-          (빈칸으로 둔 항목은 기존 값을 유지합니다.)
+          하위 과목 <b className="text-slate-900 font-bold">{categories.length}개</b> 예산 · 재원 일괄 변경 (빈칸 항목은 기존 유지)
         </div>
 
         <div className="space-y-1.5">
@@ -74,7 +73,7 @@ function BatchEditModalComponent({ isOpen, onClose, title, categories, onApply }
         <div className="space-y-2.5 pt-3 border-t border-slate-100">
           <label className="text-sm font-bold text-slate-700 block">하위 항목 재원 일괄 재분배 (선택사항)</label>
           <div className="text-xl font-black text-slate-900 tabular-nums mt-0.5">{totalBudgetsSum.toLocaleString('ko-KR')} <span className="text-sm font-semibold text-slate-500">원</span></div>
-          <div className="text-xs text-slate-500 mt-1 text-left bg-slate-50 border border-slate-200/60 p-3 rounded-lg leading-relaxed">일괄 적용 기능은 총 예산액을 몰라도 쉽게 입력할 수 있도록 <b className="text-slate-700">퍼센트(%)</b>로 입력받습니다. 여기서 입력하신 비율이 하위 {categories.length}개 단위/통계목들의 각 예산액 규모에 비례해 정확한 금액으로 자동 하향 분배 지정됩니다. 변경을 원하지 않으면 비워두세요.</div>
+          <div className="text-xs text-slate-500 mt-1 text-left bg-slate-50 border border-slate-200/60 p-3 rounded-lg leading-relaxed"><b className="text-slate-700">비율(%)</b> 입력 시 하위 {categories.length}개 통계목 예산 규모 비례 자동 배분 (미변경 시 공란)</div>
           
           <div className="bg-slate-50/70 border border-slate-200/80 p-3.5 rounded-xl space-y-2.5 mt-2">
             <div className="flex gap-2 mb-1.5 px-1">

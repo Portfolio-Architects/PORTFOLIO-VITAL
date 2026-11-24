@@ -121,21 +121,30 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
     return ids;
   }, [filteredCategories]);
 
-  // Filtered Simulated Entries Amount (excluding settled & daily_expense to prevent double deduction)
-  const { totalSimulatedExpenditure, generalSimulatedExpenditure } = useMemo(() => {
+  // Filtered Simulated Entries Amount (excluding settled, daily_expense, and bid_saving to prevent double deduction / false execution inflation)
+  const { totalSimulatedExpenditure, generalSimulatedExpenditure, totalBidSaving } = useMemo(() => {
     let totalSum = 0;
     let generalSum = 0;
+    let bidSavingSum = 0;
     for (let i = 0; i < entries.length; i++) {
       const e = entries[i];
       if (e.status === 'SETTLED') continue;
       if (selectedProject === 'ALL' || e.detailedProject === selectedProject) {
+        if (e.actionType === 'bid_saving') {
+          bidSavingSum += e.amount;
+          continue;
+        }
         totalSum += e.amount;
         if (e.actionType !== 'daily_expense') {
           generalSum += e.amount;
         }
       }
     }
-    return { totalSimulatedExpenditure: totalSum, generalSimulatedExpenditure: generalSum };
+    return {
+      totalSimulatedExpenditure: totalSum,
+      generalSimulatedExpenditure: generalSum,
+      totalBidSaving: bidSavingSum,
+    };
   }, [entries, selectedProject]);
 
   // Monthly Execution & Projected Burn-Up Trend
@@ -240,14 +249,12 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
-                지출 예정액 반영 예산 소진 추세
+                예산 소진 추세
               </h3>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 border border-slate-200/70 text-slate-600 font-mono">
-                Commitment Burn-up
-              </span>
             </div>
             <p className="vlds-subtitle text-xs text-slate-400 mt-0.5">
-              실집행 + 예정액({totalSimulatedExpenditure.toLocaleString('ko-KR')}원) 합산 소진선
+              실집행 + 예정액({totalSimulatedExpenditure.toLocaleString('ko-KR')}원)
+              {totalBidSaving > 0 ? ` · 유보(${totalBidSaving.toLocaleString('ko-KR')}원) 제외` : ''}
             </p>
           </div>
         </div>
@@ -356,6 +363,7 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
               strokeDasharray="5 5"
               dot={false}
               activeDot={false}
+              isAnimationActive={false}
               name="11월 소진 목표"
             />
 
@@ -368,6 +376,7 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
               fillOpacity={1}
               fill="url(#colorSimulationActual)"
               activeDot={{ r: 4, fill: '#0f172a', stroke: '#fff', strokeWidth: 2 }}
+              isAnimationActive={false}
               name="현재 실집행"
             />
 
@@ -380,6 +389,7 @@ export const SimulationBurnUpChart: React.FC<SimulationBurnUpChartProps> = React
               strokeDasharray="4 4"
               dot={{ r: 3, fill: '#4f46e5', stroke: '#fff', strokeWidth: 1.5 }}
               activeDot={{ r: 5, fill: '#4f46e5', stroke: '#fff', strokeWidth: 2 }}
+              isAnimationActive={false}
               name="예정액 반영 예상"
             />
           </ComposedChart>

@@ -1,5 +1,6 @@
 export * from './types';
 export * from './festivalUtils';
+export * from './ChecklistPlaybookTab';
 export * from './MilestonesTab';
 export * from './BoothsTab';
 export * from './DutiesTab';

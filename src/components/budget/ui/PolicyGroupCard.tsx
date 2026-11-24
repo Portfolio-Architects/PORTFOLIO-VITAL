@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { BudgetCategory, BudgetEntry, BudgetActionType } from '@/types';
-import { ChevronDown, ChevronUp, Pencil, Trash2, FileCheck, FilePlus2, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { BudgetCategory, BudgetEntry, BudgetActionType, SimulationEntry } from '@/types';
+import { ChevronDown, ChevronUp, Pencil, Trash2, FileCheck, FilePlus2, RefreshCw, CheckCircle2, Lock } from 'lucide-react';
 import { CategoryStats } from '@/hooks/useBudget';
 import { BudgetCategoryCardItem } from './BudgetCategoryCardItem';
 import { InlineEditCell } from './InlineEditCell';
@@ -15,6 +15,7 @@ export const ACTION_TYPE_CONFIG: Record<BudgetActionType, { label: string; badge
   general: { label: '일반 지출', badge: '일반', badgeBg: 'bg-blue-100 text-blue-700', icon: FileCheck },
   issuance: { label: '일상경비 교부', badge: '교부', badgeBg: 'bg-amber-100 text-amber-700', icon: FilePlus2 },
   daily_expense: { label: '일상경비 지출', badge: '경비지출', badgeBg: 'bg-teal-100 text-teal-700', icon: FileCheck },
+  bid_saving: { label: '낙찰차액 (집행유보)', badge: '낙찰차액', badgeBg: 'bg-violet-100 text-violet-700', icon: Lock },
   transfer: { label: '이용/전용', badge: '이용/전용', badgeBg: 'bg-purple-100 text-purple-700', icon: RefreshCw },
   correction: { label: '정정', badge: '정정', badgeBg: 'bg-orange-100 text-orange-700', icon: Pencil },
   settle: { label: '정산(결산)', badge: '정산', badgeBg: 'bg-gray-100 text-gray-700', icon: CheckCircle2 }
@@ -33,6 +34,11 @@ interface PolicyGroupCardProps {
   updateCategory?: (id: string, updates: Partial<BudgetCategory>) => void;
   updateEntry?: (id: string, updates: Partial<BudgetEntry>) => void;
   hidePolicyHeader?: boolean;
+  simulationEntries?: SimulationEntry[];
+  onEditSimEntry?: (entry: SimulationEntry) => void;
+  onDeleteSimEntry?: (id: string) => void;
+  onSettleSimEntry?: (simId: string) => void;
+  onAddSimEntryForCategory?: (cat: BudgetCategory) => void;
 }
 
 function arePolicyGroupCardPropsEqual(
@@ -49,6 +55,11 @@ function arePolicyGroupCardPropsEqual(
   if (prevProps.openBatchEdit !== nextProps.openBatchEdit) return false;
   if (prevProps.updateCategory !== nextProps.updateCategory) return false;
   if (prevProps.updateEntry !== nextProps.updateEntry) return false;
+  if (prevProps.onEditSimEntry !== nextProps.onEditSimEntry) return false;
+  if (prevProps.onDeleteSimEntry !== nextProps.onDeleteSimEntry) return false;
+  if (prevProps.onSettleSimEntry !== nextProps.onSettleSimEntry) return false;
+  if (prevProps.onAddSimEntryForCategory !== nextProps.onAddSimEntryForCategory) return false;
+  if (prevProps.simulationEntries !== nextProps.simulationEntries) return false;
 
   if (prevProps.group === nextProps.group && prevProps.entries === nextProps.entries) return true;
   if (prevProps.group.policyName !== nextProps.group.policyName) return false;
@@ -140,7 +151,12 @@ const PolicyGroupCardComponent = ({
   openBatchEdit,
   updateCategory,
   updateEntry,
-  hidePolicyHeader = false
+  hidePolicyHeader = false,
+  simulationEntries,
+  onEditSimEntry,
+  onDeleteSimEntry,
+  onSettleSimEntry,
+  onAddSimEntryForCategory,
 }: PolicyGroupCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAllEntries, setShowAllEntries] = useState(false);
@@ -150,7 +166,7 @@ const PolicyGroupCardComponent = ({
 
   const { policyName, cats } = group;
 
-  const { totalBudget, spent, planned, remaining, usageRate, groupEntries, entriesByCatId, groupedByDetail, groupFunding, groupTypes, catMap } = useMemo(() => {
+  const { totalBudget, spent, planned, remaining, usageRate, groupEntries, entriesByCatId, simEntriesByCatId, activeSimCount, activeSimTotal, activeBidSavingCount, activeBidSavingTotal, groupedByDetail, groupFunding, groupTypes, catMap } = useMemo(() => {
     let tBudget = 0;
     let tSpent = 0;
     let tPlanned = 0;
@@ -158,6 +174,8 @@ const PolicyGroupCardComponent = ({
 
     const catIdSet = new Set<string>();
     const entriesByCatMap: Record<string, BudgetEntry[]> = {};
+    const simByCatMap: Record<string, SimulationEntry[]> = {};
+    const dpStatToCatId = new Map<string, string>();
     const categoryLookupMap: Record<string, BudgetCategory> = {};
     const groupsMap: Record<string, BudgetCategory[]> = {};
     const groupFundingSet = new Set<string>();
@@ -168,6 +186,10 @@ const PolicyGroupCardComponent = ({
       tBudget += c.totalBudget;
       catIdSet.add(c.id);
       entriesByCatMap[c.id] = [];
+      simByCatMap[c.id] = [];
+      if (c.detailedProject && c.statItem) {
+        dpStatToCatId.set(`${c.detailedProject}|||${c.statItem}`, c.id);
+      }
       categoryLookupMap[c.id] = c;
 
       const st = getCategoryStats(c.id);
@@ -212,6 +234,31 @@ const PolicyGroupCardComponent = ({
 
     gEntries.sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
 
+    let gActiveSimCount = 0;
+    let gActiveSimTotal = 0;
+    let gActiveBidSavingCount = 0;
+    let gActiveBidSavingTotal = 0;
+    if (simulationEntries && simulationEntries.length > 0) {
+      for (let i = 0; i < simulationEntries.length; i++) {
+        const sim = simulationEntries[i];
+        const targetCatId =
+          (sim.categoryId && catIdSet.has(sim.categoryId) ? sim.categoryId : undefined) ||
+          dpStatToCatId.get(`${sim.detailedProject}|||${sim.statItem}`);
+        if (targetCatId && simByCatMap[targetCatId]) {
+          simByCatMap[targetCatId].push(sim);
+          if (sim.status !== 'SETTLED') {
+            if (sim.actionType === 'bid_saving') {
+              gActiveBidSavingCount += 1;
+              gActiveBidSavingTotal += sim.amount || 0;
+            } else {
+              gActiveSimCount += 1;
+              gActiveSimTotal += sim.amount || 0;
+            }
+          }
+        }
+      }
+    }
+
     const groups = Object.keys(groupsMap).map(detail => {
       const detailCats = groupsMap[detail];
       detailCats.sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
@@ -221,6 +268,7 @@ const PolicyGroupCardComponent = ({
       let detailTotalPlanned = 0;
       let detailDailyIssued = 0;
       let detailDailySpent = 0;
+      let detailDailyPlanned = 0;
       let detailDailyRemaining = 0;
 
       const detailFundingSet = new Set<string>();
@@ -236,6 +284,7 @@ const PolicyGroupCardComponent = ({
           detailTotalPlanned += st.planned;
           detailDailyIssued += st.dailyExpenseIssued;
           detailDailySpent += st.dailyExpenseSpent;
+          detailDailyPlanned += st.dailyExpensePlanned || 0;
           detailDailyRemaining += st.dailyExpenseRemaining;
         }
 
@@ -268,6 +317,7 @@ const PolicyGroupCardComponent = ({
         detailUsageRate,
         detailDailyIssued,
         detailDailySpent,
+        detailDailyPlanned,
         detailDailyRemaining,
         detailFunding: Array.from(detailFundingSet),
         detailTypes: Array.from(detailTypesSet)
@@ -285,12 +335,17 @@ const PolicyGroupCardComponent = ({
       usageRate: rate, 
       groupEntries: gEntries, 
       entriesByCatId: entriesByCatMap, 
+      simEntriesByCatId: simByCatMap,
+      activeSimCount: gActiveSimCount,
+      activeSimTotal: gActiveSimTotal,
+      activeBidSavingCount: gActiveBidSavingCount,
+      activeBidSavingTotal: gActiveBidSavingTotal,
       groupedByDetail: groups, 
       groupFunding, 
       groupTypes, 
       catMap: categoryLookupMap 
     };
-  }, [cats, entries, getCategoryStats]);
+  }, [cats, entries, getCategoryStats, simulationEntries]);
 
   // Stable swap callback function passed down to BudgetCategoryCardItem instances
   const handleSwapCat = useCallback((catId: string, dir: -1 | 1) => {
@@ -372,9 +427,19 @@ const PolicyGroupCardComponent = ({
                   {groupFunding.map(f => (
                     <span key={f} className="text-xs font-semibold px-2 py-0.5 rounded border bg-slate-50 text-slate-600 border-slate-200/80">{f}</span>
                   ))}
-                  {planned > 0 && (
+                  {activeSimCount > 0 ? (
+                    <span className="text-xs text-indigo-700 font-semibold bg-indigo-50/80 px-2 py-0.5 rounded border border-indigo-200/70 font-mono tabular-nums">
+                      지출 예정 {activeSimCount}건 · {formatN(activeSimTotal)}원
+                    </span>
+                  ) : planned > 0 && (
                     <span className="text-xs text-amber-700 font-semibold bg-amber-50/70 px-2 py-0.5 rounded border border-amber-200/60 font-mono tabular-nums">
                       품의 진행/예정: {formatN(planned)}원
+                    </span>
+                  )}
+                  {activeBidSavingCount > 0 && (
+                    <span className="text-xs text-violet-800 font-semibold bg-violet-50 px-2 py-0.5 rounded border border-violet-200/70 font-mono tabular-nums inline-flex items-center gap-1">
+                      <Lock size={11} className="text-violet-600" />
+                      낙찰차액 {activeBidSavingCount}건 · {formatN(activeBidSavingTotal)}원
                     </span>
                   )}
                 </div>
@@ -452,6 +517,7 @@ const PolicyGroupCardComponent = ({
               detailUsageRate,
               detailDailyIssued,
               detailDailySpent,
+              detailDailyPlanned,
               detailDailyRemaining,
               detailFunding,
               detailTypes
@@ -561,7 +627,9 @@ const PolicyGroupCardComponent = ({
 
                     {detailDailyIssued > 0 && (
                       <span className="text-[13px] font-semibold text-amber-800 bg-amber-50/80 border border-amber-200/70 px-2.5 py-1 rounded-md flex items-center gap-1">
-                        일상경비: 교부 {formatN(detailDailyIssued)}원 | 지출 {formatN(detailDailySpent)}원 (잔액 <strong className="text-amber-900">{formatN(detailDailyRemaining)}원</strong>)
+                        일상경비: 교부 {formatN(detailDailyIssued)}원 | 지출 {formatN(detailDailySpent)}원
+                        {detailDailyPlanned > 0 ? ` | 예정 ${formatN(detailDailyPlanned)}원` : ''}
+                        {' '}({detailDailyPlanned > 0 ? '예상잔액' : '잔액'} <strong className="text-amber-900">{formatN(detailDailyRemaining)}원</strong>)
                       </span>
                     )}
                   </div>
@@ -573,6 +641,7 @@ const PolicyGroupCardComponent = ({
                     const isFirst = catIdx === 0;
                     const isLast = catIdx === detailCats.length - 1;
                     const catEntries = entriesByCatId[cat.id] || [];
+                    const catSimEntries = simEntriesByCatId[cat.id];
 
                     return (
                       <BudgetCategoryCardItem
@@ -588,6 +657,11 @@ const PolicyGroupCardComponent = ({
                         onEditEntry={openEditEntry}
                         updateCategory={updateCategory}
                         updateEntry={updateEntry}
+                        catSimEntries={catSimEntries}
+                        onEditSimEntry={onEditSimEntry}
+                        onDeleteSimEntry={onDeleteSimEntry}
+                        onSettleSimEntry={onSettleSimEntry}
+                        onAddSimEntryForCategory={onAddSimEntryForCategory}
                       />
                     );
                   })}
@@ -621,7 +695,7 @@ const PolicyGroupCardComponent = ({
                   const cfg = ACTION_TYPE_CONFIG[entry.actionType || 'general'] || ACTION_TYPE_CONFIG['general'];
                   const parentCat = catMap[entry.categoryId];
                   return (
-                    <div key={entry.id} className="flex items-center text-[15px] group bg-white py-2.5 px-3.5 rounded-lg border border-slate-200/70 hover:border-slate-300 transition-colors relative">
+                    <div key={entry.id} className="vlds-cv-row flex items-center text-[15px] group bg-white py-2.5 px-3.5 rounded-lg border border-slate-200/70 hover:border-slate-300 transition-colors relative">
                       <div className="w-[70px] flex-shrink-0">
                         <span className={`px-2 py-1 rounded text-[13px] font-bold border whitespace-nowrap ${cfg.badge === '경비지출' ? 'bg-teal-50/70 text-teal-700 border-teal-200/70' : cfg.badge === '교부' ? 'bg-amber-50/70 text-amber-700 border-amber-200/70' : 'bg-slate-50 text-slate-700 border-slate-200/80'}`}>{cfg.badge}</span>
                       </div>

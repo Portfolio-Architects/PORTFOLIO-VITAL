@@ -115,7 +115,7 @@ export const DutiesTab: React.FC<DutiesTabProps> = React.memo(({
               총 {editingDuties ? editDutiesData.length : activeDuties.length}개 항목
             </span>
             {editingDuties && (
-              <span className="text-[10.5px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 flex items-center gap-1 animate-pulse">
+              <span className="text-[10.5px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
                 엑셀 편집 중
               </span>
@@ -244,9 +244,8 @@ export const DutiesTab: React.FC<DutiesTabProps> = React.memo(({
             <div className="flex items-start gap-2">
               <FileSpreadsheet className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
               <div className="text-xs text-emerald-950 font-medium leading-relaxed">
-                <span className="font-extrabold text-emerald-900">📊 엑셀 편집 모드: </span>
-                스프레드시트처럼 각 셀을 클릭하여 구분, 부서, 역할, 담당자, 연락처, 세부과업을 직접 입력·수정할 수 있습니다.
-                <span className="text-emerald-800 font-bold ml-1">(과업 입력란에서 엔터 줄바꿈 시 개조식 목록으로 자동 분할 저장됩니다.)</span>
+                <span className="font-extrabold text-emerald-900">엑셀 편집 모드: </span>
+                셀 클릭 직접 수정 (과업 줄바꿈 시 개조식 자동 분할)
               </div>
             </div>
             <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
@@ -582,7 +581,7 @@ export const DutiesTab: React.FC<DutiesTabProps> = React.memo(({
                     rows={Math.min(5, Math.max(2, (rawTasksText.split('\n').length || 1)))}
                     value={rawTasksText}
                     onChange={(e) => onUpdateDutyField(duty.id, 'tasks', e.target.value)}
-                    placeholder="과업 내용을 입력하세요 (줄바꿈 시 각 줄이 개조식 목록으로 저장됩니다)"
+                    placeholder="과업 내용 입력 (줄바꿈 시 개조식 자동 분할)"
                     className="w-full text-xs leading-relaxed px-2 py-1.5 border border-slate-200/80 rounded-md bg-white focus:bg-emerald-50/20 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-y"
                   />
                 </div>
@@ -627,10 +626,10 @@ export const DutiesTab: React.FC<DutiesTabProps> = React.memo(({
         </div>
       ) : (
         /* VIEW MODE */
-        <div className="space-y-2.5">
+        <div className={filteredDuties.length === 0 ? 'space-y-2.5' : 'grid grid-cols-1 lg:grid-cols-2 gap-3.5 items-start'}>
           {filteredDuties.length === 0 ? (
             <div className="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-200/80 rounded-xl shadow-2xs">
-              검색 조건과 일치하는 업무분장 항목이 없습니다.
+              일치 업무분장 없음
             </div>
           ) : (
             filteredDuties.map((duty) => {

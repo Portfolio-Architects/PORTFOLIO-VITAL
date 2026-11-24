@@ -146,7 +146,7 @@ export const QuickPlanModal: React.FC<QuickPlanModalProps> = ({
           <input
             type="text"
             required
-            placeholder="지출 예정 품목명 또는 계획 내용을 입력하세요"
+            placeholder="지출 예정 품목명 · 계획 내용 입력"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200/80 bg-white text-slate-900 text-sm focus:outline-none focus:border-slate-400 transition-colors"

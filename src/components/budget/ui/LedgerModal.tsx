@@ -299,7 +299,7 @@ function LedgerModalComponent({
         {/* Notice Bar */}
         <div className="p-3.5 bg-teal-50 border border-teal-100 rounded-lg text-[13.5px] text-teal-800 font-medium leading-relaxed flex items-center justify-between">
           <div>
-            💡 일상경비 및 일반 지출 예산 과목을 교차 대조합니다. 좌우 T계정 내역을 비교하거나 듀얼패널 뷰에서 세부 산출기초 한도와 비교하세요.
+            일상경비 · 일반지출 T계정 교차 대조 · 듀얼패널 산출기초 비교
           </div>
           {selectedEntryIds.length > 0 && (
             <div className="text-xs font-bold text-teal-900 bg-teal-200/80 px-2.5 py-1 rounded-md">
@@ -312,7 +312,7 @@ function LedgerModalComponent({
         {!isSplitView && (
           <div className="h-[65vh] overflow-y-auto space-y-4 pr-2 scrollbar-hide">
             {tAccountData.map((data, idx) => (
-                <div key={data.cat.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow transition-shadow">
+                <div key={data.cat.id} className="vlds-cv-card border border-gray-200 rounded-xl overflow-hidden bg-white shadow-2xs hover:border-slate-300 transition-colors">
                   <details className="group marker:content-['']" open={idx === 0}>
                     <summary className="flex items-center justify-between p-4 bg-gray-50/50 cursor-pointer hover:bg-gray-100 transition-colors list-none">
                       <div className="flex flex-col gap-2">
@@ -495,7 +495,7 @@ function LedgerModalComponent({
 
               <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-hide">
                 {filteredEntries.length === 0 && (
-                  <div className="text-center py-12 text-xs text-slate-400 font-medium">검색 결과가 없습니다.</div>
+                  <div className="text-center py-12 text-xs text-slate-400 font-medium">검색 결과 없음</div>
                 )}
                 {filteredEntries.map(e => {
                   const isSelected = selectedEntryIdsSet.has(e.id);
@@ -630,7 +630,7 @@ function LedgerModalComponent({
                     </div>
 
                     {(!selectedCategory.subItems || selectedCategory.subItems.length === 0) ? (
-                      <div className="text-slate-400 text-center py-4 text-[11px]">등록된 세부 산출기초가 없습니다.</div>
+                      <div className="text-slate-400 text-center py-4 text-[11px]">등록 산출기초 없음</div>
                     ) : (
                       <div className="space-y-2">
                         {selectedCategory.subItems.map((sub, sIdx) => (
@@ -673,7 +673,7 @@ function LedgerModalComponent({
                     </div>
                     <div className="space-y-1 max-h-36 overflow-y-auto">
                       {selectedCatEntries.length === 0 && (
-                        <div className="text-slate-400 text-center py-2 text-[11px]">지출 내역이 없습니다.</div>
+                        <div className="text-slate-400 text-center py-2 text-[11px]">지출 내역 없음</div>
                       )}
                       {selectedCatEntries.map(ce => (
                         <div key={ce.id} className="flex justify-between items-center text-[11px] p-1.5 rounded bg-slate-50 hover:bg-slate-100">
@@ -685,7 +685,7 @@ function LedgerModalComponent({
                   </div>
                 </div>
               ) : (
-                <div className="text-slate-400 text-center py-12 text-xs font-medium">선택된 예산 과목이 없습니다.</div>
+                <div className="text-slate-400 text-center py-12 text-xs font-medium">선택 예산 과목 없음</div>
               )}
             </div>
           </div>

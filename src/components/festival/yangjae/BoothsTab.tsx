@@ -263,13 +263,13 @@ export const BoothsTab: React.FC<BoothsTabProps> = React.memo(({
         <div className="bg-amber-50/80 border border-amber-200/90 rounded-lg p-2.5 text-xs text-amber-950 flex items-center justify-between shadow-3xs">
           <div className="flex items-center gap-1.5">
             <span className="font-extrabold bg-amber-200/80 text-amber-900 px-1.5 py-0.5 rounded text-[10.5px]">순서 변경</span>
-            <span>각 부스 카드의 <strong>▲ / ▼</strong> 버튼을 눌러 순서를 조정한 후 상단 <strong>[저장]</strong>을 눌러주세요.</span>
+            <span><strong>▲ / ▼</strong> 순서 조정 → 상단 <strong>[저장]</strong> 클릭</span>
           </div>
         </div>
       )}
 
       {/* Booths Cards List */}
-      <div className="space-y-2.5">
+      <div className={editingBooths ? 'space-y-2.5' : 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 items-start'}>
         {filteredBooths.map((booth, fIdx) => {
           const isHQ = booth.category === '운영본부' || booth.category === '운영주체' || (typeof booth.name === 'string' && booth.name.includes('보건행정팀'));
           const operatingBooths = activeBooths.filter(
@@ -295,7 +295,7 @@ export const BoothsTab: React.FC<BoothsTabProps> = React.memo(({
           return (
             <div 
               key={`booth-card-${booth.id}`}
-              className={`p-3.5 bg-white border rounded-xl transition-colors duration-150 ${
+              className={`vlds-cv-card p-3.5 bg-white border rounded-xl transition-colors duration-150 ${
                 isHQ
                   ? 'border-amber-300/90 bg-amber-50/15 shadow-2xs'
                   : isEditingSingle

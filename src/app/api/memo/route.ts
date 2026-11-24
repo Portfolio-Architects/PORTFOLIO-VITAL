@@ -177,6 +177,7 @@ export async function POST(req: NextRequest) {
                     : parsed.tags,
                 numericHighlight: (m.numericHighlight as string | undefined) ?? parsed.numericHighlight,
                 dateHighlight: (m.dateHighlight as string | undefined) ?? parsed.dateHighlight,
+                issueMeta: (m.issueMeta as WorkingMemoryMemo['issueMeta']) ?? parsed.issueMeta,
               } as WorkingMemoryMemo;
             });
         } else if (body.memo && typeof body.memo === 'object' && body.memo.content) {
@@ -198,6 +199,7 @@ export async function POST(req: NextRequest) {
                   : parsed.tags,
               numericHighlight: body.memo.numericHighlight ?? parsed.numericHighlight,
               dateHighlight: body.memo.dateHighlight ?? parsed.dateHighlight,
+              issueMeta: body.memo.issueMeta ?? parsed.issueMeta,
             },
           ];
         } else if (typeof body.content === 'string' && body.content.trim()) {
@@ -243,6 +245,7 @@ export async function POST(req: NextRequest) {
                   tags: updates.tags || reParsed.tags,
                   numericHighlight: updates.numericHighlight ?? reParsed.numericHighlight,
                   dateHighlight: updates.dateHighlight ?? reParsed.dateHighlight,
+                  issueMeta: updates.issueMeta ?? reParsed.issueMeta,
                 }
               : {}),
             updatedAt: safeNow,

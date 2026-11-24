@@ -3,8 +3,11 @@ import { spawn, execFile } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-const ARCHIVE_ROOT = path.resolve('F:\\_Organized_Archive');
-const DESKTOP_ROOT = path.resolve('D:\\Desktop');
+// Always evaluate against Win32 path semantics because allowed archive/desktop roots use Windows drive paths,
+// ensuring consistent traversal defense even when executed on POSIX CI runners.
+const winPath = path.win32;
+const ARCHIVE_ROOT = winPath.resolve('F:\\_Organized_Archive');
+const DESKTOP_ROOT = winPath.resolve('D:\\Desktop');
 const ALLOWED_ROOTS = [ARCHIVE_ROOT, DESKTOP_ROOT];
 
 /**
@@ -50,18 +53,18 @@ export function resolveAndValidatePath(
     return { ok: false, status: 400, error: 'Null bytes forbidden in path' };
   }
 
-  // Resolve absolute path or relative to ARCHIVE_ROOT
-  const fullPath = path.isAbsolute(decodedPath)
-    ? path.resolve(decodedPath)
-    : path.resolve(ARCHIVE_ROOT, decodedPath);
+  // Resolve absolute Win32 path or relative to ARCHIVE_ROOT
+  const fullPath = winPath.isAbsolute(decodedPath)
+    ? winPath.resolve(decodedPath)
+    : winPath.resolve(ARCHIVE_ROOT, decodedPath);
 
-  const normalizedTarget = path.normalize(fullPath).toLowerCase();
+  const normalizedTarget = winPath.normalize(fullPath).toLowerCase();
 
   const isAllowed = ALLOWED_ROOTS.some((root) => {
-    const normalizedRoot = path.normalize(root).toLowerCase();
-    const rootWithSep = normalizedRoot.endsWith(path.sep)
+    const normalizedRoot = winPath.normalize(root).toLowerCase();
+    const rootWithSep = normalizedRoot.endsWith(winPath.sep)
       ? normalizedRoot
-      : normalizedRoot + path.sep;
+      : normalizedRoot + winPath.sep;
     return (
       normalizedTarget === normalizedRoot ||
       normalizedTarget.startsWith(rootWithSep)

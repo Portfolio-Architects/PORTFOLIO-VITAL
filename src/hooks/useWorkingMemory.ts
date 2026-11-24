@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import { useQuery, QueryClientContext } from '@tanstack/react-query';
 import { queryClient as defaultQueryClient } from '@/lib/query-client';
-import { WorkingMemoryCategory, WorkingMemoryMemo, WorkingMemorySource } from '@/types';
+import { StickyNoteColor, WorkingMemoryCategory, WorkingMemoryMemo, WorkingMemorySource } from '@/types';
 import { readSheet, addRow, updateRow, deleteRow } from '@/lib/sheets-api';
 import {
   createWorkingMemoryMemosFromText,
@@ -188,12 +188,14 @@ export function useWorkingMemory(options: UseWorkingMemoryOptions = {}) {
     async (
       content: string,
       explicitCategory?: WorkingMemoryCategory,
-      source: WorkingMemorySource = 'pc'
+      source: WorkingMemorySource = 'pc',
+      color?: StickyNoteColor
     ): Promise<WorkingMemoryMemo | null> => {
       const createdList = createWorkingMemoryMemosFromText({
         content,
         explicitCategory,
         source,
+        color,
       });
       if (createdList.length === 0) return null;
 
@@ -307,6 +309,52 @@ export function useWorkingMemory(options: UseWorkingMemoryOptions = {}) {
     [autoFetch]
   );
 
+  const changeMemoColor = useCallback(
+    async (id: string, color: StickyNoteColor) => {
+      const current = loadInitialStore();
+      const target = current.find((m) => m.id === id);
+      if (!target) return;
+      const now = nextMonotonicIso(target.updatedAt, target.reflectedAt);
+
+      const next = current.map((m) =>
+        m.id === id ? { ...m, color, updatedAt: now } : m
+      );
+      updateStoreAndNotify(next);
+
+      const updates = {
+        color,
+        updatedAt: now,
+      };
+
+      if (!autoFetch && typeof fetch === 'function') {
+        try {
+          await fetch('/api/memo', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Memo-Pin': getSavedPin(),
+            },
+            body: JSON.stringify({
+              action: 'update',
+              id,
+              updates,
+            }),
+          });
+        } catch {
+          // Optimistic state preserved locally
+        }
+        return;
+      }
+
+      try {
+        await updateRow(SHEET_NAME, id, updates);
+      } catch {
+        // Optimistic state preserved locally
+      }
+    },
+    [autoFetch]
+  );
+
   const togglePin = useCallback(
     async (id: string) => {
       const current = loadInitialStore();
@@ -371,6 +419,7 @@ export function useWorkingMemory(options: UseWorkingMemoryOptions = {}) {
               tags: parsed.tags,
               numericHighlight: parsed.numericHighlight,
               dateHighlight: parsed.dateHighlight,
+              issueMeta: parsed.issueMeta,
               updatedAt: now,
             }
           : m
@@ -383,6 +432,7 @@ export function useWorkingMemory(options: UseWorkingMemoryOptions = {}) {
         tags: parsed.tags,
         numericHighlight: parsed.numericHighlight,
         dateHighlight: parsed.dateHighlight,
+        issueMeta: parsed.issueMeta,
         updatedAt: now,
       };
 
@@ -633,6 +683,7 @@ export function useWorkingMemory(options: UseWorkingMemoryOptions = {}) {
     markReflected,
     reopenMemo,
     togglePin,
+    changeMemoColor,
     updateMemoContent,
     deleteMemo,
     refreshFromSSOT,

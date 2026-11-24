@@ -21,12 +21,12 @@ function ExpenseBatchToolbarComponent({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-200">
-      <div className="bg-slate-900/95 text-slate-100 border border-slate-700/80 shadow-2xl rounded-2xl px-5 py-3 flex items-center gap-3 sm:gap-4 text-xs font-semibold select-none">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+      <div className="bg-slate-900/95 text-slate-100 border border-slate-700/80 shadow-md rounded-2xl px-5 py-3 flex items-center gap-3 sm:gap-4 text-xs font-semibold select-none">
         
         {/* Selected Count Indicator */}
         <div className="flex items-center gap-2 pr-3 border-r border-slate-700/80">
-          <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-pulse" />
+          <span className="w-2.5 h-2.5 rounded-full bg-teal-400" />
           <span className="font-extrabold text-white text-sm tracking-tight">
             {selectedCount}<span className="text-xs text-slate-300 font-normal ml-1">개 선택됨</span>
           </span>

@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { BudgetCategory, BudgetEntry } from '@/types';
+import { BudgetCategory, BudgetEntry, SimulationEntry } from '@/types';
 import { CategoryStats } from '@/hooks/useBudget';
-import { ChevronDown, Pencil, Trash2, ArrowUp, ArrowDown, FileCheck } from 'lucide-react';
+import { ChevronDown, Pencil, Trash2, ArrowUp, ArrowDown, FileCheck, CheckCircle2, CalendarClock, Plus, Lock } from 'lucide-react';
 import { InlineEditCell } from './InlineEditCell';
 import { useDocumentVisibility } from '@/hooks/useDocumentVisibility';
 
@@ -21,6 +21,11 @@ export interface BudgetCategoryCardItemProps {
   onEditEntry: (entry: BudgetEntry) => void;
   updateCategory?: (id: string, updates: Partial<BudgetCategory>) => void;
   updateEntry?: (id: string, updates: Partial<BudgetEntry>) => void;
+  catSimEntries?: SimulationEntry[];
+  onEditSimEntry?: (entry: SimulationEntry) => void;
+  onDeleteSimEntry?: (id: string) => void;
+  onSettleSimEntry?: (simId: string) => void;
+  onAddSimEntryForCategory?: (cat: BudgetCategory) => void;
 }
 
 function areBudgetCategoryCardItemPropsEqual(
@@ -35,6 +40,10 @@ function areBudgetCategoryCardItemPropsEqual(
   if (prevProps.onEditEntry !== nextProps.onEditEntry) return false;
   if (prevProps.updateCategory !== nextProps.updateCategory) return false;
   if (prevProps.updateEntry !== nextProps.updateEntry) return false;
+  if (prevProps.onEditSimEntry !== nextProps.onEditSimEntry) return false;
+  if (prevProps.onDeleteSimEntry !== nextProps.onDeleteSimEntry) return false;
+  if (prevProps.onSettleSimEntry !== nextProps.onSettleSimEntry) return false;
+  if (prevProps.onAddSimEntryForCategory !== nextProps.onAddSimEntryForCategory) return false;
 
   const pCat = prevProps.cat;
   const nCat = nextProps.cat;
@@ -79,6 +88,7 @@ function areBudgetCategoryCardItemPropsEqual(
       pStats.totalBudget !== nStats.totalBudget ||
       pStats.spent !== nStats.spent ||
       pStats.planned !== nStats.planned ||
+      pStats.bidSaving !== nStats.bidSaving ||
       pStats.remaining !== nStats.remaining ||
       pStats.usageRate !== nStats.usageRate ||
       pStats.generalSpent !== nStats.generalSpent ||
@@ -107,6 +117,22 @@ function areBudgetCategoryCardItemPropsEqual(
     }
   }
 
+  const pSimEntries = prevProps.catSimEntries || [];
+  const nSimEntries = nextProps.catSimEntries || [];
+  if (pSimEntries.length !== nSimEntries.length) return false;
+  for (let i = 0; i < pSimEntries.length; i++) {
+    if (
+      pSimEntries[i].id !== nSimEntries[i].id ||
+      pSimEntries[i].name !== nSimEntries[i].name ||
+      pSimEntries[i].amount !== nSimEntries[i].amount ||
+      pSimEntries[i].status !== nSimEntries[i].status ||
+      pSimEntries[i].actionType !== nSimEntries[i].actionType ||
+      pSimEntries[i].memo !== nSimEntries[i].memo
+    ) {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -121,11 +147,47 @@ const BudgetCategoryCardItemComponent = ({
   onDeleteCat,
   onEditEntry,
   updateCategory,
-  updateEntry
+  updateEntry,
+  catSimEntries,
+  onEditSimEntry,
+  onDeleteSimEntry,
+  onSettleSimEntry,
+  onAddSimEntryForCategory,
 }: BudgetCategoryCardItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeCellId, setActiveCellId] = useState<string | null>(null);
   const isVisible = useDocumentVisibility();
+
+  const { activeSimEntries, activeSimTotal, activeSimDailyTotal, activeBidSavingEntries, activeBidSavingTotal } = useMemo(() => {
+    const list = catSimEntries || [];
+    const active: SimulationEntry[] = [];
+    const bidSavings: SimulationEntry[] = [];
+    let total = 0;
+    let daily = 0;
+    let bidTotal = 0;
+    for (let i = 0; i < list.length; i++) {
+      const s = list[i];
+      if (s.status !== 'SETTLED') {
+        if (s.actionType === 'bid_saving') {
+          bidSavings.push(s);
+          bidTotal += s.amount || 0;
+        } else {
+          active.push(s);
+          total += s.amount || 0;
+          if (s.actionType === 'daily_expense') {
+            daily += s.amount || 0;
+          }
+        }
+      }
+    }
+    return {
+      activeSimEntries: active,
+      activeSimTotal: total,
+      activeSimDailyTotal: daily,
+      activeBidSavingEntries: bidSavings,
+      activeBidSavingTotal: bidTotal,
+    };
+  }, [catSimEntries]);
 
   const { generalEntries, dailyExpenseEntries, totalIssuance, totalDailyExpense, dailyRemaining } = useMemo(() => {
     const gen: BudgetEntry[] = [];
@@ -220,7 +282,7 @@ const BudgetCategoryCardItemComponent = ({
   if (!stats) return null;
 
   return (
-    <div className="group/item relative bg-white border border-slate-200/80 rounded-xl p-4 hover:border-slate-300 transition-colors">
+    <div className="vlds-cv-card group/item relative bg-white border border-slate-200/80 rounded-xl p-4 hover:border-slate-300 transition-colors">
       <div className={`flex items-center justify-between gap-2 ${isExpanded ? 'mb-3' : 'mb-0'}`}>
         <div 
           className="text-[15px] font-bold flex items-center gap-2.5 text-slate-800 cursor-pointer hover:text-indigo-600 transition-colors select-none min-w-0 flex-1" 
@@ -250,8 +312,30 @@ const BudgetCategoryCardItemComponent = ({
               <span className="text-slate-300">|</span>
               <span className="font-bold text-emerald-700">미집행 {(cat.totalBudget > 0 ? (stats.remaining / cat.totalBudget * 100) : 0).toFixed(1)}%</span>
               <span className="text-slate-300">|</span>
-              <span className="font-black text-slate-900">잔여 {formatN(stats.remaining)}원</span>
+              <span className={`font-black ${stats.remaining < 0 ? 'text-rose-600' : 'text-slate-900'}`}>잔여 {formatN(stats.remaining)}원</span>
             </span>
+
+            {activeSimEntries.length > 0 && (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50/80 border border-indigo-200/70 text-indigo-700 text-xs font-mono tabular-nums font-bold"
+                title={`미정산 지출 예정 ${activeSimEntries.length}건 · 총 ${formatN(activeSimTotal)}원`}
+              >
+                <CalendarClock size={12} className="shrink-0" />
+                <span>예정 {activeSimEntries.length}건 · {formatN(activeSimTotal)}원</span>
+                {activeSimDailyTotal > 0 && (
+                  <span className="text-amber-700 font-semibold">(일상 {formatN(activeSimDailyTotal)}원)</span>
+                )}
+              </span>
+            )}
+            {activeBidSavingEntries.length > 0 && (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 border border-violet-200/70 text-violet-800 text-xs font-mono tabular-nums font-bold"
+                title={`낙찰차액(집행유보) ${activeBidSavingEntries.length}건 · 총 ${formatN(activeBidSavingTotal)}원`}
+              >
+                <Lock size={11} className="shrink-0 text-violet-600" />
+                <span>낙찰차액 {activeBidSavingEntries.length}건 · {formatN(activeBidSavingTotal)}원</span>
+              </span>
+            )}
 
             <div className={`text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
               <ChevronDown size={15} />
@@ -269,6 +353,19 @@ const BudgetCategoryCardItemComponent = ({
           )}
         </div>
         <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity flex-shrink-0">
+          {onAddSimEntryForCategory && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddSimEntryForCategory(cat);
+              }}
+              className="p-1.5 rounded hover:bg-indigo-50 text-indigo-500 hover:text-indigo-700 cursor-pointer"
+              title="이 통계목 지출 예정 등록"
+            >
+              <Plus size={13} />
+            </button>
+          )}
           {onSwapCat && !isFirst && (
             <button onClick={(e) => { e.stopPropagation(); onSwapCat(cat.id, -1); }} className="p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700" title="위로 이동"><ArrowUp size={13} /></button>
           )}
@@ -541,6 +638,129 @@ const BudgetCategoryCardItemComponent = ({
                     />
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Planned Simulation Entries Section */}
+          {catSimEntries && catSimEntries.length > 0 && (
+            <div className="bg-indigo-50/40 border border-indigo-200/70 rounded-xl p-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2.5 pb-2 border-b border-indigo-200/60">
+                <div className="text-[14px] sm:text-[15px] font-bold text-indigo-950 flex items-center gap-2 flex-wrap">
+                  <CalendarClock size={15} className="text-indigo-600 shrink-0" />
+                  <span>지출 예정 (시뮬레이션)</span>
+                  {activeSimEntries.length > 0 && (
+                    <span className="text-xs font-mono tabular-nums px-2 py-0.5 rounded bg-white border border-indigo-200/80 text-indigo-700">
+                      미정산 {activeSimEntries.length}건 · {formatN(activeSimTotal)}원
+                    </span>
+                  )}
+                  {activeBidSavingEntries.length > 0 && (
+                    <span className="text-xs font-mono tabular-nums px-2 py-0.5 rounded bg-violet-50 border border-violet-200/80 text-violet-800 inline-flex items-center gap-1">
+                      <Lock size={11} className="text-violet-600" />
+                      낙찰차액 {activeBidSavingEntries.length}건 · {formatN(activeBidSavingTotal)}원
+                    </span>
+                  )}
+                </div>
+                {onAddSimEntryForCategory && (
+                  <button
+                    type="button"
+                    onClick={() => onAddSimEntryForCategory(cat)}
+                    className="text-xs font-bold px-2.5 py-1 rounded-md bg-white hover:bg-indigo-50 border border-indigo-200/80 text-indigo-700 flex items-center gap-1 transition-colors cursor-pointer w-fit"
+                  >
+                    <Plus size={12} /> 예정 추가
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                {catSimEntries.map((sim) => {
+                  const isSettled = sim.status === 'SETTLED';
+                  const isDaily = sim.actionType === 'daily_expense';
+                  const isBidSaving = sim.actionType === 'bid_saving';
+                  return (
+                    <div
+                      key={sim.id}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 px-3 rounded-lg border transition-colors ${
+                        isSettled
+                          ? 'bg-slate-50/80 border-slate-200/70 opacity-75'
+                          : isBidSaving
+                            ? 'bg-white border-violet-200/80 hover:border-violet-300'
+                            : 'bg-white border-indigo-100 hover:border-indigo-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+                        <span
+                          className={`text-[11px] font-bold px-2 py-0.5 rounded border shrink-0 ${
+                            isSettled
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+                              : isDaily
+                                ? 'bg-amber-50 text-amber-800 border-amber-200/80'
+                                : isBidSaving
+                                  ? 'bg-violet-50 text-violet-800 border-violet-200/80'
+                                  : 'bg-indigo-50 text-indigo-700 border-indigo-200/80'
+                          }`}
+                        >
+                          {isSettled ? '정산완료' : isDaily ? '일상경비 예정' : isBidSaving ? '낙찰차액 · 유보' : '일반 예정'}
+                        </span>
+                        <span className={`text-sm font-bold truncate ${isSettled ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
+                          {sim.name}
+                        </span>
+                        <span className="text-xs text-slate-400 font-mono tabular-nums shrink-0">
+                          {formatN(sim.unitPrice)} × {sim.quantity}
+                        </span>
+                        {sim.memo && (
+                          <span className="text-xs text-slate-500 truncate max-w-[260px]" title={sim.memo}>
+                            · {sim.memo}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2 shrink-0">
+                        <span className={`text-sm font-black font-mono tabular-nums ${isBidSaving ? 'text-violet-700' : 'text-slate-900'}`}>
+                          {formatN(sim.amount)}원
+                        </span>
+                        {!isSettled && (
+                          <div className="flex items-center gap-1">
+                            {!isBidSaving && onSettleSimEntry && (
+                              <button
+                                type="button"
+                                onClick={() => onSettleSimEntry(sim.id)}
+                                className="px-2 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 text-emerald-800 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                                title="실지출 정산 전환"
+                              >
+                                <CheckCircle2 size={12} /> 실지출 전환
+                              </button>
+                            )}
+                            {onEditSimEntry && (
+                              <button
+                                type="button"
+                                onClick={() => onEditSimEntry(sim)}
+                                className="p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                                title="예정 항목 수정"
+                              >
+                                <Pencil size={13} />
+                              </button>
+                            )}
+                            {onDeleteSimEntry && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm(`'${sim.name}' 지출 예정 항목을 삭제할까요?`)) {
+                                    onDeleteSimEntry(sim.id);
+                                  }
+                                }}
+                                className="p-1.5 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                                title="예정 항목 삭제"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

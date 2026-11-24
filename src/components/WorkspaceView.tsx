@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useTransition } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { BudgetCategory, BudgetEntry, InventoryItem, StockChange } from '@/types';
+import { CategoryStats } from '@/hooks/useBudget';
+
 function BudgetDashboardSkeleton() {
   return (
     <div className="w-full space-y-6 animate-pulse">
@@ -25,23 +27,6 @@ const BudgetDashboard = dynamic(
     loading: () => <BudgetDashboardSkeleton />,
   }
 );
-import { CategoryStats } from '@/hooks/useBudget';
-import BudgetSimulatorSkeleton from '@/components/budget/ui/BudgetSimulatorSkeleton';
-import { WorkingMemoryContextBanner } from '@/components/dashboard/WorkingMemoryContextBanner';
-import { SegmentedTabs, SegmentedTabItem } from '@/components/ui/segmented-tabs';
-
-const WORKSPACE_TABS: ReadonlyArray<SegmentedTabItem<'budget' | 'simulator'>> = [
-  { id: 'budget', label: '예산 대조보드', dotIndicator: true },
-  { id: 'simulator', label: '예산 시뮬레이터', dotIndicator: true },
-];
-
-const BudgetSimulator = dynamic(
-  () => import('@/components/budget/BudgetSimulator').then((mod) => mod.BudgetSimulator),
-  {
-    ssr: false,
-    loading: () => <BudgetSimulatorSkeleton />,
-  }
-);
 
 export interface WorkspaceViewProps {
   // Budget (optional, forwarded to BudgetDashboard if passed)
@@ -58,9 +43,14 @@ export interface WorkspaceViewProps {
   batchDeleteEntries?: (ids: string[]) => void;
   batchSettleEntries?: (ids: string[], status: 'SETTLED' | 'PENDING' | 'REJECTED') => void;
   getCategoryStats?: (id: string) => CategoryStats | null;
-  overallStats?: { 
-    totalBudget: number; totalSpent: number; totalPlanned: number; remaining: number;
-    dailyExpenseIssued: number; dailyExpenseSpent: number; dailyExpenseRemaining: number;
+  overallStats?: {
+    totalBudget: number;
+    totalSpent: number;
+    totalPlanned: number;
+    remaining: number;
+    dailyExpenseIssued: number;
+    dailyExpenseSpent: number;
+    dailyExpenseRemaining: number;
   };
   // Inventory (상위 컴포넌트 호환용)
   inventoryItems?: InventoryItem[];
@@ -72,46 +62,11 @@ export interface WorkspaceViewProps {
   // Signal (상위 컴포넌트 호환용)
   addSignal?: (text: string) => void;
   initialTab?: 'budget' | 'inventory' | 'simulator';
+  focusSeq?: number;
 }
 
 function WorkspaceViewComponent(props: WorkspaceViewProps = {}) {
-  const [activeTab, setActiveTab] = useState<'budget' | 'simulator'>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('hchps-workspace-active-tab');
-        if (saved === 'budget' || saved === 'simulator') {
-          return saved;
-        }
-      } catch {}
-    }
-    return props.initialTab === 'simulator' ? 'simulator' : 'budget';
-  });
-  const [visitedTabs, setVisitedTabs] = useState<Record<string, boolean>>(() => ({
-    budget: activeTab === 'budget',
-    simulator: activeTab === 'simulator',
-  }));
-  const [, startTransition] = useTransition();
   const [zodError, setZodError] = useState<{ sheetName: string; rowId: string; errors: any } | null>(null);
-
-  const handleTabChange = useCallback((tab: 'budget' | 'simulator') => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('hchps-workspace-active-tab', tab);
-      } catch {}
-    }
-    setVisitedTabs((prev) => (prev[tab] ? prev : { ...prev, [tab]: true }));
-    startTransition(() => {
-      setActiveTab(tab);
-    });
-  }, []);
-
-  const [prevInitialTab, setPrevInitialTab] = useState(props.initialTab);
-  if (props.initialTab && props.initialTab !== prevInitialTab) {
-    const normalizedTab = props.initialTab === 'simulator' ? 'simulator' : 'budget';
-    setPrevInitialTab(props.initialTab);
-    setVisitedTabs((prev) => (prev[normalizedTab] ? prev : { ...prev, [normalizedTab]: true }));
-    setActiveTab(normalizedTab);
-  }
 
   const handleZodError = useCallback((e: Event) => {
     const customEvent = e as CustomEvent;
@@ -126,17 +81,10 @@ function WorkspaceViewComponent(props: WorkspaceViewProps = {}) {
     };
   }, [handleZodError]);
 
+  const isSimulatorFocus = props.initialTab === 'simulator';
+
   return (
     <div className="w-full flex flex-col gap-5">
-      {/* Tab Switcher (VLDS SegmentedTabs) */}
-      <SegmentedTabs
-        items={WORKSPACE_TABS}
-        activeId={activeTab}
-        onChange={handleTabChange}
-        size="md"
-        className="w-fit"
-      />
-
       {zodError && (
         <div className="bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-xl flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -148,7 +96,8 @@ function WorkspaceViewComponent(props: WorkspaceViewProps = {}) {
               </p>
             </div>
           </div>
-          <button 
+          <button
+            type="button"
             onClick={() => window.location.reload()}
             className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-colors shadow-2xs cursor-pointer shrink-0"
           >
@@ -158,41 +107,29 @@ function WorkspaceViewComponent(props: WorkspaceViewProps = {}) {
       )}
 
       <div className="w-full">
-        {visitedTabs.budget && (
-          <div className={activeTab === 'budget' ? 'block' : 'hidden'}>
-            <BudgetDashboard
-              categories={props.budgetCategories}
-              entries={props.budgetEntries}
-              addCategory={props.addCategory}
-              updateCategory={props.updateCategory}
-              deleteCategory={props.deleteCategory}
-              replaceCategories={props.replaceCategories}
-              addEntry={props.addEntry}
-              updateEntry={props.updateEntry}
-              deleteEntry={props.deleteEntry}
-              batchUpdateEntries={props.batchUpdateEntries}
-              batchDeleteEntries={props.batchDeleteEntries}
-              batchSettleEntries={props.batchSettleEntries}
-              getCategoryStats={props.getCategoryStats}
-              overallStats={props.overallStats}
-              onNavigateToSimulator={() => handleTabChange('simulator')}
-            />
-          </div>
-        )}
-        {visitedTabs.simulator && (
-          <div className={activeTab === 'simulator' ? 'block' : 'hidden'}>
-            <BudgetSimulator />
-          </div>
-        )}
+        <BudgetDashboard
+          categories={props.budgetCategories}
+          entries={props.budgetEntries}
+          addCategory={props.addCategory}
+          updateCategory={props.updateCategory}
+          deleteCategory={props.deleteCategory}
+          replaceCategories={props.replaceCategories}
+          addEntry={props.addEntry}
+          updateEntry={props.updateEntry}
+          deleteEntry={props.deleteEntry}
+          batchUpdateEntries={props.batchUpdateEntries}
+          batchDeleteEntries={props.batchDeleteEntries}
+          batchSettleEntries={props.batchSettleEntries}
+          getCategoryStats={props.getCategoryStats}
+          overallStats={props.overallStats}
+          initialSubView={isSimulatorFocus ? 'plan' : 'categories'}
+          initialShowBurnUp={isSimulatorFocus}
+          focusSeq={props.focusSeq}
+        />
       </div>
-
-      <WorkingMemoryContextBanner
-        contextModule={activeTab === 'simulator' ? 'simulator' : 'workspace'}
-      />
     </div>
   );
 }
 
 export const WorkspaceView = React.memo(WorkspaceViewComponent);
 WorkspaceView.displayName = 'WorkspaceView';
-

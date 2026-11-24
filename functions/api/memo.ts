@@ -22,13 +22,23 @@ export interface Env {
   MEMO_PIN?: string;
 }
 
+interface WorkingMemoryEdgeIssueMeta {
+  severity?: 'low' | 'medium' | 'high' | 'critical';
+  responsibleParty?: string;
+  proximateCause?: string;
+  rootCause?: string;
+  machineFix?: string;
+  doubleDoRequired?: boolean;
+}
+
 interface WorkingMemoryEdgeRecord {
   id: string;
   content: string;
-  category: 'budget' | 'audit' | 'festival' | 'directive' | 'general';
+  category: 'budget' | 'audit' | 'festival' | 'directive' | 'issue_log' | 'general';
   tags: string[];
   numericHighlight?: string;
   dateHighlight?: string;
+  issueMeta?: WorkingMemoryEdgeIssueMeta;
   status: 'pending' | 'reflected';
   pinned?: boolean;
   source?: 'pc' | 'mobile';

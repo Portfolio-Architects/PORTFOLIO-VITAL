@@ -21,7 +21,7 @@ export interface Task {
 }
 
 // ============ Budget Module ============
-export type BudgetActionType = 'general' | 'issuance' | 'daily_expense' | 'transfer' | 'correction' | 'settle'; // 일반품의, 일상경비교부, 일상경비지출, 이용/전용, 정정, 정산(결산)
+export type BudgetActionType = 'general' | 'issuance' | 'daily_expense' | 'bid_saving' | 'transfer' | 'correction' | 'settle'; // 일반품의, 일상경비교부, 일상경비지출, 낙찰차액(집행유보·불용), 이용/전용, 정정, 정산(결산)
 
 export interface BudgetFundingSplit {
   source: string;
@@ -200,10 +200,11 @@ export interface ProjectSimulationSummary {
   totalBudget: number;         // 총 예산액
   currentSpent: number;        // 현재 집행액
   currentRemaining: number;    // 현재 집행 잔액 (totalBudget - currentSpent)
-  simulatedExpenditure: number;// 확정 지출 예정액 합계
+  simulatedExpenditure: number;// 확정 지출 예정액 합계 (낙찰차액 제외)
   simulatedGeneralExpenditure?: number; // 일반 지출 예정액
   simulatedDailyExpenditure?: number;   // 일상경비 지출 예정액
-  finalExpectedBalance: number;// 최종 예상 잔액 (currentRemaining - simulatedGeneralExpenditure)
+  simulatedBidSaving?: number;          // 낙찰차액(집행유보·불용 확정액)
+  finalExpectedBalance: number;// 최종 예상 잔액 (currentRemaining - simulatedGeneralExpenditure - simulatedBidSaving - shortfall)
   finalDailyExpenseRemaining?: number; // 최종 예상 일상경비 잔액 (dailyExpenseRemaining - simulatedDailyExpenditure)
   executionRate: number;       // 집행률 (%)
   isDeficit: boolean;          // finalExpectedBalance < 0
@@ -224,6 +225,7 @@ export interface StatItemSimulationSummary {
   simulatedExpenditure: number;
   simulatedGeneralExpenditure?: number;
   simulatedDailyExpenditure?: number;
+  simulatedBidSaving?: number;   // 낙찰차액(집행유보·불용 확정액)
   finalExpectedBalance: number;
   finalDailyExpenseRemaining?: number;
   isDeficit: boolean;
@@ -259,22 +261,42 @@ export interface Contact {
   phone: string;
   email?: string;
   notes?: string;
+  lastContactedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 // ============ Working Memory Module ============
-export type WorkingMemoryCategory = 'budget' | 'audit' | 'festival' | 'directive' | 'general';
+export type WorkingMemoryCategory =
+  | 'budget'
+  | 'audit'
+  | 'festival'
+  | 'directive'
+  | 'issue_log'
+  | 'general';
 export type WorkingMemoryStatus = 'pending' | 'reflected';
 export type WorkingMemorySource = 'pc' | 'mobile';
+export type WorkingMemoryIssueSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type StickyNoteColor = 'yellow' | 'pink' | 'mint' | 'sky';
+
+export interface WorkingMemoryIssueMeta {
+  severity?: WorkingMemoryIssueSeverity;
+  responsibleParty?: string;
+  proximateCause?: string;
+  rootCause?: string;
+  machineFix?: string;
+  doubleDoRequired?: boolean;
+}
 
 export interface WorkingMemoryMemo {
   id: string;
   content: string;
   category: WorkingMemoryCategory;
   tags: string[];
+  color?: StickyNoteColor;
   numericHighlight?: string;
   dateHighlight?: string;
+  issueMeta?: WorkingMemoryIssueMeta;
   status: WorkingMemoryStatus;
   source?: WorkingMemorySource;
   pinned?: boolean;

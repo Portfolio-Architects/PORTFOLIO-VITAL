@@ -18,6 +18,7 @@ import {
   Layers,
   Table as TableIcon,
   Coins,
+  Lock,
 } from 'lucide-react';
 
 export interface SimulationEntryListProps {
@@ -44,7 +45,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
   const [viewMode, setViewMode] = useState<EntryListViewMode>('grouped');
 
   // Filter entries and accumulate total in a single pass
-  const { filteredEntries, totalAmountSum, plannedCount, settledCount } = useMemo(() => {
+  const { filteredEntries, totalAmountSum, bidSavingSum, plannedCount, settledCount } = useMemo(() => {
     let pCount = 0;
     let sCount = 0;
     for (let i = 0; i < entries.length; i++) {
@@ -55,6 +56,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
     const trimmed = keyword.trim().toLowerCase();
     const result: SimulationEntry[] = [];
     let sum = 0;
+    let bidSum = 0;
 
     for (let i = 0; i < entries.length; i++) {
       const item = entries[i];
@@ -73,10 +75,14 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
       }
 
       result.push(item);
-      sum += (item.amount || 0);
+      if (item.actionType === 'bid_saving') {
+        bidSum += (item.amount || 0);
+      } else {
+        sum += (item.amount || 0);
+      }
     }
 
-    return { filteredEntries: result, totalAmountSum: sum, plannedCount: pCount, settledCount: sCount };
+    return { filteredEntries: result, totalAmountSum: sum, bidSavingSum: bidSum, plannedCount: pCount, settledCount: sCount };
   }, [entries, keyword, statusTab]);
 
   // Grouped Entries by detailedProject + statItem
@@ -88,6 +94,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
         statItem: string;
         items: SimulationEntry[];
         subtotalAmount: number;
+        subtotalBidSaving: number;
       }
     >();
 
@@ -101,11 +108,16 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
           statItem: item.statItem,
           items: [],
           subtotalAmount: 0,
+          subtotalBidSaving: 0,
         };
         map.set(key, group);
       }
       group.items.push(item);
-      group.subtotalAmount += (item.amount || 0);
+      if (item.actionType === 'bid_saving') {
+        group.subtotalBidSaving += (item.amount || 0);
+      } else {
+        group.subtotalAmount += (item.amount || 0);
+      }
     }
 
     return Array.from(map.values()).sort((a, b) => {
@@ -258,7 +270,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
               {groupedEntries.map((group, groupIdx) => (
                 <div
                   key={`sim-grp-${group.detailedProject}-${group.statItem}-${groupIdx}`}
-                  className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-2xs space-y-0"
+                  className="vlds-cv-card bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-2xs space-y-0"
                 >
                   {/* Group Header */}
                   <div className="bg-slate-50/80 px-4 py-3 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-2">
@@ -276,11 +288,17 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                         등록 {group.items.length}건
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 font-mono text-xs tabular-nums">
+                    <div className="flex items-center gap-2 font-mono text-xs tabular-nums flex-wrap">
                       <span className="text-slate-500 font-sans text-xs font-semibold">통계목 지출 소계:</span>
                       <span className="font-extrabold text-base text-indigo-600 bg-white border border-slate-200/80 px-3 py-0.5 rounded-lg">
                         ₩{group.subtotalAmount.toLocaleString('ko-KR')}
                       </span>
+                      {group.subtotalBidSaving > 0 && (
+                        <span className="font-extrabold text-xs text-violet-800 bg-violet-50 border border-violet-200/80 px-2.5 py-1 rounded-lg inline-flex items-center gap-1">
+                          <Lock className="w-3 h-3 text-violet-600" />
+                          낙찰차액 ₩{group.subtotalBidSaving.toLocaleString('ko-KR')}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -288,6 +306,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                   <div className="divide-y divide-slate-100">
                     {group.items.map((item, itemIdx) => {
                       const isSettled = item.status === 'SETTLED';
+                      const isBidSaving = item.actionType === 'bid_saving';
                       return (
                         <div
                           key={`sim-grp-item-${item.id}-${itemIdx}`}
@@ -301,6 +320,10 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                               <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 flex items-center gap-1 shrink-0 mt-0.5">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" /> 집행 완료
                               </span>
+                            ) : isBidSaving ? (
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-violet-50 text-violet-800 border border-violet-200/80 flex items-center gap-1 shrink-0 mt-0.5">
+                                <Lock className="w-3 h-3 text-violet-600" /> 집행유보
+                              </span>
                             ) : (
                               <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80 flex items-center gap-1 shrink-0 mt-0.5">
                                 <Clock className="w-3 h-3 text-slate-500" /> 집행 대기
@@ -311,6 +334,10 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                                 {item.actionType === 'daily_expense' ? (
                                   <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 flex items-center gap-1 shrink-0">
                                     <Coins className="w-3 h-3 text-amber-600" /> 일상경비
+                                  </span>
+                                ) : isBidSaving ? (
+                                  <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-violet-50 text-violet-700 border border-violet-200/80 shrink-0">
+                                    낙찰차액
                                   </span>
                                 ) : (
                                   <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/80 shrink-0">
@@ -342,12 +369,12 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
 
                           {/* Right: Amount & Actions */}
                           <div className="flex items-center justify-end gap-3 sm:w-56 shrink-0 whitespace-nowrap">
-                            <span className={`font-mono tabular-nums font-extrabold text-base ${isSettled ? 'text-slate-400' : 'text-indigo-600'}`}>
+                            <span className={`font-mono tabular-nums font-extrabold text-base ${isSettled ? 'text-slate-400' : isBidSaving ? 'text-violet-700' : 'text-indigo-600'}`}>
                               ₩{(item.amount || 0).toLocaleString('ko-KR')}
                             </span>
 
                             <div className="flex items-center gap-1">
-                              {!isSettled && onSettleEntry && (
+                              {!isSettled && !isBidSaving && onSettleEntry && (
                                 <button
                                   type="button"
                                   onClick={() => onSettleEntry(item.id)}
@@ -405,6 +432,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                 <tbody className="divide-y divide-slate-100 text-xs font-mono">
                   {filteredEntries.map((item, itemIdx) => {
                     const isSettled = item.status === 'SETTLED';
+                    const isBidSaving = item.actionType === 'bid_saving';
                     return (
                       <tr
                         key={`sim-tbl-item-${item.id}-${itemIdx}`}
@@ -416,6 +444,10 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                           {isSettled ? (
                             <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 inline-flex items-center gap-0.5">
                               <CheckCircle2 className="w-3 h-3" /> 완료
+                            </span>
+                          ) : isBidSaving ? (
+                            <span className="px-2 py-0.5 rounded text-xs font-bold bg-violet-50 text-violet-800 border border-violet-200/80 inline-flex items-center gap-0.5">
+                              <Lock className="w-3 h-3 text-violet-600" /> 유보
                             </span>
                           ) : (
                             <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80 inline-flex items-center gap-0.5">
@@ -435,6 +467,10 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                               {item.actionType === 'daily_expense' ? (
                                 <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/80 inline-flex items-center gap-0.5 whitespace-nowrap shrink-0">
                                   <Coins className="w-3 h-3 text-amber-600" /> 일상경비
+                                </span>
+                              ) : isBidSaving ? (
+                                <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 border border-violet-200/80 inline-flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                                  낙찰차액
                                 </span>
                               ) : (
                                 <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/80 inline-flex items-center gap-0.5 whitespace-nowrap shrink-0">
@@ -459,14 +495,14 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                           <span className="text-xs text-slate-500 font-sans ml-1">× {item.quantity}개</span>
                         </td>
                         <td className="py-3 px-4 text-right align-middle tabular-nums whitespace-nowrap">
-                          <span className={`font-extrabold text-sm ${isSettled ? 'text-slate-400' : 'text-indigo-600'}`}>
+                          <span className={`font-extrabold text-sm ${isSettled ? 'text-slate-400' : isBidSaving ? 'text-violet-700' : 'text-indigo-600'}`}>
                             {(item.amount || 0).toLocaleString('ko-KR')}
                             <span className="text-xs text-slate-400 ml-0.5 font-normal">원</span>
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center align-middle font-sans whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1">
-                            {!isSettled && onSettleEntry && (
+                            {!isSettled && !isBidSaving && onSettleEntry && (
                               <button
                                 type="button"
                                 onClick={() => onSettleEntry(item.id)}
@@ -510,10 +546,11 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredEntries.map((item, itemIdx) => {
                 const isSettled = item.status === 'SETTLED';
+                const isBidSaving = item.actionType === 'bid_saving';
                 return (
                   <div
                     key={`sim-card-item-${item.id}-${itemIdx}`}
-                    className={`border rounded-xl p-4 space-y-3 shadow-2xs transition-colors group flex flex-col justify-between ${
+                    className={`vlds-cv-card border rounded-xl p-4 space-y-3 shadow-2xs transition-colors group flex flex-col justify-between ${
                       isSettled
                         ? 'bg-slate-50/60 border-slate-200/80'
                         : 'bg-white border-slate-200/80 hover:border-slate-300'
@@ -528,6 +565,10 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                               <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80 flex items-center gap-1">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" /> 집행 완료
                               </span>
+                            ) : isBidSaving ? (
+                              <span className="text-xs font-bold px-2 py-0.5 rounded bg-violet-50 text-violet-800 border border-violet-200/80 flex items-center gap-1">
+                                <Lock className="w-3 h-3 text-violet-600" /> 집행유보
+                              </span>
                             ) : (
                               <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200/80 flex items-center gap-1">
                                 <Clock className="w-3 h-3 text-slate-500" /> 집행 대기
@@ -536,6 +577,10 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                             {item.actionType === 'daily_expense' ? (
                               <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/80 flex items-center gap-1">
                                 <Coins className="w-3 h-3 text-amber-600" /> 일상경비
+                              </span>
+                            ) : isBidSaving ? (
+                              <span className="text-xs font-bold px-2 py-0.5 rounded bg-violet-50 text-violet-700 border border-violet-200/80">
+                                낙찰차액
                               </span>
                             ) : (
                               <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/80">
@@ -605,7 +650,7 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                         </span>
                         <span
                           className={`font-extrabold text-base ${
-                            isSettled ? 'text-slate-400' : 'text-indigo-600'
+                            isSettled ? 'text-slate-400' : isBidSaving ? 'text-violet-700' : 'text-indigo-600'
                           }`}
                         >
                           ₩{(item.amount || 0).toLocaleString('ko-KR')}
@@ -613,16 +658,22 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
                       </div>
 
                       {/* Real Expenditure Settle Button */}
-                      {!isSettled && onSettleEntry && (
+                      {!isSettled && !isBidSaving && onSettleEntry && (
                         <button
                           type="button"
                           onClick={() => onSettleEntry(item.id)}
                           className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                          title="실제 집행이 이루어졌을 때 실제 지출로 정산 전환합니다."
+                          title="실제 지출 정산 전환"
                         >
                           <CheckCircle2 className="w-4 h-4" />
                           실제 지출로 집행 (정산)
                         </button>
+                      )}
+                      {!isSettled && isBidSaving && (
+                        <div className="text-xs text-violet-800 font-bold bg-violet-50/70 px-3 py-1.5 rounded-lg border border-violet-200/80 flex items-center justify-between">
+                          <span>집행유보 · 불용 확정</span>
+                          <span className="text-[11px] font-medium text-violet-600">집행률 미포함</span>
+                        </div>
                       )}
                       {isSettled && (
                         <div className="text-xs text-emerald-700 font-bold bg-emerald-50/70 px-3 py-1.5 rounded-lg border border-emerald-200/80 flex items-center justify-between">
@@ -639,9 +690,9 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
         </div>
       ) : (
         <div className="py-12 bg-white rounded-xl border border-slate-200/80 text-center flex flex-col items-center justify-center gap-2">
-          <h4 className="text-sm font-bold text-slate-700">등록된 시뮬레이션 항목이 없습니다.</h4>
+          <h4 className="text-sm font-bold text-slate-700">예정 항목 없음</h4>
           <p className="text-xs text-slate-400">
-            상단 입력 폼에서 확정 지출 예정 내역을 등록하거나 테스트 프리셋을 로드하세요.
+            상단 폼에서 지출 예정 등록 · 테스트 프리셋 로드
           </p>
           {onLoadTestPreset && (
             <button
@@ -658,11 +709,19 @@ export const SimulationEntryList: React.FC<SimulationEntryListProps> = React.mem
 
       {/* Summary Footer */}
       {filteredEntries.length > 0 && (
-        <div className="flex items-center justify-between p-4 bg-slate-50/80 border border-slate-200/80 rounded-xl text-sm font-bold text-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-2 p-4 bg-slate-50/80 border border-slate-200/80 rounded-xl text-sm font-bold text-slate-800">
           <span className="text-slate-600 font-bold">선택/필터된 지출 예정액 합계</span>
-          <span className="font-mono tabular-nums text-lg font-extrabold text-indigo-600">
-            ₩{totalAmountSum.toLocaleString('ko-KR')} 원
-          </span>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="font-mono tabular-nums text-lg font-extrabold text-indigo-600">
+              ₩{totalAmountSum.toLocaleString('ko-KR')} 원
+            </span>
+            {bidSavingSum > 0 && (
+              <span className="font-mono tabular-nums text-xs font-extrabold text-violet-800 bg-violet-50 border border-violet-200/80 px-2.5 py-1 rounded-lg inline-flex items-center gap-1">
+                <Lock className="w-3 h-3 text-violet-600" />
+                낙찰차액(유보) ₩{bidSavingSum.toLocaleString('ko-KR')} 원
+              </span>
+            )}
+          </div>
         </div>
       )}
     </div>

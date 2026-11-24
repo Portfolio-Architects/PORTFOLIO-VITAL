@@ -78,6 +78,96 @@ export interface DutyItem {
   };
 }
 
+export type ChecklistPhaseId =
+  | 'phase1_plan'
+  | 'phase2_contract'
+  | 'phase3_promo'
+  | 'phase4_onsite'
+  | 'phase5_close';
+
+export type ChecklistDomain =
+  | '기획·장소'
+  | '인허가·협조'
+  | '계약·예산'
+  | '부스·프로그램'
+  | '홍보·접수'
+  | 'VIP·의전'
+  | '안전·현장'
+  | '정산·보고';
+
+export type ChecklistPriority = 'must' | 'high' | 'normal';
+
+export interface FestivalChecklistItem {
+  id: string;
+  phase: ChecklistPhaseId;
+  timingLabel: string;
+  domain: ChecklistDomain;
+  title: string;
+  checked: boolean;
+  priority: ChecklistPriority;
+  actualDate2026: string;
+  history2026: string;
+  cooperationDepts: string[];
+  docRef?: string;
+  lessonWarning?: string;
+  memo?: string;
+}
+
+export interface FestivalLessonItem {
+  id: string;
+  severity: 'critical' | 'warning' | 'tip';
+  category: string;
+  title: string;
+  incident2026: string;
+  actionForNextYear: string;
+}
+
+export interface FestivalKeyDocItem {
+  id: string;
+  docNo: string;
+  date: string;
+  title: string;
+  docType: string;
+}
+
+export interface FestivalHistorySummary2026 {
+  eventDate: string;
+  participantsTotal: number;
+  preRegistered: number;
+  onSite: number;
+  targetParticipants: number;
+  yoyGrowthPct: number;
+  vipCount: number;
+  boothsSummary: {
+    entities: number;
+    totalDongs: number;
+    healthDongs: number;
+    supportDongs: number;
+    buses: number;
+    cumulativeVisitors: number;
+    staffCount: number;
+  };
+  safetySummary: {
+    accidents: number;
+    ambulances: number;
+    safetyStaff: number;
+    complaints: number;
+    complaintSummary: string;
+  };
+  budgetExecution: {
+    agencyBudget: number;
+    agencyExecuted: number;
+    bidSaving: number;
+    suppliesBudget: number;
+    totalBudget: number;
+    totalExecuted: number;
+    agencyCompany: string;
+    sponsorship: string;
+  };
+  keyDocs: FestivalKeyDocItem[];
+  lessonsLearned: FestivalLessonItem[];
+}
+
 export interface FestivalData {
   meta: {
     title: string;
@@ -114,6 +204,8 @@ export interface FestivalData {
     task: string;
     status: string;
   }[];
+  historySummary2026?: FestivalHistorySummary2026;
+  nextYearChecklist?: FestivalChecklistItem[];
   lastUpdated?: string;
 }
 

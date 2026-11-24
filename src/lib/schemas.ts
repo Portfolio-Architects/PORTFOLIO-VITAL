@@ -33,7 +33,7 @@ export const TaskSchema = z.object({
 export type TaskDto = z.infer<typeof TaskSchema>;
 
 // ============ Budget Module ============
-export const BudgetActionTypeSchema = z.enum(['general', 'issuance', 'daily_expense', 'transfer', 'correction', 'settle']);
+export const BudgetActionTypeSchema = z.enum(['general', 'issuance', 'daily_expense', 'bid_saving', 'transfer', 'correction', 'settle']);
 
 export const BudgetCategorySchema = z.object({
   id: z.string().catch('unknown-cat'),
@@ -205,6 +205,7 @@ export const ContactSchema = z.object({
   phone: z.string().catch(''),
   email: z.string().optional().catch(''),
   notes: z.string().optional().catch(''),
+  lastContactedAt: z.string().optional().catch(undefined),
   createdAt: z.string().catch(new Date().toISOString()),
   updatedAt: z.string().catch(new Date().toISOString()),
 });
@@ -212,17 +213,37 @@ export const ContactSchema = z.object({
 export type ContactDto = z.infer<typeof ContactSchema>;
 
 // ============ Working Memory Module ============
-export const WorkingMemoryCategorySchema = z.enum(['budget', 'audit', 'festival', 'directive', 'general']);
+export const WorkingMemoryCategorySchema = z.enum([
+  'budget',
+  'audit',
+  'festival',
+  'directive',
+  'issue_log',
+  'general',
+]);
 export const WorkingMemoryStatusSchema = z.enum(['pending', 'reflected']);
 export const WorkingMemorySourceSchema = z.enum(['pc', 'mobile']);
+export const WorkingMemoryIssueSeveritySchema = z.enum(['low', 'medium', 'high', 'critical']);
+export const StickyNoteColorSchema = z.enum(['yellow', 'pink', 'mint', 'sky']);
+
+export const WorkingMemoryIssueMetaSchema = z.object({
+  severity: WorkingMemoryIssueSeveritySchema.optional().catch(undefined),
+  responsibleParty: z.string().optional().catch(undefined),
+  proximateCause: z.string().optional().catch(undefined),
+  rootCause: z.string().optional().catch(undefined),
+  machineFix: z.string().optional().catch(undefined),
+  doubleDoRequired: z.boolean().optional().catch(undefined),
+});
 
 export const WorkingMemorySchema = z.object({
   id: z.string().catch('unknown-memo'),
   content: z.string().catch(''),
   category: WorkingMemoryCategorySchema.catch('general'),
   tags: z.array(z.string()).default([]).catch([]),
+  color: StickyNoteColorSchema.optional().catch(undefined),
   numericHighlight: z.string().optional().catch(undefined),
   dateHighlight: z.string().optional().catch(undefined),
+  issueMeta: WorkingMemoryIssueMetaSchema.optional().catch(undefined),
   status: WorkingMemoryStatusSchema.catch('pending'),
   source: WorkingMemorySourceSchema.optional().catch(undefined),
   pinned: z.boolean().optional().catch(false),
@@ -430,6 +451,98 @@ export const FestivalDutyItemSchema = z.object({
   }).optional().catch(undefined),
 });
 
+export const FestivalChecklistPhaseSchema = z.enum([
+  'phase1_plan',
+  'phase2_contract',
+  'phase3_promo',
+  'phase4_onsite',
+  'phase5_close',
+]);
+
+export const FestivalChecklistDomainSchema = z.enum([
+  '기획·장소',
+  '인허가·협조',
+  '계약·예산',
+  '부스·프로그램',
+  '홍보·접수',
+  'VIP·의전',
+  '안전·현장',
+  '정산·보고',
+]);
+
+export const FestivalChecklistPrioritySchema = z.enum(['must', 'high', 'normal']);
+
+export const FestivalChecklistItemSchema = z.object({
+  id: z.string().catch(''),
+  phase: FestivalChecklistPhaseSchema.catch('phase1_plan'),
+  timingLabel: z.string().catch(''),
+  domain: FestivalChecklistDomainSchema.catch('기획·장소'),
+  title: z.string().catch(''),
+  checked: z.boolean().catch(false),
+  priority: FestivalChecklistPrioritySchema.catch('normal'),
+  actualDate2026: z.string().catch(''),
+  history2026: z.string().catch(''),
+  cooperationDepts: z.array(z.string()).default([]).catch([]),
+  docRef: z.string().optional().catch(undefined),
+  lessonWarning: z.string().optional().catch(undefined),
+  memo: z.string().optional().catch(undefined),
+});
+
+export const FestivalLessonItemSchema = z.object({
+  id: z.string().catch(''),
+  severity: z.enum(['critical', 'warning', 'tip']).catch('warning'),
+  category: z.string().catch(''),
+  title: z.string().catch(''),
+  incident2026: z.string().catch(''),
+  actionForNextYear: z.string().catch(''),
+});
+
+export const FestivalKeyDocItemSchema = z.object({
+  id: z.string().catch(''),
+  docNo: z.string().catch(''),
+  date: z.string().catch(''),
+  title: z.string().catch(''),
+  docType: z.string().catch(''),
+});
+
+export const FestivalHistorySummary2026Schema = z.object({
+  eventDate: z.string().catch(''),
+  participantsTotal: z.number().catch(0),
+  preRegistered: z.number().catch(0),
+  onSite: z.number().catch(0),
+  targetParticipants: z.number().catch(0),
+  yoyGrowthPct: z.number().catch(0),
+  vipCount: z.number().catch(0),
+  boothsSummary: z.object({
+    entities: z.number().catch(0),
+    totalDongs: z.number().catch(0),
+    healthDongs: z.number().catch(0),
+    supportDongs: z.number().catch(0),
+    buses: z.number().catch(0),
+    cumulativeVisitors: z.number().catch(0),
+    staffCount: z.number().catch(0),
+  }),
+  safetySummary: z.object({
+    accidents: z.number().catch(0),
+    ambulances: z.number().catch(0),
+    safetyStaff: z.number().catch(0),
+    complaints: z.number().catch(0),
+    complaintSummary: z.string().catch(''),
+  }),
+  budgetExecution: z.object({
+    agencyBudget: z.number().catch(0),
+    agencyExecuted: z.number().catch(0),
+    bidSaving: z.number().catch(0),
+    suppliesBudget: z.number().catch(0),
+    totalBudget: z.number().catch(0),
+    totalExecuted: z.number().catch(0),
+    agencyCompany: z.string().catch(''),
+    sponsorship: z.string().catch(''),
+  }),
+  keyDocs: z.array(FestivalKeyDocItemSchema).default([]).catch([]),
+  lessonsLearned: z.array(FestivalLessonItemSchema).default([]).catch([]),
+});
+
 export const FestivalDataSchema = z.object({
   meta: z.object({
     title: z.string().catch(''),
@@ -466,6 +579,8 @@ export const FestivalDataSchema = z.object({
     task: z.string().catch(''),
     status: z.string().catch(''),
   })).optional().catch(undefined),
+  historySummary2026: FestivalHistorySummary2026Schema.optional().catch(undefined),
+  nextYearChecklist: z.array(FestivalChecklistItemSchema).optional().catch([]),
   lastUpdated: z.string().optional().catch(undefined),
 });
 
@@ -679,8 +794,18 @@ export const StrictContactSchema = z.object({
   phone: z.string(),
   email: z.string().optional(),
   notes: z.string().optional(),
+  lastContactedAt: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
+});
+
+export const StrictWorkingMemoryIssueMetaSchema = z.object({
+  severity: WorkingMemoryIssueSeveritySchema.optional(),
+  responsibleParty: z.string().optional(),
+  proximateCause: z.string().optional(),
+  rootCause: z.string().optional(),
+  machineFix: z.string().optional(),
+  doubleDoRequired: z.boolean().optional(),
 });
 
 export const StrictWorkingMemorySchema = z.object({
@@ -688,8 +813,10 @@ export const StrictWorkingMemorySchema = z.object({
   content: z.string(),
   category: WorkingMemoryCategorySchema,
   tags: z.array(z.string()).default([]),
+  color: StickyNoteColorSchema.optional(),
   numericHighlight: z.string().optional(),
   dateHighlight: z.string().optional(),
+  issueMeta: StrictWorkingMemoryIssueMetaSchema.optional(),
   status: WorkingMemoryStatusSchema,
   source: WorkingMemorySourceSchema.optional(),
   pinned: z.boolean().optional(),
@@ -861,6 +988,77 @@ export const StrictFestivalDutyItemSchema = z.object({
   }).optional(),
 });
 
+export const StrictFestivalChecklistItemSchema = z.object({
+  id: z.string(),
+  phase: FestivalChecklistPhaseSchema,
+  timingLabel: z.string(),
+  domain: FestivalChecklistDomainSchema,
+  title: z.string(),
+  checked: z.boolean(),
+  priority: FestivalChecklistPrioritySchema,
+  actualDate2026: z.string(),
+  history2026: z.string(),
+  cooperationDepts: z.array(z.string()),
+  docRef: z.string().optional(),
+  lessonWarning: z.string().optional(),
+  memo: z.string().optional(),
+});
+
+export const StrictFestivalLessonItemSchema = z.object({
+  id: z.string(),
+  severity: z.enum(['critical', 'warning', 'tip']),
+  category: z.string(),
+  title: z.string(),
+  incident2026: z.string(),
+  actionForNextYear: z.string(),
+});
+
+export const StrictFestivalKeyDocItemSchema = z.object({
+  id: z.string(),
+  docNo: z.string(),
+  date: z.string(),
+  title: z.string(),
+  docType: z.string(),
+});
+
+export const StrictFestivalHistorySummary2026Schema = z.object({
+  eventDate: z.string(),
+  participantsTotal: z.number(),
+  preRegistered: z.number(),
+  onSite: z.number(),
+  targetParticipants: z.number(),
+  yoyGrowthPct: z.number(),
+  vipCount: z.number(),
+  boothsSummary: z.object({
+    entities: z.number(),
+    totalDongs: z.number(),
+    healthDongs: z.number(),
+    supportDongs: z.number(),
+    buses: z.number(),
+    cumulativeVisitors: z.number(),
+    staffCount: z.number(),
+  }),
+  safetySummary: z.object({
+    accidents: z.number(),
+    ambulances: z.number(),
+    safetyStaff: z.number(),
+    complaints: z.number(),
+    complaintSummary: z.string(),
+  }),
+  budgetExecution: z.object({
+    agencyBudget: z.number(),
+    agencyExecuted: z.number(),
+    bidSaving: z.number(),
+    suppliesBudget: z.number(),
+    totalBudget: z.number(),
+    totalExecuted: z.number(),
+    agencyCompany: z.string(),
+    sponsorship: z.string(),
+  }),
+  keyDocs: z.array(StrictFestivalKeyDocItemSchema),
+  lessonsLearned: z.array(StrictFestivalLessonItemSchema),
+});
+
 export const StrictFestivalDataSchema = z.object({
   meta: z.object({
     title: z.string(),
@@ -897,6 +1095,8 @@ export const StrictFestivalDataSchema = z.object({
     task: z.string(),
     status: z.string(),
   })).optional(),
+  historySummary2026: StrictFestivalHistorySummary2026Schema.optional(),
+  nextYearChecklist: z.array(StrictFestivalChecklistItemSchema).optional(),
   lastUpdated: z.string().optional(),
 });
 

@@ -1,4 +1,25 @@
-import { WorkingMemoryCategory, WorkingMemoryMemo, WorkingMemorySource } from '@/types';
+import {
+  StickyNoteColor,
+  WorkingMemoryCategory,
+  WorkingMemoryIssueMeta,
+  WorkingMemoryIssueSeverity,
+  WorkingMemoryMemo,
+  WorkingMemorySource,
+} from '@/types';
+
+export function resolveStickyNoteColor(memo: Pick<WorkingMemoryMemo, 'color' | 'category'>): StickyNoteColor {
+  if (memo.color) return memo.color;
+  switch (memo.category) {
+    case 'directive':
+      return 'pink';
+    case 'festival':
+      return 'mint';
+    case 'audit':
+      return 'sky';
+    default:
+      return 'yellow';
+  }
+}
 
 export interface WorkingMemoryCategoryMeta {
   id: WorkingMemoryCategory;
@@ -8,6 +29,28 @@ export interface WorkingMemoryCategoryMeta {
   postItClass: string;
   accentBarClass: string;
 }
+
+export const WORKING_MEMORY_ISSUE_SEVERITY_META: Record<
+  WorkingMemoryIssueSeverity,
+  { label: string; badgeClass: string }
+> = {
+  critical: {
+    label: '치명',
+    badgeClass: 'bg-rose-100 text-rose-900 border-rose-300',
+  },
+  high: {
+    label: '높음',
+    badgeClass: 'bg-amber-100 text-amber-950 border-amber-300',
+  },
+  medium: {
+    label: '보통',
+    badgeClass: 'bg-sky-50 text-sky-800 border-sky-200',
+  },
+  low: {
+    label: '낮음',
+    badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
+  },
+};
 
 export const WORKING_MEMORY_CATEGORIES: Record<WorkingMemoryCategory, WorkingMemoryCategoryMeta> = {
   budget: {
@@ -50,6 +93,16 @@ export const WORKING_MEMORY_CATEGORIES: Record<WorkingMemoryCategory, WorkingMem
       'bg-emerald-50/65 border-emerald-200/90',
     accentBarClass: 'bg-emerald-600',
   },
+  issue_log: {
+    id: 'issue_log',
+    label: '[이슈로그]',
+    shortLabel: '이슈로그',
+    badgeClass:
+      'bg-violet-50 text-violet-800 border-violet-200',
+    postItClass:
+      'bg-violet-50/65 border-violet-200/90',
+    accentBarClass: 'bg-violet-600',
+  },
   general: {
     id: 'general',
     label: '[일반 메모]',
@@ -67,6 +120,7 @@ export const WORKING_MEMORY_CATEGORY_LIST: WorkingMemoryCategoryMeta[] = [
   WORKING_MEMORY_CATEGORIES.directive,
   WORKING_MEMORY_CATEGORIES.audit,
   WORKING_MEMORY_CATEGORIES.festival,
+  WORKING_MEMORY_CATEGORIES.issue_log,
   WORKING_MEMORY_CATEGORIES.general,
 ];
 
@@ -155,7 +209,81 @@ const CATEGORY_KEYWORDS: Record<Exclude<WorkingMemoryCategory, 'general'>, strin
     '리플릿',
     '영동4교',
   ],
+  issue_log: [
+    '[이슈로그]',
+    '이슈로그',
+    '근접원인',
+    '근본원인',
+    '기계개선',
+    '재발방지',
+    '가드레일',
+    '이중실행',
+    'Double-do',
+    'Risk of Ruin',
+    '파산위험',
+    '원인진단',
+    'RP:',
+    'RP=',
+  ],
 };
+
+function parseIssueSeverity(raw?: string): WorkingMemoryIssueSeverity | undefined {
+  if (!raw) return undefined;
+  const v = raw.trim().toLowerCase();
+  if (/^(?:치명|긴급|최상|critical|p0)$/.test(v)) return 'critical';
+  if (/^(?:상|높음|high|p1)$/.test(v)) return 'high';
+  if (/^(?:중|보통|medium|p2)$/.test(v)) return 'medium';
+  if (/^(?:하|낮음|low|p3)$/.test(v)) return 'low';
+  return undefined;
+}
+
+/**
+ * Extracts Dalio Principles Issue Log metadata from 1-line or pipe-delimited memo text.
+ * Canonical format: "[이슈로그] RP:총괄주무관 | 근접:수기누락 | 근본:단일경로 의존 | 개선:이중실행 스크립트 | 위험:상"
+ */
+export function extractIssueMeta(text: string): WorkingMemoryIssueMeta | undefined {
+  if (!text || !text.trim()) return undefined;
+
+  const stopAhead =
+    '(?=\\s*(?:\\||\\n|$|(?:RP|책임당사자|책임|근접원인|근접|근본원인|근본|기계개선|재발방지|가드레일|개선|위험등급|위험|등급|심각도)\\s*[:=]))';
+
+  const extractField = (labels: string[]): string | undefined => {
+    const pattern = new RegExp(
+      `(?:^|[\\s|\\[\\(])(?:${labels.join('|')})\\s*[:=]\\s*([^|\\n]+?)${stopAhead}`,
+      'i'
+    );
+    const match = text.match(pattern);
+    const val = match?.[1]?.trim();
+    return val ? val : undefined;
+  };
+
+  const responsibleParty = extractField(['RP', '책임당사자', '책임']);
+  const proximateCause = extractField(['근접원인', '근접']);
+  const rootCause = extractField(['근본원인', '근본']);
+  const machineFix = extractField(['기계개선', '재발방지', '가드레일', '개선']);
+  const severity = parseIssueSeverity(extractField(['위험등급', '위험', '등급', '심각도']));
+  const doubleDoRequired = /(?:이중\s*실행|double-?do)/i.test(text) ? true : undefined;
+
+  if (
+    !responsibleParty &&
+    !proximateCause &&
+    !rootCause &&
+    !machineFix &&
+    !severity &&
+    !doubleDoRequired
+  ) {
+    return undefined;
+  }
+
+  const meta: WorkingMemoryIssueMeta = {};
+  if (severity) meta.severity = severity;
+  if (responsibleParty) meta.responsibleParty = responsibleParty;
+  if (proximateCause) meta.proximateCause = proximateCause;
+  if (rootCause) meta.rootCause = rootCause;
+  if (machineFix) meta.machineFix = machineFix;
+  if (doubleDoRequired) meta.doubleDoRequired = true;
+  return meta;
+}
 
 /**
  * Extracts numeric/budget transition or figure highlights from administrative memo text.
@@ -354,11 +482,12 @@ export interface ParsedWorkingMemoryResult {
   tags: string[];
   numericHighlight?: string;
   dateHighlight?: string;
+  issueMeta?: WorkingMemoryIssueMeta;
 }
 
 /**
  * Automatically classifies a 1-line memo into a primary category, multi-context tags,
- * numeric/budget change highlight, and date highlight.
+ * numeric/budget change highlight, date highlight, and structured Issue Log metadata.
  */
 export function parseWorkingMemoryInput(
   rawText: string,
@@ -367,12 +496,14 @@ export function parseWorkingMemoryInput(
   const text = (rawText || '').trim();
   const numericHighlight = extractNumericHighlight(text);
   const dateHighlight = extractDateHighlight(text);
+  const issueMeta = extractIssueMeta(text);
 
   const scores: Record<Exclude<WorkingMemoryCategory, 'general'>, number> = {
     budget: 0,
     directive: 0,
     audit: 0,
     festival: 0,
+    issue_log: 0,
   };
 
   const matchedCategories = new Set<WorkingMemoryCategory>();
@@ -396,13 +527,31 @@ export function parseWorkingMemoryInput(
             kw === '팀장님' ||
             kw === '과장님' ||
             kw === '소장님' ||
-            kw === '지시';
+            kw === '지시' ||
+            kw === '[이슈로그]' ||
+            kw === '이슈로그' ||
+            kw === '근접원인' ||
+            kw === '근본원인' ||
+            kw === '기계개선' ||
+            kw === '재발방지';
           scores[cat] += isStrong ? 2 : 1;
           matchedCategories.add(cat);
         }
       }
     }
   );
+
+  if (issueMeta) {
+    const fieldHits = [
+      issueMeta.responsibleParty,
+      issueMeta.proximateCause,
+      issueMeta.rootCause,
+      issueMeta.machineFix,
+      issueMeta.severity,
+    ].filter(Boolean).length;
+    scores.issue_log += Math.max(2, fieldHits * 2);
+    matchedCategories.add('issue_log');
+  }
 
   // If numeric highlight contains currency units (원/만원/천원/억원), boost budget score
   if (numericHighlight && /(?:원|만원|천원|억원)/.test(numericHighlight)) {
@@ -414,6 +563,7 @@ export function parseWorkingMemoryInput(
 
   if (!explicitCategory) {
     const orderedCandidates: Array<Exclude<WorkingMemoryCategory, 'general'>> = [
+      'issue_log',
       'budget',
       'directive',
       'audit',
@@ -437,7 +587,7 @@ export function parseWorkingMemoryInput(
   const primaryLabel = WORKING_MEMORY_CATEGORIES[primaryCategory].label;
   tags.push(primaryLabel);
 
-  for (const cat of ['budget', 'directive', 'audit', 'festival'] as const) {
+  for (const cat of ['issue_log', 'budget', 'directive', 'audit', 'festival'] as const) {
     if (matchedCategories.has(cat)) {
       const label = WORKING_MEMORY_CATEGORIES[cat].label;
       if (!tags.includes(label)) {
@@ -451,6 +601,7 @@ export function parseWorkingMemoryInput(
     tags,
     numericHighlight,
     dateHighlight,
+    issueMeta,
   };
 }
 
@@ -461,6 +612,7 @@ export function createWorkingMemoryMemo(params: {
   content: string;
   explicitCategory?: WorkingMemoryCategory;
   source?: WorkingMemorySource;
+  color?: StickyNoteColor;
   pinned?: boolean;
   id?: string;
   nowIso?: string;
@@ -468,7 +620,7 @@ export function createWorkingMemoryMemo(params: {
   const now = params.nowIso || new Date().toISOString();
   const parsed = parseWorkingMemoryInput(params.content, params.explicitCategory);
 
-  return {
+  const memo: WorkingMemoryMemo = {
     id: params.id || `wm-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     content: params.content.trim(),
     category: parsed.category,
@@ -479,11 +631,20 @@ export function createWorkingMemoryMemo(params: {
     pinned:
       params.pinned !== undefined
         ? params.pinned
-        : parsed.category === 'budget' || parsed.category === 'directive',
+        : parsed.category === 'budget' ||
+          parsed.category === 'directive' ||
+          parsed.category === 'issue_log',
     source: params.source || 'pc',
     createdAt: now,
     updatedAt: now,
   };
+  if (params.color) {
+    memo.color = params.color;
+  }
+  if (parsed.issueMeta) {
+    memo.issueMeta = parsed.issueMeta;
+  }
+  return memo;
 }
 
 /**
@@ -493,6 +654,7 @@ export function createWorkingMemoryMemosFromText(params: {
   content: string;
   explicitCategory?: WorkingMemoryCategory;
   source?: WorkingMemorySource;
+  color?: StickyNoteColor;
   pinned?: boolean;
   nowIso?: string;
 }): WorkingMemoryMemo[] {
@@ -505,6 +667,7 @@ export function createWorkingMemoryMemosFromText(params: {
       content: line,
       explicitCategory: params.explicitCategory,
       source: params.source,
+      color: params.color,
       pinned: params.pinned,
       nowIso: new Date(baseMs + idx).toISOString(),
     })
@@ -627,6 +790,10 @@ export function getContextRelevantMemos(
       memo.category === 'festival' ||
       tags.includes('[양재천 행사]') ||
       tags.includes('양재천 행사');
+    const isIssueLog =
+      memo.category === 'issue_log' ||
+      tags.includes('[이슈로그]') ||
+      tags.includes('이슈로그');
 
     switch (contextModule) {
       case 'workspace':
@@ -635,7 +802,7 @@ export function getContextRelevantMemos(
       case 'festival':
         return isFestival || isDirective;
       case 'project':
-        return isAudit || isDirective || isBudget;
+        return isAudit || isDirective || isBudget || isIssueLog;
       case 'dashboard':
       default:
         return true;

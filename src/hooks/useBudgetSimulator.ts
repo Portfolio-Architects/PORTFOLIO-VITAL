@@ -117,7 +117,7 @@ export interface UseBudgetSimulatorReturn {
   loadFestivalPreset: () => void;
 
   // Real Expenditure Lifecycle Action (정산 전환)
-  settleEntry: (simId: string, actualAmount?: number, actualDate?: string) => Promise<void>;
+  settleEntry: (simId: string, actualAmount?: number, actualDate?: string) => Promise<boolean | void>;
 
   // Aggregated Summaries
   projectSummaries: ProjectSimulationSummary[];
@@ -171,6 +171,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   const addBudgetEntry = budget?.addEntry;
   const updateBudgetEntry = budget?.updateEntry;
   const deleteBudgetEntry = budget?.deleteEntry;
+  const batchDeleteBudgetEntries = budget?.batchDeleteEntries;
   const getCategoryStats = budget?.getCategoryStats;
   const budgetLoading = budget?.isLoading || false;
 
@@ -236,6 +237,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   }, [diskSimEntries, simLoading, storedEntries, saveSimulationsMut]);
 
   const setEntries = useCallback((updater: SimulationEntry[] | ((prev: SimulationEntry[]) => SimulationEntry[])) => {
+    hasSyncedRef.current = true;
     const current = entriesRef.current ?? (diskSimEntries.length > 0 ? diskSimEntries : getSimSnapshot());
     const next = typeof updater === 'function' ? updater(current) : updater;
     entriesRef.current = next;
@@ -424,7 +426,12 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
     // Auto-sync as BudgetEntry (isPlanned: true) to data/BUDGET_ENTRIES.json SSOT
     if (categoryId) {
       try {
-        const prefix = actionType === 'daily_expense' ? '[일상경비 시뮬레이션]' : '[시뮬레이션]';
+        const prefix =
+          actionType === 'daily_expense'
+            ? '[일상경비 시뮬레이션]'
+            : actionType === 'bid_saving'
+              ? '[낙찰차액·집행유보]'
+              : '[시뮬레이션]';
         const created = addBudgetEntry({
           categoryId,
           amount: computedAmount,
@@ -469,20 +476,37 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       const budgetUpdate: Partial<BudgetEntry> = {};
       if (computedAmount !== undefined) budgetUpdate.amount = computedAmount;
       if (partial.name !== undefined) budgetUpdate.purpose = partial.name;
-      if (targetCategoryId) budgetUpdate.categoryId = targetCategoryId;
+      const categoryChanged =
+        partial.categoryId !== undefined ||
+        partial.detailedProject !== undefined ||
+        partial.statItem !== undefined;
+      if (categoryChanged && targetCategoryId) {
+        budgetUpdate.categoryId = targetCategoryId;
+      }
       if (partial.actionType !== undefined) budgetUpdate.actionType = partial.actionType;
+      const effectiveActionType = partial.actionType ?? existing?.actionType ?? 'general';
+      const memoPrefix =
+        effectiveActionType === 'daily_expense'
+          ? '[일상경비 시뮬레이션]'
+          : effectiveActionType === 'bid_saving'
+            ? '[낙찰차액·집행유보]'
+            : '[시뮬레이션]';
       if (partial.memo !== undefined) {
-        budgetUpdate.memo = `[시뮬레이션] ${partial.memo}`;
-      } else if (computedAmount !== undefined) {
+        budgetUpdate.memo = partial.memo ? `${memoPrefix} ${partial.memo}` : `${memoPrefix} 단가 ₩${(partial.unitPrice ?? existing?.unitPrice ?? 0).toLocaleString('ko-KR')} × ${partial.quantity ?? existing?.quantity ?? 1}개`;
+      } else if (computedAmount !== undefined || partial.actionType !== undefined) {
         const u = partial.unitPrice !== undefined ? partial.unitPrice : (existing?.unitPrice || 0);
         const q = partial.quantity !== undefined ? partial.quantity : (existing?.quantity || 1);
-        budgetUpdate.memo = `[시뮬레이션] 단가 ₩${u.toLocaleString('ko-KR')} × ${q}개`;
+        budgetUpdate.memo = existing?.memo
+          ? `${memoPrefix} ${existing.memo}`
+          : `${memoPrefix} 단가 ₩${u.toLocaleString('ko-KR')} × ${q}개`;
       }
 
-      try {
-        updateBudgetEntry(budgetEntryId, budgetUpdate);
-      } catch (err) {
-        console.warn('[useBudgetSimulator] Failed to sync update to BudgetEntry:', err);
+      if (Object.keys(budgetUpdate).length > 0) {
+        try {
+          updateBudgetEntry(budgetEntryId, budgetUpdate);
+        } catch (err) {
+          console.warn('[useBudgetSimulator] Failed to sync update to BudgetEntry:', err);
+        }
       }
     }
 
@@ -509,21 +533,23 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
   }, [mergedEntries, budgetEntries, deleteBudgetEntry, setEntries]);
 
   // Real Expenditure Lifecycle Action (정산 전환)
-  const settleEntry = useCallback(async (simId: string, actualAmount?: number, actualDate?: string) => {
+  const settleEntry = useCallback(async (simId: string, actualAmount?: number, actualDate?: string): Promise<boolean> => {
     const sim = mergedEntries.find(e => e.id === simId);
-    if (!sim) return;
+    if (!sim || sim.status === 'SETTLED' || sim.actionType === 'bid_saving') return false;
     const finalAmount = actualAmount !== undefined ? actualAmount : sim.amount;
     const finalDate = actualDate || new Date().toISOString().split('T')[0];
     const targetActionType = sim.actionType || 'general';
+    const targetCategoryId = sim.categoryId || resolveCategoryId(sim.detailedProject, sim.statItem);
 
-    // 1. Mark planned budget entry as settled if linked
-    if (sim.budgetEntryId && budgetEntries.some(be => be.id === sim.budgetEntryId)) {
-      await updateBudgetEntry(sim.budgetEntryId, { isSettled: true });
+    if (!targetCategoryId) {
+      console.warn('[useBudgetSimulator] Cannot settle entry without a valid categoryId:', simId);
+      return false;
     }
 
-    // 2. Add real expenditure entry to SSOT (isPlanned: false)
+    // 1. Add real expenditure entry to SSOT (isPlanned: false) FIRST so checkLimit failure aborts safely
+    //    without marking the planned entry as settled (prevents silent loss of budget usage records).
     const actualEntry = await addBudgetEntry({
-      categoryId: sim.categoryId || resolveCategoryId(sim.detailedProject, sim.statItem) || '',
+      categoryId: targetCategoryId,
       amount: finalAmount,
       date: finalDate,
       purpose: `${sim.name} (${targetActionType === 'daily_expense' ? '일상경비 실지출' : '실지출 집행'})`,
@@ -534,20 +560,45 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       actionType: targetActionType,
     });
 
-    // 3. Mark sim entry as SETTLED in local state
+    if (!actualEntry) {
+      return false;
+    }
+
+    // 2. Mark planned budget entry as settled if linked
+    if (sim.budgetEntryId && budgetEntries.some(be => be.id === sim.budgetEntryId)) {
+      await updateBudgetEntry(sim.budgetEntryId, { isSettled: true });
+    }
+
+    // 3. Mark sim entry as SETTLED in local/disk simulation state
     updateEntry(simId, {
       status: 'SETTLED',
       settledEntryId: actualEntry && 'id' in actualEntry ? (actualEntry.id as string) : undefined,
       settledDate: finalDate,
     });
+
+    return true;
   }, [mergedEntries, budgetEntries, updateBudgetEntry, addBudgetEntry, resolveCategoryId, updateEntry]);
 
   const resetEntries = useCallback(() => {
-    setEntries([]);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(SIMULATION_STORAGE_KEY);
+    // Only remove unsettled mirrored planned entries from BUDGET_ENTRIES; never touch real (!isPlanned) or settled history
+    const unsettledPlannedBudgetIds: string[] = [];
+    for (let i = 0; i < mergedEntries.length; i++) {
+      const sim = mergedEntries[i];
+      if (sim.status === 'SETTLED' || !sim.budgetEntryId) continue;
+      const linked = budgetEntries.find((be) => be.id === sim.budgetEntryId);
+      if (linked && linked.isPlanned && !linked.isSettled) {
+        unsettledPlannedBudgetIds.push(linked.id);
+      }
     }
-  }, [setEntries]);
+    if (unsettledPlannedBudgetIds.length > 0) {
+      if (batchDeleteBudgetEntries) {
+        batchDeleteBudgetEntries(unsettledPlannedBudgetIds);
+      } else if (deleteBudgetEntry) {
+        unsettledPlannedBudgetIds.forEach((id) => deleteBudgetEntry(id));
+      }
+    }
+    setEntries([]);
+  }, [mergedEntries, budgetEntries, batchDeleteBudgetEntries, deleteBudgetEntry, setEntries]);
 
   const loadTestPreset = useCallback(() => {
     const now = new Date().toISOString();
@@ -591,6 +642,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       simulatedExpenditure: number;
       simulatedGeneralExpenditure: number;
       simulatedDailyExpenditure: number;
+      simulatedBidSaving: number;
       dailyExpenseIssued: number;
       dailyExpenseSpent: number;
       dailyExpenseRemaining: number;
@@ -614,6 +666,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           simulatedExpenditure: 0,
           simulatedGeneralExpenditure: 0,
           simulatedDailyExpenditure: 0,
+          simulatedBidSaving: 0,
           dailyExpenseIssued: 0,
           dailyExpenseSpent: 0,
           dailyExpenseRemaining: 0,
@@ -648,6 +701,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           simulatedExpenditure: 0,
           simulatedGeneralExpenditure: 0,
           simulatedDailyExpenditure: 0,
+          simulatedBidSaving: 0,
           dailyExpenseIssued: 0,
           dailyExpenseSpent: 0,
           dailyExpenseRemaining: 0,
@@ -656,10 +710,14 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
         map.set(key, target);
       }
       const amt = entry.amount || 0;
-      target.simulatedExpenditure += amt;
-      if (entry.actionType === 'daily_expense') {
+      if (entry.actionType === 'bid_saving') {
+        // 낙찰차액(집행유보·불용): 가용 잔액에서 차감하되 지출 예정액·예상 집행률에는 미포함
+        target.simulatedBidSaving += amt;
+      } else if (entry.actionType === 'daily_expense') {
+        target.simulatedExpenditure += amt;
         target.simulatedDailyExpenditure += amt;
       } else {
+        target.simulatedExpenditure += amt;
         target.simulatedGeneralExpenditure += amt;
       }
     }
@@ -671,7 +729,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       const actualDailyRemaining = Math.max(0, val.dailyExpenseIssued - val.dailyExpenseSpent);
       const shortfall = Math.max(0, val.simulatedDailyExpenditure - actualDailyRemaining);
       const finalDailyExpenseRemaining = Math.max(0, actualDailyRemaining - val.simulatedDailyExpenditure);
-      const finalExpectedBalance = currentRemaining - val.simulatedGeneralExpenditure - shortfall;
+      const finalExpectedBalance = currentRemaining - val.simulatedGeneralExpenditure - val.simulatedBidSaving - shortfall;
 
       results.push({
         statItem: val.statItem,
@@ -682,6 +740,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
         simulatedExpenditure: val.simulatedExpenditure,
         simulatedGeneralExpenditure: val.simulatedGeneralExpenditure,
         simulatedDailyExpenditure: val.simulatedDailyExpenditure,
+        simulatedBidSaving: val.simulatedBidSaving,
         finalExpectedBalance,
         finalDailyExpenseRemaining,
         dailyExpenseShortfall: shortfall,
@@ -718,6 +777,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
           simulatedExpenditure: 0,
           simulatedGeneralExpenditure: 0,
           simulatedDailyExpenditure: 0,
+          simulatedBidSaving: 0,
           finalExpectedBalance: 0,
           finalDailyExpenseRemaining: 0,
           executionRate: 0,
@@ -738,6 +798,7 @@ export function useBudgetSimulator(): UseBudgetSimulatorReturn {
       target.simulatedExpenditure += item.simulatedExpenditure;
       target.simulatedGeneralExpenditure = (target.simulatedGeneralExpenditure || 0) + (item.simulatedGeneralExpenditure || 0);
       target.simulatedDailyExpenditure = (target.simulatedDailyExpenditure || 0) + (item.simulatedDailyExpenditure || 0);
+      target.simulatedBidSaving = (target.simulatedBidSaving || 0) + (item.simulatedBidSaving || 0);
       target.dailyExpenseIssued = (target.dailyExpenseIssued || 0) + (item.dailyExpenseIssued || 0);
       target.dailyExpenseSpent = (target.dailyExpenseSpent || 0) + (item.dailyExpenseSpent || 0);
       target.dailyExpenseRemaining = (target.dailyExpenseRemaining || 0) + (item.dailyExpenseRemaining || 0);

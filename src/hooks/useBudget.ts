@@ -9,6 +9,7 @@ export interface CategoryStats {
   totalBudget: number;
   spent: number;
   planned: number;
+  bidSaving?: number;
   locked: number;
   remaining: number;
   usageRate: number;
@@ -296,12 +297,15 @@ export function useBudget() {
       let dailyExpenseSpent = 0;
       let planned = 0;
       let dailyExpensePlanned = 0;
+      let bidSaving = 0;
 
       for (const e of catEntries) {
         if (e.isPlanned) {
           if (!e.isSettled) {
             if (e.actionType === 'daily_expense') {
               dailyExpensePlanned += e.amount;
+            } else if (e.actionType === 'bid_saving') {
+              bidSaving += e.amount;
             } else {
               planned += e.amount;
             }
@@ -337,7 +341,7 @@ export function useBudget() {
         }
       }
 
-      const remaining = cat.totalBudget - spent - planned - lockedAmount;
+      const remaining = cat.totalBudget - spent - planned - lockedAmount - bidSaving;
       const dailyExpenseRemaining = dailyExpenseIssued - dailyExpenseSpent - dailyExpensePlanned;
       const usageRate = cat.totalBudget > 0 ? ((spent + planned) / cat.totalBudget) * 100 : 0;
 
@@ -345,6 +349,7 @@ export function useBudget() {
         totalBudget: cat.totalBudget,
         spent,
         planned,
+        bidSaving,
         locked: lockedAmount,
         remaining,
         usageRate,
@@ -362,6 +367,7 @@ export function useBudget() {
         totalBudget: cat.totalBudget,
         spent,
         planned: 0,
+        bidSaving: 0,
         locked: lockedAmount,
         remaining: remainingExclude,
         usageRate: usageRateExclude,

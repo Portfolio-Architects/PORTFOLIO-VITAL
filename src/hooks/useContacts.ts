@@ -68,7 +68,7 @@ export function useContacts(options?: { enabled?: boolean }) {
     onMutate: async ({ id, updates }) => {
       await queryClient.cancelQueries({ queryKey: ['CONTACTS'] });
       const previous = queryClient.getQueryData<Contact[]>(['CONTACTS']);
-      const updatedFields = { ...updates, updatedAt: new Date().toISOString() };
+      const updatedFields = { ...updates, updatedAt: updates.updatedAt || new Date().toISOString() };
       queryClient.setQueryData<Contact[]>(['CONTACTS'], (old) => {
         if (!old) return [];
         const result: Contact[] = [];
@@ -129,7 +129,26 @@ export function useContacts(options?: { enabled?: boolean }) {
   }, [addContactMut]);
 
   const updateContact = useCallback((id: string, updates: Partial<Contact>) => {
-    updateContactMut.mutate({ id, updates });
+    const now = new Date().toISOString();
+    updateContactMut.mutate({
+      id,
+      updates: {
+        ...updates,
+        updatedAt: updates.updatedAt || now,
+      },
+    });
+  }, [updateContactMut]);
+
+  const markContacted = useCallback((id: string) => {
+    const now = new Date().toISOString();
+    updateContactMut.mutate({
+      id,
+      updates: {
+        lastContactedAt: now,
+        updatedAt: now,
+      },
+    });
+    return now;
   }, [updateContactMut]);
 
   const deleteContact = useCallback((id: string) => {
@@ -149,6 +168,7 @@ export function useContacts(options?: { enabled?: boolean }) {
     loading,
     addContact,
     updateContact,
+    markContacted,
     deleteContact,
     replaceContacts,
     getContactById

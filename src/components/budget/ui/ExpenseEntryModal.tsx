@@ -16,7 +16,7 @@ interface ExpenseEntryModalProps {
   onOpenCategoryModal?: () => void;
 }
 
-const inputClass = "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-shadow";
+const inputClass = "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors";
 
 function ExpenseEntryModalComponent({
   isOpen,
@@ -290,7 +290,7 @@ function ExpenseEntryModalComponent({
         </div>
 
         {actionType === 'transfer' && (
-          <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 mb-4 animate-in fade-in duration-200">
+          <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 mb-4">
             <label className="block text-xs font-bold text-purple-700 mb-2.5 uppercase tracking-wider">이용/전용 방향 (선택)</label>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 cursor-pointer">
@@ -343,7 +343,7 @@ function ExpenseEntryModalComponent({
               setSelectedCatId(e.target.value);
               setEntryLinkedSubItemId('');
             }} className={inputClass} style={{ flex: 1 }} required>
-              <option value="">과목을 선택하세요</option>
+              <option value="">과목 선택</option>
               {categories.map(cat => (
                 <option key={cat.id} value={cat.id}>[{cat.detailedProject || '미지정 사업'}] {cat.name} ({cat.totalBudget.toLocaleString()}원)</option>
               ))}
@@ -393,7 +393,7 @@ function ExpenseEntryModalComponent({
              </select>
              {entryLinkedSubItemId && (
                <div className="mt-2 text-[11px] text-gray-600 font-medium">
-                 💡 선택한 산출내역에 지출 내역이 매핑되어 개별 잔액이 관리됩니다.
+                 선택 산출내역 매핑 · 개별 잔액 자동 반영
                </div>
              )}
           </div>
@@ -406,7 +406,7 @@ function ExpenseEntryModalComponent({
 
         <div><label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">품의/문서 번호 (옵션)</label><input type="text" value={entryDocNum} onChange={e => setEntryDocNum(e.target.value)} className={inputClass} placeholder="예: 보건행정과-1234" /></div>
         <div><label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">지출 목적/내용</label><input type="text" value={entryPurpose} onChange={e => setEntryPurpose(e.target.value)} className={inputClass} required placeholder="예: 3월 찾아가는 보건소 물품 구입" /></div>
-        <div><label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">상세 메모/비고 (옵션)</label><textarea value={entryMemo} onChange={e => setEntryMemo(e.target.value)} className={inputClass} rows={2} placeholder="추가 설명이나 특이사항을 입력하세요" /></div>
+        <div><label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">상세 메모/비고 (옵션)</label><textarea value={entryMemo} onChange={e => setEntryMemo(e.target.value)} className={inputClass} rows={2} placeholder="추가 메모 · 특이사항 입력" /></div>
         
         <button type="submit" className="px-5 py-2.5 bg-[var(--color-primary)] text-white rounded-lg hover:bg-opacity-90 transition-colors font-bold w-full mt-2">
           {editEntryId ? '지출 내역 저장' : '새 지출내역 등록'}

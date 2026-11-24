@@ -147,10 +147,10 @@ export function computeGeneralBudgetStats(
 
   const spent = generalSpent + dailyExpenseIssued;
 
-  // ★ Rule R Invariant: Planned daily expense is excluded from general planned sum
-  // because dailyExpenseIssued is already included in spent! Zero Double-Counting!
+  // ★ Rule R Invariant: Planned daily expense & bid_saving (집행유보) are excluded from general planned sum
+  // because dailyExpenseIssued is already included in spent and bid_saving is an unspendable reserve (not expenditure).
   const generalPlanned = entries
-    .filter((e) => e.isPlanned && !e.isSettled && e.actionType !== 'daily_expense')
+    .filter((e) => e.isPlanned && !e.isSettled && e.actionType !== 'daily_expense' && e.actionType !== 'bid_saving')
     .reduce((sum: number, e) => sum + (Number(e.amount) || 0), 0);
 
   const totalUsageActual = spent + lockedAmount;
@@ -208,8 +208,8 @@ export function validateBudgetEntryMutation(context: BudgetValidationContext): B
 
   const actionType = targetEntry.actionType || 'general';
 
-  // Transfers and corrections are reallocations/adjustments that do not add net expenditures
-  if (actionType === 'transfer' || actionType === 'correction') {
+  // Transfers, corrections, and bid_saving (집행유보·불용 확정) do not add net actual expenditures
+  if (actionType === 'transfer' || actionType === 'correction' || actionType === 'bid_saving') {
     return { valid: true };
   }
 

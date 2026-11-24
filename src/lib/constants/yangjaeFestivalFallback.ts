@@ -16,7 +16,7 @@ export const YANGJAE_FALLBACK_DATA: FestivalData = {
     "staffNote": "행사 참여 직원 대체휴무 시행 예정 (전 직원 참여)",
     "organizer": "강남구보건소 보건행정과 건강증진팀, 강남구체육회(걷기협회)",
     "overallProgress": 100,
-    "lastUpdated": "2026-11-06"
+    "lastUpdated": "2026-11-20"
   },
   "budget": {
     "total": 49900000,
@@ -2197,5 +2197,665 @@ export const YANGJAE_FALLBACK_DATA: FestivalData = {
       "remarks": "대행사 1명"
     }
   ],
-  "lastUpdated": "2026-11-06T11:15:00.000Z"
+  "historySummary2026": {
+    "eventDate": "2026-10-31(토)",
+    "participantsTotal": 824,
+    "preRegistered": 532,
+    "onSite": 292,
+    "targetParticipants": 800,
+    "yoyGrowthPct": 17.7,
+    "vipCount": 27,
+    "boothsSummary": {
+      "entities": 19,
+      "totalDongs": 37,
+      "healthDongs": 29,
+      "supportDongs": 8,
+      "buses": 2,
+      "cumulativeVisitors": 7504,
+      "staffCount": 225
+    },
+    "safetySummary": {
+      "accidents": 0,
+      "ambulances": 2,
+      "safetyStaff": 20,
+      "complaints": 1,
+      "complaintSummary": "인근 대치중학교 제37회 공인중개사 자격시험 진행 중 무대 음향 소음 민원 1건 발생 → 즉시 볼륨 하향 및 개회식 이후 마이크 사용 자제 조치"
+    },
+    "budgetExecution": {
+      "agencyBudget": 49800000,
+      "agencyExecuted": 49302000,
+      "bidSaving": 498000,
+      "suppliesBudget": 8000000,
+      "totalBudget": 57800000,
+      "totalExecuted": 57302000,
+      "agencyCompany": "커넥팅디",
+      "sponsorship": "동국제약 음파전동칫솔 1,200개 협찬"
+    },
+    "keyDocs": [
+      {
+        "id": "doc-2026-01",
+        "docNo": "보건행정과-10405",
+        "date": "2026. 9. 15.",
+        "title": "「제8회 강남구청장배 걷기대회 연계」 2026 양재천 걷자! 건강 페스티벌 추진계획",
+        "docType": "방침서"
+      },
+      {
+        "id": "doc-2026-02",
+        "docNo": "발주계획 등록",
+        "date": "2026. 10. 12.",
+        "title": "2026 양재천 건강 페스티벌 인센티브 구매 발주계획 (8,000천원)",
+        "docType": "발주계획"
+      },
+      {
+        "id": "doc-2026-03",
+        "docNo": "운영계획서 1014",
+        "date": "2026. 10. 15.",
+        "title": "2026 양재천 걷자! 건강 페스티벌 세부 운영계획서",
+        "docType": "운영계획"
+      },
+      {
+        "id": "doc-2026-04",
+        "docNo": "물품구매 계획",
+        "date": "2026. 10. 16.",
+        "title": "2026 양재천 건강 페스티벌 인센티브 구매 계획 (완주·부스 물품)",
+        "docType": "구매계획"
+      },
+      {
+        "id": "doc-2026-05",
+        "docNo": "납품내용서",
+        "date": "2026. 10. 20.",
+        "title": "2026 양재천 걷자! 건강 페스티벌 납품내용서 및 무대시안 최종",
+        "docType": "납품·시안"
+      },
+      {
+        "id": "doc-2026-06",
+        "docNo": "비서실 회신",
+        "date": "2026. 10. 29.",
+        "title": "구청장 참석 의전·동선·인사말씀 등 6종 메모보고 및 사전참가자 안내문자",
+        "docType": "의전·안내"
+      },
+      {
+        "id": "doc-2026-07",
+        "docNo": "사회카드 최종",
+        "date": "2026. 10. 30.",
+        "title": "2026 양재천 걷자! 건강 페스티벌 사회자 시나리오(국민의례 약식절차 1)",
+        "docType": "시나리오"
+      },
+      {
+        "id": "doc-2026-08",
+        "docNo": "보건행정과-14093",
+        "date": "2026. 11. 10.",
+        "title": "「구청장배 걷기대회 연계 2026 양재천 걷자!」 건강 페스티벌 개최 결과 보고 · 준공계",
+        "docType": "결과보고"
+      }
+    ],
+    "lessonsLearned": [
+      {
+        "id": "lesson-01",
+        "severity": "critical",
+        "category": "일정·민원",
+        "title": "인근 학교 국가자격시험 일정 사전 조회 필수",
+        "incident2026": "2026.10.31.(토) 인근 대치중학교 제37회 공인중개사 시험 중 무대 음향 소음 민원 1건 발생",
+        "actionForNextYear": "행사일 확정 전 인근 학교(대치중·구룡초 등) 국가시험 고사장 지정 여부 사전 조회, 불가피 시 학교 반대 방향 스피커 배치"
+      },
+      {
+        "id": "lesson-02",
+        "severity": "warning",
+        "category": "부스·통계",
+        "title": "부스별 참여 실적 현장 즉시 집계 체계화",
+        "incident2026": "행사 종료 후 19개 부스(연인원 7,504명) 실적 사후 취합에 행정 소요 발생",
+        "actionForNextYear": "부스 마감 시각(13:30) 현장에서 QR·모바일 폼으로 즉시 실적을 입력하는 표준 집계 체계 사전 구축"
+      },
+      {
+        "id": "lesson-03",
+        "severity": "warning",
+        "category": "계약·대행사",
+        "title": "대행사 계약 및 여성기업 확인 조기 확정",
+        "incident2026": "초기 협의 업체(제이민)에서 9월 말~10월 초 복수 업체 재검토 후 최종 커넥팅디로 전환되어 준비 일정 압박",
+        "actionForNextYear": "D-60 이전 대행사 용역 수의계약·여성기업 자격·견적 시담(낙찰차액 관리) 조기 확정"
+      },
+      {
+        "id": "lesson-04",
+        "severity": "warning",
+        "category": "의전·국민의례",
+        "title": "국민의례 약식절차 1 의전 표준 엄수",
+        "incident2026": "대통령훈령 제438호 준용, 무전주 애국가 1절 경례 + 묵념(10~15초) 적용 및 생략 멘트 사전 차단",
+        "actionForNextYear": "사회카드 초안 단계부터 무전주 애국가 반주·묵념곡 음원 점검 및 생략 안내 멘트 원천 배제"
+      },
+      {
+        "id": "lesson-05",
+        "severity": "tip",
+        "category": "안전·현장",
+        "title": "무사고 안전관리 체계 및 야간경호 유지",
+        "incident2026": "전년(고무매트 낙상 1건) 보완하여 구급차 2대·응급부스·안전요원 20명·전날 야간경호 2명 배치로 안전사고 0건 달성",
+        "actionForNextYear": "코스 바닥재(고무매트·단차) 사전 점검, 전날 18:00 야간경호 및 당직실 보고 절차 그대로 유지"
+      },
+      {
+        "id": "lesson-06",
+        "severity": "tip",
+        "category": "협업·예산",
+        "title": "체육회 공동개최 및 민간 협찬 시너지 확대",
+        "incident2026": "강남구체육회(걷기협회) 공동개최로 824명(+17.7%) 확대, 동국제약 음파전동칫솔 1,200개 협찬 확보",
+        "actionForNextYear": "7~8월 초 체육회 공동일정 조기 확정 및 관내 제약·헬스케어 기업 협찬 협의 8월 착수"
+      }
+    ]
+  },
+  "nextYearChecklist": [
+    {
+      "id": "chk-01",
+      "phase": "phase1_plan",
+      "timingLabel": "D-90 · 7월 말",
+      "domain": "기획·장소",
+      "title": "행사장소 사전답사 및 2km 걷기코스 확정",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.7.29. / 8.11. / 9.11.",
+      "history2026": "수변문화쉼터·출발마당(개포동 1279 일원) 사전답사 2회 및 수변문화쉼터↔영동4교 왕복 2km 신규 코스 답사 확정",
+      "cooperationDepts": [
+        "건강증진팀",
+        "강남구체육회"
+      ],
+      "docRef": "추진과제 1"
+    },
+    {
+      "id": "chk-02",
+      "phase": "phase1_plan",
+      "timingLabel": "D-85 · 8월 초",
+      "domain": "안전·현장",
+      "title": "인근 학교(대치중·구룡초) 국가자격시험 고사장 일정 사전 조회",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.31. 민원 발생(사후 도출)",
+      "history2026": "2026.10.31.(토) 대치중 제37회 공인중개사 시험과 중복되어 무대 음향 소음 민원 1건 발생",
+      "cooperationDepts": [
+        "건강증진팀",
+        "인근 학교 행정실"
+      ],
+      "docRef": "보건행정과-14093",
+      "lessonWarning": "행사일 확정 전 10월 말 주말 인근 학교 고사장 지정 여부 필수 조회, 불가피 시 학교 반대 방향 스피커 배치"
+    },
+    {
+      "id": "chk-03",
+      "phase": "phase1_plan",
+      "timingLabel": "D-80 · 8월 초",
+      "domain": "기획·장소",
+      "title": "강남구체육회(걷기협회) 구청장배 걷기대회 공동개최 협의",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.9.7. / 9.9. / 9.15.",
+      "history2026": "체육회 단독 추진안(11.21.)을 10.31. 공동개최로 전격 통합, 824명 참여(전년비 +17.7%) 및 예산 효율화 달성",
+      "cooperationDepts": [
+        "강남구체육회",
+        "강남구걷기협회"
+      ],
+      "docRef": "보건행정과-10405",
+      "lessonWarning": "차년도에는 9월이 아닌 8월 초 이전 체육회와 공동일정·역할분담 조기 합의 권장"
+    },
+    {
+      "id": "chk-04",
+      "phase": "phase1_plan",
+      "timingLabel": "D-75 · 8월 중순",
+      "domain": "인허가·협조",
+      "title": "양재천 행사장소 하천점용허가 신청 및 승인 확보",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.8.27. 승인 완료",
+      "history2026": "건설관리과 대상 개포동 1279 일원 하천점용허가 신청 및 승인 완료",
+      "cooperationDepts": [
+        "건설관리과"
+      ]
+    },
+    {
+      "id": "chk-05",
+      "phase": "phase1_plan",
+      "timingLabel": "D-70 · 8월 말",
+      "domain": "인허가·협조",
+      "title": "출발마당(포이공원) 장소·전기 사용 및 볼라드 개폐 협조",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.9.3. 협조 완료",
+      "history2026": "공원녹지과 대상 출발마당(포이공원) 장소·전기 인입 및 검진버스·화물 진입용 볼라드 개폐 협조 완료",
+      "cooperationDepts": [
+        "공원녹지과"
+      ]
+    },
+    {
+      "id": "chk-06",
+      "phase": "phase1_plan",
+      "timingLabel": "D-65 · 8월 말",
+      "domain": "기획·장소",
+      "title": "내부 킥오프 회의(VIP 초청·모집 방식·홍보 방향 확정)",
+      "checked": false,
+      "priority": "high",
+      "actualDate2026": "26.9.1.",
+      "history2026": "행사 추진 전반, VIP 초청 범위, 온라인 사전접수(800명), 보도자료 등 핵심 안건 내부 조율",
+      "cooperationDepts": [
+        "보건행정과",
+        "건강증진팀"
+      ]
+    },
+    {
+      "id": "chk-07",
+      "phase": "phase2_contract",
+      "timingLabel": "D-60 · 9월 초",
+      "domain": "계약·예산",
+      "title": "행사 대행사 선정·여성기업 확인 및 용역 수의계약 조기 체결",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.8.13. ~ 10.2. (커넥팅디 최종)",
+      "history2026": "행사운영비 49,800천원 수의계약(용역), 수의 시담 낙찰차액 1%(498천원) 절감 후 실집행 49,302천원",
+      "cooperationDepts": [
+        "보건행정과",
+        "재무과"
+      ],
+      "docRef": "준공계 · 보건행정과-14093",
+      "lessonWarning": "2026년 9월 말 대행사 재검토(제이민→제이더스·한결A&C→커넥팅디)로 일정 압박 발생 → D-60 이전 업체·여성기업 자격 조기 확정 필수"
+    },
+    {
+      "id": "chk-08",
+      "phase": "phase2_contract",
+      "timingLabel": "D-55 · 9월 초",
+      "domain": "부스·프로그램",
+      "title": "민간·대학병원·의약단체 체험부스(9개소) 및 검진버스(2대) 참여 확정",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.8.21. ~ 9.21.",
+      "history2026": "서울대병원 강남센터, 강남차병원, 자생한방병원, 고려대 척추측만증연구소(X-Ray 버스), 유디치과(구강검진버스), 의사회·한의사회, 한국신체정보, 케이스튜디오 총 9개소(15동) 확정 · 연인원 2,325명",
+      "cooperationDepts": [
+        "협력병원",
+        "강남구의사회",
+        "강남구한의사회"
+      ],
+      "lessonWarning": "검진버스(유디치과·고려대) 대형차량 진입 동선 및 정차 위치(볼라드·전기) 9월 초 현장 사전 실측 필수"
+    },
+    {
+      "id": "chk-09",
+      "phase": "phase2_contract",
+      "timingLabel": "D-50 · 9월 초",
+      "domain": "부스·프로그램",
+      "title": "보건소 내부 10개 팀 체험부스 신청 공문 발송 및 취합",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.9.9. ~ 9.28.",
+      "history2026": "건강증진팀·서울체력장·감염병예방/대응팀·만성질환관리팀·의무1팀(CPR)·약무팀·정신건강팀·치매안심센터·웰에이징센터 10개소(14동) 확정 · 연인원 5,179명",
+      "cooperationDepts": [
+        "보건행정과",
+        "질병관리과",
+        "의약과",
+        "건강관리과"
+      ]
+    },
+    {
+      "id": "chk-10",
+      "phase": "phase2_contract",
+      "timingLabel": "D-45 · 9월 중순",
+      "domain": "기획·장소",
+      "title": "행사 총괄 추진계획 방침서 결재 및 전 부서 협조 알림",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.9.15. 결재 / 9.21. 전 부서 알림",
+      "history2026": "부구청장 전결(보건행정과-10405), 11개 협조부서(자원순환·도시계획·공원녹지·주차관리·치수·정책홍보실 등) 공식 협조 결재 완료",
+      "cooperationDepts": [
+        "보건행정과",
+        "11개 협조부서"
+      ],
+      "docRef": "보건행정과-10405"
+    },
+    {
+      "id": "chk-11",
+      "phase": "phase2_contract",
+      "timingLabel": "D-45 · 9월 중순",
+      "domain": "계약·예산",
+      "title": "대행사 현장 실측 미팅 및 세부 시설·무대 운영안 조율",
+      "checked": false,
+      "priority": "high",
+      "actualDate2026": "26.8.19. / 8.29. / 9.22. / 10.1.",
+      "history2026": "총 37동(체험 29동+지원 8동), 테이블 57개, 의자 207개, 무대·음향·START 아치·전기 배선 규격 확정",
+      "cooperationDepts": [
+        "대행사",
+        "건강증진팀"
+      ]
+    },
+    {
+      "id": "chk-12",
+      "phase": "phase2_contract",
+      "timingLabel": "D-40 · 9월 하순",
+      "domain": "계약·예산",
+      "title": "민간 기업 건강 홍보물·인센티브 협찬 협의 확정",
+      "checked": false,
+      "priority": "normal",
+      "actualDate2026": "26.9.23. / 9.28.",
+      "history2026": "동국제약 음파전동칫솔 1,200개 협찬 확정으로 구민 완주 인센티브 만족도 제고",
+      "cooperationDepts": [
+        "민간 협찬사",
+        "건강증진팀"
+      ]
+    },
+    {
+      "id": "chk-13",
+      "phase": "phase2_contract",
+      "timingLabel": "D-35 · 9월 말",
+      "domain": "계약·예산",
+      "title": "완주 인센티브·운영 물품 구매계획 및 발주계획 등록(사무관리비)",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.12. 발주계획 / 10.16. 구매계획",
+      "history2026": "사무관리비 8,000천원(참여주민 800명 기준 건강생활실천 물품·에코백 등) 수의계약 구매 추진",
+      "cooperationDepts": [
+        "보건행정과",
+        "재무과"
+      ],
+      "docRef": "발주계획 등록서식 · 인센티브 구매계획",
+      "lessonWarning": "추정가격 1,000만원 초과 시 재정합의·발주계획 3일 공개 필수, 납품 지연 방지를 위해 9월 말 발주 권장"
+    },
+    {
+      "id": "chk-14",
+      "phase": "phase3_promo",
+      "timingLabel": "D-40 · 9월 하순",
+      "domain": "홍보·접수",
+      "title": "보건소 통합예약시스템 온라인 사전접수 오픈(목표 800명)",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.9.21. 오픈 ~ 10.23. 18:00 마감",
+      "history2026": "사전접수 532명 + 현장접수 292명 = 최종 824명 참여(목표 대비 103.0% 달성)",
+      "cooperationDepts": [
+        "건강증진팀",
+        "전산담당"
+      ]
+    },
+    {
+      "id": "chk-15",
+      "phase": "phase3_promo",
+      "timingLabel": "D-35 · 9월 하순",
+      "domain": "인허가·협조",
+      "title": "수변문화쉼터·산책로 사용 및 행복콘서트·모범운전자·폐기물 협조",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.9.23. ~ 10월 중순",
+      "history2026": "치수과(수변문화쉼터 외부), 문화도시과(내부·행복콘서트 공연팀), 공원녹지과(산책로), 모범운전자회(교통통제), 자원순환과·쓰레기 분리수거 2개소 협조",
+      "cooperationDepts": [
+        "치수과",
+        "문화도시과",
+        "공원녹지과",
+        "자원순환과",
+        "모범운전자회"
+      ]
+    },
+    {
+      "id": "chk-16",
+      "phase": "phase3_promo",
+      "timingLabel": "D-30 · 9월 말",
+      "domain": "홍보·접수",
+      "title": "메인 포스터·무대 키비주얼·리플릿 제작 및 감수 확정",
+      "checked": false,
+      "priority": "high",
+      "actualDate2026": "26.9.23. 포스터 / 10.21. 무대시안·리플릿 최종",
+      "history2026": "공동개최(체육회) 표기 반영, 10.19. 키비주얼 재구성 및 10.21. 무대시안·리플릿 최종 확정",
+      "cooperationDepts": [
+        "대행사",
+        "정책홍보실"
+      ]
+    },
+    {
+      "id": "chk-17",
+      "phase": "phase3_promo",
+      "timingLabel": "D-30 · 9월 말",
+      "domain": "홍보·접수",
+      "title": "다채널 구민 홍보(알림톡·헬스체크업 문자 4,000명·반상회·보도자료)",
+      "checked": false,
+      "priority": "high",
+      "actualDate2026": "26.9.28. 알림톡 / 9.29. 문자·반상회 / 10.26. 보도자료",
+      "history2026": "정책홍보실 알림톡·보도자료, 헬스체크업 4,000명 문자, 주민자치과 반상회 자료, 인근 동 주민센터(개포·일원·대치·도곡) 홍보 협조",
+      "cooperationDepts": [
+        "정책홍보실",
+        "주민자치과",
+        "인근 동 주민센터"
+      ]
+    },
+    {
+      "id": "chk-18",
+      "phase": "phase3_promo",
+      "timingLabel": "D-25 · 10월 초",
+      "domain": "VIP·의전",
+      "title": "구청장 참석 비서실 협의 및 VIP 의전 전담팀 편성",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.9.3. 참석 확정 / 10.1. 의전팀 편성",
+      "history2026": "구청장 참석 확정(08:55 도착~10:35 환송), 보건행정팀장 총괄·주차/영접·내빈석·출석체크 전담 의전팀 편성",
+      "cooperationDepts": [
+        "비서실",
+        "보건행정팀"
+      ]
+    },
+    {
+      "id": "chk-19",
+      "phase": "phase3_promo",
+      "timingLabel": "D-20 · 10월 중순",
+      "domain": "부스·프로그램",
+      "title": "부스 세부 구획·전기·집기 배치도 및 전 직원 업무분장 확정",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.15. 운영계획서 확정",
+      "history2026": "총 41개 업무분장 단위(운영·코스·부스·VIP의전·직원식사·쓰레기처리 6대 영역) 및 225명 인력 배치 확정",
+      "cooperationDepts": [
+        "보건행정과",
+        "전 부서",
+        "강남구체육회",
+        "대행사"
+      ],
+      "docRef": "운영계획서 1014"
+    },
+    {
+      "id": "chk-20",
+      "phase": "phase3_promo",
+      "timingLabel": "D-14 · 10월 중순",
+      "domain": "홍보·접수",
+      "title": "양재천 교량·산책로 홍보 현수막 게첨 협조 및 설치",
+      "checked": false,
+      "priority": "normal",
+      "actualDate2026": "26.10.17.(토) 12:00~16:00 게첨",
+      "history2026": "도시계획과 협조 하에 양재천 교량 및 산책로 주요 지점 홍보 현수막 게첨(전날 10.30. 야간 철거 완료)",
+      "cooperationDepts": [
+        "도시계획과",
+        "대행사"
+      ]
+    },
+    {
+      "id": "chk-21",
+      "phase": "phase3_promo",
+      "timingLabel": "D-10 · 10월 하순",
+      "domain": "VIP·의전",
+      "title": "VIP·행사 외부 주차장 확보 공문(남부혈액원·도시관리공단·구룡초)",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.22.~10.27. 공문·현장미팅",
+      "history2026": "서울남부혈액원 지상주차장 7면(구청장 전용면 1번 확보, 10.28. 현장미팅), 도시관리공단 3면, 구룡초 2면 협조 완료",
+      "cooperationDepts": [
+        "서울남부혈액원",
+        "강남구도시관리공단",
+        "구룡초등학교"
+      ]
+    },
+    {
+      "id": "chk-22",
+      "phase": "phase3_promo",
+      "timingLabel": "D-7 · 10월 하순",
+      "domain": "VIP·의전",
+      "title": "개회식 시나리오·사회카드 확정 및 국민의례 약식절차 1 의전 검토",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.16. 초안 / 10.30. 사회카드 최종",
+      "history2026": "대통령훈령 제438호 약식절차 1 준용(①무전주 애국가 1절 경례, 맹세문 없음 ②묵념 10~15초 ③착석 전환) 확정",
+      "cooperationDepts": [
+        "건강증진팀",
+        "강남구체육회",
+        "사회자"
+      ],
+      "docRef": "사회카드 최종",
+      "lessonWarning": "사회자 대본에 '애국가 제창·묵념 생략' 안내 멘트 절대 금지, 무전주 애국가·묵념곡 음원 리허설 필수"
+    },
+    {
+      "id": "chk-23",
+      "phase": "phase4_onsite",
+      "timingLabel": "D-8 · 10월 하순",
+      "domain": "계약·예산",
+      "title": "완주 인센티브 3종 납품 검수 및 사전참가자 안내 문자 발송",
+      "checked": false,
+      "priority": "high",
+      "actualDate2026": "26.10.23. 17:00 검수 / 10.29. 안내문자",
+      "history2026": "인센티브 3종 수량·품질 검수 완료 후 D-2 사전접수자(532명) 대상 집결시간·장소·준비물 안내 문자 발송",
+      "cooperationDepts": [
+        "건강증진팀",
+        "납품업체"
+      ]
+    },
+    {
+      "id": "chk-24",
+      "phase": "phase4_onsite",
+      "timingLabel": "D-5 · 10월 하순",
+      "domain": "안전·현장",
+      "title": "행사장 최종 합동 현장 미팅 및 안전·음향·동선 점검",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.26. 14:00",
+      "history2026": "보건소·체육회·대행사 합동 현장 미팅으로 부스 구획, 2km 코스 안전요원 배치, 청장님 단축코스(밀미리교 분기) 최종 확인",
+      "cooperationDepts": [
+        "보건행정과",
+        "강남구체육회",
+        "대행사"
+      ]
+    },
+    {
+      "id": "chk-25",
+      "phase": "phase4_onsite",
+      "timingLabel": "D-2 · 행사 이틀 전",
+      "domain": "VIP·의전",
+      "title": "비서실 구청장 참석 자료 6종 메모보고 회신 마감",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.29.(목) 회신 완료",
+      "history2026": "①원페이퍼 ②인사말씀(정책홍보실 검토) ③참석자 명단(47명) ④좌석배치도 ⑤차량·하차·도보 동선 ⑥무대·19개 부스·단축코스 및 사진촬영 소통 완료",
+      "cooperationDepts": [
+        "비서실",
+        "정책홍보실",
+        "보건행정팀"
+      ],
+      "lessonWarning": "비서실 마감(D-2) 준수 및 인사말씀 정책홍보실 사전 검토·사진촬영 담당자 동선 공유 필수"
+    },
+    {
+      "id": "chk-26",
+      "phase": "phase4_onsite",
+      "timingLabel": "D-1 · 행사 전날",
+      "domain": "안전·현장",
+      "title": "시설물·부스 설치, 스피커 방향 점검, 총무과 트럭 물품 이송",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.30.(금) 08:00~18:00",
+      "history2026": "08:00~15:00 무대·37동 부스 설치, 09:00~11:00 총무과 트럭 인센티브 이송, 15:00~18:00 부스 운영 물품 인입",
+      "cooperationDepts": [
+        "총무과",
+        "대행사",
+        "보건소 전 부서"
+      ],
+      "lessonWarning": "인근 학교·주거지 반대 방향 스피커 지향각 점검 및 코스 바닥 고무매트·전선 보호캡 낙상 위험 전수 점검"
+    },
+    {
+      "id": "chk-27",
+      "phase": "phase4_onsite",
+      "timingLabel": "D-1 · 행사 전날 저녁",
+      "domain": "안전·현장",
+      "title": "당직실 보고, 야간경호 2명 배치 및 홍보 현수막 철거",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.30.(금) 18:00~23:00",
+      "history2026": "18:00 보건소 당직실 보고 및 시설 보호 야간경호 2명 배치, 19:00~23:00 홍보 현수막 사전 철거 완료",
+      "cooperationDepts": [
+        "보건소 당직실",
+        "대행사(경호)"
+      ]
+    },
+    {
+      "id": "chk-28",
+      "phase": "phase4_onsite",
+      "timingLabel": "D-Day · 07:00~14:30",
+      "domain": "안전·현장",
+      "title": "응급의료·안전 배치(구급차 2대·응급부스·안전요원 20명) 및 본행사 운영",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.10.31.(토) 07:00~16:00",
+      "history2026": "직원 출근·간식/도시락 220개 배부, VIP 27명 영접, 개회식·2km 걷기(824명)·19개 부스 운영, 안전사고 0건, 종료 후 시설복원·환경정비 완료",
+      "cooperationDepts": [
+        "보건소 전 직원",
+        "강남구체육회",
+        "대행사",
+        "응급의료팀"
+      ]
+    },
+    {
+      "id": "chk-29",
+      "phase": "phase4_onsite",
+      "timingLabel": "D-Day · 13:30 마감 직후",
+      "domain": "부스·프로그램",
+      "title": "19개 부스 종료 시각 현장 즉시 참여 실적 집계(표준 폼)",
+      "checked": false,
+      "priority": "high",
+      "actualDate2026": "26.10.31. 사후 집계(연인원 7,504명)",
+      "history2026": "보건소 10개 팀 5,179명 + 민간 9개소 2,325명 = 누적 연인원 약 7,504명 전수 집계 완료",
+      "cooperationDepts": [
+        "보건소 10개 팀",
+        "민간 9개 기관"
+      ],
+      "docRef": "보건행정과-14093",
+      "lessonWarning": "2026년 사후 취합 지연을 개선하기 위해 부스 마감(13:30) 퇴근 서명 전 현장 즉시 실적 입력 의무화"
+    },
+    {
+      "id": "chk-30",
+      "phase": "phase5_close",
+      "timingLabel": "D+3 · 11월 초",
+      "domain": "정산·보고",
+      "title": "행복콘서트 공연 결과 제출 및 참여 직원 대체휴무 시행",
+      "checked": false,
+      "priority": "normal",
+      "actualDate2026": "26.11.3. 공연 결과 제출",
+      "history2026": "문화도시과 행복콘서트 공연 결과 양식 제출 완료, 주말 행사 참여 전 직원 대체휴무 복무 처리",
+      "cooperationDepts": [
+        "문화도시과",
+        "보건행정팀"
+      ]
+    },
+    {
+      "id": "chk-31",
+      "phase": "phase5_close",
+      "timingLabel": "D+10 · 11월 초",
+      "domain": "계약·예산",
+      "title": "대행사 준공계·납품 검수 및 행사운영비·사무관리비 최종 지출 정산",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.11.10. 준공계",
+      "history2026": "행사운영비 49,302천원(낙찰차액 498천원 유보) + 사무관리비 8,000천원 최종 집행 정산 완료",
+      "cooperationDepts": [
+        "보건행정과",
+        "재무과",
+        "대행사"
+      ],
+      "docRef": "준공계(2026 양재천 걷자! 건강 페스티벌).pdf"
+    },
+    {
+      "id": "chk-32",
+      "phase": "phase5_close",
+      "timingLabel": "D+10 · 11월 초",
+      "domain": "정산·보고",
+      "title": "개최 결과 보고서 결재 및 차년도 개선사항 체크리스트 환류",
+      "checked": false,
+      "priority": "must",
+      "actualDate2026": "26.11.10. 결재 완료",
+      "history2026": "보건행정과-14093(대시민공개) 결재 완료 — 824명 참여, 7,504명 부스 체험, 무사고, 시험일정 조회·실적 즉시집계 2대 개선안 도출",
+      "cooperationDepts": [
+        "보건행정과",
+        "보건소장"
+      ],
+      "docRef": "보건행정과-14093"
+    }
+  ],
+  "lastUpdated": "2026-11-20T11:30:00.000Z"
 };

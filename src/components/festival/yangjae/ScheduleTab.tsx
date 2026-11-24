@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Plus,
   Save,
@@ -30,17 +30,27 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = React.memo(({
   onDeleteSchedule,
   onUpdateScheduleField,
 }) => {
+  const [dateGroupFilter, setDateGroupFilter] = useState<'전체' | '사전준비' | '행사전날' | '행사당일'>('전체');
+
   const filteredSchedule = useMemo(() => {
-    if (!scheduleSearchQuery.trim()) return schedule;
+    let list = schedule;
+    if (dateGroupFilter === '사전준비') {
+      list = list.filter((item) => item.phase === '사전준비' || (item.date && !item.date.includes('10.30') && !item.date.includes('10.31')));
+    } else if (dateGroupFilter === '행사전날') {
+      list = list.filter((item) => item.phase === '행사전날' || Boolean(item.date && item.date.includes('10.30')));
+    } else if (dateGroupFilter === '행사당일') {
+      list = list.filter((item) => Boolean(item.date && item.date.includes('10.31')) || (!item.date && item.phase !== '사전준비' && item.phase !== '행사전날'));
+    }
+    if (!scheduleSearchQuery.trim()) return list;
     const q = scheduleSearchQuery.trim().toLowerCase();
-    return schedule.filter(
+    return list.filter(
       (item) =>
         item.title.toLowerCase().includes(q) ||
         (item.note && item.note.toLowerCase().includes(q)) ||
         (item.lead && item.lead.toLowerCase().includes(q)) ||
         item.time.toLowerCase().includes(q)
     );
-  }, [schedule, scheduleSearchQuery]);
+  }, [schedule, scheduleSearchQuery, dateGroupFilter]);
 
   return (
     <>
@@ -71,32 +81,50 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = React.memo(({
           )}
         </div>
 
-        {/* Row 2: Full-Width Search Bar */}
-        <div className="relative">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={scheduleSearchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="식순명, 담당자, 내용 검색..."
-            className="w-full pl-8 pr-7 py-1.5 text-xs font-medium border border-slate-200/80 rounded-lg bg-slate-50/80 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900/15 focus:border-slate-300 text-slate-900 transition-colors"
-          />
-          {scheduleSearchQuery && (
-            <button
-              type="button"
-              onClick={() => onSearchChange('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          )}
+        {/* Row 2: Search Bar + Date Group Filter Pills */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={scheduleSearchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="식순명 · 담당자 · 내용 검색"
+              className="w-full pl-8 pr-7 py-1.5 text-xs font-medium border border-slate-200/80 rounded-lg bg-slate-50/80 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900/15 focus:border-slate-300 text-slate-900 transition-colors"
+            />
+            {scheduleSearchQuery && (
+              <button
+                type="button"
+                onClick={() => onSearchChange('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-1 flex-wrap shrink-0">
+            {(['전체', '사전준비', '행사전날', '행사당일'] as const).map((grp) => (
+              <button
+                key={grp}
+                type="button"
+                onClick={() => setDateGroupFilter(grp)}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-colors ${
+                  dateGroupFilter === grp
+                    ? 'bg-slate-900 text-white border-slate-900'
+                    : 'bg-slate-50 text-slate-600 border-slate-200/80 hover:bg-slate-100'
+                }`}
+              >
+                {grp}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Schedule Box Cards List */}
       {filteredSchedule.length === 0 ? (
         <div className="p-8 text-center text-xs text-slate-500 font-medium bg-white border border-slate-200/80 rounded-xl shadow-2xs space-y-3">
-          <div>검색 조건과 일치하는 행사 식순이 없습니다.</div>
+          <div>일치 행사 식순 없음</div>
           {isLocalAdmin && (
             <div>
               <button
@@ -112,7 +140,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = React.memo(({
           )}
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
           {filteredSchedule.map((item) => {
             const isCeremony = item.id === 7 || item.title.includes('국민의례');
             const isWalkingStart = item.id === 14 || item.title.includes('걷기');
@@ -121,7 +149,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = React.memo(({
             return (
               <div
                 key={`schedule-card-${item.id}`}
-                className={`p-3.5 bg-white border rounded-xl transition-colors duration-150 ${
+                className={`vlds-cv-card p-3.5 bg-white border rounded-xl transition-colors duration-150 ${
                   isEditingThis
                     ? 'border-blue-400 ring-1 ring-blue-200 bg-blue-50/10 shadow-sm'
                     : isCeremony

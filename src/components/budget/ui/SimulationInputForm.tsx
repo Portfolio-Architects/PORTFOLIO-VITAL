@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { Calculator, Sparkles, RotateCcw, Plus, Check, X, AlertCircle, Coins, Building2 } from 'lucide-react';
+import { Calculator, Sparkles, RotateCcw, Plus, Check, X, AlertCircle, Coins, Building2, Lock } from 'lucide-react';
 import { SimulationEntry, BudgetActionType, StatItemSimulationSummary } from '@/types';
 
 export interface SimulationInputFormProps {
@@ -14,6 +14,7 @@ export interface SimulationInputFormProps {
   onCancelEdit?: () => void;
   onResetAll?: () => void;
   onLoadTestPreset?: () => void;
+  embedded?: boolean;
 }
 
 export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.memo(({
@@ -26,6 +27,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
   onCancelEdit,
   onResetAll,
   onLoadTestPreset,
+  embedded = false,
 }) => {
   // Internal Form State
   const [name, setName] = useState(() => editingEntry?.name || '');
@@ -33,7 +35,9 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
   const [statItem, setStatItem] = useState(() => editingEntry?.statItem || '');
   const [actionType, setActionType] = useState<BudgetActionType>(() => editingEntry?.actionType || 'general');
   const [unitPriceStr, setUnitPriceStr] = useState(() =>
-    editingEntry ? (editingEntry.unitPrice ? editingEntry.unitPrice.toLocaleString('ko-KR') : '0') : ''
+    editingEntry
+      ? (editingEntry.unitPrice ? editingEntry.unitPrice.toLocaleString('ko-KR') : (editingEntry.id ? '0' : ''))
+      : ''
   );
   const [quantity, setQuantity] = useState<number>(() => editingEntry?.quantity || 1);
   const [memo, setMemo] = useState(() => editingEntry?.memo || '');
@@ -48,7 +52,9 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
       setDetailedProject(editingEntry.detailedProject || '');
       setStatItem(editingEntry.statItem || '');
       setActionType(editingEntry.actionType || 'general');
-      setUnitPriceStr(editingEntry.unitPrice ? editingEntry.unitPrice.toLocaleString('ko-KR') : '0');
+      setUnitPriceStr(
+        editingEntry.unitPrice ? editingEntry.unitPrice.toLocaleString('ko-KR') : (editingEntry.id ? '0' : '')
+      );
       setQuantity(editingEntry.quantity || 1);
       setMemo(editingEntry.memo || '');
       setValidationError(null);
@@ -85,8 +91,10 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
   const dailyExpenseSpent = currentStatSummary?.dailyExpenseSpent || 0;
   const dailyExpenseRemaining = currentStatSummary?.dailyExpenseRemaining || 0;
   const generalRemaining = currentStatSummary?.currentRemaining || 0;
+  const currentBidSaving = currentStatSummary?.simulatedBidSaving || 0;
   const hasDailyExpense = dailyExpenseIssued > 0;
   const effectiveActionType: BudgetActionType = actionType;
+  const isBidSaving = effectiveActionType === 'bid_saving';
   const isEditMode = Boolean(editingEntry && editingEntry.id);
 
   // When editing an existing PLANNED daily_expense entry on the same project/statItem,
@@ -176,10 +184,17 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
       });
       if (onCancelEdit) onCancelEdit();
     } else {
+      const preservedCategoryId =
+        editingEntry?.categoryId &&
+        editingEntry.detailedProject === detailedProject &&
+        editingEntry.statItem === statItem
+          ? editingEntry.categoryId
+          : undefined;
       onAddEntry({
         name: name.trim(),
         detailedProject,
         statItem,
+        categoryId: preservedCategoryId,
         actionType: effectiveActionType,
         unitPrice,
         quantity,
@@ -193,11 +208,12 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
       setMemo('');
       if (editingEntry && onCancelEdit) onCancelEdit();
     }
-  }, [name, detailedProject, statItem, effectiveActionType, unitPrice, quantity, calculatedAmount, memo, effectiveDailyExpenseLimit, isEditMode, editingEntry, onAddEntry, onUpdateEntry, onCancelEdit]);
+  }, [name, detailedProject, statItem, effectiveActionType, unitPrice, quantity, calculatedAmount, memo, isEditMode, editingEntry, onAddEntry, onUpdateEntry, onCancelEdit]);
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-xl p-5 md:p-6 shadow-2xs space-y-5 text-slate-800">
-      {/* Panel Header */}
+    <div className={embedded ? 'space-y-4 text-slate-800' : 'bg-white border border-slate-200/80 rounded-xl p-5 md:p-6 shadow-2xs space-y-5 text-slate-800'}>
+      {/* Panel Header (hidden when embedded inside SimulationInputModal) */}
+      {!embedded && (
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 border border-slate-200/80 flex items-center justify-center shrink-0">
@@ -239,6 +255,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
           )}
         </div>
       </div>
+      )}
 
       {/* Validation Error Banner */}
       {validationError && (
@@ -254,12 +271,12 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
           {/* 1. Item Name */}
           <div className="lg:col-span-4 space-y-1.5">
             <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-              <span>지출 예정 항목명</span>
+              <span>{isBidSaving ? '낙찰차액 항목명' : '지출 예정 항목명'}</span>
               <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="예: AI 헬스체크업 키오스크 구매"
+              placeholder={isBidSaving ? '예: 양재천 페스티벌 용역 낙찰차액' : '예: AI 헬스체크업 키오스크 구매'}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50/70 focus:bg-white border border-slate-200/90 rounded-lg text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-slate-400 transition-colors"
@@ -303,7 +320,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
             </select>
           </div>
 
-          {/* 3-1. Expense Source & Type Segmented Selector (일반 지출 vs 일상경비 지출) */}
+          {/* 3-1. Expense Source & Type Segmented Selector (일반 지출 vs 일상경비 지출 vs 낙찰차액) */}
           <div className="lg:col-span-12 p-3.5 bg-slate-50/60 border border-slate-200/80 rounded-xl space-y-2.5">
             <div className="flex items-center justify-between flex-wrap gap-1">
               <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
@@ -321,7 +338,7 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {/* Option 1: General Expenditure */}
               <button
                 type="button"
@@ -329,30 +346,30 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
                   setActionType('general');
                   setValidationError(null);
                 }}
-                className={`p-3 rounded-lg border text-left transition-colors cursor-pointer flex items-start gap-3 ${
+                className={`p-3 rounded-lg border text-left transition-colors cursor-pointer flex items-start gap-2.5 ${
                   effectiveActionType === 'general'
                     ? 'bg-white border-slate-900 shadow-2xs'
                     : 'bg-white/70 border-slate-200/80 hover:border-slate-300'
                 }`}
               >
-                <div className={`p-2 rounded-md shrink-0 mt-0.5 ${
+                <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${
                   effectiveActionType === 'general' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'
                 }`}>
                   <Building2 className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1 flex-wrap">
-                    <span className={`text-xs sm:text-sm font-bold ${effectiveActionType === 'general' ? 'text-slate-900' : 'text-slate-600'}`}>
-                      일반 지출 (본청 직접 집행)
+                    <span className={`text-xs sm:text-[13px] font-bold ${effectiveActionType === 'general' ? 'text-slate-900' : 'text-slate-600'}`}>
+                      일반 지출
                     </span>
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded font-mono tabular-nums ${
+                    <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded font-mono tabular-nums ${
                       effectiveActionType === 'general' ? 'bg-slate-100 text-slate-900' : 'bg-slate-100 text-slate-500'
                     }`}>
                       가용 {generalRemaining.toLocaleString('ko-KR')}원
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
-                    본청 총예산 직접 집행 · 가용 잔액 차감
+                  <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                    본청 직접 집행 · 가용 잔액 차감
                   </p>
                 </div>
               </button>
@@ -364,38 +381,73 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
                   setActionType('daily_expense');
                   setValidationError(null);
                 }}
-                className={`p-3 rounded-lg border text-left transition-colors cursor-pointer flex items-start gap-3 ${
+                className={`p-3 rounded-lg border text-left transition-colors cursor-pointer flex items-start gap-2.5 ${
                   effectiveActionType === 'daily_expense'
                     ? 'bg-amber-50/40 border-amber-500 shadow-2xs'
                     : 'bg-white/70 border-slate-200/80 hover:border-amber-300'
                 }`}
               >
-                <div className={`p-2 rounded-md shrink-0 mt-0.5 ${
+                <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${
                   effectiveActionType === 'daily_expense' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-500'
                 }`}>
                   <Coins className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1 flex-wrap">
-                    <span className={`text-xs sm:text-sm font-bold ${effectiveActionType === 'daily_expense' ? 'text-amber-950' : 'text-slate-600'}`}>
-                      일상경비 지출 (교부금 내 집행)
+                    <span className={`text-xs sm:text-[13px] font-bold ${effectiveActionType === 'daily_expense' ? 'text-amber-950' : 'text-slate-600'}`}>
+                      일상경비 지출
                     </span>
                     {hasDailyExpense ? (
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded font-mono tabular-nums ${
+                      <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded font-mono tabular-nums ${
                         effectiveActionType === 'daily_expense' ? 'bg-amber-100 text-amber-900' : 'bg-amber-50 text-amber-700'
                       }`}>
                         미집행 {effectiveDailyExpenseLimit.toLocaleString('ko-KR')}원
                       </span>
                     ) : (
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800 font-mono">
+                      <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 font-mono">
                         미교부 (추가 교부 필요)
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
+                  <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
                     {hasDailyExpense
-                      ? `교부액 ₩${dailyExpenseIssued.toLocaleString('ko-KR')}원 · 미집행 잔액 차감`
-                      : '교부액 0원 · 추가 교부 예정 반영'}
+                      ? `교부 ₩${dailyExpenseIssued.toLocaleString('ko-KR')} · 미집행 차감`
+                      : '교부 0원 · 추가 교부 반영'}
+                  </p>
+                </div>
+              </button>
+
+              {/* Option 3: Bid Saving (낙찰차액 · 집행유보 · 불용 확정) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActionType('bid_saving');
+                  setValidationError(null);
+                }}
+                className={`p-3 rounded-lg border text-left transition-colors cursor-pointer flex items-start gap-2.5 ${
+                  isBidSaving
+                    ? 'bg-violet-50/50 border-violet-500 shadow-2xs'
+                    : 'bg-white/70 border-slate-200/80 hover:border-violet-300'
+                }`}
+              >
+                <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${
+                  isBidSaving ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  <Lock className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-1 flex-wrap">
+                    <span className={`text-xs sm:text-[13px] font-bold ${isBidSaving ? 'text-violet-950' : 'text-slate-600'}`}>
+                      낙찰차액
+                    </span>
+                    <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded font-mono tabular-nums ${
+                      isBidSaving ? 'bg-violet-100 text-violet-900' : 'bg-violet-50 text-violet-700'
+                    }`}>
+                      {currentBidSaving > 0 ? `유보 ${currentBidSaving.toLocaleString('ko-KR')}원` : '집행유보 · 불용'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                    가용 잔액 차감 · 집행률 미포함
                   </p>
                 </div>
               </button>
@@ -436,20 +488,28 @@ export const SimulationInputForm: React.FC<SimulationInputFormProps> = React.mem
           <div className="lg:col-span-4 space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-700">
-                총 예정 집행액 (자동 계산)
+                {isBidSaving ? '낙찰차액 유보액 (자동 계산)' : '총 예정 집행액 (자동 계산)'}
               </label>
               <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
                 effectiveActionType === 'daily_expense'
                   ? 'bg-amber-50 text-amber-800 border-amber-200/80'
-                  : 'bg-slate-100 text-slate-700 border-slate-200/80'
+                  : isBidSaving
+                    ? 'bg-violet-50 text-violet-800 border-violet-200/80'
+                    : 'bg-slate-100 text-slate-700 border-slate-200/80'
               }`}>
-                {effectiveActionType === 'daily_expense' ? '🪙 일상경비 잔액 차감' : '🏢 본청 예산 차감'}
+                {effectiveActionType === 'daily_expense'
+                  ? '🪙 일상경비 잔액 차감'
+                  : isBidSaving
+                    ? '🔒 가용 차감 · 집행률 제외'
+                    : '🏢 본청 예산 차감'}
               </span>
             </div>
             <div className={`w-full px-3.5 py-2.5 rounded-lg font-bold text-base text-right flex items-center justify-between border ${
               effectiveActionType === 'daily_expense'
                 ? 'bg-amber-50/40 border-amber-200/80 text-amber-900'
-                : 'bg-slate-50/80 border-slate-200/90 text-slate-900'
+                : isBidSaving
+                  ? 'bg-violet-50/40 border-violet-200/80 text-violet-900'
+                  : 'bg-slate-50/80 border-slate-200/90 text-slate-900'
             }`}>
               <span className="text-xs font-medium text-slate-400">₩</span>
               <span className="font-mono tabular-nums text-base">{calculatedAmount.toLocaleString('ko-KR')} 원</span>
