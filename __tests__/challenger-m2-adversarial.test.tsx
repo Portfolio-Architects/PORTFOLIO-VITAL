@@ -277,7 +277,7 @@ describe('Challenger 1 Adversarial Stress Test Suite: Milestone 2', () => {
         render(<AdminOntologyExplorer initialGraph={minimalGraph} />);
       });
 
-      expect(screen.getByText('행정 문서·업무 온톨로지 양방향 탐색기')).toBeInTheDocument();
+      expect(screen.getByText('문서 관계도')).toBeInTheDocument();
       // Should show fallback labels when callbacks are absent
       expect(screen.getByText('포스트잇 보드')).toBeInTheDocument();
       expect(screen.getByText('수요일 2단 대조')).toBeInTheDocument();
@@ -303,7 +303,7 @@ describe('Challenger 1 Adversarial Stress Test Suite: Milestone 2', () => {
 
       const detailsTab = screen.getByRole('button', { name: /상세 속성/i });
       const crossTab = screen.getByRole('button', { name: /6대 도메인 연계/i });
-      const traceTab = screen.getByRole('button', { name: /인과 순회/i });
+      const traceTab = screen.getByRole('button', { name: /인과 추적/i });
       const forensicsTab = screen.getByRole('button', { name: /예산 포렌식 검산/i });
 
       // Rapidly switch tabs 10 times
@@ -315,7 +315,7 @@ describe('Challenger 1 Adversarial Stress Test Suite: Milestone 2', () => {
       }
 
       // Final tab should be details
-      expect(screen.getByText('전사 도메인 연계 퀵 점프')).toBeInTheDocument();
+      expect(screen.getByText('연계 바로가기')).toBeInTheDocument();
       expect(screen.getByTestId('btn-jump-memory')).toBeInTheDocument();
     });
   });
@@ -345,7 +345,7 @@ describe('Challenger 1 Adversarial Stress Test Suite: Milestone 2', () => {
       }
 
       // Explorer should remain functional
-      expect(screen.getByText('행정 문서·업무 온톨로지 양방향 탐색기')).toBeInTheDocument();
+      expect(screen.getByText('문서 관계도')).toBeInTheDocument();
     });
   });
 
@@ -462,8 +462,8 @@ describe('Challenger 1 Adversarial Stress Test Suite: Milestone 2', () => {
         render(<AdminOntologyExplorer initialGraph={minimalGraph} />);
       });
 
-      expect(screen.getByText('1. 온톨로지')).toBeInTheDocument();
-      expect(screen.getByText('2. 아카이브')).toBeInTheDocument();
+      expect(screen.getByText('1. 문서 관계도')).toBeInTheDocument();
+      expect(screen.getByText('2. 문서 보관함')).toBeInTheDocument();
       expect(screen.getByText('3. 작업기억')).toBeInTheDocument();
       expect(screen.getByText('4. e-호조 예산')).toBeInTheDocument();
       expect(screen.getByText('5. 주간업무')).toBeInTheDocument();

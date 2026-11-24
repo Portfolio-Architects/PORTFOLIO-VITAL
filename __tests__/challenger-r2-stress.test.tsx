@@ -105,7 +105,9 @@ describe('Challenger 1 Adversarial Stress Test Suite: Zero-Stall Pipeline (R2)',
       expect(content).toContain('useInventory({ enabled: isDeferredDataEnabled })');
       expect(content).toContain('useMeetings({ enabled: isDeferredDataEnabled })');
       expect(content).toContain('useProjects({ enabled: isDeferredDataEnabled })');
-      expect(content).toContain('useContacts({ enabled: isCommandPaletteOpen || hasOpenedCommandPalette })');
+      expect(content).toMatch(
+        /useContacts\(\{\s*enabled:\s*isCommandPaletteOpen\s*\|\|\s*hasOpenedCommandPalette\s*\|\|\s*isContactsOpen\s*\|\|\s*hasOpenedContacts,?\s*\}\)/
+      );
       expect(content).toContain('hasOpenedCommandPalette');
       expect(content).toContain('if (next) setHasOpenedCommandPalette(true)');
     });

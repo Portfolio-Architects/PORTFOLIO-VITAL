@@ -403,7 +403,7 @@ describe('Milestone 2: AdminOntologyDrawer & AdminOntologyExplorer Test Suite', 
       );
 
       // Verify explorer header rendered
-      expect(screen.getByText('행정 문서·업무 온톨로지 양방향 탐색기')).toBeInTheDocument();
+      expect(screen.getByText('문서 관계도')).toBeInTheDocument();
 
       // Switch view mode to "목록 카드 뷰"
       const cardsModeBtn = screen.getByRole('button', { name: /목록 카드 뷰/i });

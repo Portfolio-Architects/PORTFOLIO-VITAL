@@ -324,7 +324,7 @@ describe('Milestone 3 Empirical Challenger: Props & Hooks Verification Suite', (
       const { container } = render(<BudgetDashboard />);
       expect(container).toBeInTheDocument();
       // Verify empty state fallback
-      expect(screen.getByText('예산 과목을 추가해 보세요')).toBeInTheDocument();
+      expect(screen.getByText('등록 예산 과목 없음')).toBeInTheDocument();
       expect(screen.getByText('0개 정책사업 · 0개 통계목')).toBeInTheDocument();
     });
 
@@ -366,7 +366,7 @@ describe('Milestone 3 Empirical Challenger: Props & Hooks Verification Suite', (
       // 0 props render (ProtectedApp pattern)
       const { container } = render(<WorkspaceView initialTab="budget" />);
       expect(container).toBeInTheDocument();
-      expect(screen.getByText('예산 과목을 추가해 보세요')).toBeInTheDocument();
+      expect(screen.getByText('등록 예산 과목 없음')).toBeInTheDocument();
 
       // Render with custom categories and getCategoryStats forwarded
       const mockForwardStats = jest.fn().mockReturnValue({

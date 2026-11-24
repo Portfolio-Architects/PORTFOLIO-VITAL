@@ -342,36 +342,38 @@ describe('Milestone 3 Empirical Challenger: View Integrations Stress Suite', () 
   // Section 1: WorkspaceView & ProtectedApp Zero-Prop Rendering & Null-Safety
   // ==========================================================================
   describe('1. WorkspaceView & ProtectedApp Zero-Prop Rendering & Runtime Resilience', () => {
-    it('1-1. mounts WorkspaceView with zero props without throwing TypeError or crash', () => {
+    it('1-1. mounts WorkspaceView with zero props without throwing TypeError or crash', async () => {
+      let container!: HTMLElement;
       expect(() => {
-        const { container } = renderWithQueryClient(<WorkspaceView />);
-        expect(container).toBeInTheDocument();
-        // Default tab switcher displays budget and simulator options
-        expect(screen.getByText('예산 대조보드')).toBeInTheDocument();
-        expect(screen.getByText('예산 시뮬레이터')).toBeInTheDocument();
+        const res = renderWithQueryClient(<WorkspaceView />);
+        container = res.container;
       }).not.toThrow();
+      expect(container).toBeInTheDocument();
+      // Unified budget control board renders directly without legacy dual top tabs
+      expect(await screen.findByText('예산 현황')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /과목별 대조/ })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /예정 · 소진 표/ })).toBeInTheDocument();
     });
 
-    it('1-2. renders WorkspaceView with empty object props ({}) and preserves stateful tab switching', async () => {
+    it('1-2. renders WorkspaceView with empty object props ({}) and switches between unified sub-views cleanly', async () => {
       const { container } = renderWithQueryClient(<WorkspaceView {...{}} />);
       expect(container).toBeInTheDocument();
 
-      // Click on "예산 시뮬레이터" tab
-      const simulatorTab = screen.getByText('예산 시뮬레이터');
-      fireEvent.click(simulatorTab);
+      // Switch to "예정 · 소진 표" sub-view
+      const planSubViewBtn = await screen.findByRole('button', { name: /예정 · 소진 표/ });
+      fireEvent.click(planSubViewBtn);
+      expect(planSubViewBtn).toHaveAttribute('aria-pressed', 'true');
 
-      // Verify localStorage was updated
-      expect(localStorage.getItem('hchps-workspace-active-tab')).toBe('simulator');
-
-      // Click back to "예산 대조보드"
-      const budgetTab = screen.getByText('예산 대조보드');
-      fireEvent.click(budgetTab);
-      expect(localStorage.getItem('hchps-workspace-active-tab')).toBe('budget');
+      // Switch back to "과목별 대조" sub-view
+      const catSubViewBtn = screen.getByRole('button', { name: /과목별 대조/ });
+      fireEvent.click(catSubViewBtn);
+      expect(catSubViewBtn).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('1-3. mounts WorkspaceView with initialTab="simulator" directly without prop drilling', () => {
+    it('1-3. mounts WorkspaceView with initialTab="simulator" directly without prop drilling', async () => {
       renderWithQueryClient(<WorkspaceView initialTab="simulator" />);
-      expect(localStorage.getItem('hchps-workspace-active-tab')).toBe(null); // doesn't overwrite until user clicks
+      const planSubViewBtn = await screen.findByRole('button', { name: /예정 · 소진 표/ });
+      expect(planSubViewBtn).toHaveAttribute('aria-pressed', 'true');
     });
 
     it('1-4. handles window custom event "hchps-zod-error" safely without crashing', () => {
@@ -414,17 +416,18 @@ describe('Milestone 3 Empirical Challenger: View Integrations Stress Suite', () 
       renderWithQueryClient(<ProtectedApp appMode="HCHPS" onModeChange={onModeChange} />);
 
       // ProtectedApp starts at dashboard
-      expect(screen.getByText(/HCHPS 통합 대시보드/i)).toBeInTheDocument();
+      expect(screen.getByText(/HCHPS 대시보드/i)).toBeInTheDocument();
 
       // Switch module to workspace (예산관리)
       const workspaceNavBtns = screen.getAllByText('예산관리');
       expect(workspaceNavBtns.length).toBeGreaterThan(0);
       fireEvent.click(workspaceNavBtns[0]);
 
-      // WorkspaceView should be active with 0 drilled props
+      // WorkspaceView should be active with 0 drilled props rendering unified board
       await waitFor(() => {
-        expect(screen.getByText('예산 대조보드')).toBeInTheDocument();
-        expect(screen.getByText('예산 시뮬레이터')).toBeInTheDocument();
+        expect(screen.getByText('예산 현황')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /과목별 대조/ })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /예정 · 소진 표/ })).toBeInTheDocument();
       });
     });
 
@@ -440,7 +443,7 @@ describe('Milestone 3 Empirical Challenger: View Integrations Stress Suite', () 
       fireEvent.click(workspaceNavBtns[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('예산 대조보드')).toBeInTheDocument();
+        expect(screen.getByText('예산 현황')).toBeInTheDocument();
       });
     });
   });
@@ -573,7 +576,7 @@ describe('Milestone 3 Empirical Challenger: View Integrations Stress Suite', () 
       const cardsModeBtn = screen.getByRole('button', { name: /목록 카드 뷰/i });
       fireEvent.click(cardsModeBtn);
 
-      const reindexBtn = screen.getByTitle('아카이브 및 온톨로지 비파괴 재색인 실행');
+      const reindexBtn = screen.getByTitle('문서 색인 갱신');
       expect(reindexBtn).toBeInTheDocument();
 
       // Trigger reindex
@@ -616,7 +619,7 @@ describe('Milestone 3 Empirical Challenger: View Integrations Stress Suite', () 
 
       render(<AdminOntologyExplorer initialGraph={mockTestGraph} projectKey="ALL" />);
 
-      const reindexBtn = screen.getByTitle('아카이브 및 온톨로지 비파괴 재색인 실행');
+      const reindexBtn = screen.getByTitle('문서 색인 갱신');
       fireEvent.click(reindexBtn);
 
       // Verify button recovers from reindexing state without fatal crash
@@ -626,7 +629,7 @@ describe('Milestone 3 Empirical Challenger: View Integrations Stress Suite', () 
       });
 
       // Explorer view remains stable and healthy
-      expect(screen.getByText('행정 문서·업무 온톨로지 양방향 탐색기')).toBeInTheDocument();
+      expect(screen.getByText('문서 관계도')).toBeInTheDocument();
 
       fetchSpy.mockRestore();
     });

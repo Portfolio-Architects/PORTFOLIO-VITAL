@@ -166,7 +166,7 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       mockContactsList = [];
       render(<ContactsBox />);
 
-      expect(screen.getByText('등록된 연락처가 없습니다.')).toBeInTheDocument();
+      expect(screen.getByText('등록 연락처 없음')).toBeInTheDocument();
 
       const nameInput = screen.getByPlaceholderText('예: 이성섭 상임이사, 최장미');
       const phoneInput = screen.getByPlaceholderText('예: 010-5284-3946');
@@ -191,6 +191,8 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       const dialog = screen.getByRole('dialog', { name: '업무 연락처' });
       expect(dialog).toBeInTheDocument();
       expect(screen.getByText('김행정')).toBeInTheDocument();
+      expect(screen.queryByText('초성 · 메모 검색')).not.toBeInTheDocument();
+      expect(screen.queryByText('부서 · 유관기관 담당자 통합 조회')).not.toBeInTheDocument();
 
       // Add form is collapsed by default in sheet mode and expands on button click
       expect(screen.queryByPlaceholderText('예: 이성섭 상임이사, 최장미')).not.toBeInTheDocument();
@@ -261,7 +263,7 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       expect(screen.queryByText('총 편성 예산')).not.toBeInTheDocument();
 
       // Verify dedicated Execution & Unallocated Risk Diagnosis figures render by default
-      expect(screen.getByText('집행·불용 위험 정밀 진단')).toBeInTheDocument();
+      expect(screen.getByText('집행·불용 진단')).toBeInTheDocument();
       expect(screen.getAllByText('65,400,000').length).toBeGreaterThanOrEqual(2);
       expect(screen.getAllByText('34,600,000').length).toBeGreaterThanOrEqual(3);
       expect(screen.getAllByText(/65\.4%/).length).toBeGreaterThan(0);
@@ -291,14 +293,14 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       );
 
       // Verify Korean accounting headings and labels are present
-      expect(screen.getByText('집행·불용 위험 정밀 진단')).toBeInTheDocument();
+      expect(screen.getByText('집행·불용 진단')).toBeInTheDocument();
       expect(screen.getByText('예산 집행률')).toBeInTheDocument();
       expect(screen.getByText('예산 잔여율')).toBeInTheDocument();
       expect(screen.getByText('누적 집행액')).toBeInTheDocument();
       expect(screen.getByText('가용 잔액')).toBeInTheDocument();
-      expect(screen.getByText('월별 예산 집행 추이')).toBeInTheDocument();
+      expect(screen.getByText('월별 집행 추이')).toBeInTheDocument();
       expect(screen.getByText('최대 집행월')).toBeInTheDocument();
-      expect(screen.getByText('월 권장 집행액 (11월 기준)')).toBeInTheDocument();
+      expect(screen.getByText('월 권장 집행액')).toBeInTheDocument();
       expect(screen.getByText('목표 대비 잔여액')).toBeInTheDocument();
       expect(screen.getByText('5월')).toBeInTheDocument();
 
@@ -411,7 +413,7 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       );
 
       // Verify heading, design completion badge, and center unallocated risk metric (10,173,300원) on initial render
-      expect(screen.getByText('집행·불용 위험 정밀 진단')).toBeInTheDocument();
+      expect(screen.getByText('집행·불용 진단')).toBeInTheDocument();
       expect(screen.getByText('설계 완료 97.4%')).toBeInTheDocument();
       expect(screen.getByTestId('donut-center-execution-risk')).toHaveTextContent('10,173,300');
       expect(screen.getByText('설계 97.4% · 실집행 79.2%')).toBeInTheDocument();
@@ -456,7 +458,7 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
         path.join(process.cwd(), 'src/components/ProtectedApp.tsx'),
         'utf-8'
       );
-      expect(protectedAppSrc).toContain('통합 대시보드');
+      expect(protectedAppSrc).toContain('대시보드');
       expect(protectedAppSrc).toContain('로그아웃');
       expect(protectedAppSrc).not.toContain('Precision Operations Intelligence');
       expect(protectedAppSrc).not.toContain('>SECURE<');
@@ -480,11 +482,12 @@ describe('Main Page & Yangjae Festival Minimalist Design Overhaul (Milestone 270
       return template.replace('__APP_DATA_JSON__', JSON.stringify(festivalData));
     };
 
-    it('renders YangjaeFestivalSkeleton with minimalist 1px border and 4-tab segmented bar', () => {
+    it('renders YangjaeFestivalSkeleton with minimalist 1px border, 4-KPI wide grid, and 5-tab segmented bar', () => {
       const { container } = render(<YangjaeFestivalSkeleton />);
       expect(container.innerHTML).not.toContain('border-2');
       expect(container.innerHTML).toContain('border-slate-200/80');
       expect(container.innerHTML).toContain('grid-cols-4');
+      expect(container.innerHTML).toContain('grid-cols-5');
     });
 
     it('verifies YangjaeFestivalDashboard.tsx, LocalhostStatusHUD.tsx, and pages-template.html minimalist integrity', () => {

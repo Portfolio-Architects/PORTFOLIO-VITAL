@@ -99,7 +99,7 @@ describe('Challenger 2 Empirical Cross-Component Null-Safety Stress Suite', () =
       });
 
       expect(container).toBeDefined();
-      expect(screen.getByText('행정 문서·업무 온톨로지 양방향 탐색기')).toBeInTheDocument();
+      expect(screen.getByText('문서 관계도')).toBeInTheDocument();
       expect(screen.getByText('전체 사업 (9개)')).toBeInTheDocument();
       expect(screen.getByText('0건 연계')).toBeInTheDocument();
       expect(screen.getByText('미반영 0건')).toBeInTheDocument();
@@ -431,7 +431,7 @@ describe('Challenger 2 Empirical Cross-Component Null-Safety Stress Suite', () =
       });
 
       // Right-hand panel should show default fallback stats
-      expect(screen.getByText('6대 도메인 라이브 연계 현황')).toBeInTheDocument();
+      expect(screen.getByText('연계 현황')).toBeInTheDocument();
       expect(screen.getByText('미반영 메모 0건')).toBeInTheDocument();
       expect(screen.getByText('0.0억원')).toBeInTheDocument();
     });

@@ -404,6 +404,43 @@ describe('Milestone 275 & 276 & 280 & Phase 4 Task 4.3: 12-Domain Dynamic Schema
       expect(StrictWorkingMemorySchema.safeParse(invalidWorkingMemory).success).toBe(false);
       expect(HARNESS_SCHEMAS.WorkingMemorySchema.safeParse(invalidWorkingMemory).success).toBe(false);
       expect(WorkingMemorySchema.safeParse(invalidWorkingMemory).success).toBe(true);
+
+      const validIssueLogMemo = {
+        id: 'wm-issue-log-1',
+        content: '[이슈로그] RP:총괄주무관 | 근접:수기검산 누락 | 근본:단일경로 의존 | 개선:이중실행 강제 | 위험:상',
+        category: 'issue_log',
+        tags: ['[이슈로그]'],
+        issueMeta: {
+          severity: 'high',
+          responsibleParty: '총괄주무관',
+          proximateCause: '수기검산 누락',
+          rootCause: '단일경로 의존',
+          machineFix: '이중실행 강제',
+          doubleDoRequired: true,
+        },
+        status: 'pending',
+        pinned: true,
+        source: 'pc',
+        createdAt: '2026-11-19T00:00:00.000Z',
+        updatedAt: '2026-11-19T00:00:00.000Z',
+      };
+      const strictIssueParsed = StrictWorkingMemorySchema.safeParse(validIssueLogMemo);
+      const runtimeIssueParsed = WorkingMemorySchema.safeParse(validIssueLogMemo);
+      expect(strictIssueParsed.success).toBe(true);
+      expect(runtimeIssueParsed.success).toBe(true);
+      if (strictIssueParsed.success && runtimeIssueParsed.success) {
+        expect(strictIssueParsed.data).toEqual(runtimeIssueParsed.data);
+      }
+
+      const invalidIssueSeverityMemo = {
+        ...validIssueLogMemo,
+        issueMeta: {
+          ...validIssueLogMemo.issueMeta,
+          severity: 'INVALID_SEVERITY',
+        },
+      };
+      expect(StrictWorkingMemorySchema.safeParse(invalidIssueSeverityMemo).success).toBe(false);
+      expect(WorkingMemorySchema.safeParse(invalidIssueSeverityMemo).success).toBe(true);
     });
 
     it('strictly rejects invalid Task record lacking required title or having invalid status', () => {
@@ -598,12 +635,12 @@ describe('Milestone 275 & 276 & 280 & Phase 4 Task 4.3: 12-Domain Dynamic Schema
       expect(driftResult.errors.length).toBeGreaterThanOrEqual(3);
     });
 
-    it('audits all 9 governance, skill, and guideline documents via auditGovernanceAndSkillDocs() with 0 errors', () => {
-      expect(GOVERNANCE_DOC_PATHS).toHaveLength(9);
+    it('audits all 10 governance, skill, and guideline documents via auditGovernanceAndSkillDocs() with 0 errors', () => {
+      expect(GOVERNANCE_DOC_PATHS).toHaveLength(10);
       const auditResult = auditGovernanceAndSkillDocs();
       expect(auditResult.passed).toBe(true);
       expect(auditResult.errors).toEqual([]);
-      expect(auditResult.docStats).toHaveLength(9);
+      expect(auditResult.docStats).toHaveLength(10);
       for (const stat of auditResult.docStats) {
         expect(stat.puaCount).toBe(0);
         expect(stat.doubleBullets).toBe(0);

@@ -25,7 +25,11 @@ jest.mock('next/dynamic', () => {
       return function MockBudgetDashboard(props: any) {
         const [text, setText] = useState('');
         return (
-          <div data-testid="mock-budget-dashboard">
+          <div
+            data-testid="mock-budget-dashboard"
+            data-sub-view={props.initialSubView || 'categories'}
+            data-show-burn-up={String(Boolean(props.initialShowBurnUp))}
+          >
             <h3>예산 대시보드 컴포넌트</h3>
             <input
               data-testid="budget-stateful-input"
@@ -33,9 +37,6 @@ jest.mock('next/dynamic', () => {
               onChange={(e) => setText(e.target.value)}
               placeholder="예산 메모 입력"
             />
-            <button data-testid="goto-simulator-btn" onClick={props.onNavigateToSimulator}>
-              시뮬레이터로 이동
-            </button>
           </div>
         );
       };
@@ -140,76 +141,57 @@ describe('Milestone M2 Empirical Challenger: Dormant Tab & Zombie Polling Defens
       getItemHistory: jest.fn().mockReturnValue([]),
     };
 
-    it('mounts only initial active tab initially, keeping unvisited tabs unmounted', () => {
+    it('mounts only single unified BudgetDashboard without duplicate BudgetSimulator or InventoryList instances', () => {
       render(<WorkspaceView {...defaultProps} />);
 
       const budget = screen.getByTestId('mock-budget-dashboard');
       expect(budget).toBeInTheDocument();
-      expect(budget.parentElement).toHaveClass('block');
+      expect(budget).toHaveAttribute('data-sub-view', 'categories');
+      expect(budget).toHaveAttribute('data-show-burn-up', 'false');
 
-      // Unvisited tabs are not in the DOM yet
+      // Duplicate legacy tab components are not mounted
       expect(screen.queryByTestId('mock-inventory-list')).toBeNull();
       expect(screen.queryByTestId('mock-budget-simulator')).toBeNull();
     });
 
-    it('preserves mounted DOM instances and state when switching between budget and simulator', () => {
-      render(<WorkspaceView {...defaultProps} />);
+    it('preserves mounted BudgetDashboard instance and draft state when initialTab switches between budget and simulator', () => {
+      const { rerender } = render(<WorkspaceView {...defaultProps} initialTab="budget" />);
 
-      // Step A: Enter draft text in Budget tab
+      // Step A: Enter draft text in unified BudgetDashboard
       const budgetInput = screen.getByTestId('budget-stateful-input');
       fireEvent.change(budgetInput, { target: { value: '2026년 방역 예산 신규 배정안' } });
       expect(budgetInput).toHaveValue('2026년 방역 예산 신규 배정안');
 
-      // Step B: Switch to Simulator tab ("예산 시뮬레이터")
-      const simulatorTabBtn = screen.getByRole('button', { name: /예산 시뮬레이터/i });
-      fireEvent.click(simulatorTabBtn);
+      // Step B: Switch initialTab to simulator -> forwards initialSubView="plan" without remounting
+      rerender(<WorkspaceView {...defaultProps} initialTab="simulator" />);
 
       const budgetEl = screen.getByTestId('mock-budget-dashboard');
-      const simulatorEl = screen.getByTestId('mock-budget-simulator');
-      expect(budgetEl.parentElement).toHaveClass('hidden');
-      expect(simulatorEl.parentElement).toHaveClass('block');
+      expect(budgetEl).toHaveAttribute('data-sub-view', 'plan');
+      expect(budgetEl).toHaveAttribute('data-show-burn-up', 'true');
+      expect(screen.queryByTestId('mock-budget-simulator')).toBeNull();
 
-      // Both components are mounted in the DOM simultaneously
-      expect(screen.getByTestId('mock-budget-dashboard')).toBeInTheDocument();
-      expect(screen.getByTestId('mock-budget-simulator')).toBeInTheDocument();
-
-      // Crucial: Budget input is STILL in the document and retains its state!
+      // Crucial: Draft input inside BudgetDashboard retains its state across mode switch!
       expect(screen.getByTestId('budget-stateful-input')).toHaveValue('2026년 방역 예산 신규 배정안');
 
-      // Enter state in Simulator tab
-      const simulatorInput = screen.getByTestId('simulator-stateful-input');
-      fireEvent.change(simulatorInput, { target: { value: '시뮬레이션 시나리오 A 검토' } });
-
-      // Step C: Switch back to Budget tab ("예산 대조보드")
-      const budgetTabBtn = screen.getByRole('button', { name: /예산 대조보드/i });
-      fireEvent.click(budgetTabBtn);
-
-      expect(budgetEl.parentElement).toHaveClass('block');
-      expect(simulatorEl.parentElement).toHaveClass('hidden');
-
-      // Verify both stateful values are fully intact
+      // Step C: Switch back to budget
+      rerender(<WorkspaceView {...defaultProps} initialTab="budget" />);
+      expect(budgetEl).toHaveAttribute('data-sub-view', 'categories');
       expect(screen.getByTestId('budget-stateful-input')).toHaveValue('2026년 방역 예산 신규 배정안');
-      expect(screen.getByTestId('simulator-stateful-input')).toHaveValue('시뮬레이션 시나리오 A 검토');
     });
 
-    it('stress test: withstands 15 rapid consecutive tab switches without DOM node duplication or state loss', () => {
-      render(<WorkspaceView {...defaultProps} />);
+    it('stress test: withstands 15 rapid consecutive initialTab transitions without DOM node duplication or state loss', () => {
+      const { rerender } = render(<WorkspaceView {...defaultProps} initialTab="budget" />);
 
       fireEvent.change(screen.getByTestId('budget-stateful-input'), { target: { value: '안전성 스트레스 테스트' } });
 
-      const tabs = [
-        screen.getByRole('button', { name: /예산 시뮬레이터/i }),
-        screen.getByRole('button', { name: /예산 대조보드/i }),
-      ];
-
-      // Rapidly toggle tabs 15 times
+      // Rapidly toggle initialTab 15 times
       for (let i = 0; i < 15; i++) {
-        fireEvent.click(tabs[i % 2]);
+        rerender(<WorkspaceView {...defaultProps} initialTab={i % 2 === 0 ? 'simulator' : 'budget'} />);
       }
 
-      // Check DOM integrity: exactly 1 instance of each mounted component
+      // Check DOM integrity: exactly 1 unified BudgetDashboard and 0 duplicate BudgetSimulator instances
       expect(screen.getAllByTestId('mock-budget-dashboard')).toHaveLength(1);
-      expect(screen.getAllByTestId('mock-budget-simulator')).toHaveLength(1);
+      expect(screen.queryByTestId('mock-budget-simulator')).toBeNull();
 
       // Verify state was never reset
       expect(screen.getByTestId('budget-stateful-input')).toHaveValue('안전성 스트레스 테스트');

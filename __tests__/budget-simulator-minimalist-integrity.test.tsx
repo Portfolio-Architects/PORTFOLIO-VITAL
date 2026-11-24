@@ -404,8 +404,8 @@ describe('BudgetSimulator Minimalist Redesign & Functional Integrity Suite', () 
         />
       );
 
-      expect(screen.getByText('지출 예정액 반영 예산 소진 추세')).toBeInTheDocument();
-      expect(screen.getByText('Commitment Burn-up')).toBeInTheDocument();
+      expect(screen.getByText('예산 소진 추세')).toBeInTheDocument();
+      expect(screen.queryByText('Commitment Burn-up')).not.toBeInTheDocument();
       // Actual spent: 5,000,000 / 20,000,000 = 25.0%
       expect(screen.getByText('현재 실집행 25.0%')).toBeInTheDocument();
       // Projected general spent: (5,000,000 + 2,000,000) / 20,000,000 = 35.0% (excludes 500k daily_expense & 3M SETTLED)
@@ -499,7 +499,7 @@ describe('BudgetSimulator Minimalist Redesign & Functional Integrity Suite', () 
       expect(screen.getByText('0원 (100% 완전 소진)')).toBeInTheDocument();
 
       // Enter plan name and submit
-      fireEvent.change(screen.getByPlaceholderText('지출 예정 품목명 또는 계획 내용을 입력하세요'), {
+      fireEvent.change(screen.getByPlaceholderText('지출 예정 품목명 · 계획 내용 입력'), {
         target: { value: '연말 캠페인 리플렛 제작' },
       });
 

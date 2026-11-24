@@ -123,7 +123,7 @@ describe('Master Archive Organization & Explorer Integration Suite', () => {
       />
     );
 
-    const archiveBtn = screen.getByText('아카이브 탐색기').closest('button');
+    const archiveBtn = screen.getByText('문서 보관함').closest('button');
     expect(archiveBtn).not.toBeNull();
     fireEvent.click(archiveBtn!);
     expect(onModuleChange).toHaveBeenCalledWith('archive');
@@ -133,7 +133,7 @@ describe('Master Archive Organization & Explorer Integration Suite', () => {
     render(<ArchiveExplorerView />);
 
     await waitFor(() => {
-      expect(screen.getByText('마스터 아카이브 통합 탐색기')).toBeInTheDocument();
+      expect(screen.getAllByText('문서 보관함').length).toBeGreaterThan(0);
       expect(screen.getByText(/총 6,208건 색인됨/)).toBeInTheDocument();
     });
 
@@ -145,11 +145,11 @@ describe('Master Archive Organization & Explorer Integration Suite', () => {
     ).toBeInTheDocument();
 
     // Verify Linked Project Cluster panel displays related docs, sheets, and images
-    expect(screen.getByText('연계 업무 묶음 (Project Cluster)')).toBeInTheDocument();
+    expect(screen.getByText('연계 자료')).toBeInTheDocument();
     expect(screen.getAllByText('261020_물자총괄표.xlsx').length).toBeGreaterThan(0);
 
     // Switch to Photo & Poster Gallery mode
-    const galleryToggleBtn = screen.getByText('사진·시안 갤러리').closest('button');
+    const galleryToggleBtn = screen.getByText('사진 갤러리').closest('button');
     expect(galleryToggleBtn).not.toBeNull();
     fireEvent.click(galleryToggleBtn!);
 

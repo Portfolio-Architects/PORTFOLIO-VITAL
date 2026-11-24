@@ -68,7 +68,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
   describe('R2. Default Collapsed State for Milestone Tasks', () => {
     it('starts with all 6 milestone tasks collapsed by default and provides full accordion toggle', async () => {
-      renderWithClient(<YangjaeFestivalDashboard />);
+      renderWithClient(<YangjaeFestivalDashboard initialTab="milestones" />);
 
       // Verify "전체 펼치기" button is initially displayed
       const toggleAllBtn = await screen.findByRole('button', { name: /전체 펼치기/i });
@@ -107,7 +107,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     });
 
     it('handles multiple individual task toggles independently and preserves O(1) state', async () => {
-      renderWithClient(<YangjaeFestivalDashboard />);
+      renderWithClient(<YangjaeFestivalDashboard initialTab="milestones" />);
 
       const task1Btn = await screen.findByRole('button', { name: /추진과제 1/i });
       const task3Btn = screen.getByRole('button', { name: /부스 운영/i });
@@ -297,7 +297,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
         json: async () => customDataEmptyMilestones,
       });
 
-      renderWithClient(<YangjaeFestivalDashboard />);
+      renderWithClient(<YangjaeFestivalDashboard initialTab="milestones" />);
 
       // Top toggle should display "전체 펼치기" (not "전체 접기") when 0 milestones exist
       const toggleBtn = await screen.findByRole('button', { name: /전체 펼치기/i });
@@ -376,7 +376,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
   describe('R4. Task Detail Rows Reordering Controls (▲/▼)', () => {
     it('renders move up and move down buttons in edit mode with boundary disablement and swaps order', async () => {
-      renderWithClient(<YangjaeFestivalDashboard />);
+      renderWithClient(<YangjaeFestivalDashboard initialTab="milestones" />);
 
       // Wait for dashboard to load
       await waitFor(() => {
@@ -434,7 +434,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     });
 
     it('preserves input identity and focus stability without unmounting when typing in detail fields', async () => {
-      renderWithClient(<YangjaeFestivalDashboard />);
+      renderWithClient(<YangjaeFestivalDashboard initialTab="milestones" />);
 
       await waitFor(() => {
         expect(screen.getByText('2026 양재천 건강 페스티벌')).toBeInTheDocument();
@@ -640,7 +640,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
   describe('R8. Cooperation Departments Blank Fallback Guard', () => {
     it('leaves cooperationDepts blank when empty and never displays "보건소 자체 추진"', async () => {
-      renderWithClient(<YangjaeFestivalDashboard />);
+      renderWithClient(<YangjaeFestivalDashboard initialTab="milestones" />);
 
       // Find task 2 button ("추진과제 2") which has cooperationDepts: []
       const task2Btn = await screen.findByRole('button', { name: /추진과제 2/i });
@@ -655,7 +655,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     });
 
     it('renders department badges properly when cooperationDepts has valid departments', async () => {
-      renderWithClient(<YangjaeFestivalDashboard />);
+      renderWithClient(<YangjaeFestivalDashboard initialTab="milestones" />);
 
       // Find task 1 button ("추진과제 1") which has cooperationDepts: ["건설관리과(부지 소유자)", ...]
       const task1Btn = await screen.findByRole('button', { name: /추진과제 1/i });
@@ -674,7 +674,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       renderWithClient(<YangjaeFestivalDashboard />);
 
       // Switch to '2. 부스현황' tab
-      const boothsTabBtn = await screen.findByRole('button', { name: /2\. 부스현황/i });
+      const boothsTabBtn = await screen.findByRole('button', { name: /3\. 부스현황/i });
       expect(boothsTabBtn).toBeInTheDocument();
       fireEvent.click(boothsTabBtn);
 
@@ -703,7 +703,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       renderWithClient(<YangjaeFestivalDashboard />);
 
       // Switch to '2. 부스현황' tab
-      const boothsTabBtn = await screen.findByRole('button', { name: /2\. 부스현황/i });
+      const boothsTabBtn = await screen.findByRole('button', { name: /3\. 부스현황/i });
       fireEvent.click(boothsTabBtn);
 
       // Click '민간' filter
@@ -770,7 +770,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       renderWithClient(<YangjaeFestivalDashboard />);
 
       // Switch to booths tab
-      const boothsTab = await screen.findByRole('button', { name: /2\. 부스현황/i });
+      const boothsTab = await screen.findByRole('button', { name: /3\. 부스현황/i });
       fireEvent.click(boothsTab);
 
       // Verify "순서 변경 / 편집" button exists
@@ -779,7 +779,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       fireEvent.click(editOrderBtn);
 
       // Verify guidance banner appears
-      expect(screen.getByText(/각 부스 카드의/)).toBeInTheDocument();
+      expect(screen.getByText(/순서 조정/)).toBeInTheDocument();
 
       // Find all Move Up and Move Down buttons
       const moveUpButtons = screen.getAllByRole('button', { name: /위로 이동/i });
@@ -818,7 +818,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       renderWithClient(<YangjaeFestivalDashboard />);
 
       // Switch to Booths tab
-      const boothsTabBtn = await screen.findByRole('button', { name: /2\. 부스현황/i });
+      const boothsTabBtn = await screen.findByRole('button', { name: /3\. 부스현황/i });
       fireEvent.click(boothsTabBtn);
 
       // Verify Booth Summary Metrics Card titles are rendered
@@ -831,7 +831,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
       // Verify required booth scale dong count
       const totalExpectedDong = YANGJAE_FALLBACK_DATA.booths.reduce((acc, b) => acc + parseBoothScale(b.scale).dong, 0);
-      expect(screen.getByText(new RegExp(`총 ${totalExpectedDong}동`))).toBeInTheDocument();
+      expect(screen.getAllByText(new RegExp(`총 ${totalExpectedDong}동`)).length).toBeGreaterThan(0);
 
       // Verify header badge displays required dong count
       expect(screen.getByText(new RegExp(`필요 ${totalExpectedDong}동`))).toBeInTheDocument();
@@ -840,7 +840,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
   describe('R13. Sub-Task Category Transfer Across Milestone Tasks', () => {
     it('opens transfer modal when clicking transfer button in reading view and executes category move', async () => {
-      renderWithClient(<YangjaeFestivalDashboard />);
+      renderWithClient(<YangjaeFestivalDashboard initialTab="milestones" />);
 
       // Expand all tasks so details are visible
       const toggleAllBtn = await screen.findByRole('button', { name: /전체 펼치기/i });
@@ -858,7 +858,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
       // Verify transfer modal opens
       expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(screen.getByText('세부 과업 카테고리 이동')).toBeInTheDocument();
+      expect(screen.getByText('과업 이동')).toBeInTheDocument();
       expect(screen.getByText(/이동할 세부 과업/i)).toBeInTheDocument();
 
       // Current location should be disabled
@@ -884,7 +884,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     });
 
     it('allows transferring sub-tasks in edit mode via DetailEditRow transfer button', async () => {
-      renderWithClient(<YangjaeFestivalDashboard />);
+      renderWithClient(<YangjaeFestivalDashboard initialTab="milestones" />);
 
       // Expand all tasks
       const toggleAllBtn = await screen.findByRole('button', { name: /전체 펼치기/i });
@@ -904,7 +904,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       // Modal should open
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
-      expect(screen.getByText('세부 과업 카테고리 이동')).toBeInTheDocument();
+      expect(screen.getByText('과업 이동')).toBeInTheDocument();
 
       // Close modal by clicking cancel inside dialog
       const cancelBtn = within(dialog).getByRole('button', { name: '취소' });
@@ -951,7 +951,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
 
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const boothsTabBtn = await screen.findByRole('button', { name: /2\. 부스현황/i });
+      const boothsTabBtn = await screen.findByRole('button', { name: /3\. 부스현황/i });
       fireEvent.click(boothsTabBtn);
 
       // In default hidden state, manager should be masked with 'O'
@@ -966,7 +966,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       renderWithClient(<YangjaeFestivalDashboard />);
 
       // 1. Switch to 4. 행사식순 Tab
-      const scheduleTabBtn = await screen.findByRole('button', { name: /4\. 행사식순/i });
+      const scheduleTabBtn = await screen.findByRole('button', { name: /5\. 행사식순/i });
       fireEvent.click(scheduleTabBtn);
 
       // 2. Verify reading mode schedule items are present
@@ -1007,7 +1007,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('cancels inline schedule edit mode without saving when cancel button is clicked', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const scheduleTabBtn = await screen.findByRole('button', { name: /4\. 행사식순/i });
+      const scheduleTabBtn = await screen.findByRole('button', { name: /5\. 행사식순/i });
       fireEvent.click(scheduleTabBtn);
 
       const editButtons = screen.getAllByTitle('식순명 및 세부내용 수정');
@@ -1029,7 +1029,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('adds a new schedule item box and immediately enters edit mode', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const scheduleTabBtn = await screen.findByRole('button', { name: /4\. 행사식순/i });
+      const scheduleTabBtn = await screen.findByRole('button', { name: /5\. 행사식순/i });
       fireEvent.click(scheduleTabBtn);
 
       // Find top "식순 추가" button
@@ -1064,7 +1064,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       renderWithClient(<YangjaeFestivalDashboard />);
 
       // 1. Switch to Duties tab (Tab 3)
-      const dutiesTabBtn = await screen.findByRole('button', { name: /3\. 업무분장/i });
+      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
       fireEvent.click(dutiesTabBtn);
 
       // 2. Click "엑셀 편집" button
@@ -1073,7 +1073,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       fireEvent.click(editDutiesBtn);
 
       // 3. Verify spreadsheet edit banner and inputs are visible
-      expect(screen.getByText(/📊 엑셀 편집 모드/i)).toBeInTheDocument();
+      expect(screen.getByText(/엑셀 편집 모드/i)).toBeInTheDocument();
       const managerInputs = screen.getAllByPlaceholderText('예: 오창선');
       expect(managerInputs.length).toBeGreaterThan(0);
 
@@ -1100,7 +1100,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('cancels duties spreadsheet edit mode and rolls back changes without saving', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const dutiesTabBtn = await screen.findByRole('button', { name: /3\. 업무분장/i });
+      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
       fireEvent.click(dutiesTabBtn);
 
       const editDutiesBtn = screen.getByTitle('스프레드시트 엑셀 편집 모드 시작');
@@ -1114,14 +1114,14 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       fireEvent.click(cancelBtn);
 
       // Verify returned to view mode
-      expect(screen.queryByText(/📊 엑셀 편집 모드/i)).toBeNull();
+      expect(screen.queryByText(/엑셀 편집 모드/i)).toBeNull();
       expect(screen.queryByDisplayValue('임시수정자')).toBeNull();
     });
 
     it('adds a new duty row and supports reordering rows', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const dutiesTabBtn = await screen.findByRole('button', { name: /3\. 업무분장/i });
+      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
       fireEvent.click(dutiesTabBtn);
 
       // Click "+ 새 업무분장 행 추가" button
@@ -1129,7 +1129,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       fireEvent.click(addRowBtns[0]);
 
       // Verify entered edit mode and new row exists
-      expect(screen.getByText(/📊 엑셀 편집 모드/i)).toBeInTheDocument();
+      expect(screen.getByText(/엑셀 편집 모드/i)).toBeInTheDocument();
       const managerInputs = screen.getAllByPlaceholderText('예: 오창선');
       const lastManagerInput = managerInputs[managerInputs.length - 1] as HTMLInputElement;
       expect(lastManagerInput.value).toBe('');
@@ -1159,7 +1159,7 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
     it('exports duties table to CSV on button click', async () => {
       renderWithClient(<YangjaeFestivalDashboard />);
 
-      const dutiesTabBtn = await screen.findByRole('button', { name: /3\. 업무분장/i });
+      const dutiesTabBtn = await screen.findByRole('button', { name: /4\. 업무분장/i });
       fireEvent.click(dutiesTabBtn);
 
       // Mock URL.createObjectURL and URL.revokeObjectURL
@@ -1176,6 +1176,96 @@ describe('Yangjae Festival Real-time Multi-Device Sync & UX Verification', () =>
       expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
     });
   });
+
+  describe('R16. Wide-View Layout, 2026 Execution History & Next-Year Interactive Checklist Playbook', () => {
+    it('renders wide-view 4-KPI summary strip, 5 tabs, 2026 lessons/docs, and 32 checklist items on default landing', async () => {
+      const { container } = renderWithClient(<YangjaeFestivalDashboard />);
+
+      // Wide-view container must not clamp to sm:max-w-md
+      const rootCard = container.querySelector('.yangjae-dashboard-container');
+      expect(rootCard).toBeInTheDocument();
+      expect(rootCard?.className).not.toContain('sm:max-w-md');
+
+      // 4-column KPI strip displays 2026 confirmed execution metrics
+      const kpiGrid = await screen.findByTestId('festival-wide-kpi-grid');
+      expect(kpiGrid).toBeInTheDocument();
+      expect(kpiGrid.textContent).toContain('824');
+      expect(kpiGrid.textContent).toContain('7,504');
+      expect(kpiGrid.textContent).toContain('57,302');
+      expect(kpiGrid.textContent).toContain('무사고 0건');
+
+      // 5 tabs present with playbook active by default
+      expect(screen.getByRole('button', { name: /1\. 히스토리·체크리스트/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /2\. 추진과제/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /3\. 부스현황/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /4\. 업무분장/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /5\. 행사식순/i })).toBeInTheDocument();
+
+      // 2026 lessons learned and official key documents rendered in right panel
+      expect(screen.getByText('2026 핵심 교훈')).toBeInTheDocument();
+      expect(screen.getByText('인근 학교 국가자격시험 일정 사전 조회 필수')).toBeInTheDocument();
+      expect(screen.getByText('2026 주요 공문')).toBeInTheDocument();
+      expect(screen.getAllByText('보건행정과-14093').length).toBeGreaterThan(0);
+
+      // 32 checklist items rendered with unchecked default state
+      const checkboxes = screen.getAllByRole('checkbox');
+      expect(checkboxes.length).toBe(32);
+      expect(checkboxes[0]).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('toggles checklist item checked state, persists via POST API, and filters by phase/lesson/search', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      const checkboxes = await screen.findAllByRole('checkbox');
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          success: true,
+          data: {
+            ...YANGJAE_FALLBACK_DATA,
+            nextYearChecklist: (YANGJAE_FALLBACK_DATA.nextYearChecklist || []).map((item, idx) =>
+              idx === 0 ? { ...item, checked: true } : item
+            ),
+          },
+        }),
+      });
+
+      fireEvent.click(checkboxes[0]);
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/api/festival/yangjae',
+          expect.objectContaining({ method: 'POST' })
+        );
+      });
+
+      // Filter by lessons-only toggle
+      const lessonFilterBtn = screen.getByRole('button', { name: /교훈 반영/i });
+      fireEvent.click(lessonFilterBtn);
+      const lessonCheckboxes = screen.getAllByRole('checkbox');
+      expect(lessonCheckboxes.length).toBeGreaterThan(0);
+      expect(lessonCheckboxes.length).toBeLessThan(32);
+
+      // Turn off lessons-only and search for 하천점용허가
+      fireEvent.click(lessonFilterBtn);
+      const searchInput = screen.getByPlaceholderText(/항목 · 2026 이력/i);
+      fireEvent.change(searchInput, { target: { value: '하천점용허가' } });
+      expect(screen.getAllByRole('checkbox')).toHaveLength(1);
+    });
+
+    it('exports next-year checklist to CSV on button click', async () => {
+      renderWithClient(<YangjaeFestivalDashboard />);
+
+      const mockCreateObjectURL = jest.fn(() => 'blob:mock-checklist-csv');
+      const mockRevokeObjectURL = jest.fn();
+      window.URL.createObjectURL = mockCreateObjectURL;
+      window.URL.revokeObjectURL = mockRevokeObjectURL;
+
+      const csvBtn = await screen.findByTitle('체크리스트 CSV 다운로드');
+      fireEvent.click(csvBtn);
+
+      expect(mockCreateObjectURL).toHaveBeenCalled();
+      expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-checklist-csv');
+    });
+  });
 });
-
-

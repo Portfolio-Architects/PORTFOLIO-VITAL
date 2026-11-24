@@ -292,6 +292,16 @@ describe('VLDS Zero-Verbosity & Particle-Free Microcopy Standard (Milestone 288)
       expect(legacyJargonSample.valid).toBe(false);
       expect(legacyJargonSample.violations.some((v) => v.includes('금지 레거시'))).toBe(true);
 
+      // Plain-Word Naming & 3-word title cap (VLDS Design Harness)
+      const bloatedShowcaseTitle = auditVldsCopy('통합 행정 지식 쇼케이스', 'title');
+      expect(bloatedShowcaseTitle.valid).toBe(false);
+      expect(bloatedShowcaseTitle.violations.some((v) => v.includes('장황한 타이틀 어절 초과'))).toBe(true);
+      expect(bloatedShowcaseTitle.violations.some((v) => v.includes('과장·추상 UI 용어 금지'))).toBe(true);
+
+      const intuitiveBoardTitle = auditVldsCopy('행정 게시판', 'title');
+      expect(intuitiveBoardTitle.valid).toBe(true);
+      expect(intuitiveBoardTitle.violations).toEqual([]);
+
       // Exact boundary check for title (18 chars allowed, 19 chars rejected)
       expect(auditVldsCopy('가'.repeat(VLDS_COPY_BUDGET.title), 'title').valid).toBe(true);
       expect(auditVldsCopy('가'.repeat(VLDS_COPY_BUDGET.title + 1), 'title').valid).toBe(false);
@@ -330,25 +340,26 @@ describe('VLDS Zero-Verbosity & Particle-Free Microcopy Standard (Milestone 288)
   describe('3. Live App-Wide Zero-Verbosity & Layout Invariant Verification', () => {
     it('preserves 2-tier title padding & wide margins in ProtectedApp and particle-free SSR copy in SplashView', () => {
       const { container: splashContainer } = render(<SplashView />);
-      expect(splashContainer.textContent).toContain('로컬 SSOT · 워크스페이스 연결 중');
+      expect(splashContainer.textContent).toContain('로컬 데이터 연결 중');
       expect(splashContainer.textContent).not.toContain('연결하고 있습니다');
-      expect(auditVldsCopy('로컬 SSOT · 워크스페이스 연결 중', 'helper').valid).toBe(true);
+      expect(splashContainer.textContent).not.toContain('워크스페이스');
+      expect(auditVldsCopy('로컬 데이터 연결 중', 'helper').valid).toBe(true);
 
       const { container } = render(<ProtectedApp appMode="VITAL" onModeChange={jest.fn()} />);
 
       // Layout invariants from PORTFOLIO ASSET alignment must remain intact
-      expect(container.innerHTML).toContain('max-w-[1800px] mx-auto px-2 sm:px-3 lg:px-4');
-      expect(container.innerHTML).toContain('pt-7 sm:pt-9 lg:pt-11 pb-6 sm:pb-7 lg:pb-8');
+      expect(container.innerHTML).toContain('w-full max-w-[2400px] mx-auto px-4 sm:px-8 xl:px-12 2xl:px-16');
+      expect(container.innerHTML).toContain('pt-5 sm:pt-7 pb-4 sm:pb-5');
 
-      // Verbose abstract slogans removed
+      // Verbose abstract slogans & redundant page-level subtitle removed
       const text = container.textContent || '';
       expect(text).not.toContain('초개인화 행정 인텔리전스 워크스페이스');
       expect(text).not.toContain('하이브리드 공공 인텔리전스 아키텍처');
-
-      // Concise telegraphic subtitle passes VLDS audit
-      const subtitleText = '집행 · 불용 진단 · 월별 소진 추이 · 업무 연락처';
-      expect(screen.getByText(subtitleText)).toBeInTheDocument();
-      expect(auditVldsCopy(subtitleText, 'subtitle').valid).toBe(true);
+      expect(text).not.toContain('VITAL 통합 대시보드');
+      expect(text).toContain('WORK VITAL');
+      expect(container.querySelector('[data-testid="vital-logo-mark"]')).toBeInTheDocument();
+      expect(splashContainer.textContent).toContain('WORK VITAL');
+      expect(splashContainer.textContent).not.toContain('Architecture Ready');
     });
 
     it('renders concise 2-tier rows and SectionHeader in PortfolioDashboardView and ContactsBox without legacy MindMap prose', () => {
@@ -380,7 +391,7 @@ describe('VLDS Zero-Verbosity & Particle-Free Microcopy Standard (Milestone 288)
       expect(dashText).not.toContain('부서 일상경비 통장 입금액 제외한 일반지출분');
       expect(dashText).not.toContain('클릭 시 비목 상세');
       expect(dashText).not.toContain('본청');
-      const trendSub = screen.getByText('11월 전액 집행 목표 대비 누적 소진율');
+      const trendSub = screen.getByText('11월 전액 집행 목표');
       expect(trendSub).toHaveClass('vlds-subtitle', 'line-clamp-1');
 
       const { container: contactsContainer } = render(<ContactsBox />);
@@ -388,9 +399,9 @@ describe('VLDS Zero-Verbosity & Particle-Free Microcopy Standard (Milestone 288)
       expect(contactsText).not.toContain('마인드맵 공약제안');
       expect(contactsText).not.toContain('연락 정보를 관리합니다');
       expect(contactsText).not.toContain('적어두시면 검색창에서 즉시 찾아낼 수 있습니다');
+      expect(contactsText).not.toContain('초성 · 메모 검색');
+      expect(contactsText).not.toContain('부서 · 유관기관 담당자 통합 조회');
       expect(screen.getByText('업무 연락처')).toBeInTheDocument();
-      const contactSub = screen.getByText('부서 · 유관기관 담당자 통합 조회');
-      expect(contactSub).toHaveClass('vlds-subtitle', 'line-clamp-1');
     });
 
     it('eliminates verbose explanatory sentences and unnecessary particles across BudgetDashboard, BudgetSimulator, WorkingMemory, ArchiveExplorer, AdminOntology, ProjectManagementPage (both tabs), CommandPalette, and Modals', async () => {
@@ -457,7 +468,7 @@ describe('VLDS Zero-Verbosity & Particle-Free Microcopy Standard (Milestone 288)
 
       // 3. ArchiveExplorerView, AdminOntologyExplorer, AdminOntologyDrawer & WeeklyReportManager
       const { container: arcContainer } = render(<ArchiveExplorerView />);
-      expect(await screen.findByText('본문(HWPX · PDF · XLSX) · 사진 맥락 통합 검색')).toBeInTheDocument();
+      expect(await screen.findByText('HWPX · PDF · XLSX · 사진 검색')).toBeInTheDocument();
       expect(arcContainer.textContent).not.toContain('파일명에 키워드가 없어도');
       expect(arcContainer.textContent).not.toContain('좌측 목록에서 항목을 선택하면');
       expect(arcContainer.textContent).not.toContain('주간업무 작성으로 이동');
@@ -476,7 +487,7 @@ describe('VLDS Zero-Verbosity & Particle-Free Microcopy Standard (Milestone 288)
         />
       );
       expect(
-        await screen.findByText('방침서 ↔ 결과보고 ↔ 행정감사 ↔ 사업설명서 인과 추적')
+        await screen.findByText('방침 · 결과 · 감사 · 예산서')
       ).toBeInTheDocument();
       expect(ontoContainer.textContent).not.toContain('사이버네틱스 환류 순회');
       expect(
@@ -555,7 +566,7 @@ describe('VLDS Zero-Verbosity & Particle-Free Microcopy Standard (Milestone 288)
       expect(projContainer.textContent).not.toContain('직접 수동으로 제어하실 수 있습니다');
       expect(projContainer.textContent).toContain('좌측 사업 선택 → 추진 현황 · 체크리스트 · 연계 업무 조회');
       expect(screen.getAllByText('사업 · 일정 관리').length).toBeGreaterThanOrEqual(2);
-      expect(screen.getAllByText('단위사업 개요 · 체크리스트 · 일정 플래너').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getAllByText('단위사업 개요 · 체크리스트 · 일정 플래너').length).toBeGreaterThanOrEqual(1);
 
       // Switch to '일정 플래너' tab and verify WeeklyScheduler also has zero verbose prose
       fireEvent.click(screen.getByText('일정 플래너'));
@@ -586,6 +597,47 @@ describe('VLDS Zero-Verbosity & Particle-Free Microcopy Standard (Milestone 288)
       );
       expect(lockContainer.textContent).toContain('4자리 PIN 입력');
       expect(lockContainer.textContent).not.toContain('설정하신 4자리 PIN을 입력하세요');
+    });
+
+    it('passes AST UI Copy Design Harness across all src/components/**/*.tsx files and catches inflated titles/prose in synthetic JSX', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { auditUiCopyDirectory, auditUiCopySource } = require('@/../scripts/audit-ui-copy');
+
+      const badSample = auditUiCopySource(
+        'src/components/Sample.tsx',
+        `export function Sample({ empty }: { empty: boolean }) {
+          return (
+            <div>
+              <SectionHeader title="통합 행정 지식 쇼케이스" subtitle="자세히 확인해 보세요." />
+              <h1><span className="dot" /><span>행정 문서 업무 온톨로지 탐색기</span></h1>
+              <p>등록된 항목이 없습니다.</p>
+              <p>{empty ? '검색 결과가 없습니다.' : '정상'}</p>
+              <span>주요 사업목표 (Objectives)</span>
+            </div>
+          );
+        }`
+      );
+      expect(badSample.violations.length).toBeGreaterThanOrEqual(6);
+
+      const goodSample = auditUiCopySource(
+        'src/components/Sample.tsx',
+        `export function Sample({ empty }: { empty: boolean }) {
+          return (
+            <div>
+              <SectionHeader title="행정 게시판" />
+              <h1><span className="dot" /><span>문서 관계도</span></h1>
+              <p>등록 항목 없음</p>
+              <p>{empty ? '검색 결과 없음' : '정상'}</p>
+              <span>주요 사업목표</span>
+            </div>
+          );
+        }`
+      );
+      expect(goodSample.violations).toEqual([]);
+
+      const liveAudit = auditUiCopyDirectory();
+      expect(liveAudit.passed).toBe(true);
+      expect(liveAudit.violationCount).toBe(0);
     });
   });
 });

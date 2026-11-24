@@ -201,7 +201,7 @@ describe('Milestone 3 (M3) Empirical Auth Hook & Decoupling Tests', () => {
     test('2.1 Renders initial login form elements cleanly', () => {
       render(<LoginPage />);
 
-      expect(screen.getByText('VITAL Work Manager')).toBeInTheDocument();
+      expect(screen.getByText('WORK VITAL')).toBeInTheDocument();
       expect(screen.getByText('통합 업무 및 예산 관리 아키텍처')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Enter your ID')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();

@@ -16,7 +16,7 @@ if (typeof global.Headers === 'undefined') {
 }
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ArchiveExplorerView } from '@/components/archive/ArchiveExplorerView';
 import { ProtectedApp } from '@/components/ProtectedApp';
@@ -422,21 +422,21 @@ describe('Archive & Enterprise Ontology Integrated Hub (Milestone 3 Test Suite)'
 
     // 1. Verify 3 workflow tabs are rendered
     await waitFor(() => {
-      expect(screen.getByRole('tab', { name: /마스터 아카이브 탐색/i })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: /4단계 행정 온톨로지/i })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: /수요일 주간업무/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /문서 보관함/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /문서 관계도/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /주간업무/i })).toBeInTheDocument();
     });
 
     // 2. Verify 'archive' tab is active by default
-    const archiveTab = screen.getByRole('tab', { name: /마스터 아카이브 탐색/i });
+    const archiveTab = screen.getByRole('tab', { name: /문서 보관함/i });
     expect(archiveTab).toHaveAttribute('aria-selected', 'true');
 
     // 3. Verify existing archive search bar, facets, and indexing stats are displayed
     await waitFor(() => {
-      expect(screen.getByText('마스터 아카이브 통합 탐색기')).toBeInTheDocument();
+      expect(screen.getAllByText('문서 보관함').length).toBeGreaterThan(0);
       expect(screen.getByText(/총 6,208건 색인됨/)).toBeInTheDocument();
       expect(
-        screen.getByPlaceholderText(/찾으실 키워드를 입력하세요/i)
+        screen.getByPlaceholderText(/키워드 검색/i)
       ).toBeInTheDocument();
     });
 
@@ -455,41 +455,41 @@ describe('Archive & Enterprise Ontology Integrated Hub (Milestone 3 Test Suite)'
     render(<ArchiveExplorerView />);
 
     await waitFor(() => {
-      expect(screen.getByRole('tab', { name: /마스터 아카이브 탐색/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /문서 보관함/i })).toBeInTheDocument();
     });
 
     // Switch to 'ontology' tab
-    const ontologyTab = screen.getByRole('tab', { name: /4단계 행정 온톨로지/i });
+    const ontologyTab = screen.getByRole('tab', { name: /문서 관계도/i });
     fireEvent.click(ontologyTab);
 
     await waitFor(() => {
       expect(ontologyTab).toHaveAttribute('aria-selected', 'true');
       expect(
-        screen.getByText('행정 문서·업무 온톨로지 양방향 탐색기')
-      ).toBeInTheDocument();
+        screen.getAllByText('문서 관계도').length
+      ).toBeGreaterThan(0);
     });
 
     // Verify archive search input is not visible in ontology tab
     expect(
-      screen.queryByPlaceholderText(/찾으실 키워드를 입력하세요/i)
+      screen.queryByPlaceholderText(/키워드 검색/i)
     ).not.toBeInTheDocument();
 
     // Switch to 'weekly' tab
-    const weeklyTab = screen.getByRole('tab', { name: /수요일 주간업무/i });
+    const weeklyTab = screen.getByRole('tab', { name: /주간업무/i });
     fireEvent.click(weeklyTab);
 
     await waitFor(() => {
       expect(weeklyTab).toHaveAttribute('aria-selected', 'true');
-      expect(screen.getAllByText(/수요일.*주간업무/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/주간업무/i).length).toBeGreaterThan(0);
     });
 
     // Switch back to 'archive' tab
-    const archiveTab = screen.getByRole('tab', { name: /마스터 아카이브 탐색/i });
+    const archiveTab = screen.getByRole('tab', { name: /문서 보관함/i });
     fireEvent.click(archiveTab);
 
     await waitFor(() => {
       expect(archiveTab).toHaveAttribute('aria-selected', 'true');
-      expect(screen.getByText('마스터 아카이브 통합 탐색기')).toBeInTheDocument();
+      expect(screen.getAllByText('문서 보관함').length).toBeGreaterThan(0);
     });
   });
 
@@ -500,7 +500,7 @@ describe('Archive & Enterprise Ontology Integrated Hub (Milestone 3 Test Suite)'
     render(<ArchiveExplorerView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/연계 업무 묶음/i)).toBeInTheDocument();
+      expect(screen.getByText(/연계 자료/i)).toBeInTheDocument();
     });
 
     // 1. Verify 6-domain metrics are rendered for selected project
@@ -545,13 +545,13 @@ describe('Archive & Enterprise Ontology Integrated Hub (Milestone 3 Test Suite)'
     render(<ArchiveExplorerView onNavigateModule={onNavigateModule} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/연계 업무 묶음/i)).toBeInTheDocument();
+      expect(screen.getByText(/연계 자료/i)).toBeInTheDocument();
     });
 
     // 1. Jump to Memory
     const jumpMemoryBtn =
       screen.queryByTestId('btn-jump-memory') ||
-      screen.getByRole('button', { name: /작업기억.*이동/i });
+      screen.getByRole('button', { name: /포스트잇.*열기/i });
     fireEvent.click(jumpMemoryBtn);
     expect(onNavigateModule).toHaveBeenCalledWith('memory');
 
@@ -579,11 +579,11 @@ describe('Archive & Enterprise Ontology Integrated Hub (Milestone 3 Test Suite)'
     // 5. Jump to Weekly Report (switches to 'weekly' workflow tab)
     const jumpWeeklyBtn =
       screen.queryByTestId('btn-jump-weekly') ||
-      screen.getByRole('button', { name: /주간업무.*작성.*이동/i });
+      screen.getByRole('button', { name: /주간업무.*이동/i });
     fireEvent.click(jumpWeeklyBtn);
 
     await waitFor(() => {
-      const weeklyTab = screen.getByRole('tab', { name: /수요일 주간업무/i });
+      const weeklyTab = screen.getByRole('tab', { name: /주간업무/i });
       expect(weeklyTab).toHaveAttribute('aria-selected', 'true');
     });
   });
@@ -595,7 +595,7 @@ describe('Archive & Enterprise Ontology Integrated Hub (Milestone 3 Test Suite)'
     render(<ArchiveExplorerView />);
 
     await waitFor(() => {
-      expect(screen.getByRole('tab', { name: /마스터 아카이브 탐색/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /문서 보관함/i })).toBeInTheDocument();
     });
 
     // 1. Verify workflow tab navigation bar has horizontal scroll containment (no page clipping)
@@ -613,7 +613,7 @@ describe('Archive & Enterprise Ontology Integrated Hub (Milestone 3 Test Suite)'
     // 3. Verify right-hand cluster panel buttons and text enforce truncation/break protection
     const jumpMemoryBtn =
       screen.queryByTestId('btn-jump-memory') ||
-      screen.getByRole('button', { name: /작업기억.*이동/i });
+      screen.getByRole('button', { name: /포스트잇.*열기/i });
     expect(jumpMemoryBtn.className).toMatch(/truncate|w-full/);
   });
 
@@ -625,33 +625,36 @@ describe('Archive & Enterprise Ontology Integrated Hub (Milestone 3 Test Suite)'
 
     // 1. Initially on Dashboard
     await waitFor(() => {
-      expect(screen.getByText('VITAL 통합 대시보드')).toBeInTheDocument();
+      expect(screen.getByText('WORK VITAL')).toBeInTheDocument();
     });
 
     // 2. Navigate to 'archive' via Sidebar
-    const archiveNavBtn = screen.getByText('아카이브 탐색기').closest('button');
+    const archiveNavBtn = within(screen.getByRole('banner')).getByText('문서 보관함').closest('button');
     expect(archiveNavBtn).not.toBeNull();
     fireEvent.click(archiveNavBtn!);
 
     // 3. Verify Archive Explorer is rendered in ProtectedApp with title
     await waitFor(() => {
-      expect(screen.getByText('VITAL 아카이브 탐색기')).toBeInTheDocument();
-      expect(screen.getByText('마스터 아카이브 통합 탐색기')).toBeInTheDocument();
+      expect(screen.getByText('WORK VITAL')).toBeInTheDocument();
+      expect(screen.getAllByText('문서 보관함').length).toBeGreaterThan(0);
     });
 
     // 4. Trigger jump to 'memory' from within the rendered ArchiveExplorerView
-    const jumpMemoryBtn = await screen.findByRole('button', { name: /작업기억.*이동/i });
+    const jumpMemoryBtn = await within(screen.getByTestId('archive-explorer-view')).findByTestId('btn-jump-memory');
     fireEvent.click(jumpMemoryBtn);
 
-    // 5. Verify ProtectedApp transitioned smoothly to Working Memory view
+    // 5. Verify ProtectedApp transitioned smoothly to StickyNotes / memory drawer
     await waitFor(() => {
-      expect(screen.getByText('VITAL 작업기억 보조 보드')).toBeInTheDocument();
+      expect(
+        screen.queryByText('VITAL 포스트잇') || screen.queryByTestId('sticky-notes-panel') || screen.queryByText('포스트잇')
+      ).toBeTruthy();
     });
 
     // 6. Navigate back to 'archive' and jump to 'workspace' (예산관리)
     fireEvent.click(archiveNavBtn!);
     await waitFor(() => {
-      expect(screen.getByText('VITAL 아카이브 탐색기')).toBeInTheDocument();
+      expect(screen.getByText('WORK VITAL')).toBeInTheDocument();
+      expect(screen.getAllByText('문서 보관함').length).toBeGreaterThan(0);
     });
 
     const jumpWorkspaceBtns = await screen.findAllByRole('button', { name: /예산관리.*이동/i });
@@ -659,7 +662,8 @@ describe('Archive & Enterprise Ontology Integrated Hub (Milestone 3 Test Suite)'
     fireEvent.click(jumpWorkspaceBtn);
 
     await waitFor(() => {
-      expect(screen.getByText('VITAL 예산관리')).toBeInTheDocument();
+      expect(screen.getByText('WORK VITAL')).toBeInTheDocument();
+      expect(screen.getAllByText('예산관리').length).toBeGreaterThan(1);
     });
   });
 });

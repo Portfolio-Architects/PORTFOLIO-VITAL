@@ -449,6 +449,120 @@ describe('Challenger M1: Frontend State Synchronization Stress Suite', () => {
           relatedPlanId: 'be-linked-101'
         })
       );
+
+      // Must NOT emit redundant empty updateRow calls to BUDGET_ENTRIES
+      expect(mockUpdateRow).toHaveBeenCalledTimes(1);
+    });
+
+    it('settleEntry aborts cleanly without marking planned entry settled when checkLimit rejects the expenditure (zero data loss)', async () => {
+      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+      const { Wrapper } = createTestWrapper();
+      const { result } = renderHook(() => useBudgetSimulator(), { wrapper: Wrapper });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      const plannedEntry = result.current.entries.find(e => e.budgetEntryId === 'be-linked-101');
+      const simId = plannedEntry!.id;
+
+      // Attempt to settle with 999,999,999원 (> cat-1 totalBudget 50,000,000원) -> checkLimit rejects
+      let settledResult: boolean | void;
+      await act(async () => {
+        settledResult = await result.current.settleEntry(simId, 999999999, '2026-09-10');
+      });
+
+      expect(settledResult!).toBe(false);
+      expect(alertSpy).toHaveBeenCalledTimes(1);
+      expect(mockAddRow).not.toHaveBeenCalled();
+      expect(mockUpdateRow).not.toHaveBeenCalled();
+      expect(result.current.entries.find(e => e.id === simId)?.status).toBe('PLANNED');
+
+      alertSpy.mockRestore();
+    });
+
+    it('resetEntries removes only unsettled mirrored planned entries while preserving real expenditure history', async () => {
+      let diskBudgetEntries: any[] = [
+        {
+          id: 'be-real-001',
+          categoryId: 'cat-1',
+          amount: 5000000,
+          purpose: '실제 집행 완료 내역',
+          date: '2026-05-01',
+          isPlanned: false,
+          isSettled: true,
+          actionType: 'general'
+        },
+        {
+          id: 'be-linked-101',
+          categoryId: 'cat-1',
+          amount: 2500000,
+          purpose: '미정산 지출 예정',
+          date: '2026-09-01',
+          isPlanned: true,
+          isSettled: false,
+          simulationEntryId: 'sim-linked-101',
+          actionType: 'general'
+        }
+      ];
+      let diskSimEntries: any[] = [
+        {
+          id: 'sim-linked-101',
+          budgetEntryId: 'be-linked-101',
+          categoryId: 'cat-1',
+          detailedProject: '건강증진지원실 운영',
+          statItem: '201-01 사무관리비',
+          name: '미정산 지출 예정',
+          unitPrice: 2500000,
+          quantity: 1,
+          amount: 2500000,
+          status: 'PLANNED',
+          createdAt: '2026-09-01T00:00:00.000Z',
+        }
+      ];
+
+      mockReadSheet.mockImplementation((sheetName: string) => {
+        if (sheetName === 'BUDGET_CATEGORIES') {
+          return Promise.resolve([
+            { id: 'cat-1', name: '사업비', totalBudget: 50000000, policyProject: 'P1', unitProject: 'U1', detailedProject: '건강증진지원실 운영', statItem: '201-01 사무관리비' },
+          ]);
+        }
+        if (sheetName === 'BUDGET_ENTRIES') {
+          return Promise.resolve([...diskBudgetEntries]);
+        }
+        if (sheetName === 'BUDGET_SIMULATIONS') {
+          return Promise.resolve([...diskSimEntries]);
+        }
+        return Promise.resolve([]);
+      });
+      mockReplaceAll.mockImplementation((sheetName: string, rows: any[]) => {
+        if (sheetName === 'BUDGET_ENTRIES') diskBudgetEntries = [...rows];
+        if (sheetName === 'BUDGET_SIMULATIONS') diskSimEntries = [...rows];
+        return Promise.resolve(true);
+      });
+
+      const { Wrapper } = createTestWrapper();
+      const { result } = renderHook(() => useBudgetSimulator(), { wrapper: Wrapper });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.entries).toHaveLength(1);
+
+      act(() => {
+        result.current.resetEntries();
+      });
+
+      await waitFor(() => {
+        expect(mockReplaceAll).toHaveBeenCalledWith('BUDGET_SIMULATIONS', []);
+        expect(mockReplaceAll).toHaveBeenCalledWith(
+          'BUDGET_ENTRIES',
+          [expect.objectContaining({ id: 'be-real-001', isPlanned: false })]
+        );
+      });
+
+      // No zombie resurrection of the deleted planned entry after disk refetch
+      await waitFor(() => {
+        expect(result.current.entries).toHaveLength(0);
+      });
+      expect(diskBudgetEntries).toHaveLength(1);
+      expect(diskBudgetEntries[0].id).toBe('be-real-001');
     });
   });
 });

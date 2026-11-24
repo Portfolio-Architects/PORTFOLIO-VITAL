@@ -16,7 +16,7 @@ if (typeof global.Headers === 'undefined') {
 }
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ArchiveExplorerView } from '@/components/archive/ArchiveExplorerView';
 import { ProtectedApp } from '@/components/ProtectedApp';
@@ -280,11 +280,11 @@ describe('Milestone 3 Empirical Challenger Stress Test Suite', () => {
 
     // Should render empty fallback message
     await waitFor(() => {
-      expect(screen.getByText('조건에 일치하는 아카이브 자료가 없습니다')).toBeInTheDocument();
+      expect(screen.getByText('일치 아카이브 자료 없음')).toBeInTheDocument();
     });
 
     // Enterprise summary should display default values (e.g., 9개 사업, 0건)
-    expect(screen.getByText('전사 6대 도메인 연계')).toBeInTheDocument();
+    expect(screen.getByText('전체 연계')).toBeInTheDocument();
     expect(screen.getByText(/9개 사업 완결/)).toBeInTheDocument();
     expect(screen.getByText(/미반영 메모 0건/)).toBeInTheDocument();
   });
@@ -320,7 +320,7 @@ describe('Milestone 3 Empirical Challenger Stress Test Suite', () => {
 
     render(<ArchiveExplorerView onNavigateModule={jest.fn()} />);
 
-    const searchInput = screen.getByPlaceholderText(/찾으실 키워드를 입력하세요/);
+    const searchInput = screen.getByPlaceholderText(/키워드 검색/);
 
     // Adversarial inputs
     const adversarialQueries = [
@@ -408,11 +408,11 @@ describe('Milestone 3 Empirical Challenger Stress Test Suite', () => {
 
     // Initially on Dashboard
     await waitFor(() => {
-      expect(screen.getByText('VITAL 통합 대시보드')).toBeInTheDocument();
+      expect(screen.getByText('WORK VITAL')).toBeInTheDocument();
     });
 
     // Navigate to 'archive' via Sidebar / Top Nav
-    const archiveNavBtn = screen.getByText('아카이브 탐색기').closest('button');
+    const archiveNavBtn = within(screen.getByRole('banner')).getByText('문서 보관함').closest('button');
     expect(archiveNavBtn).not.toBeNull();
     fireEvent.click(archiveNavBtn!);
 
@@ -422,11 +422,13 @@ describe('Milestone 3 Empirical Challenger Stress Test Suite', () => {
     });
 
     // 1. Jump from archive to memory
-    const btnMemory = await screen.findByRole('button', { name: /작업기억.*이동/i });
+    const btnMemory = await within(screen.getByTestId('archive-explorer-view')).findByTestId('btn-jump-memory');
     fireEvent.click(btnMemory);
 
     await waitFor(() => {
-      expect(screen.getByText('VITAL 작업기억 보조 보드')).toBeInTheDocument();
+      expect(
+        screen.queryByText('VITAL 포스트잇') || screen.queryByTestId('sticky-notes-panel') || screen.queryByText('포스트잇')
+      ).toBeTruthy();
     });
 
     // 2. Return to archive via navigation button
@@ -441,7 +443,8 @@ describe('Milestone 3 Empirical Challenger Stress Test Suite', () => {
     fireEvent.click(jumpWorkspaceBtns[0]);
 
     await waitFor(() => {
-      expect(screen.getByText('VITAL 예산관리')).toBeInTheDocument();
+      expect(screen.getByText('WORK VITAL')).toBeInTheDocument();
+      expect(screen.getAllByText('예산관리').length).toBeGreaterThan(1);
     });
   });
 });

@@ -153,7 +153,7 @@ describe('BudgetDashboard Minimalist Redesign & Data Preservation Verification',
       />
     );
 
-    expect(screen.getByText('예산 과목을 추가해 보세요')).toBeInTheDocument();
+    expect(screen.getByText('등록 예산 과목 없음')).toBeInTheDocument();
     const proposalBtn = screen.getByRole('button', { name: /지출 품의/ });
     expect(proposalBtn).toBeDisabled();
     expect(screen.getByText('본청 잔여 0.0%')).toBeInTheDocument();

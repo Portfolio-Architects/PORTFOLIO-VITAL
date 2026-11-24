@@ -46,15 +46,25 @@ jest.mock('next/dynamic', () => {
 // Spies for sub-components of WorkspaceView
 const budgetMountSpy = jest.fn();
 const budgetUnmountSpy = jest.fn();
+const budgetPropsSpy = jest.fn();
 jest.mock('@/components/budget/BudgetDashboard', () => {
-  const MockBudgetDashboard = () => {
+  const MockBudgetDashboard = (props: any) => {
+    budgetPropsSpy(props);
     React.useEffect(() => {
       budgetMountSpy();
       return () => {
         budgetUnmountSpy();
       };
     }, []);
-    return <div data-testid="budget-dashboard">Budget Dashboard Content</div>;
+    return (
+      <div
+        data-testid="budget-dashboard"
+        data-sub-view={props.initialSubView || 'categories'}
+        data-show-burn-up={String(Boolean(props.initialShowBurnUp))}
+      >
+        Budget Dashboard Content
+      </div>
+    );
   };
   return {
     __esModule: true,
@@ -107,8 +117,8 @@ describe('Auditor M2 Forensic Verification Suite', () => {
     localStorage.clear();
   });
 
-  describe('1. WorkspaceView Dormant Sub-Tab Strategy', () => {
-    it('preserves mounted sub-tabs across tab switches without unmounting when rendered without fixed initialTab', async () => {
+  describe('1. WorkspaceView Unified Budget Control Board Strategy', () => {
+    it('mounts single unified BudgetDashboard without duplicate top-level BudgetSimulator tab or instance', async () => {
       const mockProps: any = {
         budgetCategories: [],
         budgetEntries: [],
@@ -142,45 +152,17 @@ describe('Auditor M2 Forensic Verification Suite', () => {
       expect(budgetMountSpy).toHaveBeenCalledTimes(1);
       expect(inventoryMountSpy).not.toHaveBeenCalled();
       expect(simulatorMountSpy).not.toHaveBeenCalled();
+      expect(screen.queryByRole('button', { name: /예산 시뮬레이터/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /예산 대조보드/ })).not.toBeInTheDocument();
 
       const budgetEl = screen.getByTestId('budget-dashboard');
-      expect(budgetEl.parentElement).toHaveClass('block');
-
-      // Switch to Simulator tab
-      const simulatorBtn = screen.getByRole('button', { name: /예산 시뮬레이터/ });
-      await act(async () => {
-        fireEvent.click(simulatorBtn);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('budget-simulator')).toBeInTheDocument();
-      });
-
-      expect(simulatorMountSpy).toHaveBeenCalledTimes(1);
-      // Budget component MUST remain mounted (no unmount call)
-      expect(budgetUnmountSpy).not.toHaveBeenCalled();
-      expect(budgetEl.parentElement).toHaveClass('hidden');
-
-      const simulatorEl = screen.getByTestId('budget-simulator');
-      expect(simulatorEl.parentElement).toHaveClass('block');
-
-      // Switch back to Budget tab
-      const budgetBtn = screen.getByRole('button', { name: /예산 대조보드/ });
-      await act(async () => {
-        fireEvent.click(budgetBtn);
-      });
-
-      // No new mount calls, no unmounts, display toggled to block
-      expect(budgetMountSpy).toHaveBeenCalledTimes(1);
-      expect(budgetUnmountSpy).not.toHaveBeenCalled();
-      expect(simulatorUnmountSpy).not.toHaveBeenCalled();
-      expect(budgetEl.parentElement).toHaveClass('block');
-      expect(simulatorEl.parentElement).toHaveClass('hidden');
+      expect(budgetEl).toHaveAttribute('data-sub-view', 'categories');
+      expect(budgetEl).toHaveAttribute('data-show-burn-up', 'false');
     });
 
-    it('remediation verified: static initialTab does not lock tab switching; user can switch tabs smoothly', async () => {
+    it('preserves initialTab="simulator" backward compatibility by forwarding initialSubView="plan" without remounting', async () => {
       const mockProps: any = {
-        initialTab: 'budget',
+        initialTab: 'budget' as const,
         budgetCategories: [],
         budgetEntries: [],
         addCategory: jest.fn(),
@@ -195,35 +177,22 @@ describe('Auditor M2 Forensic Verification Suite', () => {
         batchSettleEntries: jest.fn(),
         getCategoryStats: jest.fn(),
         overallStats: { totalIncome: 0, totalExpense: 0, balance: 0, totalBudget: 0, remainingBudget: 0, executionRate: 0 },
-        inventoryItems: [],
-        addItem: jest.fn(),
-        updateItem: jest.fn(),
-        deleteItem: jest.fn(),
-        adjustStock: jest.fn(),
-        getItemHistory: jest.fn(),
-        addSignal: jest.fn(),
       };
 
-      render(<WorkspaceView {...mockProps} />);
+      const { rerender } = render(<WorkspaceView {...mockProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('budget-dashboard')).toBeInTheDocument();
       });
 
-      const simulatorBtn = screen.getByRole('button', { name: /예산 시뮬레이터/ });
-      await act(async () => {
-        fireEvent.click(simulatorBtn);
-      });
+      rerender(<WorkspaceView {...mockProps} initialTab="simulator" />);
 
-      await waitFor(() => {
-        expect(screen.getByTestId('budget-simulator')).toBeInTheDocument();
-      });
-
-      // Remediation verified: activeTab successfully switches to simulator
       const budgetEl = screen.getByTestId('budget-dashboard');
-      expect(budgetEl.parentElement).toHaveClass('hidden');
-      const simulatorEl = screen.getByTestId('budget-simulator');
-      expect(simulatorEl.parentElement).toHaveClass('block');
+      expect(budgetEl).toHaveAttribute('data-sub-view', 'plan');
+      expect(budgetEl).toHaveAttribute('data-show-burn-up', 'true');
+      expect(budgetMountSpy).toHaveBeenCalledTimes(1);
+      expect(budgetUnmountSpy).not.toHaveBeenCalled();
+      expect(simulatorMountSpy).not.toHaveBeenCalled();
     });
   });
 

@@ -6,6 +6,7 @@ import '@testing-library/jest-dom';
 import {
   extractNumericHighlight,
   extractDateHighlight,
+  extractIssueMeta,
   parseWorkingMemoryInput,
   getContextRelevantMemos,
   createWorkingMemoryMemo,
@@ -125,6 +126,23 @@ describe('Milestone 277: Working Memory Post-it Board & Mobile KV Memo Inbox Sui
       const overridden = parseWorkingMemoryInput('복합기 토너 여분 확인', 'budget');
       expect(overridden.category).toBe('budget');
       expect(overridden.tags[0]).toBe('[2027 예산편성]');
+
+      // Dalio Principles Issue Log extraction & zero false positive on regular memos
+      const issueInput =
+        '[이슈로그] RP:총괄주무관 | 근접:산출표 수기누락 | 근본:단일경로 의존·자동검산 부재 | 개선:이중실행 스크립트 강제 | 위험:상';
+      const issueParsed = parseWorkingMemoryInput(issueInput);
+      expect(issueParsed.category).toBe('issue_log');
+      expect(issueParsed.tags).toContain('[이슈로그]');
+      expect(issueParsed.issueMeta).toEqual({
+        severity: 'high',
+        responsibleParty: '총괄주무관',
+        proximateCause: '산출표 수기누락',
+        rootCause: '단일경로 의존·자동검산 부재',
+        machineFix: '이중실행 스크립트 강제',
+        doubleDoRequired: true,
+      });
+
+      expect(extractIssueMeta('바른자세개선 검진 1,000만 원 예산 반영')).toBeUndefined();
     });
 
     it('filters context-relevant pending memos for workspace, simulator, festival, and project modules', () => {
@@ -249,11 +267,12 @@ describe('Milestone 277: Working Memory Post-it Board & Mobile KV Memo Inbox Sui
 
       expect(screen.getByTestId('working-memory-page')).toBeInTheDocument();
 
-      // Switch to 4-Column Kanban view
+      // Switch to 5-Column Kanban view (incl. Dalio Issue Log lane)
       fireEvent.click(screen.getByTestId('working-memory-layout-kanban'));
       expect(screen.getByTestId('working-memory-kanban-view')).toBeInTheDocument();
       expect(screen.getByTestId('lane-directive')).toBeInTheDocument();
       expect(screen.getByTestId('lane-budget')).toBeInTheDocument();
+      expect(screen.getByTestId('lane-issue-log')).toBeInTheDocument();
 
       // Switch to Numeric & Deadline Ledger Table view
       fireEvent.click(screen.getByTestId('working-memory-layout-ledger'));
@@ -286,6 +305,37 @@ describe('Milestone 277: Working Memory Post-it Board & Mobile KV Memo Inbox Sui
       expect(
         screen.queryByTestId('working-memory-card-wm-seed-audit-qna')
       ).not.toBeInTheDocument();
+    });
+
+    it('captures Dalio Issue Log memo with live preview and renders structured root-cause card in Grid and Kanban lane', async () => {
+      resetWorkingMemoryStoreForTest(DEFAULT_WORKING_MEMORY_MEMOS);
+      render(<WorkingMemoryBoard />);
+
+      const input = screen.getByTestId('working-memory-input');
+      fireEvent.change(input, {
+        target: {
+          value:
+            '[이슈로그] RP:예산담당 | 근접:천원 올림 누락 | 근본:단일경로 수기산식 의존 | 개선:이중실행 하네스 추가 | 위험:치명',
+        },
+      });
+
+      expect(screen.getByTestId('working-memory-preview-issue')).toHaveTextContent(
+        '이슈로그 · RP 예산담당 · 근본원인 · 기계개선'
+      );
+
+      fireEvent.click(screen.getByTestId('working-memory-submit'));
+
+      await waitFor(() => {
+        expect(screen.getByText('위험 치명')).toBeInTheDocument();
+        expect(screen.getByText('RP 예산담당')).toBeInTheDocument();
+        expect(screen.getByText('이중실행')).toBeInTheDocument();
+        expect(screen.getByText('단일경로 수기산식 의존')).toBeInTheDocument();
+        expect(screen.getByText('이중실행 하네스 추가')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('working-memory-layout-kanban'));
+      const issueLane = screen.getByTestId('lane-issue-log');
+      expect(issueLane).toHaveTextContent('단일경로 수기산식 의존');
     });
   });
 

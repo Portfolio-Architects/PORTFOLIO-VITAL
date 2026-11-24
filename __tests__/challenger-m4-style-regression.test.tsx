@@ -26,8 +26,10 @@ function collectComponentFiles(dir: string): string[] {
 describe('Empirical Style Regression & Transition Stress Test (Challenger M4-1)', () => {
   const rootDir = process.cwd();
   const componentsDir = path.join(rootDir, 'src', 'components');
+  const appDir = path.join(rootDir, 'src', 'app');
   const parserFile = path.join(rootDir, 'src', 'lib', 'working-memory-parser.ts');
   const componentFiles = collectComponentFiles(componentsDir);
+  const allUiFiles = [...componentFiles, ...collectComponentFiles(appDir)];
 
   describe('Adversarial Static Scans', () => {
     test('Zero `dark:` selectors exist across src/components and working-memory-parser.ts', () => {
@@ -53,14 +55,14 @@ describe('Empirical Style Regression & Transition Stress Test (Challenger M4-1)'
       expect(violations.length).toBe(0);
     });
 
-    test('Zero `backdrop-blur` occurrences exist across all files in src/components', () => {
+    test('Zero `backdrop-blur` and `blur-2xl`/`blur-3xl` occurrences exist across src/components and src/app', () => {
       const violations: Array<{ file: string; line: number; text: string }> = [];
 
-      for (const file of componentFiles) {
+      for (const file of allUiFiles) {
         const content = fs.readFileSync(file, 'utf-8');
         const lines = content.split('\n');
         lines.forEach((line, index) => {
-          if (/backdrop-blur/.test(line)) {
+          if (/backdrop-blur|\bblur-(?:xl|2xl|3xl)\b/.test(line)) {
             violations.push({
               file: path.relative(rootDir, file),
               line: index + 1,
@@ -105,15 +107,15 @@ describe('Empirical Style Regression & Transition Stress Test (Challenger M4-1)'
       }
     });
 
-    test('transition-all is restricted only to preserved YangjaeFestivalDashboard test selectors', () => {
-      const transitionAllMatches: Array<{ file: string; line: number; text: string }> = [];
+    test('Zero `transition-all`, `transition-shadow`, `animate-in`, and `hover:scale-` across src/components and src/app (Performance-First)', () => {
+      const violations: Array<{ file: string; line: number; text: string }> = [];
 
-      for (const file of componentFiles) {
+      for (const file of allUiFiles) {
         const content = fs.readFileSync(file, 'utf-8');
         const lines = content.split('\n');
         lines.forEach((line, index) => {
-          if (/\btransition-all\b/.test(line)) {
-            transitionAllMatches.push({
+          if (/\btransition-all\b|\btransition-shadow\b|\banimate-in\b|(?:group-)?hover:scale-/.test(line)) {
+            violations.push({
               file: path.relative(rootDir, file).replace(/\\/g, '/'),
               line: index + 1,
               text: line.trim()
@@ -122,11 +124,22 @@ describe('Empirical Style Regression & Transition Stress Test (Challenger M4-1)'
         });
       }
 
-      // Exactly 2 occurrences should exist, and both must be in YangjaeFestivalDashboard.tsx
-      expect(transitionAllMatches.length).toBe(2);
-      for (const m of transitionAllMatches) {
-        expect(m.file).toBe('src/components/festival/YangjaeFestivalDashboard.tsx');
-      }
+      expect(violations).toEqual([]);
+      expect(violations.length).toBe(0);
+    });
+
+    test('All Recharts chart series disable JS rAF animations via isAnimationActive={false}', () => {
+      const dashboardSrc = fs.readFileSync(
+        path.join(rootDir, 'src', 'components', 'dashboard', 'PortfolioDashboardView.tsx'),
+        'utf-8'
+      );
+      const burnUpSrc = fs.readFileSync(
+        path.join(rootDir, 'src', 'components', 'budget', 'ui', 'SimulationBurnUpChart.tsx'),
+        'utf-8'
+      );
+
+      expect((dashboardSrc.match(/isAnimationActive=\{false\}/g) || []).length).toBeGreaterThanOrEqual(3);
+      expect((burnUpSrc.match(/isAnimationActive=\{false\}/g) || []).length).toBeGreaterThanOrEqual(3);
     });
   });
 

@@ -106,8 +106,8 @@ describe('IntegratedShowcaseSection Component Suite', () => {
     expect(section).toHaveClass('overflow-hidden');
     expect(section).toHaveClass('rounded-xl');
 
-    expect(screen.getByText('통합 행정 지식 쇼케이스')).toBeInTheDocument();
-    expect(screen.getByText('작업기억 보드 · 마스터 아카이브 통합 탐색')).toBeInTheDocument();
+    expect(screen.getByText('행정 게시판')).toBeInTheDocument();
+    expect(screen.queryByText('작업기억 보드 · 문서 보관함')).not.toBeInTheDocument();
 
     // Badges present
     expect(screen.getAllByText(/미반영/).length).toBeGreaterThan(0);
@@ -121,8 +121,8 @@ describe('IntegratedShowcaseSection Component Suite', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText('작업기억 보드 요약')).toBeInTheDocument();
-    expect(screen.getByText('아카이브 빠른 검색')).toBeInTheDocument();
+    expect(screen.getAllByText('업무 메모').length).toBeGreaterThan(0);
+    expect(screen.getByText('문서 검색')).toBeInTheDocument();
 
     // Navigation buttons in split view
     const navButtons = screen.getAllByRole('button', { name: /전체/ });
@@ -136,7 +136,7 @@ describe('IntegratedShowcaseSection Component Suite', () => {
       </QueryClientProvider>
     );
 
-    const memoryTab = screen.getByRole('button', { name: /작업기억 보드/ });
+    const memoryTab = screen.getByRole('button', { name: /업무 메모/ });
     fireEvent.click(memoryTab);
 
     expect(screen.getByText('빠른 삽입:')).toBeInTheDocument();
@@ -161,7 +161,7 @@ describe('IntegratedShowcaseSection Component Suite', () => {
       </QueryClientProvider>
     );
 
-    const archiveTab = screen.getByRole('button', { name: /아카이브 탐색기/ });
+    const archiveTab = screen.getByRole('button', { name: /문서 보관함/ });
     fireEvent.click(archiveTab);
 
     expect(screen.getByPlaceholderText(/마스터 아카이브 전문 검색/)).toBeInTheDocument();
@@ -170,7 +170,7 @@ describe('IntegratedShowcaseSection Component Suite', () => {
     expect(screen.getByText('수의계약')).toBeInTheDocument();
 
     // Bottom CTA
-    const ctaButton = screen.getByText('아카이브 전체 탐색기 이동');
+    const ctaButton = screen.getByText('문서 보관함 이동');
     expect(ctaButton).toBeInTheDocument();
     fireEvent.click(ctaButton);
     expect(mockNavigate).toHaveBeenCalledWith('archive');

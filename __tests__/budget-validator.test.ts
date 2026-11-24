@@ -552,5 +552,58 @@ describe('Budget Validator Unit Tests (e-호조 회계 및 5대 재정 제약 �
       expect(stats.spent).toBe(3_000_000);
       expect(stats.planned).toBe(2_000_000);
     });
+
+    it('excludes bid_saving (낙찰차액·집행유보) from general planned expenditure and allows validation', () => {
+      const entries: BudgetEntry[] = [
+        {
+          id: 'gen-1',
+          categoryId: 'cat-health-1',
+          purpose: '일반 지출',
+          date: '2026-06-01',
+          actionType: 'general',
+          amount: 4_000_000,
+          isPlanned: false,
+        },
+        {
+          id: 'plan-1',
+          categoryId: 'cat-health-1',
+          purpose: '예정 지출',
+          date: '2026-06-02',
+          actionType: 'general',
+          amount: 1_000_000,
+          isPlanned: true,
+          isSettled: false,
+        },
+        {
+          id: 'bid-1',
+          categoryId: 'cat-health-1',
+          purpose: '용역 낙찰차액',
+          date: '2026-06-03',
+          actionType: 'bid_saving',
+          amount: 498_000,
+          isPlanned: true,
+          isSettled: false,
+        },
+      ];
+
+      const generalStats = computeGeneralBudgetStats(entries, 0, 0);
+      expect(generalStats.spent).toBe(4_000_000);
+      // bid_saving is NOT counted as general planned expenditure
+      expect(generalStats.planned).toBe(1_000_000);
+
+      const validation = validateBudgetEntryMutation({
+        action: 'add',
+        entryData: {
+          id: 'bid-2',
+          categoryId: 'cat-health-1',
+          actionType: 'bid_saving',
+          amount: 500_000,
+          isPlanned: true,
+        },
+        currentEntries: entries,
+        categories: sampleCategories,
+      });
+      expect(validation.valid).toBe(true);
+    });
   });
 });
